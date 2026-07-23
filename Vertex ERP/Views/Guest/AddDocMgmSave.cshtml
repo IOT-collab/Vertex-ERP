@@ -1,0 +1,216 @@
+﻿@*
+    AddDocMgmSave.cshtml - Document Vault Save & Synchronization Control
+*@
+@{
+    ViewData["Title"] = "Add & Save Document Vault";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+<link href="~/css/AddDocMgmSave.css" rel="stylesheet" />
+
+<div class="vault-save-container">
+
+    <!-- Top Navigation & Page Header -->
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Synchronize Document Vault</h2>
+            <p>Review changes, assign security parameters, and lock current document versions into the master repository.</p>
+        </div>
+
+        <div class="header-actions">
+            <a href="@Url.Action("DocumentMgm", "Guest")" class="btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to Dashboard
+            </a>
+            <button type="button" class="btn-primary" onclick="confirmVaultSave()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                Lock & Save Vault
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Layout Grid -->
+    <div class="vault-layout-grid">
+
+        <!-- Main Panel: Primary Configurations & Overview -->
+        <div class="vault-main-panel">
+            
+            <!-- Section 1: Vault Overview Summary -->
+            <div class="vault-card">
+                <div class="card-title">
+                    <span class="step-badge">1</span>
+                    <h3>Pending Vault Changes Summary</h3>
+                </div>
+                <p class="card-desc">Review modified or uploaded documents ready to be committed.</p>
+
+                <!-- Status Pills -->
+                <div class="summary-pills-grid">
+                    <div class="pill-item">
+                        <span class="pill-label">Total Modules</span>
+                        <span class="pill-value">06 Categories</span>
+                    </div>
+                    <div class="pill-item status-active">
+                        <span class="pill-label">New Files Attached</span>
+                        <span class="pill-value">04 Documents</span>
+                    </div>
+                    <div class="pill-item status-warning">
+                        <span class="pill-label">Pending Verifications</span>
+                        <span class="pill-value">01 File</span>
+                    </div>
+                </div>
+
+                <!-- Document Breakdown Table -->
+                <div class="responsive-table-wrapper">
+                    <table class="vault-doc-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>File Name</th>
+                                <th>Size</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>01. Company Docs</strong></td>
+                                <td>MOA_Certificate_2026.pdf</td>
+                                <td>2.4 MB</td>
+                                <td><span class="badge badge-success">Ready</span></td>
+                                <td><button type="button" class="btn-text-danger">Remove</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong>02. User Roles</strong></td>
+                                <td>KYC_Master_Schema.xlsx</td>
+                                <td>1.1 MB</td>
+                                <td><span class="badge badge-success">Ready</span></td>
+                                <td><button type="button" class="btn-text-danger">Remove</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong>03. Security</strong></td>
+                                <td>2FA_Recovery_Specs.pdf</td>
+                                <td>850 KB</td>
+                                <td><span class="badge badge-warning">Needs Tag</span></td>
+                                <td><button type="button" class="btn-text-danger">Remove</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong>05. Inventory</strong></td>
+                                <td>Warehouse_Rack_v2.dwg</td>
+                                <td>14.8 MB</td>
+                                <td><span class="badge badge-success">Ready</span></td>
+                                <td><button type="button" class="btn-text-danger">Remove</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Section 2: Vault Versioning & Metadata -->
+            <div class="vault-card">
+                <div class="card-title">
+                    <span class="step-badge">2</span>
+                    <h3>Release Versioning & Audit Notes</h3>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="vaultVersion">Vault Release Version</label>
+                        <input type="text" id="vaultVersion" class="form-control" value="v2.4.10" readonly />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="changeCategory">Change Severity Level</label>
+                        <select id="changeCategory" class="form-control">
+                            <option value="routine">Routine Update (Minor)</option>
+                            <option value="major">Compliance / Policy Change (Major)</option>
+                            <option value="critical">Security System Patch (Critical)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="auditLogs">Audit Log / Commit Description</label>
+                        <textarea id="auditLogs" class="form-control" rows="3" placeholder="Provide a brief summary of why these documents were updated..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sidebar Panel: Access Controls & Security Settings -->
+        <div class="vault-sidebar-panel">
+
+            <div class="vault-card">
+                <div class="card-title">
+                    <span class="step-badge">3</span>
+                    <h3>Access Control & Encryption</h3>
+                </div>
+
+                <!-- Access Rights Options -->
+                <div class="access-option-group">
+                    <label class="access-radio-card">
+                        <input type="radio" name="accessLevel" value="admin" checked />
+                        <div class="radio-content">
+                            <span class="radio-title">Admin & HR Master Only</span>
+                            <span class="radio-sub">Restricted strictly to Tier-1 system executives.</span>
+                        </div>
+                    </label>
+
+                    <label class="access-radio-card">
+                        <input type="radio" name="accessLevel" value="internal" />
+                        <div class="radio-content">
+                            <span class="radio-title">Internal Staff Access</span>
+                            <span class="radio-sub">Available for viewing across all logged-in employees.</span>
+                        </div>
+                    </label>
+
+                    <label class="access-radio-card">
+                        <input type="radio" name="accessLevel" value="encrypted" />
+                        <div class="radio-content">
+                            <span class="radio-title">Encrypted Storage Vault</span>
+                            <span class="radio-sub">Requires 2FA clearance before downloading.</span>
+                        </div>
+                    </label>
+                </div>
+
+                <hr class="card-divider" />
+
+                <!-- System Confirmation Options -->
+                <div class="checkbox-group">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" id="chkNotify" checked />
+                        <span class="label-text">Notify system administrators via Email</span>
+                    </label>
+
+                    <label class="custom-checkbox">
+                        <input type="checkbox" id="chkLock" checked />
+                        <span class="label-text">Lock old version histories permanently</span>
+                    </label>
+                </div>
+
+                <!-- Mobile & Sidebar Quick Action -->
+                <div class="sidebar-action-zone">
+                    <button type="button" class="btn-primary btn-block" onclick="confirmVaultSave()">
+                        Save & Sync Vault Now
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function confirmVaultSave() {
+        // Handle API submission or trigger confirmation modal (e.g. SweetAlert / Toastr)
+        alert("Document Vault successfully synchronized and saved!");
+    }
+</script>

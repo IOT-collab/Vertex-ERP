@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - Vertex ERP</title>
+    <link href="~/css/style.css" rel="stylesheet" />
+</head>
+<body>
+
+    <!-- Pure CSS Sidebar Drawer Controller Toggle -->
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-check" />
+
+    <div class="layout">
+
+        <!-- Mobile Drawer Overlay Screen -->
+        <label for="sidebar-toggle" class="sidebar-overlay"></label>
+
+        <!-- Sidebar Navigation Drawer -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>Vertex ERP</h2>
+                <!-- Close Button For Mobile Viewports -->
+                <label for="sidebar-toggle" class="sidebar-close-btn">&times;</label>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="/Guest/Dashboard">🏠 Dashboard</a>
+                </li>
+                <li>
+                    <a href="/Guest/Employees">👨‍💼 Employees</a>
+                </li>
+                <li>
+                    <a href="/Guest/Attendence">🕒 Attendance</a>
+                </li>
+
+                <li>
+                    <a href="/Guest/LeaveManagement">🏖 Leave Management</a>
+                </li>
+
+                <li>
+                    <a href="/Guest/DepartmentManagement">🏢 Department</a>
+                </li>
+                
+                <li>
+                    <a href="/Guest/Reports">📊 Reports</a>
+                </li>
+                <li>
+                    <a href="/Guest/Hrms">👨‍💼 HR Management</a>
+                </li>
+                <li>
+                    <a href="/Guest/ProjectMgm">📁 Project Management</a>
+                </li>
+                <li>
+                    <a href="/Guest/DocumentMgm">📁 Document Management</a>
+                </li>
+                <li>
+                    <a href="/Guest/AdminPanel">📁 Admin Panel</a>
+                </li>
+                <li>
+                    <a href="/Guest/Settings">⚙ Settings</a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Dashboard Workspace Panel -->
+        <main class="main-content">
+
+            <!-- Global Action Application Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <!-- Hamburger Bar Button Toggle Target Icon -->
+                    <label for="sidebar-toggle" class="hamburger-menu-btn">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </label>
+                    @* <h3 class="topbar-brand">Vertex ERP</h3> *@
+                </div>
+
+                <div class="profile">
+                    <span class="profile-text">Welcome, Admin 👋</span>
+                </div>
+            </header>
+
+            <!-- Embedded Nested Page Target Body Canvas Wrapper -->
+            <div class="page-content">
+                @RenderBody()
+            </div>
+
+        </main>
+
+    </div>
+
+</body>

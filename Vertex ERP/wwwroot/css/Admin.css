@@ -1,0 +1,262 @@
+﻿/* Clean ERP Typography & Base Reset */
+.admin-control-page {
+    padding: 30px;
+    width: 100%;
+    max-width: 1400px; /* Prevents extreme stretching on ultra-wide / 4K monitors */
+    margin: 0 auto; /* Centers the layout on large screens */
+    background-color: #f8fafc;
+    min-height: 100vh;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+    .admin-control-page * {
+        box-sizing: border-box;
+    }
+
+    /* Page Header Setup - Responsive Flexbox */
+    .admin-control-page .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; /* Allows button to wrap nicely on mobile */
+        gap: 20px;
+        margin-bottom: 35px;
+        padding-bottom: 25px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .admin-control-page .header-text {
+        flex: 1;
+        min-width: 250px; /* Prevents text container from squishing */
+    }
+
+    .admin-control-page .page-header h2 {
+        color: #1e293b;
+        margin: 0;
+        font-size: clamp(20px, 2.5vw, 26px); /* Fluid typography across screen sizes */
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .admin-control-page .page-header p {
+        color: #64748b;
+        margin: 6px 0 0 0;
+        font-size: clamp(13px, 1.2vw, 14px);
+        line-height: 1.5;
+    }
+
+    /* Solid Clean Save Button */
+    .admin-control-page .save-btn {
+        background-color: #4f46e5;
+        color: #ffffff;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        white-space: nowrap;
+        transition: background-color 0.15s ease, transform 0.1s ease;
+        touch-action: manipulation; /* Optimizes tap response on mobile touchscreens */
+    }
+
+        .admin-control-page .save-btn:hover {
+            background-color: #4338ca;
+        }
+
+        .admin-control-page .save-btn:active {
+            transform: scale(0.98);
+        }
+
+    /* Ultra-Responsive Grid Matrix */
+    .admin-control-page .admin-modules-grid {
+        display: grid;
+        /* Smart grid adaptation: dynamically calculates column fit down to 280px minimum */
+        grid-template-columns: repeat(auto-fill, minmax(clamp(280px, 30vw, 360px), 1fr));
+        gap: 24px;
+    }
+
+    /* Module Card Layout */
+    .admin-control-page .module-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.02);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+/* Hover effects enabled only for devices with precision pointers (mouse) */
+@media (hover: hover) {
+    .admin-control-page .module-card:hover {
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+        transform: translateY(-2px);
+    }
+}
+
+.admin-control-page .module-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex-grow: 1;
+}
+
+/* Top Color Bar Indicators */
+.admin-control-page .card-blue {
+    border-top: 4px solid #3b82f6;
+}
+
+.admin-control-page .card-green {
+    border-top: 4px solid #10b981;
+}
+
+.admin-control-page .card-indigo {
+    border-top: 4px solid #4f46e5;
+}
+
+.admin-control-page .card-orange {
+    border-top: 4px solid #f59e0b;
+}
+
+.admin-control-page .card-red {
+    border-top: 4px solid #ef4444;
+}
+
+.admin-control-page .card-purple {
+    border-top: 4px solid #8b5cf6;
+}
+
+/* Module Indexing & Text Setup */
+.admin-control-page .module-index {
+    font-size: 12px;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: inline-block;
+}
+
+.admin-control-page .module-body h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.admin-control-page .module-body p {
+    margin: 0 0 20px 0;
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.6;
+    flex-grow: 1; /* Pushes footer to the bottom evenly */
+}
+
+/* Card Control Consoles Section */
+.admin-control-page .module-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-top: 15px;
+    border-top: 1px solid #f1f5f9;
+    margin-top: auto;
+}
+
+/* Action Links / Buttons */
+.admin-control-page .btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    padding: 9px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    touch-action: manipulation;
+}
+
+    .admin-control-page .btn-action:hover {
+        background-color: #e2e8f0;
+        color: #0f172a;
+        border-color: #94a3b8;
+    }
+
+    .admin-control-page .btn-action:active {
+        background-color: #cbd5e1;
+    }
+
+/* ERP Status Pill */
+.admin-control-page .status-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.admin-control-page .badge-active {
+    background-color: #e6f9f0;
+    color: #10b981;
+}
+
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES (Tablets, Mobiles, Foldables)
+   ========================================================================== */
+
+/* Tablet & Smaller Screens (Under 768px) */
+@media (max-width: 768px) {
+    .admin-control-page {
+        padding: 20px 16px;
+    }
+
+        .admin-control-page .page-header {
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .admin-control-page .header-text {
+            width: 100%;
+        }
+
+        .admin-control-page .save-btn {
+            width: 100%; /* Full width button on smaller screens */
+            text-align: center;
+        }
+
+        .admin-control-page .admin-modules-grid {
+            gap: 16px;
+        }
+}
+
+/* Mobile Screens (Under 480px) */
+@media (max-width: 480px) {
+    .admin-control-page .admin-modules-grid {
+        grid-template-columns: 1fr; /* Strict 1-column layout for small mobile screens */
+    }
+
+    .admin-control-page .module-body {
+        padding: 18px;
+    }
+
+    .admin-control-page .module-footer {
+        flex-wrap: wrap; /* Allows badge to wrap below button if device is very narrow */
+    }
+
+    .admin-control-page .btn-action {
+        flex: 1; /* Button takes available space */
+        text-align: center;
+    }
+}

@@ -1,0 +1,198 @@
+﻿@{
+    ViewData["Title"] = "Department Management";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/departmentmgm.css" rel="stylesheet" />
+
+
+<div class="department-page">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h2>Department Management</h2>
+            <p>Create and manage departments, designations and teams.</p>
+        </div>
+
+        <button class="btn-primary">
+            + Add Department
+        </button>
+    </div>
+
+    <!-- Statistics -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <h3>12</h3>
+            <span>Total Departments</span>
+        </div>
+
+        <div class="stat-card">
+            <h3>45</h3>
+            <span>Total Designations</span>
+        </div>
+
+        <div class="stat-card">
+            <h3>18</h3>
+            <span>Total Teams</span>
+        </div>
+
+        <div class="stat-card">
+            <h3>320</h3>
+            <span>Total Employees</span>
+        </div>
+
+    </div>
+
+
+    <!-- Add Department -->
+
+    <div class="card">
+
+        <h3>Add Department</h3>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Department Name</label>
+                <input type="text" placeholder="IT Department">
+            </div>
+
+            <div class="form-group">
+                <label>Department Code</label>
+                <input type="text" placeholder="IT001">
+            </div>
+
+            <div class="form-group">
+                <label>Department Head</label>
+                <input type="text" placeholder="John Smith">
+            </div>
+
+            <div class="form-group">
+                <label>Status</label>
+                <select>
+                    <option>Active</option>
+                    <option>Inactive</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="btn-area">
+            <button class="btn-primary">Save Department</button>
+        </div>
+
+    </div>
+
+
+
+    <!-- Department List -->
+
+
+    <div class="card">
+
+        <div class="table-header">
+
+            <h3>Department List</h3>
+
+            <input type="text" placeholder="Search Department">
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+                        <th>Department</th>
+                        <th>Code</th>
+                        <th>Department Head</th>
+                        <th>Employees</th>
+                        <th>Status</th>
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+
+                        <td>1</td>
+                        <td>IT</td>
+                        <td>IT001</td>
+                        <td>Rahul</td>
+                        <td>54</td>
+                        <td><span class="active">Active</span></td>
+                        <td>Edit | Delete</td>
+
+                    </tr>
+
+                    <tr>
+
+                        <td>2</td>
+                        <td>HR</td>
+                        <td>HR001</td>
+                        <td>Priya</td>
+                        <td>16</td>
+                        <td><span class="active">Active</span></td>
+                        <td>Edit | Delete</td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Bottom Grid -->
+
+    <div class="bottom-grid">
+
+        <div class="card">
+
+            <h3>Designation</h3>
+
+            <ul>
+
+                <li>Software Engineer</li>
+                <li>Senior Developer</li>
+                <li>HR Manager</li>
+                <li>Project Manager</li>
+                <li>QA Engineer</li>
+
+            </ul>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Teams</h3>
+
+            <ul>
+
+                <li>Frontend Team</li>
+                <li>Backend Team</li>
+                <li>QA Team</li>
+                <li>Support Team</li>
+                <li>DevOps Team</li>
+
+            </ul>
+
+        </div>
+
+    </div>
+
+</div>

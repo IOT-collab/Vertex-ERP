@@ -1,0 +1,202 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Employees";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/employees.css" rel="stylesheet" />
+
+<div class="hr-dashboard-container">
+
+    <!-- Page Header Setup -->
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Employee Requirements & Profiles</h2>
+            <p>Manage standard verification parameters, required checklists, onboarding paperwork, and profile configuration rules.</p>
+        </div>
+
+        <a href="@Url.Action("EmpAddRequirement", "Guest")" class="save-btn" style="text-decoration: none; display: inline-flex; align-items: center;">
+            <span class="custom-btn-icon"></span>
+            Add Requirement
+        </a>
+    </div>
+
+    <!-- Dynamic Smart-Grid Layout Wrapper -->
+    <div class="settings-grid">
+
+        <!-- 01. GENERAL PROFILE REQUIREMENTS -->
+        <div class="setting-card block-admin">
+            <div class="card-header">
+                <h3>01. GENERAL PROFILE REQUIREMENTS</h3>
+            </div>
+            <div class="card-body">
+                <div class="center-icon">
+                    <div class="icon-user">
+                        <div class="user-head"></div>
+                        <div class="user-body"></div>
+                    </div>
+                </div>
+                <ul class="feature-list">
+                    <li>Full Name (As per Govt ID)</li>
+                    <li>Official Email & Mobile No</li>
+                    <li>Date of Birth & Gender Setup</li>
+                    <li>Blood Group Designation</li>
+                    <li>Emergency Contacts Verification</li>
+                    <li>Marital Status Confirmation</li>
+                </ul>
+                <div class="doc-action-hub">
+                    <label class="btn-upload">
+                        <input type="file" />
+                        Update
+                    </label>
+                    <button class="btn-view">View</button>
+                    <button class="btn-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 02. KYCS & MANDATORY DOCUMENTS -->
+        <div class="setting-card block-hr">
+            <div class="card-header">
+                <h3>02. KYCS & MANDATORY DOCUMENTS</h3>
+            </div>
+            <div class="card-body">
+                <div class="center-icon">
+                    <div class="icon-doc">
+                        <div class="doc-fold"></div>
+                        <div class="doc-line line1"></div>
+                        <div class="doc-line line2"></div>
+                    </div>
+                </div>
+                <ul class="feature-list">
+                    <li>Aadhaar Card Verification</li>
+                    <li>PAN Card Mandatory Input</li>
+                    <li>Passport Copy (If applicable)</li>
+                    <li>Permanent Address Proof</li>
+                    <li>Current Residential Address</li>
+                    <li>Digital Signature Upload</li>
+                </ul>
+                <div class="doc-action-hub">
+                    <label class="btn-upload"><input type="file" />Update</label>
+                    <button class="btn-view">View</button>
+                    <button class="btn-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 03. ACADEMIC & EXPERIENCE PROOFS -->
+        <div class="setting-card block-system">
+            <div class="card-header">
+                <h3>03. ACADEMIC & EXPERIENCE PROOFS</h3>
+            </div>
+            <div class="card-body">
+                <div class="center-icon">
+                    <div class="icon-badge">
+                        <div class="badge-ribbon1"></div>
+                        <div class="badge-ribbon2"></div>
+                        <div class="badge-circle"></div>
+                    </div>
+                </div>
+                <ul class="feature-list">
+                    <li>Highest Graduation Degree</li>
+                    <li>Previous Company Relieving Letter</li>
+                    <li>Last 3 Months Salary Slips</li>
+                    <li>Experience Certificates List</li>
+                    <li>Professional Reference Checks</li>
+                    <li>Background Check Consent Form</li>
+                </ul>
+                <div class="doc-action-hub">
+                    <label class="btn-upload"><input type="file" />Update</label>
+                    <button class="btn-view">View</button>
+                    <button class="btn-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 04. BANKING & TAXATION RULES -->
+        <div class="setting-card block-supply">
+            <div class="card-header">
+                <h3>04. BANKING & TAXATION RULES</h3>
+            </div>
+            <div class="card-body">
+                <div class="center-icon">
+                    <div class="icon-card">
+                        <div class="card-strip"></div>
+                    </div>
+                </div>
+                <ul class="feature-list">
+                    <li>Salary Bank Account Number</li>
+                    <li>Bank IFSC Code Verification</li>
+                    <li>Cancelled Cheque Scan Upload</li>
+                    <li>PF Form 11 Declaration</li>
+                    <li>Income Tax Declaration Form</li>
+                    <li>ESI Eligibility Declaration</li>
+                </ul>
+                <div class="doc-action-hub">
+                    <label class="btn-upload"><input type="file" />Update</label>
+                    <button class="btn-view">View</button>
+                    <button class="btn-download-slip" title="Download Monthly Payslip">Download Slip</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 05. JOB PROFILE & ROLES -->
+        <div class="setting-card block-hr">
+            <div class="card-header">
+                <h3>05. JOB PROFILE & ROLES</h3>
+            </div>
+            <div class="card-body">
+                <div class="center-icon">
+                    <div class="icon-org">
+                        <div class="org-box box-top"></div>
+                        <div class="org-line"></div>
+                        <div class="org-box box-left"></div>
+                        <div class="org-box box-right"></div>
+                    </div>
+                </div>
+                <ul class="feature-list">
+                    <li>Allocated Core Department</li>
+                    <li>Designation Assignment</li>
+                    <li>Reporting Manager Mapping</li>
+                    <li>CTC Structure Acknowledgment</li>
+                    <li>Work Location & Branch Setup</li>
+                    <li>Probation Period Track Rule</li>
+                </ul>
+                <div class="doc-action-hub">
+                    <label class="btn-upload"><input type="file" />Update</label>
+                    <button class="btn-view">View</button>
+                    <button class="btn-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 06. ASSETS & CREDENTIALS SETTINGS -->
+        <div class="setting-card block-comm">
+            <div class="card-header">
+                <h3>06. ASSETS & CREDENTIALS SETTINGS</h3>
+            </div>
+            <div class="card-body">
+                <div class="center-icon">
+                    <div class="icon-clock">
+                        <div class="clock-hand"></div>
+                    </div>
+                </div>
+                <ul class="feature-list">
+                    <li>Official Biometric ID Link</li>
+                    <li>Company System/Laptop Allocation</li>
+                    <li>Official Email Account Activation</li>
+                    <li>ID Card Generation Request</li>
+                    <li>ERP Portal Login Activation</li>
+                    <li>Security Access Token Rules</li>
+                </ul>
+                <div class="doc-action-hub">
+                    <label class="btn-upload"><input type="file" />Update</label>
+                    <button class="btn-view">View</button>
+                    <button class="btn-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

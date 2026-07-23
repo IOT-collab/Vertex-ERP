@@ -1,0 +1,71 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<!-- Replaced local absolute disk path with an application-relative path -->
+<link href="~/css/login.css" rel="stylesheet" />
+
+<div class="login-container">
+    <!-- Left Panel - Brand Showcase -->
+    <div class="login-left">
+        <div class="brand-wrapper">
+            <div class="brand-logo">✦</div>
+            <h1 class="brand-title">Vertex <span>ERP</span></h1>
+            <p class="brand-subtitle">
+                A next-generation smart solution optimizing your HR, Inventory,
+                Attendance, and real-time analytical reporting.
+            </p>
+        </div>
+        <!-- Decorative glowing gradient spots -->
+        <div class="circle-decor-1"></div>
+        <div class="circle-decor-2"></div>
+    </div>
+
+    <!-- Right Panel - Form Area -->
+    <div class="login-right">
+        <div class="login-card">
+            <div class="card-header">
+                <h2>Welcome back</h2>
+                <p>Enter your details to access your dashboard</p>
+            </div>
+
+            <!-- ASP.NET Core Form tag helpers properly bound with required name attributes -->
+            <form asp-action="Login" asp-controller="Guest" method="post" autocomplete="off">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <input id="email" name="Email" type="email" placeholder="name@company.com" required />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input id="password" name="Password" type="password" placeholder="••••••••" required />
+                    </div>
+                </div>
+
+                <div class="login-utilities">
+                    <label class="checkbox-container">
+                        <input type="checkbox" name="RememberMe" />
+                        <span class="checkmark"></span>
+                        Remember me
+                    </label>
+                    <a href="#" class="forgot-link">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Sign In
+                    <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                </button>
+            </form>
+
+            <div class="login-footer">
+                &copy; 2026 Vertex ERP. All rights reserved.
+            </div>
+        </div>
+    </div>
+</div>

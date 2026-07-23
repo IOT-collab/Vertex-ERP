@@ -1,0 +1,457 @@
+﻿/* ==========================================================================
+   AddDocMgmSave.css - Layout & Component Styling
+   ========================================================================== */
+
+/* Container & Base Reset */
+.vault-save-container {
+    padding: 30px;
+    width: 100%;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+}
+
+    .vault-save-container * {
+        box-sizing: border-box;
+    }
+
+    /* Header Section */
+    .vault-save-container .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 30px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 20px;
+    }
+
+    .vault-save-container .header-text {
+        flex: 1;
+        min-width: 280px;
+    }
+
+    .vault-save-container .page-header h2 {
+        font-size: 26px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 5px 0;
+    }
+
+    .vault-save-container .page-header p {
+        color: #64748b;
+        font-size: 14px;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .vault-save-container .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+
+
+    /* Button System */
+    .vault-save-container .btn-primary {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        color: #ffffff;
+        border: none;
+        padding: 12px 22px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        transition: all 0.2s ease-in-out;
+        text-decoration: none;
+    }
+
+        .vault-save-container .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+        }
+
+    .vault-save-container .btn-secondary {
+        background-color: #ffffff;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        padding: 11px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.15s ease;
+        text-decoration: none;
+    }
+
+        .vault-save-container .btn-secondary:hover {
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
+
+    .vault-save-container svg {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+    }
+
+    .vault-save-container .btn-block {
+        width: 100%;
+        justify-content: center;
+    }
+
+/* Main Grid Layout */
+.vault-layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 25px;
+    align-items: start;
+}
+
+.vault-main-panel,
+.vault-sidebar-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Card Wrapper Component */
+.vault-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.02);
+}
+
+    .vault-card .card-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+
+        .vault-card .card-title h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+    .vault-card .step-badge {
+        background-color: #eff6ff;
+        color: #4f46e5;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 13px;
+        flex-shrink: 0;
+    }
+
+    .vault-card .card-desc {
+        color: #64748b;
+        font-size: 13.5px;
+        margin: 0 0 20px 0;
+    }
+
+/* Summary Cards / Pills */
+.summary-pills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.pill-item {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pill-label {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pill-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.pill-item.status-active {
+    border-left: 4px solid #4f46e5;
+}
+
+.pill-item.status-warning {
+    border-left: 4px solid #f59e0b;
+}
+
+/* Table Design */
+.responsive-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.vault-doc-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13.5px;
+    white-space: nowrap;
+}
+
+    .vault-doc-table th {
+        background-color: #f8fafc;
+        color: #475569;
+        padding: 12px 14px;
+        font-weight: 600;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .vault-doc-table td {
+        padding: 14px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+    }
+
+    .vault-doc-table tr:last-child td {
+        border-bottom: none;
+    }
+
+/* Badges & Text Buttons */
+.badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-success {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.badge-warning {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+.btn-text-danger {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 12.5px;
+    padding: 0;
+}
+
+    .btn-text-danger:hover {
+        text-decoration: underline;
+    }
+
+/* Form Controls & Layout */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+    .form-group.full-width {
+        grid-column: span 2;
+    }
+
+    .form-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+.form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #0f172a;
+    background-color: #ffffff;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+    .form-control:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Radio & Access Control Cards */
+.access-option-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.access-radio-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+    .access-radio-card:hover {
+        background-color: #f8fafc;
+        border-color: #cbd5e1;
+    }
+
+    .access-radio-card input[type="radio"] {
+        margin-top: 3px;
+        accent-color: #4f46e5;
+        cursor: pointer;
+    }
+
+.radio-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.radio-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.radio-sub {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+.card-divider {
+    border: none;
+    border-top: 1px dashed #e2e8f0;
+    margin: 20px 0;
+}
+
+/* Custom Checkbox Elements */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #334155;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+    .custom-checkbox input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: #4f46e5;
+        cursor: pointer;
+    }
+
+.sidebar-action-zone {
+    margin-top: 10px;
+}
+
+/* ==========================================================================
+   Responsive Viewports
+   ========================================================================== */
+
+/* Tablets & Small Laptops (Max Width: 1024px) */
+@media (max-width: 1024px) {
+    .vault-layout-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vault-sidebar-panel {
+        order: 2;
+    }
+}
+
+/* Mobile Devices (Max Width: 600px) */
+@media (max-width: 600px) {
+    .vault-save-container {
+        padding: 16px;
+    }
+
+        .vault-save-container .page-header {
+            margin-bottom: 20px;
+        }
+
+        .vault-save-container .header-actions {
+            width: 100%;
+            flex-direction: column;
+        }
+
+        .vault-save-container .btn-primary,
+        .vault-save-container .btn-secondary {
+            width: 100%;
+            justify-content: center;
+        }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+
+    .summary-pills-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vault-card {
+        padding: 18px;
+    }
+}

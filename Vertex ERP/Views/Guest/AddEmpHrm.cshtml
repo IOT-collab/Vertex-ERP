@@ -1,0 +1,193 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Add Employee HRM";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+<link href="~/css/AddEmpHrm.css" rel="stylesheet" />
+
+<div class="hrms-page">
+
+    <!-- Adaptive Page Header with Back Navigation -->
+    <div class="page-header">
+        <div class="header-text">
+            <a href="@Url.Action("Hrms", "Guest")" class="back-link">← Back to HRMS Dashboard</a>
+            <h2>Add New Employee Profile</h2>
+            <p>Setup general credentials, administrative mapping, mandatory identifications, and banking profiles for onboarding.</p>
+        </div>
+    </div>
+
+    <!-- Master Form Workspace Wrapper -->
+    <div class="form-container-wrapper">
+        <form class="employee-onboarding-form" method="post">
+
+            <div class="form-grid">
+
+                <!-- Left Control Panel: Core Employee Parameters -->
+                <div class="form-main-section">
+
+                    <div class="section-divider">
+                        <span>Personal Specifications</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="FullName">Full Name (As per Identification Document)</label>
+                        <input type="text" id="FullName" placeholder="e.g., Sanjeev Kumar" required />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="OfficialEmail">Official Email ID</label>
+                            <input type="email" id="OfficialEmail" placeholder="name@company.com" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="MobileNumber">Contact Mobile Number</label>
+                            <input type="tel" id="MobileNumber" placeholder="+91 XXXXX XXXXX" required />
+                        </div>
+                    </div>
+
+                    <div class="form-row triple-row">
+                        <div class="form-group">
+                            <label for="DateOfBirth">Date of Birth</label>
+                            <input type="date" id="DateOfBirth" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="GenderSetup">Gender Configuration</label>
+                            <select id="GenderSetup" required>
+                                <option value="" disabled selected>Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="BloodGroup">Blood Group</label>
+                            <select id="BloodGroup">
+                                <option value="" disabled selected>Select</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">
+                        <span>Statutory IDs & Banking Details</span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="GovtID">Identity Document (Verification Target)</label>
+                            <input type="text" id="GovtID" placeholder="[Identity Verification Number]" />
+                        </div>
+                        <div class="form-group">
+                            <label for="PanCard">PAN Card Alpha-Numeric Input</label>
+                            <input type="text" id="PanCard" placeholder="e.g., ABCDE1234F" style="text-transform: uppercase;" />
+                        </div>
+                    </div>
+
+                    <div class="form-row triple-row">
+                        <div class="form-group">
+                            <label for="BankAccount">Salary Bank Account</label>
+                            <input type="text" id="BankAccount" placeholder="Account Number" />
+                        </div>
+                        <div class="form-group">
+                            <label for="BankIfsc">Bank IFSC Code</label>
+                            <input type="text" id="BankIfsc" placeholder="e.g., SBIN0001234" style="text-transform: uppercase;" />
+                        </div>
+                        <div class="form-group">
+                            <label for="MaxPayload">Max File Attachment Size</label>
+                            <select id="MaxPayload">
+                                <option>2 MB Limit</option>
+                                <option selected>5 MB Standard</option>
+                                <option>10 MB Max</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Control Panel: Administrative Mapping & Checklist Options -->
+                <div class="form-side-section">
+
+                    <div class="config-card">
+                        <h3>Organizational Mapping</h3>
+
+                        <div class="form-group">
+                            <label for="AllocatedDept">Core Department Allocation</label>
+                            <select id="AllocatedDept" required>
+                                <option value="" disabled selected>Select Department</option>
+                                <option value="IT">IT Component</option>
+                                <option value="HR">HR Department</option>
+                                <option value="Sales">Sales Matrix</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Designation">Designation Assignment</label>
+                            <input type="text" id="Designation" placeholder="e.g., Software Developer" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ManagerMapping">Reporting Manager</label>
+                            <select id="ManagerMapping">
+                                <option value="" disabled selected>Select Supervisor</option>
+                                <option value="Tarun">Tarun Sharma</option>
+                                <option value="Sanjeev">Sanjeev Kumar</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="config-card option-card">
+                        <h3>Workflow Enforcement</h3>
+
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" checked />
+                                <span class="checkmark"></span>
+                                Trigger Welcome Onboarding Mail
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" checked />
+                                <span class="checkmark"></span>
+                                Require Mandatory Background Check
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" />
+                                <span class="checkmark"></span>
+                                Enable Biometric Database Sync
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="info-alert-box">
+                        <h4>System Synchronicity Node</h4>
+                        <p>Completing this action registers the record across the Employee Master, generating dynamic hooks for Leave Management, Attendance, and Payroll matrix calculations globally.</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Bottom Operational Controls Footer Elements -->
+            <div class="form-actions-footer">
+                <a href="@Url.Action("Hrms", "Guest")" class="btn-cancel">Cancel Registration</a>
+                <button type="submit" class="btn-submit">Register Profile</button>
+            </div>
+
+        </form>
+    </div>
+
+</div>

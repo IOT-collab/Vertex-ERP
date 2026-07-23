@@ -1,0 +1,194 @@
+﻿/* Base Layout Reset & Standard Alignment Properties */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+body {
+    background: #f5f7fb;
+}
+
+.project-page {
+    padding: 30px;
+    width: 100%;
+    min-height: 100vh;
+}
+
+    /* Flexible Page Header Hub */
+    .project-page .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; /* Allows action targets to stack fluidly down on smaller viewports */
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .project-page .header-text {
+        flex: 1;
+        min-width: 280px; /* Prevents title text blocks from crunching awkwardly */
+    }
+
+    .project-page .page-header h2 {
+        color: #2c3e50;
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .project-page .page-header p {
+        color: #64748b;
+        margin-top: 6px;
+        font-size: 15px;
+    }
+
+    /* Primary Operations CTA Button Trigger */
+    .project-page .btn-add {
+        background: #5b4bdb;
+        color: white;
+        border: none;
+        padding: 14px 22px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: background-color 0.3s ease;
+    }
+
+        .project-page .btn-add:hover {
+            background: #4338ca;
+        }
+
+    /* Intelligent Self-Correcting Analytics Metrics Row Grid */
+    .project-page .summary {
+        display: grid;
+        /* Auto-fit scales metric segments seamlessly from 4 columns down to 1 row layout */
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-bottom: 35px;
+    }
+
+    .project-page .summary-card {
+        background: #fff;
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,.03);
+        border: 1px solid #e2e8f0;
+    }
+
+        .project-page .summary-card h2 {
+            color: #5b4bdb;
+            font-size: 34px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .project-page .summary-card p {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+    /* Premium Fluid Workspace Modules Matrix Configuration Grid */
+    .project-page .module-grid {
+        display: grid;
+        /* Dynamically manages multi-column positioning grid arrays without requiring custom break thresholds */
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+    }
+
+    .project-page .module-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,.03);
+        border: 1px solid #e2e8f0;
+        border-top: 5px solid #5b4bdb;
+        display: flex;
+        flex-direction: column; /* Aligns card modules internally to standardize buttons anchors */
+        justify-content: space-between;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .project-page .module-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 28px rgba(91,75,219,.15);
+        }
+
+    .project-page .icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: #ede9fe;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 20px auto;
+        font-size: 40px;
+        flex-shrink: 0; /* Prevents visual clipping layout issues inside flex arrays */
+    }
+
+    .project-page .module-card h3 {
+        color: #1e293b;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .project-page .module-card p {
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.6;
+        min-height: 55px;
+        flex-grow: 1; /* Guarantees the card text container pushes launch buttons down uniformly */
+    }
+
+    .project-page .btn-action {
+        margin-top: 20px;
+        width: 100%;
+        padding: 12px;
+        border: none;
+        background: #5b4bdb;
+        color: white;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+    }
+
+        .project-page .btn-action:hover {
+            background: #4338ca;
+        }
+
+/* Global Responsive UI Custom Adjustments */
+@media (max-width: 768px) {
+    .project-page {
+        padding: 20px;
+    }
+
+        .project-page .page-header {
+            margin-bottom: 25px;
+        }
+
+            .project-page .page-header h2 {
+                font-size: 24px;
+            }
+
+        .project-page .btn-add {
+            width: 100%; /* Spans primary action command to full layout parameters on mobile phone system browsers */
+            text-align: center;
+        }
+}
+
+@media (max-width: 320px) {
+    /* Safe layout adjustments tracking back towards extremely legacy narrow displays */
+    .project-page .summary,
+    .project-page .module-grid {
+        grid-template-columns: 1fr;
+    }
+}

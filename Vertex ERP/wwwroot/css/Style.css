@@ -1,0 +1,229 @@
+﻿/* Base Canvas Core Normalizations */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+body {
+    background: #f4f6f9;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Master Layout Framework */
+.layout {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Hidden Control Element Checklist State Rule */
+.sidebar-toggle-check {
+    display: none;
+}
+
+/* ====================================================
+    SIDEBAR SYSTEM NAVIGATION DESIGN
+======================================================= */
+.sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: #1e293b;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    z-index: 100;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo {
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+    .logo h2 {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: #ffffff;
+    }
+
+.sidebar-close-btn {
+    display: none; /* Invisible outside mobile environments */
+    font-size: 28px;
+    color: #94a3b8;
+    cursor: pointer;
+    line-height: 1;
+}
+
+    .sidebar-close-btn:hover {
+        color: #ffffff;
+    }
+
+.sidebar-menu {
+    list-style: none;
+    margin-top: 15px;
+    overflow-y: auto; /* Handles lower screen height allocations gracefully */
+    flex: 1;
+}
+
+    .sidebar-menu li a {
+        display: block;
+        padding: 14px 24px;
+        color: #cbd5e1;
+        text-decoration: none;
+        font-size: 14.5px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+        .sidebar-menu li a:hover {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+/* ====================================================
+    WORKSPACE CANVAS AREA (MAIN CONTAINER)
+======================================================= */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: 0; /* Critical layout constraint preventing horizontal code leaks */
+    position: relative;
+}
+
+/* App System Header Topbar Layout */
+.topbar {
+    height: 70px;
+    min-height: 70px;
+    background: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    border-bottom: 1px solid #e2e8f0;
+    z-index: 90;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.topbar-brand {
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* Pure CSS Hamburger Toggle Icon Layout */
+.hamburger-menu-btn {
+    display: none; /* Concealed by standard fallback configurations on desktop viewports */
+    flex-direction: column;
+    justify-content: space-between;
+    width: 20px;
+    height: 14px;
+    cursor: pointer;
+}
+
+    .hamburger-menu-btn span {
+        display: block;
+        width: 100%;
+        height: 2px;
+        background-color: #334155;
+        border-radius: 2px;
+        transition: all 0.2s ease;
+    }
+
+/* Topbar Profile Panel */
+.profile {
+    display: flex;
+    align-items: center;
+}
+
+.profile-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+}
+
+/* Dynamic Page Content Viewport System Canvas */
+.page-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile Background Blur Barrier Mask Screen */
+.sidebar-overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 95;
+    cursor: pointer;
+}
+
+/* ====================================================
+    RESPONSIVE MEDIA CONTROLS OVERRIDES
+======================================================= */
+@media (max-width: 992px) {
+    /* Transforms Sidebar Panel into an Off-Canvas Flyout Drawer Drawer */
+    .sidebar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform: translateX(-100%); /* Displaces menu outward by default state */
+    }
+
+    .sidebar-close-btn,
+    .hamburger-menu-btn {
+        display: flex; /* Activates control hooks on mid/low responsive profiles */
+    }
+
+    /* Checkbox Activation Engine Transformations */
+    .sidebar-toggle-check:checked ~ .layout .sidebar {
+        transform: translateX(0); /* Drops slide drawer inward into view context on toggle click */
+    }
+
+    .sidebar-toggle-check:checked ~ .layout .sidebar-overlay {
+        display: block; /* Locks and handles background clicking traps out cleanly */
+    }
+
+    .topbar {
+        padding: 0 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .page-content {
+        padding: 20px 16px; /* Scales inner canvas margins tighter on micro screens */
+    }
+
+    .profile-text {
+        font-size: 13px; /* Compresses text to protect profile structures */
+    }
+
+    .topbar-brand {
+        display: none; /* Minimizes header duplicate naming collisions on active view layouts */
+    }
+}

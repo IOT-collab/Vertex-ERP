@@ -1,0 +1,146 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Employee Add Requirement";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/empaddrequirement.css" rel="stylesheet" />
+
+
+
+<div class="hr-dashboard-container">
+
+    <!-- Page Header Setup with Contextual Back Navigation -->
+    <div class="page-header">
+        <div class="header-text">
+            <a href="@Url.Action("Employees", "Guest")" class="back-link">← Back to Dashboard</a>
+            <h2>Create New Requirement Block</h2>
+            <p>Append a new standard verification module, required document checklist parameters, or custom profile configuration rules.</p>
+        </div>
+    </div>
+
+    <!-- Master Form Workspace Wrapper -->
+    <div class="form-container-wrapper">
+        <form class="requirement-form" method="post">
+
+            <div class="form-grid">
+
+                <!-- Left Control Panel: Main Operational Fields -->
+                <div class="form-main-section">
+
+                    <div class="form-group">
+                        <label for="RequirementName">Requirement Block Title</label>
+                        <input type="text" id="RequirementName" placeholder="e.g., 07. BACKGROUND & MEDICAL VERIFICATION" required />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="CategorySelect">Target Matrix Theme / Category</label>
+                            <select id="CategorySelect" required>
+                                <option value="" disabled selected>Select Core Department Block</option>
+                                <option value="block-admin">01. General Profile Requirements</option>
+                                <option value="block-hr">02. KYCs & Mandatory Documents</option>
+                                <option value="block-system">03. Academic & Experience Proofs</option>
+                                <option value="block-supply">04. Banking & Taxation Rules</option>
+                                <option value="block-comm">06. Assets & Credentials Settings</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="PrioritySelect">Criticality Level</label>
+                            <select id="PrioritySelect" required>
+                                <option value="Mandatory">High (Mandatory Upload)</option>
+                                <option value="Optional">Medium (Optional Input)</option>
+                                <option value="Conditional">Low (Conditional Access)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Description">Scope & Evaluation Guidelines</label>
+                        <textarea id="Description" rows="4" placeholder="Detail the legal policy, onboarding logic, or specific internal rules for the HR team..."></textarea>
+                    </div>
+
+                    <!-- Functional Dynamic Checklist Component Array -->
+                    <div class="checklist-builder-section">
+                        <label>Define Checklist Parameters / Parameters List</label>
+                        <p class="field-subtext">Add specific items that employees or verification teams must confirm.</p>
+
+                        <div class="checklist-input-group">
+                            <input type="text" placeholder="e.g., Digital Signature Upload or Medical Scan" />
+                            <button type="button" class="btn-add-item">+ Add Item</button>
+                        </div>
+
+                        <ul class="preview-checklist">
+                            <li>
+                                <span>Verification Declaration Acknowledgment</span>
+                                <button type="button" class="btn-remove-li">×</button>
+                            </li>
+                            <li>
+                                <span>Government Portal Authenticated Copy</span>
+                                <button type="button" class="btn-remove-li">×</button>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                <!-- Right Control Panel: Technical Workflow Configurations -->
+                <div class="form-side-section">
+
+                    <div class="config-card">
+                        <h3>Workflow Enforcement Options</h3>
+
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" checked />
+                                <span class="checkmark"></span>
+                                Require Digital Signature Verification
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" checked />
+                                <span class="checkmark"></span>
+                                Trigger Automated Email Alerts
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" />
+                                <span class="checkmark"></span>
+                                Restrict Access Until Approved
+                            </label>
+                        </div>
+
+                        <div class="form-group file-config">
+                            <label for="MaxFileSize">Max Document File Payload Limit</label>
+                            <select id="MaxFileSize">
+                                <option>2 MB Max Limit</option>
+                                <option selected>5 MB Standard Limit</option>
+                                <option>10 MB Extended Limit</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="info-alert-box">
+                        <h4>HR System Integration Node</h4>
+                        <p>Saving this parameter adds a synchronized matrix card across the employee profile rendering system globally, standardizing this requirement block layout.</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Bottom Action Execution Footer Controls -->
+            <div class="form-actions-footer">
+                <a href="@Url.Action("Employees", "Guest")" class="btn-cancel">Cancel changes</a>
+                <button type="submit" class="btn-submit">Save Requirement Block</button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
