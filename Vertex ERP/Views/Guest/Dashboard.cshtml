@@ -5,7 +5,7 @@
     ViewData["Title"] = "ERP Master Dashboard";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
-<link href="~/css/dashboard.css" rel="stylesheet" />
+<link href="~/css/Dashboard.css" rel="stylesheet" />
 
 <div class="dashboard">
 
@@ -36,6 +36,10 @@
             <button class="btn-icon-bell" title="Notifications">
                 🔔 <span class="dot"></span>
             </button>
+
+            <div class="user-avatar" title="Admin">
+                <span>AD</span>
+            </div>
         </div>
     </header>
 
@@ -87,6 +91,125 @@
                 <span class="trend down">⚠ 18 Low Stock</span>
             </div>
             <div class="card-footer-info">4 Re-orders Auto-Triggered</div>
+        </div>
+    </section>
+
+    <!-- Analytics Graphs Row -->
+    <section class="analytics-row">
+        <div class="analytics-card analytics-wide">
+            <div class="box-header">
+                <div>
+                    <h3>Workforce Trend</h3>
+                    <p class="sub-text">Attendance performance across the current week</p>
+                </div>
+                <span class="badge-count">Live Trend</span>
+            </div>
+
+            <div class="line-chart" aria-label="Weekly attendance trend graph">
+                <svg viewBox="0 0 640 230" role="img" aria-labelledby="attendanceTrendTitle">
+                    <title id="attendanceTrendTitle">Weekly attendance trend</title>
+                    <defs>
+                        <linearGradient id="lineFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#3B82F6" stop-opacity=".34" />
+                            <stop offset="100%" stop-color="#3B82F6" stop-opacity="0" />
+                        </linearGradient>
+                        <linearGradient id="lineStroke" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#22C55E" />
+                            <stop offset="55%" stop-color="#3B82F6" />
+                            <stop offset="100%" stop-color="#8B5CF6" />
+                        </linearGradient>
+                    </defs>
+                    <g class="chart-grid">
+                        <line x1="34" y1="35" x2="610" y2="35" />
+                        <line x1="34" y1="82" x2="610" y2="82" />
+                        <line x1="34" y1="129" x2="610" y2="129" />
+                        <line x1="34" y1="176" x2="610" y2="176" />
+                    </g>
+                    <path class="line-area" d="M45 162 C100 138 128 128 176 114 C225 100 254 120 306 96 C360 72 392 86 444 72 C496 58 532 68 590 42 L590 206 L45 206 Z" />
+                    <path class="line-stroke" d="M45 162 C100 138 128 128 176 114 C225 100 254 120 306 96 C360 72 392 86 444 72 C496 58 532 68 590 42" />
+                    <g class="line-points">
+                        <circle cx="45" cy="162" r="6"><title>Mon: 84%</title></circle>
+                        <circle cx="176" cy="114" r="6"><title>Tue: 89%</title></circle>
+                        <circle cx="306" cy="96" r="6"><title>Wed: 91%</title></circle>
+                        <circle cx="444" cy="72" r="6"><title>Thu: 93%</title></circle>
+                        <circle cx="590" cy="42" r="6"><title>Fri: 96%</title></circle>
+                    </g>
+                </svg>
+
+                <div class="chart-labels">
+                    <span>Mon</span>
+                    <span>Tue</span>
+                    <span>Wed</span>
+                    <span>Thu</span>
+                    <span>Fri</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <div class="box-header">
+                <div>
+                    <h3>Department Load</h3>
+                    <p class="sub-text">Open activity by team</p>
+                </div>
+            </div>
+
+            <div class="bar-chart" aria-label="Department workload bar chart">
+                <div class="bar-item" style="--bar-height: 72%; --bar-color: #3B82F6;">
+                    <span class="bar-value">72</span>
+                    <div class="bar-fill" title="IT: 72"></div>
+                    <small>IT</small>
+                </div>
+                <div class="bar-item" style="--bar-height: 54%; --bar-color: #22C55E;">
+                    <span class="bar-value">54</span>
+                    <div class="bar-fill" title="HR: 54"></div>
+                    <small>HR</small>
+                </div>
+                <div class="bar-item" style="--bar-height: 63%; --bar-color: #F59E0B;">
+                    <span class="bar-value">63</span>
+                    <div class="bar-fill" title="Accounts: 63"></div>
+                    <small>ACC</small>
+                </div>
+                <div class="bar-item" style="--bar-height: 81%; --bar-color: #8B5CF6;">
+                    <span class="bar-value">81</span>
+                    <div class="bar-fill" title="Production: 81"></div>
+                    <small>PROD</small>
+                </div>
+                <div class="bar-item" style="--bar-height: 48%; --bar-color: #EF4444;">
+                    <span class="bar-value">48</span>
+                    <div class="bar-fill" title="Logistics: 48"></div>
+                    <small>LOG</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <div class="box-header">
+                <div>
+                    <h3>Approval Health</h3>
+                    <p class="sub-text">SLA clearance progress</p>
+                </div>
+            </div>
+
+            <div class="radial-chart" role="img" aria-label="Approval health is 78 percent">
+                <div class="radial-ring" style="--progress: 78;">
+                    <span>78%</span>
+                </div>
+                <div class="radial-details">
+                    <div>
+                        <strong>24</strong>
+                        <span>Closed</span>
+                    </div>
+                    <div>
+                        <strong>07</strong>
+                        <span>Queued</span>
+                    </div>
+                    <div>
+                        <strong>02</strong>
+                        <span>Escalated</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 

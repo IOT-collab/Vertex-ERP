@@ -1,18 +1,28 @@
-﻿/* Base Canvas Core Normalizations */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+html {
+    font-size: 14px;
+    background: #07111f;
 }
 
 body {
-    background: #f4f6f9;
-    overflow-x: hidden;
     width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background:
+        radial-gradient(circle at 16% 0%, rgba(59, 130, 246, .22), transparent 30%),
+        radial-gradient(circle at 92% 10%, rgba(139, 92, 246, .16), transparent 26%),
+        linear-gradient(135deg, #07111f 0%, #0b1424 52%, #111827 100%);
+    color: #ffffff;
 }
 
-/* Master Layout Framework */
 .layout {
     display: flex;
     width: 100vw;
@@ -21,100 +31,110 @@ body {
     position: relative;
 }
 
-/* Hidden Control Element Checklist State Rule */
 .sidebar-toggle-check {
     display: none;
 }
 
-/* ====================================================
-    SIDEBAR SYSTEM NAVIGATION DESIGN
-======================================================= */
 .sidebar {
     width: 260px;
     min-width: 260px;
-    background: #1e293b;
-    color: white;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    height: 100%;
     z-index: 100;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #ffffff;
+    background: linear-gradient(180deg, rgba(15, 23, 42, .9), rgba(7, 17, 31, .88));
+    border-right: 1px solid rgba(255, 255, 255, .1);
+    box-shadow: 18px 0 44px rgba(0, 0, 0, .22), inset -1px 0 0 rgba(255, 255, 255, .04);
+    backdrop-filter: blur(22px) saturate(140%);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    transition: transform .3s cubic-bezier(.4, 0, .2, 1);
 }
 
 .logo {
+    height: 70px;
     padding: 20px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 70px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, .09);
 }
 
-    .logo h2 {
-        font-size: 20px;
-        font-weight: 700;
-        letter-spacing: -0.5px;
-        color: #ffffff;
-    }
+.logo h2 {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0;
+}
 
 .sidebar-close-btn {
-    display: none; /* Invisible outside mobile environments */
-    font-size: 28px;
-    color: #94a3b8;
-    cursor: pointer;
+    display: none;
+    color: #a8b3cf;
+    font-size: 26px;
     line-height: 1;
+    cursor: pointer;
 }
 
-    .sidebar-close-btn:hover {
-        color: #ffffff;
-    }
+.sidebar-close-btn:hover {
+    color: #ffffff;
+}
 
 .sidebar-menu {
-    list-style: none;
-    margin-top: 15px;
-    overflow-y: auto; /* Handles lower screen height allocations gracefully */
     flex: 1;
+    list-style: none;
+    margin-top: 14px;
+    padding: 0 12px 18px;
+    overflow-y: auto;
 }
 
-    .sidebar-menu li a {
-        display: block;
-        padding: 14px 24px;
-        color: #cbd5e1;
-        text-decoration: none;
-        font-size: 14.5px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-    }
+.sidebar-menu li {
+    margin-bottom: 5px;
+}
 
-        .sidebar-menu li a:hover {
-            background: #2563eb;
-            color: #ffffff;
-        }
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 11px 14px;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    color: #c9d3e8;
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 700;
+    transition: background .25s ease, color .25s ease, border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+}
 
-/* ====================================================
-    WORKSPACE CANVAS AREA (MAIN CONTAINER)
-======================================================= */
+.sidebar-menu li a:hover {
+    transform: translateX(2px);
+    color: #ffffff;
+    border-color: rgba(59, 130, 246, .24);
+    background: rgba(59, 130, 246, .14);
+    box-shadow: 0 12px 28px rgba(59, 130, 246, .12);
+}
+
 .main-content {
     flex: 1;
+    min-width: 0;
+    height: 100%;
+    position: relative;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    min-width: 0; /* Critical layout constraint preventing horizontal code leaks */
-    position: relative;
 }
 
-/* App System Header Topbar Layout */
 .topbar {
     height: 70px;
     min-height: 70px;
-    background: #ffffff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 30px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
-    border-bottom: 1px solid #e2e8f0;
     z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    background: rgba(7, 17, 31, .76);
+    border-bottom: 1px solid rgba(255, 255, 255, .1);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, .18);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
 }
 
 .topbar-left {
@@ -124,14 +144,13 @@ body {
 }
 
 .topbar-brand {
-    color: #0f172a;
-    font-size: 18px;
-    font-weight: 700;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
 }
 
-/* Pure CSS Hamburger Toggle Icon Layout */
 .hamburger-menu-btn {
-    display: none; /* Concealed by standard fallback configurations on desktop viewports */
+    display: none;
     flex-direction: column;
     justify-content: space-between;
     width: 20px;
@@ -139,91 +158,94 @@ body {
     cursor: pointer;
 }
 
-    .hamburger-menu-btn span {
-        display: block;
-        width: 100%;
-        height: 2px;
-        background-color: #334155;
-        border-radius: 2px;
-        transition: all 0.2s ease;
-    }
+.hamburger-menu-btn span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background-color: #d7def2;
+    transition: all .2s ease;
+}
 
-/* Topbar Profile Panel */
 .profile {
     display: flex;
     align-items: center;
 }
 
 .profile-text {
-    font-size: 14px;
-    font-weight: 600;
-    color: #334155;
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 8px 13px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .06);
+    color: #d7def2;
+    font-size: 13px;
+    font-weight: 700;
 }
 
-/* Dynamic Page Content Viewport System Canvas */
 .page-content {
     flex: 1;
-    padding: 30px;
-    overflow-y: auto;
     width: 100%;
+    padding: 26px;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    background:
+        linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .025) 1px, transparent 1px),
+        transparent;
+    background-size: 54px 54px;
 }
 
-/* Mobile Background Blur Barrier Mask Screen */
 .sidebar-overlay {
     display: none;
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(4px);
     z-index: 95;
     cursor: pointer;
+    background: rgba(7, 17, 31, .62);
+    backdrop-filter: blur(8px);
 }
 
-/* ====================================================
-    RESPONSIVE MEDIA CONTROLS OVERRIDES
-======================================================= */
 @media (max-width: 992px) {
-    /* Transforms Sidebar Panel into an Off-Canvas Flyout Drawer Drawer */
     .sidebar {
         position: absolute;
         top: 0;
         left: 0;
-        transform: translateX(-100%); /* Displaces menu outward by default state */
+        transform: translateX(-100%);
     }
 
     .sidebar-close-btn,
     .hamburger-menu-btn {
-        display: flex; /* Activates control hooks on mid/low responsive profiles */
+        display: flex;
     }
 
-    /* Checkbox Activation Engine Transformations */
     .sidebar-toggle-check:checked ~ .layout .sidebar {
-        transform: translateX(0); /* Drops slide drawer inward into view context on toggle click */
+        transform: translateX(0);
     }
 
     .sidebar-toggle-check:checked ~ .layout .sidebar-overlay {
-        display: block; /* Locks and handles background clicking traps out cleanly */
+        display: block;
     }
 
     .topbar {
-        padding: 0 20px;
+        padding: 0 18px;
     }
 }
 
 @media (max-width: 576px) {
     .page-content {
-        padding: 20px 16px; /* Scales inner canvas margins tighter on micro screens */
+        padding: 16px 12px;
     }
 
     .profile-text {
-        font-size: 13px; /* Compresses text to protect profile structures */
+        font-size: 12px;
     }
 
     .topbar-brand {
-        display: none; /* Minimizes header duplicate naming collisions on active view layouts */
+        display: none;
     }
 }
