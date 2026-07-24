@@ -1,71 +1,86 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
 @{
     ViewData["Title"] = "Login";
+    Layout = null;
 }
 
-<!-- Replaced local absolute disk path with an application-relative path -->
-<link href="~/css/login.css" rel="stylesheet" />
-
-<div class="login-container">
-    <!-- Left Panel - Brand Showcase -->
-    <div class="login-left">
-        <div class="brand-wrapper">
-            <div class="brand-logo">✦</div>
-            <h1 class="brand-title">Vertex <span>ERP</span></h1>
-            <p class="brand-subtitle">
-                A next-generation smart solution optimizing your HR, Inventory,
-                Attendance, and real-time analytical reporting.
-            </p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Vertex ERP</title>
+    <link href="~/css/Login.css" rel="stylesheet" />
+</head>
+<body>
+    <main class="login-shell">
+        <div class="ai-holo-bg" aria-hidden="true">
+            <div class="holo-room"></div>
+            <div class="holo-assistant">
+                <span class="holo-ring ring-one"></span>
+                <span class="holo-ring ring-two"></span>
+                <span class="holo-ring ring-three"></span>
+                <span class="holo-core"></span>
+                <span class="voice-wave wave-one"></span>
+                <span class="voice-wave wave-two"></span>
+                <span class="voice-wave wave-three"></span>
+                <span class="voice-wave wave-four"></span>
+                <span class="voice-wave wave-five"></span>
+                <span class="holo-node node-one"></span>
+                <span class="holo-node node-two"></span>
+                <span class="holo-node node-three"></span>
+            </div>
         </div>
-        <!-- Decorative glowing gradient spots -->
-        <div class="circle-decor-1"></div>
-        <div class="circle-decor-2"></div>
-    </div>
 
-    <!-- Right Panel - Form Area -->
-    <div class="login-right">
-        <div class="login-card">
-            <div class="card-header">
-                <h2>Welcome back</h2>
-                <p>Enter your details to access your dashboard</p>
+        <section class="login-card" aria-labelledby="loginTitle">
+            <div class="logo-placeholder">
+                <img src="~/images/vertex-group-logo.png" alt="Vertex Group" />
             </div>
 
-            <!-- ASP.NET Core Form tag helpers properly bound with required name attributes -->
-            <form asp-action="Login" asp-controller="Guest" method="post" autocomplete="off">
+            <div class="login-heading">
+                <span class="eyebrow">Enterprise Access</span>
+                <h1 id="loginTitle">Welcome to Vertex ERP</h1>
+                <p>Sign in with your employee credentials to continue.</p>
+            </div>
+
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="login-alert">@ViewBag.ErrorMessage</div>
+            }
+
+            <form asp-action="Login" asp-controller="Guest" method="post" autocomplete="off" class="login-form">
                 <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <div class="input-wrapper">
-                        <input id="email" name="Email" type="email" placeholder="name@company.com" required />
+                    <label for="email">Employee ID / Username</label>
+                    <div class="input-shell">
+                        <span class="input-icon">ID</span>
+                        <input id="email" name="email" type="text" placeholder="Enter employee ID or username" required />
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <div class="input-wrapper">
-                        <input id="password" name="Password" type="password" placeholder="••••••••" required />
+                    <div class="input-shell">
+                        <span class="input-icon">***</span>
+                        <input id="password" name="password" type="password" placeholder="Enter password" required />
                     </div>
                 </div>
 
-                <div class="login-utilities">
-                    <label class="checkbox-container">
+                <div class="login-options">
+                    <label class="remember-option">
                         <input type="checkbox" name="RememberMe" />
-                        <span class="checkmark"></span>
+                        <span></span>
                         Remember me
                     </label>
-                    <a href="#" class="forgot-link">Forgot password?</a>
+                    <a href="#" class="forgot-link">Forgot Password?</a>
                 </div>
 
-                <button type="submit" class="btn-submit">
-                    Sign In
-                    <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                <button type="submit" class="login-button">
+                    Login
+                    <span aria-hidden="true">-&gt;</span>
                 </button>
             </form>
 
-            <div class="login-footer">
-                &copy; 2026 Vertex ERP. All rights reserved.
-            </div>
-        </div>
-    </div>
-</div>
+            <p class="login-footnote">Secure ERP workspace access</p>
+        </section>
+    </main>
+</body>
+</html>

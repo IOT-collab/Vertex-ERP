@@ -5,7 +5,7 @@
     ViewData["Title"] = "ERP Master Dashboard";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
-<link href="~/css/Dashboard.css" rel="stylesheet" />
+<link href="~/css/Dashboard.css" rel="stylesheet" asp-append-version="true" />
 
 <div class="dashboard">
 
@@ -32,6 +32,10 @@
                     <span>@DateTime.Now.ToString("dd MMM yyyy")</span>
                 </div>
             </div>
+
+            <button class="btn-ai-mic" id="aiHeaderMic" type="button" title="Ask Vertex AI by voice">
+                🎙 <span class="mic-dot"></span>
+            </button>
 
             <button class="btn-icon-bell" title="Notifications">
                 🔔 <span class="dot"></span>
@@ -458,4 +462,206 @@
 
     </section>
 
+    <!-- Vertex AI Assistant -->
+    <section class="ai-assistant" aria-label="Vertex AI Assistant">
+        <button type="button" class="ai-toggle" id="aiToggle" title="Open Vertex AI Assistant">
+            <span class="ai-pulse"></span>
+            <strong>AI</strong>
+        </button>
+
+        <div class="ai-panel" id="aiPanel">
+            <div class="ai-panel-header">
+                <div>
+                    <span class="system-badge">Voice Assistant</span>
+                    <h3>Vertex AI</h3>
+                    <p class="sub-text">Ask for today's report, users, attendance, or calendar status.</p>
+                </div>
+                <button type="button" class="ai-close" id="aiClose" title="Close assistant">×</button>
+            </div>
+
+            <div class="ai-messages" id="aiMessages">
+                <div class="ai-message assistant">
+                    Hello, good morning sir. Ask me for today's company report.
+                </div>
+            </div>
+
+            <div class="ai-controls">
+                <button type="button" class="ai-mic" id="aiMic" title="Speak to assistant">🎙</button>
+                <input type="text" id="aiInput" placeholder="Ask: show today's company report..." />
+                <button type="button" class="ai-send" id="aiSend">Send</button>
+            </div>
+        </div>
+    </section>
+
 </div>
+
+<script>
+    (() => {
+        const aiToggle = document.getElementById("aiToggle");
+        const aiPanel = document.getElementById("aiPanel");
+        const aiClose = document.getElementById("aiClose");
+        const aiInput = document.getElementById("aiInput");
+        const aiSend = document.getElementById("aiSend");
+        const aiMic = document.getElementById("aiMic");
+        const aiHeaderMic = document.getElementById("aiHeaderMic");
+        const aiMessages = document.getElementById("aiMessages");
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+
+        if (recognition) {
+            recognition.lang = "en-IN";
+            recognition.interimResults = false;
+            recognition.continuous = false;
+        }
+
+        let isListening = false;
+
+        const stopAssistantAudio = () => {
+            if ("speechSynthesis" in window) {
+                window.speechSynthesis.cancel();
+            }
+
+            if (recognition && isListening) {
+                try {
+                    recognition.abort();
+                } catch {
+                    recognition.stop();
+                }
+            }
+
+            isListening = false;
+            aiMic.classList.remove("listening");
+            aiHeaderMic.classList.remove("listening");
+        };
+
+        const addMessage = (text, type) => {
+            const message = document.createElement("div");
+            message.className = `ai-message ${type}`;
+            message.textContent = text;
+            aiMessages.appendChild(message);
+            aiMessages.scrollTop = aiMessages.scrollHeight;
+        };
+
+        const speak = (text) => {
+            if (!aiPanel.classList.contains("open") || !("speechSynthesis" in window)) {
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            const voices = window.speechSynthesis.getVoices();
+            utterance.voice = voices.find((voice) => voice.lang === "en-US") ||
+                voices.find((voice) => voice.lang === "en-GB") ||
+                voices.find((voice) => voice.lang?.startsWith("en"));
+            utterance.lang = utterance.voice?.lang || "en-US";
+            utterance.rate = 0.95;
+            utterance.pitch = 1;
+            window.speechSynthesis.speak(utterance);
+        };
+
+        const askAssistant = async () => {
+            const question = aiInput.value.trim();
+            if (!question) {
+                return;
+            }
+
+            addMessage(question, "user");
+            aiInput.value = "";
+
+            try {
+                const response = await fetch("/Guest/AskAssistant", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ message: question })
+                });
+
+                const data = await response.json();
+                addMessage(data.reply, "assistant");
+                if (aiPanel.classList.contains("open")) {
+                    speak(data.reply);
+                }
+            } catch {
+                const fallback = "Sorry sir, assistant service is not responding right now.";
+                addMessage(fallback, "assistant");
+                if (aiPanel.classList.contains("open")) {
+                    speak(fallback);
+                }
+            }
+        };
+
+        aiToggle.addEventListener("click", () => {
+            aiPanel.classList.toggle("open");
+            if (!aiPanel.classList.contains("open")) {
+                stopAssistantAudio();
+            }
+        });
+
+        aiClose.addEventListener("click", () => {
+            aiPanel.classList.remove("open");
+            stopAssistantAudio();
+        });
+        aiSend.addEventListener("click", askAssistant);
+        aiInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                askAssistant();
+            }
+        });
+
+        const startListening = () => {
+            aiPanel.classList.add("open");
+
+            if (!recognition) {
+                const message = "Voice input is not supported in this browser. Please type your question.";
+                addMessage(message, "assistant");
+                speak(message);
+                return;
+            }
+
+            if (isListening) {
+                return;
+            }
+
+            try {
+                isListening = true;
+                aiMic.classList.add("listening");
+                aiHeaderMic.classList.add("listening");
+                recognition.start();
+            } catch {
+                isListening = false;
+                aiMic.classList.remove("listening");
+                aiHeaderMic.classList.remove("listening");
+            }
+        };
+
+        aiMic.addEventListener("click", startListening);
+        aiHeaderMic.addEventListener("click", startListening);
+
+        if (recognition) {
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                aiInput.value = transcript;
+                isListening = false;
+                aiMic.classList.remove("listening");
+                aiHeaderMic.classList.remove("listening");
+                askAssistant();
+            };
+
+            recognition.onerror = () => {
+                isListening = false;
+                aiMic.classList.remove("listening");
+                aiHeaderMic.classList.remove("listening");
+                const message = "I could not hear the voice input. Please try again or type your question.";
+                addMessage(message, "assistant");
+                speak(message);
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                aiMic.classList.remove("listening");
+                aiHeaderMic.classList.remove("listening");
+            };
+        }
+    })();
+</script>

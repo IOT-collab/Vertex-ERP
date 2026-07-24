@@ -8,6 +8,10 @@
     <link href="~/css/site.css" rel="stylesheet" />
 </head>
 <body>
+    @{
+        var currentRole = Context.Session.GetString("role") ?? "User";
+        var currentName = Context.Session.GetString("fullName") ?? Context.Session.GetString("username") ?? currentRole;
+    }
 
     <!-- Pure CSS Sidebar Drawer Controller Toggle -->
     <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-check" />
@@ -21,8 +25,7 @@
         <aside class="sidebar">
             <div class="logo">
                 <h2>Vertex ERP</h2>
-                <!-- Close Button For Mobile Viewports -->
-                <label for="sidebar-toggle" class="sidebar-close-btn">&times;</label>
+                    <label for="sidebar-toggle" class="sidebar-close-btn">&times;</label>
             </div>
 
             <ul class="sidebar-menu">
@@ -60,6 +63,9 @@
                     <a href="/Guest/AdminPanel">📁 Admin Panel</a>
                 </li>
                 <li>
+                    <a href="/Guest/UserSettings">👤 User Setting</a>
+                </li>
+                <li>
                     <a href="/Guest/Settings">⚙ Settings</a>
                 </li>
             </ul>
@@ -71,17 +77,17 @@
             <!-- Global Action Application Topbar -->
             <header class="topbar">
                 <div class="topbar-left">
-                    <!-- Hamburger Bar Button Toggle Target Icon -->
-                    <label for="sidebar-toggle" class="hamburger-menu-btn">
+                    <label for="sidebar-toggle" class="hamburger-menu-btn" title="Open navigation" aria-label="Open navigation">
                         <span></span>
                         <span></span>
                         <span></span>
                     </label>
-                    @* <h3 class="topbar-brand">Vertex ERP</h3> *@
+                    <h3 class="topbar-brand">Vertex ERP</h3>
                 </div>
 
                 <div class="profile">
-                    <span class="profile-text">Welcome, Admin 👋</span>
+                    <span class="profile-text">Welcome, @currentName (@currentRole)</span>
+                    <a class="logout-btn" href="/Guest/Logout" title="Logout">Logout</a>
                 </div>
             </header>
 

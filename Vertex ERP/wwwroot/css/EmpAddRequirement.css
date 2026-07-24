@@ -3,13 +3,14 @@
     padding: 30px;
     width: 100%;
     min-height: 100vh;
-    background: #f4f7fc;
+    color: #d7def2;
+    background: transparent;
 }
 
 /* Back Link Route Navigation Element */
 .back-link {
     display: inline-block;
-    color: #2563eb;
+    color: #60a5fa;
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
@@ -22,13 +23,13 @@
     }
 
 .page-header h2 {
-    color: #1e3a5f;
+    color: #ffffff;
     font-size: 26px;
     font-weight: 700;
 }
 
 .page-header p {
-    color: #64748b;
+    color: #a8b3cf;
     margin-top: 6px;
     font-size: 14px;
     line-height: 1.5;
@@ -36,10 +37,12 @@
 
 /* Master Form Sheet Wrapper Component */
 .form-container-wrapper {
-    background: #fff;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, .03);
+    background: linear-gradient(145deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .045));
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .26), inset 0 1px 0 rgba(255, 255, 255, .1);
+    backdrop-filter: blur(22px) saturate(145%);
+    -webkit-backdrop-filter: blur(22px) saturate(145%);
     margin-top: 25px;
     padding: 30px;
 }
@@ -75,7 +78,7 @@
     .form-group label {
         font-size: 13.5px;
         font-weight: 600;
-        color: #334155;
+        color: #d7def2;
     }
 
     .form-group input[type="text"],
@@ -83,32 +86,32 @@
     .form-group textarea {
         width: 100%;
         padding: 11px 14px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, .13);
+        border-radius: 14px;
         font-size: 14px;
         outline: none;
-        background-color: #fff;
-        color: #1e293b;
+        background-color: rgba(255, 255, 255, .07);
+        color: #ffffff;
         transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            border-color: rgba(59, 130, 246, .55);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, .12);
         }
 
 /* Parameters Checklist Interactive Builder Layout */
 .checklist-builder-section label {
     font-size: 13.5px;
     font-weight: 600;
-    color: #334155;
+    color: #d7def2;
 }
 
 .field-subtext {
     font-size: 12px;
-    color: #64748b;
+    color: #a8b3cf;
     margin-top: 2px;
     margin-bottom: 8px;
 }
@@ -121,16 +124,18 @@
     .checklist-input-group input {
         flex: 1;
         padding: 11px 14px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, .13);
+        border-radius: 14px;
         font-size: 14px;
         outline: none;
+        background: rgba(255, 255, 255, .07);
+        color: #ffffff;
     }
 
 .btn-add-item {
-    background: #f1f5f9;
-    color: #1e293b;
-    border: 1px solid #cbd5e1;
+    background: rgba(59, 130, 246, .18);
+    color: #bfdbfe;
+    border: 1px solid rgba(59, 130, 246, .34);
     padding: 0 18px;
     border-radius: 8px;
     cursor: pointer;
@@ -141,7 +146,7 @@
 }
 
     .btn-add-item:hover {
-        background: #e2e8f0;
+        background: rgba(59, 130, 246, .26);
     }
 
 /* Checklist Display Preview Node Array */
@@ -157,12 +162,12 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background: rgba(255, 255, 255, .06);
+        border: 1px solid rgba(255, 255, 255, .11);
         padding: 10px 14px;
-        border-radius: 6px;
+        border-radius: 12px;
         font-size: 13.5px;
-        color: #475569;
+        color: #d7def2;
         gap: 10px;
     }
 
@@ -173,7 +178,7 @@
 .btn-remove-li {
     background: transparent;
     border: none;
-    color: #dc2626;
+    color: #fca5a5;
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;
@@ -183,9 +188,9 @@
 
 /* Configuration Side Sheet Controls (Right Panel) */
 .config-card {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .11);
+    border-radius: 18px;
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -194,7 +199,7 @@
 
     .config-card h3 {
         font-size: 14px;
-        color: #1e3a5f;
+        color: #ffffff;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -215,7 +220,7 @@
     cursor: pointer;
     font-size: 13.5px;
     font-weight: 500;
-    color: #475569;
+    color: #d7def2;
     user-select: none;
 }
 
@@ -233,18 +238,18 @@
     left: 0;
     height: 18px;
     width: 18px;
-    background-color: #fff;
-    border: 1px solid #cbd5e1;
+    background-color: rgba(255, 255, 255, .07);
+    border: 1px solid rgba(255, 255, 255, .18);
     border-radius: 4px;
 }
 
 .custom-checkbox:hover input ~ .checkmark {
-    border-color: #2563eb;
+    border-color: #60a5fa;
 }
 
 .custom-checkbox input:checked ~ .checkmark {
     background-color: #2563eb;
-    border-color: #2563eb;
+    border-color: #60a5fa;
 }
 
 .checkmark:after {
@@ -273,22 +278,22 @@
 
 /* System Context Information Notification Alert Box */
 .info-alert-box {
-    background: #eff6ff;
-    border-left: 4px solid #2563eb;
-    border-radius: 6px;
+    background: rgba(59, 130, 246, .12);
+    border-left: 4px solid #3b82f6;
+    border-radius: 12px;
     padding: 14px;
 }
 
     .info-alert-box h4 {
         font-size: 13px;
-        color: #1e40af;
+        color: #bfdbfe;
         font-weight: 700;
         margin-bottom: 4px;
     }
 
     .info-alert-box p {
         font-size: 12.5px;
-        color: #1e3a8a;
+        color: #d7def2;
         line-height: 1.5;
     }
 
@@ -299,7 +304,7 @@
     gap: 12px;
     margin-top: 30px;
     padding-top: 20px;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid rgba(255, 255, 255, .1);
 }
 
 .btn-cancel,
@@ -315,25 +320,37 @@
 }
 
 .btn-cancel {
-    background: #fff;
-    color: #64748b;
-    border: 1px solid #cbd5e1;
+    background: rgba(255, 255, 255, .06);
+    color: #d7def2;
+    border: 1px solid rgba(255, 255, 255, .14);
 }
 
     .btn-cancel:hover {
-        background: #f8fafc;
-        color: #334155;
+        background: rgba(255, 255, 255, .1);
+        color: #ffffff;
     }
 
 .btn-submit {
-    background: #2563eb;
+    background: linear-gradient(135deg, rgba(59, 130, 246, .96), rgba(37, 99, 235, .78));
     color: #fff;
     border: none;
 }
 
     .btn-submit:hover {
-        background: #1d4ed8;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     }
+
+.form-group input::placeholder,
+.form-group textarea::placeholder,
+.checklist-input-group input::placeholder {
+    color: #b7c2da;
+}
+
+.form-group select option,
+.edit-select option {
+    background: #111b31;
+    color: #ffffff;
+}
 
 /* ==========================================================================
    DYNAMIC RESPONSIVE MEDIA QUERIES MATRIX (BREAKPOINTS OVERHAUL)
