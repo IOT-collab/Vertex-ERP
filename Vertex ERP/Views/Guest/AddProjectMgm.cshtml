@@ -1,0 +1,150 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Create Project";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+<!-- Linked to the dedicated project management layout stylesheet -->
+<link href="~/css/AddProjectMgm.css" rel="stylesheet" />
+
+<div class="project-page">
+
+    <!-- Adaptive Page Header with Back Route Configuration -->
+    <div class="page-header">
+        <div class="header-text">
+            <a href="@Url.Action("ProjectMgm", "Guest")" class="back-link">← Back to Project Dashboard</a>
+            <h2>Create New Company Project</h2>
+            <p>Initiate standard baseline definitions, select target milestones, allocate primary resources, and define execution guardrails.</p>
+        </div>
+    </div>
+
+    <!-- Master Form Workspace Container Wrapper -->
+    <div class="form-container-wrapper">
+        <form class="project-creation-form" method="post">
+
+            <div class="form-grid">
+
+                <!-- Left Control Section: Scope Parameters & Timelines -->
+                <div class="form-main-section">
+
+                    <div class="section-divider">
+                        <span>Project Baseline Matrix</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ProjectName">Project Title / Name</label>
+                        <input type="text" id="ProjectName" placeholder="e.g., Enterprise ERP Integration Pipeline" required />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ProjectClient">Client Designation</label>
+                            <input type="text" id="ProjectClient" placeholder="e.g., Internal Corporate or Third Party Brand Name" />
+                        </div>
+                        <div class="form-group">
+                            <label for="ProjectCategory">Project Focus Area</label>
+                            <select id="ProjectCategory" required>
+                                <option value="" disabled selected>Select Core Category Type</option>
+                                <option value="Web">Web Application Architecture</option>
+                                <option value="Desktop">Desktop Software Interface</option>
+                                <option value="Automation">Industrial Automation Systems</option>
+                                <option value="Infrastructure">Cloud Infrastructure Management</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row triple-row">
+                        <div class="form-group">
+                            <label for="StartDate">Planned Start Date</label>
+                            <input type="date" id="StartDate" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="EndDate">Estimated Target Date</label>
+                            <input type="date" id="EndDate" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="ProjectBudget">Estimated Budget Allocation</label>
+                            <input type="number" id="ProjectBudget" placeholder="₹ Value Entry" min="0" step="any" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Description">Project Scope & Core Specifications</label>
+                        <textarea id="Description" rows="4" placeholder="Detail the technical milestones, scope boundaries, or explicit execution criteria for the development engineering team..."></textarea>
+                    </div>
+
+                </div>
+
+                <!-- Right Control Section: Organizational Mapping & Verification -->
+                <div class="form-side-section">
+
+                    <div class="config-card">
+                        <h3>Resource & Ownership Assignment</h3>
+
+                        <div class="form-group">
+                            <label for="ProjectManager">Designated Project Manager</label>
+                            <select id="ProjectManager" required>
+                                <option value="" disabled selected>Select Team Lead</option>
+                                <option value="Manager1">Tarun Sharma</option>
+                                <option value="Manager2">Sanjeev Kumar</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="PriorityTier">Operational Priority Level</label>
+                            <select id="PriorityTier" required>
+                                <option value="Critical">Tier 1 - Mission Critical</option>
+                                <option value="Standard" selected>Tier 2 - Standard Pipeline</option>
+                                <option value="Low">Tier 3 - Low Urgency Evaluation</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="config-card option-card">
+                        <h3>Workflow Enforcement Options</h3>
+
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" checked />
+                                <span class="checkmark"></span>
+                                Require Mandatory Gantt Tracking
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" checked />
+                                <span class="checkmark"></span>
+                                Automate Client Metric Summary Mails
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" />
+                                <span class="checkmark"></span>
+                                Enforce Strict Timesheet Bounds
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="info-alert-box">
+                        <h4>Matrix Synchronization Notice</h4>
+                        <p>Committing this form instantiates database mapping rules, appending dynamic telemetry pipelines inside Tasks, Timesheets, and Financial Budget tracking grids application-wide.</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Bottom Execution Controls Footer Panel Layout -->
+            <div class="form-actions-footer">
+                <a href="@Url.Action("ProjectMgm", "Guest")" class="btn-cancel">Cancel Pipeline Setup</a>
+                <button type="submit" class="btn-submit">Initialize Project</button>
+            </div>
+
+        </form>
+    </div>
+
+</div>

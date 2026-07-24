@@ -1,0 +1,94 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "ProjectMgm";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/projectmgm.css" rel="stylesheet" />
+
+<div class="project-page">
+
+    <!-- Adaptive Page Header Layout -->
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Project Management</h2>
+            <p>Manage Projects, Tasks & Resources</p>
+        </div>
+
+        <a href="@Url.Action("AddProjectMgm", "Guest")" class="btn-add" style="text-decoration: none; display: inline-flex; align-items: center;">
+            + Create Project
+        </a>
+    </div>
+
+    <!-- Summary Metrics Grid Row -->
+    <div class="summary">
+        <div class="summary-card">
+            <h2>18</h2>
+            <p>Total Projects</p>
+        </div>
+
+        <div class="summary-card">
+            <h2>126</h2>
+            <p>Active Tasks</p>
+        </div>
+
+        <div class="summary-card">
+            <h2>9</h2>
+            <p>Running Projects</p>
+        </div>
+
+        <div class="summary-card">
+            <h2>92%</h2>
+            <p>Completion</p>
+        </div>
+    </div>
+
+    <!-- Core Interactive Operations Module Grid Matrix -->
+    <div class="module-grid">
+
+        <div class="module-card">
+            <div class="icon">📁</div>
+            <h3>Project Creation</h3>
+            <p>Create and manage company projects.</p>
+            <button class="btn-action">Open Module</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">✅</div>
+            <h3>Tasks</h3>
+            <p>Assign and monitor project tasks.</p>
+            <button class="btn-action">Open Module</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">📊</div>
+            <h3>Gantt Chart</h3>
+            <p>Track project timeline visually.</p>
+            <button class="btn-action">Open Module</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">👥</div>
+            <h3>Resource Allocation</h3>
+            <p>Allocate employees and resources.</p>
+            <button class="btn-action">Open Module</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">⏱</div>
+            <h3>Timesheet</h3>
+            <p>Manage employee work hours.</p>
+            <button class="btn-action">Open Module</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">💰</div>
+            <h3>Budget Tracking</h3>
+            <p>Monitor project expenses & budget.</p>
+            <button class="btn-action">Open Module</button>
+        </div>
+
+    </div>
+
+</div>

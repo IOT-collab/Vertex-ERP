@@ -1,0 +1,142 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Hrms";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/hrms.css" rel="stylesheet" />
+
+<div class="hrms-page">
+
+    <!-- Adaptive Page Header -->
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Human Resource Management</h2>
+            <p>Manage Employees, Attendance, Payroll & Recruitment</p>
+        </div>
+
+        <a href="@Url.Action("AddEmpHrm", "Guest")" class="btn-add" style="text-decoration: none; display: inline-flex; align-items: center;">
+            + Add Employee
+        </a>
+    </div>
+
+    <!-- Summary Cards Fluid Grid -->
+    <div class="summary">
+
+        <div class="summary-card">
+            <span class="summary-icon">👨‍💼</span>
+            <h2>254</h2>
+            <p>Total Employees</p>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-icon">🟢</span>
+            <h2>241</h2>
+            <p>Present Today</p>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-icon">🏖</span>
+            <h2>13</h2>
+            <p>On Leave</p>
+        </div>
+
+        <div class="summary-card">
+            <span class="summary-icon">💰</span>
+            <h2>₹18.5L</h2>
+            <p>Monthly Payroll</p>
+        </div>
+
+    </div>
+
+    <!-- Modules Fluid Matrix Grid -->
+    <div class="module-grid">
+
+        <div class="module-card">
+            <div class="icon">👨‍💼</div>
+            <h3>Employee Master</h3>
+            <p>Add, Edit & Manage Employees</p>
+            <button class="btn-module-action">Open</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">🕒</div>
+            <h3>Attendance</h3>
+            <p>Daily Attendance & Shift</p>
+            <button class="btn-module-action">Open</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">🏖</div>
+            <h3>Leave Management</h3>
+            <p>Leave Requests & Approval</p>
+            <button class="btn-module-action">Open</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">💰</div>
+            <h3>Payroll</h3>
+            <p>Salary & Payslip</p>
+            <button class="btn-module-action">Open</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">📈</div>
+            <h3>Performance</h3>
+            <p>KPI & Employee Reviews</p>
+            <button class="btn-module-action">Open</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">🎯</div>
+            <h3>Recruitment</h3>
+            <p>Hiring & Interview Process</p>
+            <button class="btn-module-action">Open</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">📄</div>
+            <h3>Documents</h3>
+            <p>Employee Documents</p>
+            <button class="btn-module-action">Open</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">📅</div>
+            <h3>Holiday Calendar</h3>
+            <p>Company Holidays</p>
+            <button class="btn-module-action">Open</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">🏢</div>
+            <h3>Departments</h3>
+            <p>Manage Departments</p>
+            <button class="btn-module-action">Open</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">🧾</div>
+            <h3>Expense Claims</h3>
+            <p>Employee Reimbursement</p>
+            <button class="btn-module-action">Open</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">🎓</div>
+            <h3>Training</h3>
+            <p>Employee Learning</p>
+            <button class="btn-module-action">Open</button>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">📊</div>
+            <h3>Reports</h3>
+            <p>HR Analytics & Reports</p>
+            <button class="btn-module-action">Open</button>
+        </div>
+
+    </div>
+
+</div>

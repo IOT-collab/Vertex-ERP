@@ -1,0 +1,134 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Add Attendence";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+<link href="~/css/AddAttendence.css" rel="stylesheet" />
+
+<div class="attendance-panel-container">
+
+    <!-- Page Header Setup with Back Route -->
+    <div class="page-header">
+        <div class="header-text">
+            <a href="@Url.Action("Attendance", "Guest")" class="back-link">← Back to Attendance Roster</a>
+            <h2>Mark Daily Attendance Checkpoint</h2>
+            <p>Log automated or manual entry points, register check-in logs, and adjust structural baseline configurations for employee shifts.</p>
+        </div>
+    </div>
+
+    <!-- Master Form Wrapper -->
+    <div class="form-container-wrapper">
+        <form class="attendance-form" method="post">
+
+            <div class="form-grid">
+
+                <!-- Left Section: Shift Timings & Core Parameters -->
+                <div class="form-main-section">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="EmployeeSelect">Select Employee</label>
+                            <select id="EmployeeSelect" required>
+                                <option value="" disabled selected>Choose Employee Profiles</option>
+                                <option value="101">101 - Sanjeev Kumar</option>
+                                <option value="102">102 - Tarun Sharma</option>
+                                <option value="103">103 - Amit Verma</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="LogDate">Attendance Logging Date</label>
+                            <input type="date" id="LogDate" value="2026-07-20" required />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="CheckInTime">Check-In Dynamic Log (AM)</label>
+                            <input type="time" id="CheckInTime" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="CheckOutTime">Check-Out Dynamic Log (PM)</label>
+                            <input type="time" id="CheckOutTime" />
+                        </div>
+                    </div>
+
+                    <div class="form-row triple-row">
+                        <div class="form-group">
+                            <label for="TotalLeaves">Total Leaves Allocation</label>
+                            <input type="number" id="TotalLeaves" placeholder="e.g. 24" value="24" min="0" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="LeavesTaken">Leaves Availed / Taken</label>
+                            <input type="number" id="LeavesTaken" placeholder="e.g. 04" min="0" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="LateDays">Late Arrivals Count</label>
+                            <input type="number" id="LateDays" placeholder="e.g. 03" min="0" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Remarks">Operational Exceptions / Remarks</label>
+                        <textarea id="Remarks" rows="3" placeholder="Document dynamic exceptions, on-field duty approvals, or validation overrides..."></textarea>
+                    </div>
+
+                </div>
+
+                <!-- Right Section: Status Anchors & Metadata Parameters -->
+                <div class="form-side-section">
+
+                    <div class="config-card">
+                        <h3>Attendance Status Context</h3>
+
+                        <div class="form-group">
+                            <label for="StatusSelect">Designated Checkpoint Status</label>
+                            <select id="StatusSelect" required>
+                                <option value="Present">Present (Standard Shift)</option>
+                                <option value="Late">Late (Shift Grace Crossed)</option>
+                                <option value="Leave">On Leave (Approved Bucket)</option>
+                                <option value="Absent">Absent (Unexcused Exception)</option>
+                            </select>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" />
+                                <span class="checkmark"></span>
+                                Mark as On-Field / Client Visit
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" checked />
+                                <span class="checkmark"></span>
+                                Standard Payroll Integration
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="info-alert-box">
+                        <h4>Validation Engine Trigger</h4>
+                        <p>Committing this operational log overrides existing automated biometric data structures for the designated employee configuration pipeline on the selected tracking window.</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Bottom Operational Controls Footer Footer -->
+            <div class="form-actions-footer">
+                <a href="@Url.Action("Attendence", "Guest")" class="btn-cancel">Cancel Logs</a>
+                <button type="submit" class="btn-submit">Commit Log Entry</button>
+            </div>
+
+        </form>
+    </div>
+
+</div>

@@ -1,0 +1,191 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Document Management";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/documentmgm.css" rel="stylesheet" />
+
+<div class="hr-dashboard-container">
+
+    <!-- Dashboard Main Header -->
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Document Management Control</h2>
+            <p>Upload corporate sheets, verify legal profiles, and manage system repository attachments.</p>
+        </div>
+
+        <a asp-controller="Guest"
+           asp-action="AddDocMgmSave"
+           class="save-btn">
+
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="18"
+                 height="18"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2"
+                 stroke-linecap="round"
+                 stroke-linejoin="round">
+
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+
+            </svg>
+
+            <span>Save Document Vault</span>
+        </a>
+    </div>
+
+    <!-- Repository Action Cards Grid -->
+    <div class="settings-grid">
+
+        <!-- 01. COMPANY DOCUMENTS -->
+        <div class="setting-card">
+            <div class="card-header">
+                <h3>01. COMPANY MANAGEMENT DOCS</h3>
+            </div>
+            <div class="card-body">
+                <div class="center-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="16"></line><line x1="15" y1="22" x2="15" y2="16"></line><line x1="9" y1="16" x2="15" y2="16"></line><path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01"></path></svg>
+                </div>
+
+                <ul class="feature-list">
+                    <li>Company Profile Logs</li>
+                    <li>Branding Schemes & Logos</li>
+                    <li>Branch Allocation Layouts</li>
+                    <li>Legal MOA Certificates</li>
+                </ul>
+
+                <!-- Document Repository Action Console -->
+                <div class="doc-action-hub">
+                    <label class="btn-upload">
+                        <input type="file" onchange="console.log('File Selected')" />
+                        Upload
+                    </label>
+                    <button class="btn-view" title="View/Download Document">View</button>
+                    <button class="btn-delete" title="Delete Document">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 02. USER & ROLES DOCUMENTS -->
+        <div class="setting-card">
+            <div class="card-header">
+                <h3>02. USER ROLES & KYC</h3>
+            </div>
+            <div class="card-body">
+                <div class="center-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <ul class="feature-list">
+                    <li>Employee Master Records</li>
+                    <li>Custom Signed Permissions</li>
+                    <li>Role Allocation Schemas</li>
+                    <li>Access Log Disclaimers</li>
+                </ul>
+                <div class="doc-action-hub">
+                    <label class="btn-upload"><input type="file" />Upload</label>
+                    <button class="btn-view">View</button>
+                    <button class="btn-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 03. SECURITY AGREEMENTS -->
+        <div class="setting-card">
+            <div class="card-header">
+                <h3>03. SECURITY SYSTEM DOCS</h3>
+            </div>
+            <div class="card-body">
+                <div class="center-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+                <ul class="feature-list">
+                    <li>Password Complexity Rules</li>
+                    <li>2FA Recovery Declarations</li>
+                    <li>Session Timeout Thresholds</li>
+                    <li>IP Whitelisting Agreements</li>
+                </ul>
+                <div class="doc-action-hub">
+                    <label class="btn-upload"><input type="file" />Upload</label>
+                    <button class="btn-view">View</button>
+                    <button class="btn-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 04. LEAVE & ATTENDANCE POLICY -->
+        <div class="setting-card">
+            <div class="card-header">
+                <h3>04. ATTENDANCE & LEAVE REPO</h3>
+            </div>
+            <div class="card-body">
+                <div class="center-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><polyline points="9 16 11 18 15 14"></polyline></svg>
+                </div>
+                <ul class="feature-list">
+                    <li>Attendance Policy SOPs</li>
+                    <li>Leave Grant Structures</li>
+                    <li>Overtime Calculation Briefs</li>
+                    <li>Grace Time Allocation Rules</li>
+                </ul>
+                <div class="doc-action-hub">
+                    <label class="btn-upload"><input type="file" />Upload</label>
+                    <button class="btn-view">View</button>
+                    <button class="btn-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 05. INVENTORY & WAREHOUSE DISPATCH -->
+        <div class="setting-card">
+            <div class="card-header">
+                <h3>05. INVENTORY & STOCK LAYOUTS</h3>
+            </div>
+            <div class="card-body">
+                <div class="center-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+                </div>
+                <ul class="feature-list">
+                    <li>Warehouse Racking Blueprints</li>
+                    <li>Stock Auditing Registers</li>
+                    <li>SKU & Barcode Rule Matrix</li>
+                    <li>Batch Control Manifests</li>
+                </ul>
+                <div class="doc-action-hub">
+                    <label class="btn-upload"><input type="file" />Upload</label>
+                    <button class="btn-view">View</button>
+                    <button class="btn-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 06. SYSTEMS DOCUMENTATION -->
+        <div class="setting-card">
+            <div class="card-header">
+                <h3>06. DOCUMENT VAULT & STORAGE</h3>
+            </div>
+            <div class="card-body">
+                <div class="center-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                </div>
+                <ul class="feature-list">
+                    <li>Cloud Server Storage Specs</li>
+                    <li>SOP Guides & Engineering Drawings</li>
+                    <li>Version Isolation Control Forms</li>
+                    <li>Approval Workflow Templates</li>
+                </ul>
+                <div class="doc-action-hub">
+                    <label class="btn-upload"><input type="file" />Upload</label>
+                    <button class="btn-view">View</button>
+                    <button class="btn-delete">Delete</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

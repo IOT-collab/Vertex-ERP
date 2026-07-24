@@ -1,0 +1,248 @@
+﻿/* Container & Background Canvas Setup */
+.settings-page {
+    padding: 30px;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+    .settings-page * {
+        box-sizing: border-box;
+    }
+
+    /* Page Header Styling - Responsive Flex Setup */
+    .settings-page .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; /* Allows action items to drop into block alignments gracefully */
+        gap: 20px;
+        margin-bottom: 35px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 20px;
+    }
+
+    .settings-page .header-text {
+        flex: 1;
+        min-width: 280px; /* Safe boundaries preventing layout squeezing */
+    }
+
+    .settings-page .page-header h2 {
+        font-size: 26px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 5px 0;
+    }
+
+    .settings-page .page-header p {
+        color: #64748b;
+        font-size: 14px;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    /* Premium Action Button Layout */
+    .settings-page .save-btn {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: #fff;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+        transition: all 0.25s ease;
+    }
+
+        .settings-page .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        }
+
+        .settings-page .save-btn svg {
+            flex-shrink: 0;
+        }
+
+    /* Intelligent Fluid Responsive Grid Engine */
+    .settings-page .settings-grid {
+        display: grid;
+        /* Shifts grid matrix column counts uniformly without strict media breakpoint definitions */
+        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+        gap: 20px;
+    }
+
+    /* Premium Settings Card Configuration Pattern */
+    .settings-page .setting-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .settings-page .setting-card:hover {
+            transform: translateY(-4px);
+            border-color: #cbd5e1;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
+        }
+
+    /* Card Icon Box Styling Rules */
+    .settings-page .card-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: transform 0.3s ease;
+    }
+
+        /* Vector Containment Constraints inside Accent Containers */
+        .settings-page .card-icon svg {
+            width: 24px;
+            height: 24px;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+    .settings-page .setting-card:hover .card-icon {
+        transform: scale(1.05);
+    }
+
+    /* Layout Elements Setup inside Dashboard Card Blocks */
+    .settings-page .card-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .settings-page .setting-card h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .settings-page .setting-card p {
+        color: #64748b;
+        font-size: 13px;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+/* Premium Custom Smooth Accent Palette Mappings */
+.icon-company {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.icon-users {
+    background: #ecfdf5;
+    color: #10b981;
+}
+
+.icon-security {
+    background: #fff1f2;
+    color: #f43f5e;
+}
+
+.icon-email {
+    background: #f5f3ff;
+    color: #8b5cf6;
+}
+
+.icon-sms {
+    background: #fff7ed;
+    color: #f97316;
+}
+
+.icon-language {
+    background: #f0fdfa;
+    color: #0d9488;
+}
+
+.icon-finance {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.icon-attendance {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+.icon-shift {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.icon-inventory {
+    background: #faf5ff;
+    color: #9333ea;
+}
+
+.icon-print {
+    background: #f8fafc;
+    color: #475569;
+}
+
+.icon-bell {
+    background: #fffbeb;
+    color: #eab308;
+}
+
+.icon-backup {
+    background: #ecfeff;
+    color: #0891b2;
+}
+
+.icon-api {
+    background: #fdf2f8;
+    color: #db2777;
+}
+
+.icon-appearance {
+    background: #f1f5f9;
+    color: #6366f1;
+}
+
+.icon-audit {
+    background: #f0fdf4;
+    color: #059669;
+}
+
+.icon-maintenance {
+    background: #fff5f5;
+    color: #dc2626;
+}
+
+/* Global Standard System Breaks Adaptions */
+@media (max-width: 768px) {
+    .settings-page {
+        padding: 20px;
+    }
+
+        .settings-page .page-header {
+            margin-bottom: 25px;
+        }
+
+        .settings-page .save-btn {
+            width: 100%; /* Force button control parameters across full width setups */
+            justify-content: center;
+        }
+}

@@ -1,0 +1,204 @@
+﻿/* Base Canvas Normalization Rules */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+body {
+    background: #f4f6fb;
+}
+
+.hrms-page {
+    padding: 30px;
+    width: 100%;
+    min-height: 100vh;
+}
+
+    /* Page Header Aligned Layout System */
+    .hrms-page .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; /* Permits safe wraps for button element nodes */
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .hrms-page .header-text {
+        flex: 1;
+        min-width: 280px; /* Safe bounds preventing layout squeezing */
+    }
+
+    .hrms-page .page-header h2 {
+        color: #2c3e50;
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .hrms-page .page-header p {
+        color: #777;
+        margin-top: 5px;
+        font-size: 15px;
+    }
+
+    /* Main Top Action Button */
+    .hrms-page .btn-add {
+        background: #4f46e5;
+        color: #fff;
+        border: none;
+        padding: 14px 24px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: background-color 0.3s ease;
+    }
+
+        .hrms-page .btn-add:hover {
+            background: #372fc6;
+        }
+
+    /* Intelligent Fluid Grid Counter Systems */
+    .hrms-page .summary {
+        display: grid;
+        /* Shifts columns automatically down from 4 rows based on canvas boundaries */
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-bottom: 35px;
+    }
+
+    .hrms-page .summary-card {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0,0,0,.04);
+        border: 1px solid #e2e8f0;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .hrms-page .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,.08);
+        }
+
+    .hrms-page .summary-icon {
+        font-size: 35px;
+        display: inline-block;
+    }
+
+    .hrms-page .summary-card h2 {
+        margin: 15px 0 8px 0;
+        color: #4f46e5;
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    .hrms-page .summary-card p {
+        color: #777;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    /* Standardized Responsive Modules Configuration Grid */
+    .hrms-page .module-grid {
+        display: grid;
+        /* Auto-fills blocks natively across rows without forcing fixed layouts */
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 25px;
+    }
+
+    .hrms-page .module-card {
+        background: white;
+        border-radius: 18px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 8px 18px rgba(0,0,0,.04);
+        border: 1px solid #e2e8f0;
+        border-top: 5px solid #4f46e5;
+        display: flex;
+        flex-direction: column; /* Aligns actions perfectly to lower boundaries */
+        justify-content: space-between;
+        transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+
+        .hrms-page .module-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(79,70,229,.15);
+        }
+
+    .hrms-page .icon {
+        width: 80px;
+        height: 80px;
+        background: #eef2ff;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 20px auto;
+        font-size: 40px;
+        flex-shrink: 0;
+    }
+
+    .hrms-page .module-card h3 {
+        color: #333;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .hrms-page .module-card p {
+        color: #777;
+        font-size: 14px;
+        line-height: 1.6;
+        min-height: 45px;
+        flex-grow: 1; /* Pushes launch control console links uniformly downward */
+    }
+
+    .hrms-page .btn-module-action {
+        margin-top: 20px;
+        width: 100%;
+        padding: 12px;
+        border: none;
+        background: #4f46e5;
+        color: white;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+    }
+
+        .hrms-page .btn-module-action:hover {
+            background: #352db8;
+        }
+
+/* Global Standard Adaptive Screen Adaptions */
+@media (max-width: 768px) {
+    .hrms-page {
+        padding: 20px;
+    }
+
+        .hrms-page .page-header {
+            margin-bottom: 25px;
+        }
+
+            .hrms-page .page-header h2 {
+                font-size: 24px;
+            }
+
+        .hrms-page .btn-add {
+            width: 100%; /* Expands master action triggers across mobile layouts */
+            text-align: center;
+        }
+}
+
+@media (max-width: 320px) {
+    /* Fallback protection targeting legacy micro screen devices */
+    .hrms-page .summary,
+    .hrms-page .module-grid {
+        grid-template-columns: 1fr;
+    }
+}

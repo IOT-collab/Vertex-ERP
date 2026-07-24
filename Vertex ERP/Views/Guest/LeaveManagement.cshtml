@@ -1,0 +1,185 @@
+﻿@{
+    ViewData["Title"] = "Leave Management";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/leavemgm.css" rel="stylesheet" />
+
+<div class="leave-page">
+
+    <div class="page-header">
+        <div>
+            <h2>Leave Management</h2>
+            <p>Manage employee leave requests, balances and holidays.</p>
+        </div>
+
+        <button class="btn-primary">
+            + Apply Leave
+        </button>
+    </div>
+
+    <!-- Statistics -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <h3>45</h3>
+            <span>Total Leaves</span>
+        </div>
+
+        <div class="stat-card">
+            <h3>08</h3>
+            <span>Pending Requests</span>
+        </div>
+
+        <div class="stat-card">
+            <h3>30</h3>
+            <span>Approved</span>
+        </div>
+
+        <div class="stat-card">
+            <h3>07</h3>
+            <span>Rejected</span>
+        </div>
+
+    </div>
+
+
+    <!-- Apply Leave -->
+
+    <div class="card">
+
+        <h3>Apply Leave</h3>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Leave Type</label>
+                <select>
+                    <option>Casual Leave</option>
+                    <option>Sick Leave</option>
+                    <option>Earned Leave</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>From Date</label>
+                <input type="date">
+            </div>
+
+            <div class="form-group">
+                <label>To Date</label>
+                <input type="date">
+            </div>
+
+            <div class="form-group">
+                <label>Total Days</label>
+                <input type="number">
+            </div>
+
+        </div>
+
+        <div class="form-group full-width">
+            <label>Reason</label>
+            <textarea rows="4"></textarea>
+        </div>
+
+        <button class="btn-primary">Submit Leave</button>
+
+    </div>
+
+
+    <!-- Leave Requests -->
+
+    <div class="card">
+
+        <div class="table-header">
+
+            <h3>Leave Requests</h3>
+
+            <input type="text" placeholder="Search Employee">
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Employee</th>
+                        <th>Leave Type</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Days</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Rahul</td>
+                        <td>Casual</td>
+                        <td>10/08/26</td>
+                        <td>12/08/26</td>
+                        <td>3</td>
+                        <td><span class="pending">Pending</span></td>
+                        <td>Approve | Reject</td>
+                    </tr>
+
+                    <tr>
+                        <td>Aman</td>
+                        <td>Sick</td>
+                        <td>05/08/26</td>
+                        <td>06/08/26</td>
+                        <td>2</td>
+                        <td><span class="approved">Approved</span></td>
+                        <td>View</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- Bottom Cards -->
+
+    <div class="bottom-grid">
+
+        <div class="card">
+
+            <h3>Leave Balance</h3>
+
+            <ul>
+                <li>Casual Leave <strong>8 Days</strong></li>
+                <li>Sick Leave <strong>5 Days</strong></li>
+                <li>Earned Leave <strong>12 Days</strong></li>
+                <li>Maternity Leave <strong>0 Days</strong></li>
+            </ul>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>Holiday Calendar</h3>
+
+            <ul>
+                <li>15 Aug - Independence Day</li>
+                <li>02 Oct - Gandhi Jayanti</li>
+                <li>25 Dec - Christmas</li>
+                <li>01 Jan - New Year</li>
+            </ul>
+
+        </div>
+
+    </div>
+
+</div>

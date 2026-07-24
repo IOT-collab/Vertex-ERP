@@ -1,0 +1,667 @@
+﻿@*
+    ASP.NET Core MVC ERP Master Dashboard View
+*@
+@{
+    ViewData["Title"] = "ERP Master Dashboard";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/Dashboard.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="dashboard">
+
+    <!-- Top Navigation & Header Row -->
+    <header class="page-header">
+        <div class="header-text">
+            <span class="system-badge">Enterprise Resource Planning v2.4</span>
+            <h2>Enterprise Overview</h2>
+            <p>Welcome back, <strong>Admin</strong>. Here is your operational summary for today.</p>
+        </div>
+
+        <div class="header-actions">
+            <!-- Sleek Upgraded Search Bar -->
+            <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" placeholder="Search POs, Employees, Items..." />
+                <span class="search-shortcut">⌘</span>
+            </div>
+
+            <div class="date-box">
+                <span class="calendar-icon">📅</span>
+                <div>
+                    <strong>@DateTime.Now.ToString("dddd")</strong>
+                    <span>@DateTime.Now.ToString("dd MMM yyyy")</span>
+                </div>
+            </div>
+
+            <button class="btn-ai-mic" id="aiHeaderMic" type="button" title="Ask Vertex AI by voice">
+                🎙 <span class="mic-dot"></span>
+            </button>
+
+            <button class="btn-icon-bell" title="Notifications">
+                🔔 <span class="dot"></span>
+            </button>
+
+            <div class="user-avatar" title="Admin">
+                <span>AD</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Top KPI Cards Grid -->
+    <section class="card-row">
+        <div class="dashboard-card status-blue">
+            <div class="card-meta">
+                <span>Total Workforce</span>
+                <div class="card-icon blue-icon">👥</div>
+            </div>
+            <div class="card-body-metrics">
+                <h2>142</h2>
+                <span class="trend up">▲ +6 this month</span>
+            </div>
+            <div class="card-footer-info">134 Onboarding Complete</div>
+        </div>
+
+        <div class="dashboard-card status-green">
+            <div class="card-meta">
+                <span>Present Today</span>
+                <div class="card-icon green-icon">🎯</div>
+            </div>
+            <div class="card-body-metrics">
+                <h2>128</h2>
+                <span class="trend neutral">90.1% Rate</span>
+            </div>
+            <div class="card-footer-info">10 On Field / Client Visit</div>
+        </div>
+
+        <div class="dashboard-card status-orange">
+            <div class="card-meta">
+                <span>Pending Approvals</span>
+                <div class="card-icon orange-icon">⏳</div>
+            </div>
+            <div class="card-body-metrics">
+                <h2>14</h2>
+                <span class="trend warning">Needs Action</span>
+            </div>
+            <div class="card-footer-info">8 Leaves, 6 Purchase Orders</div>
+        </div>
+
+        <div class="dashboard-card status-purple">
+            <div class="card-meta">
+                <span>Inventory Items</span>
+                <div class="card-icon purple-icon">📦</div>
+            </div>
+            <div class="card-body-metrics">
+                <h2>1,240</h2>
+                <span class="trend down">⚠ 18 Low Stock</span>
+            </div>
+            <div class="card-footer-info">4 Re-orders Auto-Triggered</div>
+        </div>
+    </section>
+
+    <!-- Analytics Graphs Row -->
+    <section class="analytics-row">
+        <div class="analytics-card analytics-wide">
+            <div class="box-header">
+                <div>
+                    <h3>Workforce Trend</h3>
+                    <p class="sub-text">Attendance performance across the current week</p>
+                </div>
+                <span class="badge-count">Live Trend</span>
+            </div>
+
+            <div class="line-chart" aria-label="Weekly attendance trend graph">
+                <svg viewBox="0 0 640 230" role="img" aria-labelledby="attendanceTrendTitle">
+                    <title id="attendanceTrendTitle">Weekly attendance trend</title>
+                    <defs>
+                        <linearGradient id="lineFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#3B82F6" stop-opacity=".34" />
+                            <stop offset="100%" stop-color="#3B82F6" stop-opacity="0" />
+                        </linearGradient>
+                        <linearGradient id="lineStroke" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#22C55E" />
+                            <stop offset="55%" stop-color="#3B82F6" />
+                            <stop offset="100%" stop-color="#8B5CF6" />
+                        </linearGradient>
+                    </defs>
+                    <g class="chart-grid">
+                        <line x1="34" y1="35" x2="610" y2="35" />
+                        <line x1="34" y1="82" x2="610" y2="82" />
+                        <line x1="34" y1="129" x2="610" y2="129" />
+                        <line x1="34" y1="176" x2="610" y2="176" />
+                    </g>
+                    <path class="line-area" d="M45 162 C100 138 128 128 176 114 C225 100 254 120 306 96 C360 72 392 86 444 72 C496 58 532 68 590 42 L590 206 L45 206 Z" />
+                    <path class="line-stroke" d="M45 162 C100 138 128 128 176 114 C225 100 254 120 306 96 C360 72 392 86 444 72 C496 58 532 68 590 42" />
+                    <g class="line-points">
+                        <circle cx="45" cy="162" r="6"><title>Mon: 84%</title></circle>
+                        <circle cx="176" cy="114" r="6"><title>Tue: 89%</title></circle>
+                        <circle cx="306" cy="96" r="6"><title>Wed: 91%</title></circle>
+                        <circle cx="444" cy="72" r="6"><title>Thu: 93%</title></circle>
+                        <circle cx="590" cy="42" r="6"><title>Fri: 96%</title></circle>
+                    </g>
+                </svg>
+
+                <div class="chart-labels">
+                    <span>Mon</span>
+                    <span>Tue</span>
+                    <span>Wed</span>
+                    <span>Thu</span>
+                    <span>Fri</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <div class="box-header">
+                <div>
+                    <h3>Department Load</h3>
+                    <p class="sub-text">Open activity by team</p>
+                </div>
+            </div>
+
+            <div class="bar-chart" aria-label="Department workload bar chart">
+                <div class="bar-item" style="--bar-height: 72%; --bar-color: #3B82F6;">
+                    <span class="bar-value">72</span>
+                    <div class="bar-fill" title="IT: 72"></div>
+                    <small>IT</small>
+                </div>
+                <div class="bar-item" style="--bar-height: 54%; --bar-color: #22C55E;">
+                    <span class="bar-value">54</span>
+                    <div class="bar-fill" title="HR: 54"></div>
+                    <small>HR</small>
+                </div>
+                <div class="bar-item" style="--bar-height: 63%; --bar-color: #F59E0B;">
+                    <span class="bar-value">63</span>
+                    <div class="bar-fill" title="Accounts: 63"></div>
+                    <small>ACC</small>
+                </div>
+                <div class="bar-item" style="--bar-height: 81%; --bar-color: #8B5CF6;">
+                    <span class="bar-value">81</span>
+                    <div class="bar-fill" title="Production: 81"></div>
+                    <small>PROD</small>
+                </div>
+                <div class="bar-item" style="--bar-height: 48%; --bar-color: #EF4444;">
+                    <span class="bar-value">48</span>
+                    <div class="bar-fill" title="Logistics: 48"></div>
+                    <small>LOG</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <div class="box-header">
+                <div>
+                    <h3>Approval Health</h3>
+                    <p class="sub-text">SLA clearance progress</p>
+                </div>
+            </div>
+
+            <div class="radial-chart" role="img" aria-label="Approval health is 78 percent">
+                <div class="radial-ring" style="--progress: 78;">
+                    <span>78%</span>
+                </div>
+                <div class="radial-details">
+                    <div>
+                        <strong>24</strong>
+                        <span>Closed</span>
+                    </div>
+                    <div>
+                        <strong>07</strong>
+                        <span>Queued</span>
+                    </div>
+                    <div>
+                        <strong>02</strong>
+                        <span>Escalated</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Workspace Grid (Directory Table + Visual Stats) -->
+    <section class="content-row">
+
+        <!-- Table Column -->
+        <div class="table-card-wrapper">
+            <div class="table-box">
+                <div class="box-header">
+                    <div>
+                        <h3>Recent Active Directory</h3>
+                        <p class="sub-text">Real-time status of cross-departmental personnel</p>
+                    </div>
+                    <div class="table-controls">
+                        <select class="select-filter">
+                            <option>All Departments</option>
+                            <option>IT & Systems</option>
+                            <option>HR & Talent</option>
+                            <option>Accounts</option>
+                            <option>Production</option>
+                        </select>
+                        <span class="badge-count">6 Updates</span>
+                    </div>
+                </div>
+
+                <div class="table-responsive-container">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>Emp ID</th>
+                                <th>Employee Details</th>
+                                <th>Department</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="id-col">#101</td>
+                                <td>
+                                    <div class="user-meta">
+                                        <span class="avatar-placeholder">RS</span>
+                                        <div>
+                                            <strong>Rahul Sharma</strong>
+                                            <small>rahul.s@company.com</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="dept-tag">IT Team</span></td>
+                                <td>Sr. Developer</td>
+                                <td><span class="status status-active">Active</span></td>
+                                <td><button class="btn-action">View</button></td>
+                            </tr>
+                            <tr>
+                                <td class="id-col">#102</td>
+                                <td>
+                                    <div class="user-meta">
+                                        <span class="avatar-placeholder">AK</span>
+                                        <div>
+                                            <strong>Amit Kumar</strong>
+                                            <small>amit.k@company.com</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="dept-tag">HR & Talent</span></td>
+                                <td>HR Executive</td>
+                                <td><span class="status status-leave">On Leave</span></td>
+                                <td><button class="btn-action">View</button></td>
+                            </tr>
+                            <tr>
+                                <td class="id-col">#103</td>
+                                <td>
+                                    <div class="user-meta">
+                                        <span class="avatar-placeholder">NS</span>
+                                        <div>
+                                            <strong>Neha Singh</strong>
+                                            <small>neha.s@company.com</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="dept-tag">Accounts</span></td>
+                                <td>Financial Analyst</td>
+                                <td><span class="status status-active">Active</span></td>
+                                <td><button class="btn-action">View</button></td>
+                            </tr>
+                            <tr>
+                                <td class="id-col">#104</td>
+                                <td>
+                                    <div class="user-meta">
+                                        <span class="avatar-placeholder">RV</span>
+                                        <div>
+                                            <strong>Rohit Verma</strong>
+                                            <small>rohit.v@company.com</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="dept-tag">Production</span></td>
+                                <td>Plant Manager</td>
+                                <td><span class="status status-absent">Absent</span></td>
+                                <td><button class="btn-action">View</button></td>
+                            </tr>
+                            <tr>
+                                <td class="id-col">#105</td>
+                                <td>
+                                    <div class="user-meta">
+                                        <span class="avatar-placeholder">PJ</span>
+                                        <div>
+                                            <strong>Pooja Joshi</strong>
+                                            <small>pooja.j@company.com</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="dept-tag">Logistics</span></td>
+                                <td>Supply Coordinator</td>
+                                <td><span class="status status-field">On Field</span></td>
+                                <td><button class="btn-action">View</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance & Quick Visual Side Panel -->
+        <div class="side-panel">
+            <div class="attendance-box">
+                <div class="box-header">
+                    <h3>Attendance Split</h3>
+                    <span class="sub-text">Today</span>
+                </div>
+
+                <!-- Visual Progress Bar -->
+                <div class="progress-stacked">
+                    <div class="progress-bar bg-green" style="width: 75%;" title="Present"></div>
+                    <div class="progress-bar bg-blue" style="width: 10%;" title="Late"></div>
+                    <div class="progress-bar bg-orange" style="width: 8%;" title="Leave"></div>
+                    <div class="progress-bar bg-red" style="width: 7%;" title="Absent"></div>
+                </div>
+
+                <div class="attendance-list">
+                    <div class="attendance-item">
+                        <span class="label-group"><span class="indicator green"></span> Present</span>
+                        <strong class="metric-val">128</strong>
+                    </div>
+                    <div class="attendance-item">
+                        <span class="label-group"><span class="indicator blue"></span> Late Entry</span>
+                        <strong class="metric-val">06</strong>
+                    </div>
+                    <div class="attendance-item">
+                        <span class="label-group"><span class="indicator orange"></span> On Leave</span>
+                        <strong class="metric-val">08</strong>
+                    </div>
+                    <div class="attendance-item">
+                        <span class="label-group"><span class="indicator red"></span> Absent</span>
+                        <strong class="metric-val">05</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operational Alerts Card -->
+            <div class="alerts-box">
+                <h3>Priority Alerts</h3>
+                <div class="alert-list">
+                    <div class="alert-item warning">
+                        <span class="alert-icon">⚡</span>
+                        <div>
+                            <strong>Low Stock Warning</strong>
+                            <p>18 SKUs below threshold level.</p>
+                        </div>
+                    </div>
+                    <div class="alert-item info">
+                        <span class="alert-icon">💳</span>
+                        <div>
+                            <strong>Payroll Cycle</strong>
+                            <p>Cutoff in 2 days. 4 pending timesheets.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Bottom Management Panel -->
+    <section class="bottom-row">
+
+        <div class="activity-box">
+            <div class="box-header">
+                <h3>System Audit & Logs</h3>
+                <a href="#" class="link-more">View All Logs →</a>
+            </div>
+            <div class="timeline-container">
+                <div class="timeline-step">
+                    <div class="step-icon blue"></div>
+                    <div class="step-content">
+                        <strong>User Sync Completed</strong>
+                        <p>Employee <strong>Rahul Sharma</strong> synced with production database by Admin.</p>
+                        <span class="timestamp">10 mins ago</span>
+                    </div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-icon green"></div>
+                    <div class="step-content">
+                        <strong>Payroll Auto-Generated</strong>
+                        <p>Monthly payroll sheets created for Q3 lifecycle.</p>
+                        <span class="timestamp">1 hour ago</span>
+                    </div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-icon orange"></div>
+                    <div class="step-content">
+                        <strong>Inventory Cron Job Triggered</strong>
+                        <p>Stock scanner updated flags: 18 items marked low-stock.</p>
+                        <span class="timestamp">3 hours ago</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-box">
+            <h3>Instant ERP Operations</h3>
+            <p class="sub-text">Frequent enterprise shortcuts</p>
+            <div class="action-flex">
+                <button class="btn-neo-primary">
+                    <span class="btn-icon">➕</span> Create Employee
+                </button>
+                <button class="btn-neo-secondary">
+                    <span class="btn-icon">⏱</span> Log Attendance
+                </button>
+                <button class="btn-neo-secondary">
+                    <span class="btn-icon">🧾</span> Raise PO Request
+                </button>
+                <button class="btn-neo-secondary">
+                    <span class="btn-icon">🔄</span> Rebuild Payroll
+                </button>
+                <button class="btn-neo-secondary">
+                    <span class="btn-icon">📊</span> Generate Report
+                </button>
+                <button class="btn-neo-secondary">
+                    <span class="btn-icon">💾</span> Export Schema
+                </button>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Vertex AI Assistant -->
+    <section class="ai-assistant" aria-label="Vertex AI Assistant">
+        <button type="button" class="ai-toggle" id="aiToggle" title="Open Vertex AI Assistant">
+            <span class="ai-pulse"></span>
+            <strong>AI</strong>
+        </button>
+
+        <div class="ai-panel" id="aiPanel">
+            <div class="ai-panel-header">
+                <div>
+                    <span class="system-badge">Voice Assistant</span>
+                    <h3>Vertex AI</h3>
+                    <p class="sub-text">Ask for today's report, users, attendance, or calendar status.</p>
+                </div>
+                <button type="button" class="ai-close" id="aiClose" title="Close assistant">×</button>
+            </div>
+
+            <div class="ai-messages" id="aiMessages">
+                <div class="ai-message assistant">
+                    Hello, good morning sir. Ask me for today's company report.
+                </div>
+            </div>
+
+            <div class="ai-controls">
+                <button type="button" class="ai-mic" id="aiMic" title="Speak to assistant">🎙</button>
+                <input type="text" id="aiInput" placeholder="Ask: show today's company report..." />
+                <button type="button" class="ai-send" id="aiSend">Send</button>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    (() => {
+        const aiToggle = document.getElementById("aiToggle");
+        const aiPanel = document.getElementById("aiPanel");
+        const aiClose = document.getElementById("aiClose");
+        const aiInput = document.getElementById("aiInput");
+        const aiSend = document.getElementById("aiSend");
+        const aiMic = document.getElementById("aiMic");
+        const aiHeaderMic = document.getElementById("aiHeaderMic");
+        const aiMessages = document.getElementById("aiMessages");
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+
+        if (recognition) {
+            recognition.lang = "en-IN";
+            recognition.interimResults = false;
+            recognition.continuous = false;
+        }
+
+        let isListening = false;
+
+        const stopAssistantAudio = () => {
+            if ("speechSynthesis" in window) {
+                window.speechSynthesis.cancel();
+            }
+
+            if (recognition && isListening) {
+                try {
+                    recognition.abort();
+                } catch {
+                    recognition.stop();
+                }
+            }
+
+            isListening = false;
+            aiMic.classList.remove("listening");
+            aiHeaderMic.classList.remove("listening");
+        };
+
+        const addMessage = (text, type) => {
+            const message = document.createElement("div");
+            message.className = `ai-message ${type}`;
+            message.textContent = text;
+            aiMessages.appendChild(message);
+            aiMessages.scrollTop = aiMessages.scrollHeight;
+        };
+
+        const speak = (text) => {
+            if (!aiPanel.classList.contains("open") || !("speechSynthesis" in window)) {
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            const voices = window.speechSynthesis.getVoices();
+            utterance.voice = voices.find((voice) => voice.lang === "en-US") ||
+                voices.find((voice) => voice.lang === "en-GB") ||
+                voices.find((voice) => voice.lang?.startsWith("en"));
+            utterance.lang = utterance.voice?.lang || "en-US";
+            utterance.rate = 0.95;
+            utterance.pitch = 1;
+            window.speechSynthesis.speak(utterance);
+        };
+
+        const askAssistant = async () => {
+            const question = aiInput.value.trim();
+            if (!question) {
+                return;
+            }
+
+            addMessage(question, "user");
+            aiInput.value = "";
+
+            try {
+                const response = await fetch("/Guest/AskAssistant", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ message: question })
+                });
+
+                const data = await response.json();
+                addMessage(data.reply, "assistant");
+                if (aiPanel.classList.contains("open")) {
+                    speak(data.reply);
+                }
+            } catch {
+                const fallback = "Sorry sir, assistant service is not responding right now.";
+                addMessage(fallback, "assistant");
+                if (aiPanel.classList.contains("open")) {
+                    speak(fallback);
+                }
+            }
+        };
+
+        aiToggle.addEventListener("click", () => {
+            aiPanel.classList.toggle("open");
+            if (!aiPanel.classList.contains("open")) {
+                stopAssistantAudio();
+            }
+        });
+
+        aiClose.addEventListener("click", () => {
+            aiPanel.classList.remove("open");
+            stopAssistantAudio();
+        });
+        aiSend.addEventListener("click", askAssistant);
+        aiInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                askAssistant();
+            }
+        });
+
+        const startListening = () => {
+            aiPanel.classList.add("open");
+
+            if (!recognition) {
+                const message = "Voice input is not supported in this browser. Please type your question.";
+                addMessage(message, "assistant");
+                speak(message);
+                return;
+            }
+
+            if (isListening) {
+                return;
+            }
+
+            try {
+                isListening = true;
+                aiMic.classList.add("listening");
+                aiHeaderMic.classList.add("listening");
+                recognition.start();
+            } catch {
+                isListening = false;
+                aiMic.classList.remove("listening");
+                aiHeaderMic.classList.remove("listening");
+            }
+        };
+
+        aiMic.addEventListener("click", startListening);
+        aiHeaderMic.addEventListener("click", startListening);
+
+        if (recognition) {
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                aiInput.value = transcript;
+                isListening = false;
+                aiMic.classList.remove("listening");
+                aiHeaderMic.classList.remove("listening");
+                askAssistant();
+            };
+
+            recognition.onerror = () => {
+                isListening = false;
+                aiMic.classList.remove("listening");
+                aiHeaderMic.classList.remove("listening");
+                const message = "I could not hear the voice input. Please try again or type your question.";
+                addMessage(message, "assistant");
+                speak(message);
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                aiMic.classList.remove("listening");
+                aiHeaderMic.classList.remove("listening");
+            };
+        }
+    })();
+</script>
