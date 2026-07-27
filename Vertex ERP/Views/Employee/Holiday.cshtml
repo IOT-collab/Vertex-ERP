@@ -1,0 +1,243 @@
+﻿@{
+    ViewData["Title"] = "Holiday ";
+}
+<link href="~/css/holiday.css" rel="stylesheet" />
+
+
+<div class="hc-container">
+    <!-- Top Header -->
+    <div class="hc-header">
+        <div class="hc-header-main">
+            <button class="hc-btn-icon" onclick="history.back()" title="Back">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+            </button>
+            <div>
+                <h1 class="hc-title">Holiday Calendar</h1>
+                <p class="hc-subtitle">List of official company holidays and upcoming observational leaves</p>
+            </div>
+        </div>
+
+        <div class="hc-header-actions">
+            <select class="hc-select">
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+            </select>
+            <button class="hc-btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                <span>Add Holiday</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards Grid -->
+    <div class="hc-grid-stats">
+        <div class="hc-card hc-card-featured">
+            <div class="hc-card-body">
+                <div>
+                    <span class="hc-card-label">Next Holiday</span>
+                    <h3 class="hc-card-title">Independence Day</h3>
+                    <span class="hc-card-sub">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
+                        15 Aug 2026 (Saturday)
+                    </span>
+                </div>
+                <div class="hc-icon-badge icon-blue">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /><path d="M8 14h.01" /><path d="M12 14h.01" /><path d="M16 14h.01" /></svg>
+                </div>
+            </div>
+            <div class="hc-card-footer text-emerald">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                In 19 Days
+            </div>
+        </div>
+
+        <div class="hc-card">
+            <div class="hc-card-body">
+                <div>
+                    <span class="hc-card-label">Total Holidays</span>
+                    <h3 class="hc-card-title">14 Days</h3>
+                </div>
+                <div class="hc-icon-badge icon-purple">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+                </div>
+            </div>
+            <div class="hc-card-footer">For Year 2026</div>
+        </div>
+
+        <div class="hc-card">
+            <div class="hc-card-body">
+                <div>
+                    <span class="hc-card-label">Mandatory Holidays</span>
+                    <h3 class="hc-card-title">10 Days</h3>
+                </div>
+                <div class="hc-icon-badge icon-green">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                </div>
+            </div>
+            <div class="hc-card-footer text-emerald">Fixed Company Offs</div>
+        </div>
+
+        <div class="hc-card">
+            <div class="hc-card-body">
+                <div>
+                    <span class="hc-card-label">Restricted / Optional</span>
+                    <h3 class="hc-card-title">04 Days</h3>
+                </div>
+                <div class="hc-icon-badge icon-amber">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
+                </div>
+            </div>
+            <div class="hc-card-footer text-amber">Max 2 selectable</div>
+        </div>
+    </div>
+
+    <!-- Main Section -->
+    <div class="hc-panel">
+        <!-- Search & Filters -->
+        <div class="hc-controls">
+            <div class="hc-search-box">
+                <svg class="hc-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                <input type="text" id="holidaySearchInput" placeholder="Search holiday or day..." onkeyup="filterHolidays()" />
+            </div>
+
+            <select class="hc-select" id="holidayTypeSelect" onchange="filterHolidays()">
+                <option value="All">All Types</option>
+                <option value="Mandatory">Mandatory</option>
+                <option value="Optional">Optional / Restricted</option>
+            </select>
+        </div>
+
+        <!-- Table View -->
+        <div class="hc-table-wrapper">
+            <table class="hc-table" id="holidayTable">
+                <thead>
+                    <tr>
+                        <th>Date & Day</th>
+                        <th>Holiday Name</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="hc-table-row">
+                        <td>
+                            <div class="hc-date-group">
+                                <div class="hc-date-box">
+                                    <span class="hc-d-number">26</span>
+                                    <span class="hc-d-month">JAN</span>
+                                </div>
+                                <span class="hc-day-text">Monday</span>
+                            </div>
+                        </td>
+                        <td><span class="hc-name-text">Republic Day</span></td>
+                        <td><span class="hc-pill pill-blue">Mandatory</span></td>
+                        <td><span class="hc-status status-gray">Passed</span></td>
+                        <td><span class="hc-desc-text">National Holiday</span></td>
+                    </tr>
+
+                    <tr class="hc-table-row">
+                        <td>
+                            <div class="hc-date-group">
+                                <div class="hc-date-box">
+                                    <span class="hc-d-number">25</span>
+                                    <span class="hc-d-month">MAR</span>
+                                </div>
+                                <span class="hc-day-text">Wednesday</span>
+                            </div>
+                        </td>
+                        <td><span class="hc-name-text">Holi</span></td>
+                        <td><span class="hc-pill pill-blue">Mandatory</span></td>
+                        <td><span class="hc-status status-gray">Passed</span></td>
+                        <td><span class="hc-desc-text">Festival Holiday</span></td>
+                    </tr>
+
+                    <tr class="hc-table-row row-active">
+                        <td>
+                            <div class="hc-date-group">
+                                <div class="hc-date-box active-box">
+                                    <span class="hc-d-number">15</span>
+                                    <span class="hc-d-month">AUG</span>
+                                </div>
+                                <span class="hc-day-text text-blue">Saturday</span>
+                            </div>
+                        </td>
+                        <td><span class="hc-name-text">Independence Day</span></td>
+                        <td><span class="hc-pill pill-blue">Mandatory</span></td>
+                        <td><span class="hc-status status-emerald">Next Holiday</span></td>
+                        <td><span class="hc-desc-text">National Holiday</span></td>
+                    </tr>
+
+                    <tr class="hc-table-row">
+                        <td>
+                            <div class="hc-date-group">
+                                <div class="hc-date-box">
+                                    <span class="hc-d-number">02</span>
+                                    <span class="hc-d-month">OCT</span>
+                                </div>
+                                <span class="hc-day-text">Friday</span>
+                            </div>
+                        </td>
+                        <td><span class="hc-name-text">Gandhi Jayanti</span></td>
+                        <td><span class="hc-pill pill-blue">Mandatory</span></td>
+                        <td><span class="hc-status status-blue">Upcoming</span></td>
+                        <td><span class="hc-desc-text">National Holiday</span></td>
+                    </tr>
+
+                    <tr class="hc-table-row">
+                        <td>
+                            <div class="hc-date-group">
+                                <div class="hc-date-box">
+                                    <span class="hc-d-number">08</span>
+                                    <span class="hc-d-month">NOV</span>
+                                </div>
+                                <span class="hc-day-text">Sunday</span>
+                            </div>
+                        </td>
+                        <td><span class="hc-name-text">Diwali</span></td>
+                        <td><span class="hc-pill pill-blue">Mandatory</span></td>
+                        <td><span class="hc-status status-blue">Upcoming</span></td>
+                        <td><span class="hc-desc-text">Festival Holiday</span></td>
+                    </tr>
+
+                    <tr class="hc-table-row">
+                        <td>
+                            <div class="hc-date-group">
+                                <div class="hc-date-box">
+                                    <span class="hc-d-number">25</span>
+                                    <span class="hc-d-month">DEC</span>
+                                </div>
+                                <span class="hc-day-text">Friday</span>
+                            </div>
+                        </td>
+                        <td><span class="hc-name-text">Christmas Day</span></td>
+                        <td><span class="hc-pill pill-amber">Optional</span></td>
+                        <td><span class="hc-status status-blue">Upcoming</span></td>
+                        <td><span class="hc-desc-text">Restricted Holiday</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterHolidays() {
+        const searchValue = document.getElementById("holidaySearchInput").value.toUpperCase();
+        const typeValue = document.getElementById("holidayTypeSelect").value.toUpperCase();
+        const table = document.getElementById("holidayTable");
+        const rows = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < rows.length; i++) {
+            let rowText = rows[i].textContent || rows[i].innerText;
+            let matchesSearch = rowText.toUpperCase().indexOf(searchValue) > -1;
+            let matchesType = (typeValue === "ALL") || rowText.toUpperCase().indexOf(typeValue) > -1;
+
+            if (matchesSearch && matchesType) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
+</script>

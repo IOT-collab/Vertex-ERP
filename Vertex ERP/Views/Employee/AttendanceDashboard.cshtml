@@ -1,0 +1,83 @@
+﻿@{
+    ViewData["Title"] = "Attendance Quick Card";
+}
+<link href="~/css/attendancedashboardt.css" rel="stylesheet" />
+
+<div class="dashboard-card-wrapper">
+    <div class="attendance-card-glass">
+
+        <!-- Top Accent & Live Status -->
+        <div class="card-header-bar">
+            <div class="status-badge-glow online">
+                <span class="badge-ping"></span>
+                <span class="badge-dot"></span>
+                <span>Checked In • 09:15 AM</span>
+            </div>
+            <span class="shift-tag">General Shift</span>
+        </div>
+
+        <div class="card-body">
+
+            <!-- Circular Visual Progress Ring -->
+            <div class="clock-progress-container">
+                <svg class="progress-ring" viewBox="0 0 120 120">
+                    <circle class="ring-bg" cx="60" cy="60" r="52" />
+                    <!-- Stroke offset calculates ~70% work day completed -->
+                    <circle class="ring-fill" cx="60" cy="60" r="52" style="stroke-dashoffset: 98;" />
+                </svg>
+
+                <div class="clock-center-content">
+                    <div class="live-timer">06h 45m</div>
+                    <span class="timer-label">Logged Today</span>
+                </div>
+            </div>
+
+            <!-- Title & Subtitle -->
+            <div class="card-heading">
+                <h2 class="card-title">Attendance &amp; Shift</h2>
+                <p class="card-subtitle">Daily Work Hours &amp; Punch Management</p>
+            </div>
+
+            <!-- Enhanced Mini Stats -->
+            <div class="stats-pills-grid">
+                <div class="stat-pill">
+                    <span class="pill-label">Shift Hours</span>
+                    <span class="pill-val">09:00 - 18:00</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="pill-label">Break Time</span>
+                    <span class="pill-val text-amber">45 mins</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="pill-label">Punctuality</span>
+                    <span class="pill-val text-green">98% On-Time</span>
+                </div>
+            </div>
+
+            <!-- Primary Action Button (Punch Out / Punch In) -->
+            <div class="action-btn-group">
+                <button class="open-btn primary-punch-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0" /><line x1="12" y1="2" x2="12" y2="12" /></svg>
+                    <span>Punch Out</span>
+                </button>
+            </div>
+
+            <!-- Secondary Quick Actions (Grid Format) -->
+            <div class="quick-grid">
+                <a href="#" class="quick-tile" title="Request Leave or OD">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                    <span>Apply Leave</span>
+                </a>
+                <a href="#" class="quick-tile" title="Log Break Time">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" /></svg>
+                    <span>Take Break</span>
+                </a>
+                <a href="#" class="quick-tile" title="Full Attendance Calendar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>
+                    <span>Logs</span>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -21,8 +21,8 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    DatabaseInitializer.SeedDefaultUsers(dbContext);
+    //var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    //DatabaseInitializer.SeedDefaultUsers(dbContext);
 }
 
 // Configure the HTTP request pipeline.
@@ -44,6 +44,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-   pattern: "{controller=Guest}/{action=Login}/{id?}");
+   pattern: "{controller=Guest}/{action=Dashboard}/{id?}");
 
 app.Run();

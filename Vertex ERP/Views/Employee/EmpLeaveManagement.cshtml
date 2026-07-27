@@ -1,0 +1,282 @@
+﻿@{
+    ViewData["Title"] = "Leave Management";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/empleavemanagement.css" rel="stylesheet" />
+
+
+<div class="leave-dashboard-wrapper">
+
+    <!-- Page Header -->
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h2>Leave & Attendance Portal</h2>
+            <p>Apply for leaves, track approval statuses, and check company holidays.</p>
+        </div>
+    </div>
+
+    <!-- Main Grid Dashboard -->
+    <div class="dashboard-grid">
+
+        <!-- LEFT SIDE: Apply Leave & Personal Leave Stats -->
+        <div class="left-section">
+
+            <!-- Quick Stats Row -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon total-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-value">24 Days</span>
+                        <span class="stat-label">Total Quota</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon consumed-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-value">08 Days</span>
+                        <span class="stat-label">Consumed</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon pending-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-value">02</span>
+                        <span class="stat-label">Pending Approval</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon balance-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-value">16 Days</span>
+                        <span class="stat-label">Remaining Balance</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apply Leave Form Card -->
+            <div class="glass-card apply-leave-card">
+                <div class="card-header">
+                    <h3>Apply New Leave</h3>
+                    <span class="badge-accent">Quick Request</span>
+                </div>
+
+                <form class="leave-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Leave Type</label>
+                            <select class="form-input">
+                                <option value="CL">Casual Leave (CL)</option>
+                                <option value="SL">Sick Leave (SL)</option>
+                                <option value="UL">Unpaid Leave (UL)</option>
+                                <option value="EL">Earned Leave (EL)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Duration</label>
+                            <select class="form-input">
+                                <option value="Full">Full Day</option>
+                                <option value="HalfFirst">Half Day (First Half)</option>
+                                <option value="HalfSecond">Half Day (Second Half)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>From Date</label>
+                            <input type="date" class="form-input calendar-input" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>To Date</label>
+                            <input type="date" class="form-input calendar-input" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Reason for Leave</label>
+                        <textarea class="form-input text-area" rows="3" placeholder="Specify valid reason for leave application..."></textarea>
+                    </div>
+
+                    <button type="button" class="btn-primary-glow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+                        Submit 
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- RIGHT SIDE: Company Holiday Calendar & Holidays List -->
+        <div class="right-section">
+
+            <div class="glass-card holiday-card">
+                <div class="card-header">
+                    <h3>Company Holiday Calendar</h3>
+                    <span class="year-badge">2026</span>
+                </div>
+
+                <!-- Mini Calendar Header -->
+                <div class="calendar-widget">
+                    <div class="calendar-month-nav">
+                        <button class="nav-btn">&lt;</button>
+                        <span class="current-month">July 2026</span>
+                        <button class="nav-btn">&gt;</button>
+                    </div>
+
+                    <div class="calendar-days-grid">
+                        <span class="day-head">Su</span>
+                        <span class="day-head">Mo</span>
+                        <span class="day-head">Tu</span>
+                        <span class="day-head">We</span>
+                        <span class="day-head">Th</span>
+                        <span class="day-head">Fr</span>
+                        <span class="day-head">Sa</span>
+
+                        <!-- Sample Days -->
+                        <span class="day-num muted">28</span>
+                        <span class="day-num muted">29</span>
+                        <span class="day-num muted">30</span>
+                        <span class="day-num">1</span>
+                        <span class="day-num">2</span>
+                        <span class="day-num">3</span>
+                        <span class="day-num weekend">4</span>
+                        <span class="day-num weekend">5</span>
+                        <span class="day-num">6</span>
+                        <span class="day-num">7</span>
+                        <span class="day-num">8</span>
+                        <span class="day-num">9</span>
+                        <span class="day-num">10</span>
+                        <span class="day-num weekend">11</span>
+                        <span class="day-num weekend">12</span>
+                        <span class="day-num">13</span>
+                        <span class="day-num">14</span>
+                        <span class="day-num holiday-highlight">15</span>
+                        <span class="day-num">16</span>
+                        <span class="day-num">17</span>
+                        <span class="day-num weekend">18</span>
+                        <span class="day-num weekend">19</span>
+                        <span class="day-num">20</span>
+                        <span class="day-num">21</span>
+                        <span class="day-num">22</span>
+                        <span class="day-num">23</span>
+                        <span class="day-num active-day">24</span>
+                        <span class="day-num weekend">25</span>
+                        <span class="day-num weekend">26</span>
+                        <span class="day-num">27</span>
+                        <span class="day-num">28</span>
+                        <span class="day-num">29</span>
+                        <span class="day-num">30</span>
+                        <span class="day-num">31</span>
+                    </div>
+                </div>
+
+                <!-- Upcoming Holidays List -->
+                <div class="upcoming-holidays">
+                    <h4>Upcoming Company Holidays</h4>
+                    <ul class="holiday-list">
+                        <li>
+                            <div class="holiday-date">
+                                <span class="h-day">15</span>
+                                <span class="h-month">AUG</span>
+                            </div>
+                            <div class="holiday-info">
+                                <h5>Independence Day</h5>
+                                <small>National Holiday</small>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="holiday-date">
+                                <span class="h-day">02</span>
+                                <span class="h-month">OCT</span>
+                            </div>
+                            <div class="holiday-info">
+                                <h5>Gandhi Jayanti</h5>
+                                <small>National Holiday</small>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="holiday-date">
+                                <span class="h-day">08</span>
+                                <span class="h-month">NOV</span>
+                            </div>
+                            <div class="holiday-info">
+                                <h5>Diwali Special</h5>
+                                <small>Festival Holiday</small>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- BOTTOM SECTION: Recent Leave History & Status Table -->
+    <div class="glass-card table-section">
+        <div class="card-header">
+            <h3>Recent Leave Requests</h3>
+            <div class="filter-pills">
+                <span class="pill active">All</span>
+                <span class="pill">Pending</span>
+                <span class="pill">Approved</span>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Leave Type</th>
+                        <th>Applied On</th>
+                        <th>From - To Date</th>
+                        <th>Total Days</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="type-badge cl-badge">Casual Leave (CL)</span></td>
+                        <td>22 Jul 2026</td>
+                        <td>28 Jul 2026 - 29 Jul 2026</td>
+                        <td>02 Days</td>
+                        <td>Personal work at home</td>
+                        <td><span class="status-badge badge-pending">Pending</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="type-badge sl-badge">Sick Leave (SL)</span></td>
+                        <td>10 Jul 2026</td>
+                        <td>11 Jul 2026 - 11 Jul 2026</td>
+                        <td>01 Day</td>
+                        <td>Severe Fever &amp; Doctor Visit</td>
+                        <td><span class="status-badge badge-approved">Approved</span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="type-badge ul-badge">Unpaid Leave (UL)</span></td>
+                        <td>01 Jun 2026</td>
+                        <td>05 Jun 2026 - 08 Jun 2026</td>
+                        <td>04 Days</td>
+                        <td>Out of station family trip</td>
+                        <td><span class="status-badge badge-approved">Approved</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

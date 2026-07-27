@@ -1,0 +1,438 @@
+﻿/* Base Theme Setup */
+.payroll-dashboard-wrapper {
+    background-color: #0b0f19;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 2rem;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    box-sizing: border-box;
+}
+
+    .payroll-dashboard-wrapper * {
+        box-sizing: border-box;
+    }
+
+/* Header */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+    .dashboard-header h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin: 0;
+    }
+
+    .dashboard-header p {
+        color: #94a3b8;
+        margin: 0.3rem 0 0 0;
+        font-size: 0.95rem;
+    }
+
+/* Stats Summary Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: #111827;
+    border: 1px solid #1f293d;
+    border-radius: 16px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+    .stat-card.accent-green {
+        border-color: rgba(16, 185, 129, 0.3);
+        background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, #111827 100%);
+    }
+
+.stat-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+    .stat-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+.icon-net {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}
+
+.icon-gross {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
+
+.icon-deduction {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+}
+
+.icon-ytd {
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.stat-meta {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 0.2rem;
+}
+
+/* Grid Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+    background: #111827;
+    border: 1px solid #1f293d;
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+    .card-header h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        color: #f8fafc;
+        font-weight: 600;
+    }
+
+/* Salary Breakdown Layout */
+.breakdown-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.col-title {
+    margin: 0 0 1rem 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.breakdown-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+    .breakdown-list li {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.88rem;
+        color: #cbd5e1;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px dashed #1e293b;
+    }
+
+        .breakdown-list li.col-total {
+            border-bottom: none;
+            border-top: 1px solid #334155;
+            padding-top: 0.75rem;
+            font-weight: 700;
+        }
+
+.net-payout-banner {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .net-payout-banner span {
+        color: #94a3b8;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    .net-payout-banner h2 {
+        margin: 0;
+        color: #34d399;
+        font-size: 1.5rem;
+    }
+
+/* Payout Account Info */
+.account-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.detail-group {
+    background: #0f172a;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: 1px solid #1e293b;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+    .detail-group label {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    .detail-group span {
+        font-size: 0.9rem;
+        color: #f8fafc;
+        font-weight: 600;
+    }
+
+.font-mono {
+    font-family: monospace;
+    letter-spacing: 0.5px;
+}
+
+.tax-declaration-banner {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tax-info h5 {
+    margin: 0;
+    color: #f8fafc;
+    font-size: 0.9rem;
+}
+
+.tax-info p {
+    margin: 0.2rem 0 0 0;
+    color: #64748b;
+    font-size: 0.75rem;
+}
+
+/* Buttons & Badges */
+.btn-secondary-glow {
+    background: #1e293b;
+    color: #ffffff;
+    border: 1px solid #334155;
+    padding: 0.65rem 1.25rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+    .btn-secondary-glow svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .btn-secondary-glow:hover {
+        background: #334155;
+    }
+
+.btn-sm-primary {
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 0.5rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-action {
+    background: #0f172a;
+    color: #60a5fa;
+    border: 1px solid #1e293b;
+    padding: 0.45rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+    .btn-action svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .btn-action:hover {
+        background: #2563eb;
+        color: #fff;
+        border-color: #2563eb;
+    }
+
+.text-green {
+    color: #34d399 !important;
+}
+
+.text-red {
+    color: #f87171 !important;
+}
+
+.text-amber {
+    color: #fbbf24 !important;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.badge-month {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+}
+
+.badge-verified {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.badge-paid {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.year-select {
+    background: #0f172a;
+    color: #cbd5e1;
+    border: 1px solid #334155;
+    padding: 0.45rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    outline: none;
+}
+
+/* Modern Table */
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+    .modern-table th {
+        background: #0f172a;
+        color: #94a3b8;
+        padding: 0.85rem 1rem;
+        font-weight: 600;
+        border-bottom: 1px solid #1e293b;
+    }
+
+    .modern-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #1e293b;
+        color: #cbd5e1;
+    }
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1100px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .payroll-dashboard-wrapper {
+        padding: 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .breakdown-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .account-details {
+        grid-template-columns: 1fr;
+    }
+}

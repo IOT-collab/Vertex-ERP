@@ -1,0 +1,246 @@
+﻿@{
+    ViewData["Title"] = "Employee Documents";
+}
+<link href="~/css/empdocuments.css" rel="stylesheet" />
+
+
+<div class="emp-docs-container">
+    <!-- Top Header -->
+    <div class="header-section">
+        <div class="header-left">
+            <button class="btn-back" id="btnBack" onclick="history.back()">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <div>
+                <h1 class="page-title">Employee Documents</h1>
+                <p class="page-subtitle">Manage, verify, and store employee records & compliance files</p>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="openUploadModal()">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span>Upload Document</span>
+        </button>
+    </div>
+
+    <!-- Stats Cards Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <span class="stat-title">Total Documents</span>
+                    <h3 class="stat-value">248</h3>
+                </div>
+                <div class="stat-icon icon-blue">
+                    <i class="fa-solid fa-folder-closed"></i>
+                </div>
+            </div>
+            <p class="stat-meta text-emerald"><i class="fa-solid fa-arrow-up"></i> +12% this month</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <span class="stat-title">Pending Review</span>
+                    <h3 class="stat-value">14</h3>
+                </div>
+                <div class="stat-icon icon-amber">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+            </div>
+            <p class="stat-meta text-amber">Requires verification</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <span class="stat-title">Expiring Soon</span>
+                    <h3 class="stat-value">5</h3>
+                </div>
+                <div class="stat-icon icon-orange">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+            <p class="stat-meta text-orange">Action required &lt;30 days</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <span class="stat-title">Verified Rate</span>
+                    <h3 class="stat-value">94%</h3>
+                </div>
+                <div class="stat-icon icon-green">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+            </div>
+            <p class="stat-meta">Compliance compliant</p>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-panel">
+        <!-- Filter Controls Bar -->
+        <div class="controls-bar">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Search by document, employee or ID..." onkeyup="filterTable()" />
+            </div>
+
+            <div class="filter-group">
+                <select class="custom-select" id="categoryFilter" onchange="filterTable()">
+                    <option value="All">All Categories</option>
+                    <option value="Contracts">Contracts & Agreements</option>
+                    <option value="KYC">KYC & Identification</option>
+                    <option value="Tax">Tax & Financial</option>
+                    <option value="Certifications">Certifications</option>
+                </select>
+
+                <select class="custom-select" id="statusFilter" onchange="filterTable()">
+                    <option value="All">All Statuses</option>
+                    <option value="Verified">Verified</option>
+                    <option value="Pending">Pending Review</option>
+                    <option value="Expiring">Expiring Soon</option>
+                </select>
+
+                <button class="btn-secondary">
+                    <i class="fa-solid fa-filter"></i>
+                    <span class="hide-mobile">More Filters</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Table View -->
+        <div class="table-wrapper">
+            <table class="data-table" id="docsTable">
+                <thead>
+                    <tr>
+                        <th>Document Name</th>
+                        <th>Employee Details</th>
+                        <th>Category</th>
+                        <th>Upload Date</th>
+                        <th>Expiry Date</th>
+                        <th>Status</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="doc-title-cell">
+                                <i class="fa-solid fa-file-pdf doc-type-icon pdf"></i>
+                                <div>
+                                    <span class="doc-name">Employment Contract - Rahul Sharma.pdf</span>
+                                    <span class="doc-sub">DOC-2026-001 • 2.4 MB</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="emp-name">Rahul Sharma</div>
+                            <div class="emp-sub">EMP-1024 • Engineering</div>
+                        </td>
+                        <td><span class="category-chip">Contracts</span></td>
+                        <td>12 Jul 2026</td>
+                        <td>—</td>
+                        <td><span class="badge badge-green"><i class="fa-solid fa-circle-check"></i> Verified</span></td>
+                        <td class="text-right">
+                            <button class="btn-action" title="View Document"><i class="fa-regular fa-eye"></i></button>
+                            <button class="btn-action" title="Download"><i class="fa-solid fa-download"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="doc-title-cell">
+                                <i class="fa-solid fa-file-pdf doc-type-icon pdf"></i>
+                                <div>
+                                    <span class="doc-name">Aadhaar & PAN Verification.pdf</span>
+                                    <span class="doc-sub">DOC-2026-002 • 1.8 MB</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="emp-name">Priya Patel</div>
+                            <div class="emp-sub">EMP-1088 • Product Design</div>
+                        </td>
+                        <td><span class="category-chip">KYC</span></td>
+                        <td>20 Jul 2026</td>
+                        <td>—</td>
+                        <td><span class="badge badge-green"><i class="fa-solid fa-circle-check"></i> Verified</span></td>
+                        <td class="text-right">
+                            <button class="btn-action" title="View Document"><i class="fa-regular fa-eye"></i></button>
+                            <button class="btn-action" title="Download"><i class="fa-solid fa-download"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="doc-title-cell">
+                                <i class="fa-solid fa-file-word doc-type-icon word"></i>
+                                <div>
+                                    <span class="doc-name">Form 16 Tax Declaration.docx</span>
+                                    <span class="doc-sub">DOC-2026-003 • 3.1 MB</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="emp-name">Vikram Malhotra</div>
+                            <div class="emp-sub">EMP-1012 • Finance</div>
+                        </td>
+                        <td><span class="category-chip">Tax</span></td>
+                        <td>24 Jul 2026</td>
+                        <td>31 Mar 2027</td>
+                        <td><span class="badge badge-amber"><i class="fa-solid fa-clock"></i> Pending Review</span></td>
+                        <td class="text-right">
+                            <button class="btn-action" title="View Document"><i class="fa-regular fa-eye"></i></button>
+                            <button class="btn-action" title="Download"><i class="fa-solid fa-download"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="doc-title-cell">
+                                <i class="fa-solid fa-file-pdf doc-type-icon pdf"></i>
+                                <div>
+                                    <span class="doc-name">Work Visa & Passport Copy.pdf</span>
+                                    <span class="doc-sub">DOC-2026-004 • 4.2 MB</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="emp-name">Ananya Deshmukh</div>
+                            <div class="emp-sub">EMP-1145 • Marketing</div>
+                        </td>
+                        <td><span class="category-chip">KYC</span></td>
+                        <td>05 Jan 2024</td>
+                        <td class="text-orange">15 Aug 2026</td>
+                        <td><span class="badge badge-orange"><i class="fa-solid fa-triangle-exclamation"></i> Expiring Soon</span></td>
+                        <td class="text-right">
+                            <button class="btn-action" title="View Document"><i class="fa-regular fa-eye"></i></button>
+                            <button class="btn-action" title="Download"><i class="fa-solid fa-download"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterTable() {
+        const input = document.getElementById("searchInput").value.toUpperCase();
+        const table = document.getElementById("docsTable");
+        const tr = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < tr.length; i++) {
+            let visible = false;
+            const tdArray = tr[i].getElementsByTagName("td");
+            for (let j = 0; j < tdArray.length; j++) {
+                if (tdArray[j]) {
+                    const txtValue = tdArray[j].textContent || tdArray[j].innerText;
+                    if (txtValue.toUpperCase().indexOf(input) > -1) {
+                        visible = true;
+                        break;
+                    }
+                }
+            }
+            tr[i].style.display = visible ? "" : "none";
+        }
+    }
+</script>

@@ -1,0 +1,196 @@
+﻿@{
+    ViewData["Title"] = "Recruitment Management";
+}
+<link href="~/css/recuirement.css" rel="stylesheet" />
+
+
+<div class="recruitment-container">
+    <!-- Top Header -->
+    <div class="header-section">
+        <div class="header-left">
+            <button class="btn-back" id="btnBack">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <div>
+                <h1 class="page-title">Recruitment Management</h1>
+                <p class="page-subtitle">Manage job openings, candidate pipelines & interviews</p>
+            </div>
+        </div>
+        <button class="btn-primary">
+            <i class="fa-solid fa-plus"></i>
+            <span>Post New Job</span>
+        </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <span class="stat-title">Open Positions</span>
+                    <h3 class="stat-value">12</h3>
+                </div>
+                <div class="stat-icon icon-blue">
+                    <i class="fa-solid fa-briefcase"></i>
+                </div>
+            </div>
+            <p class="stat-meta">+2 this month</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <span class="stat-title">Total Applicants</span>
+                    <h3 class="stat-value">148</h3>
+                </div>
+                <div class="stat-icon icon-purple">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+            </div>
+            <p class="stat-meta">+24 new</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <span class="stat-title">Interviews Today</span>
+                    <h3 class="stat-value">6</h3>
+                </div>
+                <div class="stat-icon icon-orange">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </div>
+            </div>
+            <p class="stat-meta">4 completed</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <span class="stat-title">Hired (This Month)</span>
+                    <h3 class="stat-value">5</h3>
+                </div>
+                <div class="stat-icon icon-green">
+                    <i class="fa-solid fa-user-check"></i>
+                </div>
+            </div>
+            <p class="stat-meta">Target: 8</p>
+        </div>
+    </div>
+
+    <!-- Main Content Panel -->
+    <div class="main-panel">
+        <!-- Controls & Navigation Bar -->
+        <div class="controls-bar">
+            <div class="tab-group">
+                <button class="tab-btn active" id="tabCandidates">Candidates</button>
+                <button class="tab-btn" id="tabJobs">Active Jobs</button>
+            </div>
+
+            <div class="action-group">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" placeholder="Search candidate or job..." id="searchInput" />
+                </div>
+                <button class="btn-secondary">
+                    <i class="fa-solid fa-filter"></i>
+                    <span class="hide-mobile">Filter</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Candidates Table Section -->
+        <div class="table-wrapper" id="candidatesSection">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Candidate</th>
+                        <th>Applied Role</th>
+                        <th>Current Stage</th>
+                        <th>Interview Date</th>
+                        <th>Status</th>
+                        <th class="text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="font-bold">Aarav Sharma</td>
+                        <td>Frontend Developer</td>
+                        <td><span class="badge badge-blue">Technical Round 2</span></td>
+                        <td><i class="fa-regular fa-clock icon-gray"></i> 27 Jul 2026</td>
+                        <td><span class="badge badge-orange">Scheduled</span></td>
+                        <td class="text-right"><button class="btn-icon"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold">Priya Verma</td>
+                        <td>UI/UX Designer</td>
+                        <td><span class="badge badge-blue">HR Interview</span></td>
+                        <td><i class="fa-regular fa-clock icon-gray"></i> 28 Jul 2026</td>
+                        <td><span class="badge badge-gray">Pending</span></td>
+                        <td class="text-right"><button class="btn-icon"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold">Rohan Mehta</td>
+                        <td>Backend Engineer</td>
+                        <td><span class="badge badge-blue">System Design</span></td>
+                        <td><i class="fa-regular fa-clock icon-gray"></i> 26 Jul 2026</td>
+                        <td><span class="badge badge-green">Passed</span></td>
+                        <td class="text-right"><button class="btn-icon"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Active Jobs Section (Initially Hidden) -->
+        <div class="jobs-grid hidden" id="jobsSection">
+            <div class="job-card">
+                <div class="job-header">
+                    <div>
+                        <span class="job-dept">Engineering</span>
+                        <h4 class="job-title">Senior React Developer</h4>
+                    </div>
+                    <span class="badge badge-green">Active</span>
+                </div>
+                <div class="job-footer">
+                    <span>Location: <strong>Remote / Noida</strong></span>
+                    <span>Applicants: <strong class="text-blue">42</strong></span>
+                </div>
+            </div>
+
+            <div class="job-card">
+                <div class="job-header">
+                    <div>
+                        <span class="job-dept">Hardware & Automation</span>
+                        <h4 class="job-title">IoT Systems Engineer</h4>
+                    </div>
+                    <span class="badge badge-green">Active</span>
+                </div>
+                <div class="job-footer">
+                    <span>Location: <strong>On-site</strong></span>
+                    <span>Applicants: <strong class="text-blue">18</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tab switching functionality
+    const tabCandidates = document.getElementById('tabCandidates');
+    const tabJobs = document.getElementById('tabJobs');
+    const candidatesSection = document.getElementById('candidatesSection');
+    const jobsSection = document.getElementById('jobsSection');
+
+    tabCandidates.addEventListener('click', () => {
+        tabCandidates.classList.add('active');
+        tabJobs.classList.remove('active');
+        candidatesSection.classList.remove('hidden');
+        jobsSection.classList.add('hidden');
+    });
+
+    tabJobs.addEventListener('click', () => {
+        tabJobs.classList.add('active');
+        tabCandidates.classList.remove('active');
+        jobsSection.classList.remove('hidden');
+        candidatesSection.classList.add('hidden');
+    });
+</script>

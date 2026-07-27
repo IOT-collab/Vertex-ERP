@@ -1,0 +1,280 @@
+﻿@{
+    ViewData["Title"] = "Payroll & Salary";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/emppayroll.css" rel="stylesheet" />
+
+
+<div class="payroll-dashboard-wrapper">
+
+    <!-- Page Header -->
+    <div class="dashboard-header">
+        <div class="header-text">
+            <h2>Payroll &amp; Salary Portal</h2>
+            <p>View monthly payslips, salary breakdowns, tax declarations, and payout accounts.</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn-secondary-glow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                Download Form 16
+            </button>
+        </div>
+    </div>
+
+    <!-- Top Salary Overview Stats -->
+    <div class="stats-grid">
+        <div class="stat-card accent-green">
+            <div class="stat-icon icon-net">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Net Take-Home (July 2026)</span>
+                <span class="stat-value">₹ 78,500</span>
+                <small class="stat-meta text-green">✓ Credited on 30 Jul 2026</small>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-gross">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Gross Salary</span>
+                <span class="stat-value">₹ 92,000</span>
+                <small class="stat-meta">Monthly Base + Allowances</small>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-deduction">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="8" y1="12" x2="16" y2="12" /></svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Total Deductions</span>
+                <span class="stat-value">₹ 13,500</span>
+                <small class="stat-meta text-amber">PF, Tax &amp; PT Deductions</small>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-ytd">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">YTD Earnings (FY 26-27)</span>
+                <span class="stat-value">₹ 3,68,000</span>
+                <small class="stat-meta">Apr 2026 - Present</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Grid: Breakdown & Bank Info -->
+    <div class="dashboard-grid">
+
+        <!-- LEFT: Salary Breakdown (Earnings vs Deductions) -->
+        <div class="glass-card breakdown-card">
+            <div class="card-header">
+                <h3>Current Month Salary Breakdown</h3>
+                <span class="badge-month">July 2026</span>
+            </div>
+
+            <div class="breakdown-columns">
+                <!-- Earnings Column -->
+                <div class="breakdown-col">
+                    <h4 class="col-title text-green">Earnings</h4>
+                    <ul class="breakdown-list">
+                        <li>
+                            <span>Basic Salary</span>
+                            <strong>₹ 46,000</strong>
+                        </li>
+                        <li>
+                            <span>House Rent Allowance (HRA)</span>
+                            <strong>₹ 23,000</strong>
+                        </li>
+                        <li>
+                            <span>Special Allowance</span>
+                            <strong>₹ 15,000</strong>
+                        </li>
+                        <li>
+                            <span>Conveyance &amp; Medical</span>
+                            <strong>₹ 8,000</strong>
+                        </li>
+                        <li class="col-total">
+                            <span>Total Gross Earnings</span>
+                            <strong class="text-green">₹ 92,000</strong>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Deductions Column -->
+                <div class="breakdown-col">
+                    <h4 class="col-title text-red">Deductions</h4>
+                    <ul class="breakdown-list">
+                        <li>
+                            <span>Provident Fund (PF)</span>
+                            <strong>₹ 5,520</strong>
+                        </li>
+                        <li>
+                            <span>Professional Tax (PT)</span>
+                            <strong>₹ 200</strong>
+                        </li>
+                        <li>
+                            <span>Income Tax (TDS)</span>
+                            <strong>₹ 7,780</strong>
+                        </li>
+                        <li>
+                            <span>Other Deductions</span>
+                            <strong>₹ 0</strong>
+                        </li>
+                        <li class="col-total">
+                            <span>Total Deductions</span>
+                            <strong class="text-red">₹ 13,500</strong>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="net-payout-banner">
+                <span>Net Payable Amount:</span>
+                <h2>₹ 78,500</h2>
+            </div>
+        </div>
+
+        <!-- RIGHT: Bank & Statutory Account Info -->
+        <div class="glass-card account-card">
+            <div class="card-header">
+                <h3>Payout &amp; Account Details</h3>
+                <span class="badge-verified">✓ Verified</span>
+            </div>
+
+            <div class="account-details">
+                <div class="detail-group">
+                    <label>Bank Name</label>
+                    <span>HDFC Bank Ltd.</span>
+                </div>
+
+                <div class="detail-group">
+                    <label>Account Number</label>
+                    <span class="font-mono">XXXXXXXX4821</span>
+                </div>
+
+                <div class="detail-group">
+                    <label>IFSC Code</label>
+                    <span class="font-mono">HDFC0000124</span>
+                </div>
+
+                <div class="detail-group">
+                    <label>PAN Number</label>
+                    <span class="font-mono">ABCDE1234F</span>
+                </div>
+
+                <div class="detail-group">
+                    <label>PF UAN Number</label>
+                    <span class="font-mono">100987654321</span>
+                </div>
+
+                <div class="detail-group">
+                    <label>Payment Mode</label>
+                    <span>Direct Bank Transfer</span>
+                </div>
+            </div>
+
+            <div class="tax-declaration-banner">
+                <div class="tax-info">
+                    <h5>Tax Regime: New Regime</h5>
+                    <p>Submit declarations to save Income Tax.</p>
+                </div>
+                <button class="btn-sm-primary">Manage Tax</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BOTTOM: Payslip Downloads Table -->
+    <div class="glass-card table-section">
+        <div class="card-header">
+            <h3>Monthly Payslips History</h3>
+            <div class="filter-controls">
+                <select class="year-select">
+                    <option value="2026">FY 2026 - 2027</option>
+                    <option value="2025">FY 2025 - 2026</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Month &amp; Year</th>
+                        <th>Gross Amount</th>
+                        <th>Deductions</th>
+                        <th>Net Paid</th>
+                        <th>Payment Date</th>
+                        <th>Status</th>
+                        <th class="text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>July 2026</strong></td>
+                        <td>₹ 92,000</td>
+                        <td>₹ 13,500</td>
+                        <td><strong class="text-green">₹ 78,500</strong></td>
+                        <td>30 Jul 2026</td>
+                        <td><span class="status-badge badge-paid">Paid</span></td>
+                        <td class="text-right">
+                            <button class="btn-action">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                                Download
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>June 2026</strong></td>
+                        <td>₹ 92,000</td>
+                        <td>₹ 13,500</td>
+                        <td><strong class="text-green">₹ 78,500</strong></td>
+                        <td>30 Jun 2026</td>
+                        <td><span class="status-badge badge-paid">Paid</span></td>
+                        <td class="text-right">
+                            <button class="btn-action">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                                Download
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>May 2026</strong></td>
+                        <td>₹ 92,000</td>
+                        <td>₹ 13,500</td>
+                        <td><strong class="text-green">₹ 78,500</strong></td>
+                        <td>31 May 2026</td>
+                        <td><span class="status-badge badge-paid">Paid</span></td>
+                        <td class="text-right">
+                            <button class="btn-action">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                                Download
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>April 2026</strong></td>
+                        <td>₹ 92,000</td>
+                        <td>₹ 13,500</td>
+                        <td><strong class="text-green">₹ 78,500</strong></td>
+                        <td>30 Apr 2026</td>
+                        <td><span class="status-badge badge-paid">Paid</span></td>
+                        <td class="text-right">
+                            <button class="btn-action">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                                Download
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
