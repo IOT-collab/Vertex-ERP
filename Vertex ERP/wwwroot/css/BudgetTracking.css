@@ -1,0 +1,450 @@
+﻿/* ==========================================================================
+   BudgetTracking.css - Vertex_ERP Dark Theme
+   ========================================================================== */
+
+:root {
+    --bg-main: #0B0F19;
+    --bg-card: rgba(17, 24, 39, 0.85);
+    --bg-input: #1F2937;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-highlight: rgba(255, 255, 255, 0.15);
+    --text-primary: #F9FAFB;
+    --text-secondary: #9CA3AF;
+    --text-muted: #6B7280;
+    --blue: #3B82F6;
+    --blue-glow: rgba(59, 130, 246, 0.3);
+    --emerald: #10B981;
+    --purple: #8B5CF6;
+    --amber: #F59E0B;
+    --rose: #F43F5E;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-full: 9999px;
+    --shadow-lg: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.budget-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* --- Page Header --- */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.header-title-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.icon-avatar {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: #FFF;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.header-title-group h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.header-title-group p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.date-filter {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 0.8rem;
+    border-radius: var(--radius-md);
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.select-clean {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    outline: none;
+    cursor: pointer;
+}
+
+    .select-clean option {
+        background-color: var(--bg-input);
+        color: var(--text-primary);
+    }
+
+/* --- Buttons --- */
+.btn {
+    padding: 0.65rem 1.2rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2563EB, #1D4ED8);
+    color: #FFF;
+    box-shadow: 0 4px 14px var(--blue-glow);
+}
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px var(--blue-glow);
+    }
+
+.btn-outline {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+    .btn-outline:hover {
+        background-color: var(--bg-input);
+    }
+
+.btn-sm {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.8rem;
+}
+
+/* --- Metric Cards --- */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+}
+
+.metric-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-lg);
+}
+
+.metric-info .label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.metric-info .value {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+    .metric-info .value small {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+.metric-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.icon-blue {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--blue);
+}
+
+.icon-purple {
+    background: rgba(139, 92, 246, 0.15);
+    color: var(--purple);
+}
+
+.icon-emerald {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--emerald);
+}
+
+.icon-rose {
+    background: rgba(244, 63, 94, 0.15);
+    color: var(--rose);
+}
+
+.text-emerald {
+    color: var(--emerald);
+}
+
+.text-danger {
+    color: var(--rose);
+}
+
+/* --- Main Layout Grid --- */
+.main-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 1.25rem;
+}
+
+.glass-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+    .card-header h2 {
+        font-size: 1.1rem;
+        margin: 0 0 0.2rem 0;
+    }
+
+.subtitle {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* --- Project Budget Breakdown --- */
+.project-budget-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.project-budget-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    padding: 1.2rem;
+    border-radius: var(--radius-md);
+}
+
+.project-title-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+    .project-title-meta h3 {
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+.badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+}
+
+.badge-success {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--emerald);
+}
+
+.badge-danger {
+    background: rgba(244, 63, 94, 0.15);
+    color: var(--rose);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--amber);
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background-color: var(--bg-input);
+    border-radius: var(--radius-full);
+    margin: 0.8rem 0 0.5rem 0;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width 0.5s ease;
+}
+
+.progress-blue {
+    background: linear-gradient(90deg, #3B82F6, #60A5FA);
+}
+
+.progress-purple {
+    background: linear-gradient(90deg, #8B5CF6, #A78BFA);
+}
+
+.progress-danger {
+    background: linear-gradient(90deg, #F43F5E, #FB7185);
+}
+
+/* --- Expenses Table --- */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.expense-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+    .expense-table th {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.775rem;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border-color);
+        font-weight: 600;
+    }
+
+    .expense-table td {
+        padding: 0.85rem 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+
+.expense-category {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.cat-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--bg-input);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--blue);
+    font-size: 0.85rem;
+}
+
+.expense-category strong {
+    display: block;
+    font-size: 0.85rem;
+}
+
+.expense-category small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.project-tag {
+    background: var(--bg-input);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.amount {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+    .main-content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .budget-container {
+        padding: 0.75rem;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .date-filter {
+        flex: 1;
+        justify-content: center;
+    }
+}

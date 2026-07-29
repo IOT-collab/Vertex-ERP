@@ -1,0 +1,216 @@
+﻿@{
+    ViewData["Title"] = "Timesheet Management";
+    Layout = "_Layout";
+}
+
+<!-- FontAwesome Icons CDN Link -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link href="~/css/timesheet.css" rel="stylesheet" />
+
+<div class="timesheet-container">
+    <!-- Header Section -->
+    <header class="page-header">
+        <div class="header-title-group">
+            <div class="icon-avatar">
+                <i class="fas fa-business-time"></i>
+            </div>
+            <div>
+                <h1>Timesheet Management</h1>
+                <p>Track, record, and manage employee work hours and project logs.</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="week-picker">
+                <button class="btn-icon-sm" title="Previous Week"><i class="fas fa-chevron-left"></i></button>
+                <span class="week-range"><i class="far fa-calendar-alt"></i> Jul 27 - Aug 02, 2026</span>
+                <button class="btn-icon-sm" title="Next Week"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <button class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> <span>Submit Week</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Top KPI Metrics -->
+    <section class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Total Logged (This Week)</span>
+                <span class="value">38.5 <small>hrs</small></span>
+            </div>
+            <div class="metric-icon icon-blue">
+                <i class="fas fa-clock"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Target Hours</span>
+                <span class="value">40.0 <small>hrs</small></span>
+            </div>
+            <div class="metric-icon icon-purple">
+                <i class="fas fa-bullseye"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Billable Hours</span>
+                <span class="value">32.0 <small>hrs (83%)</small></span>
+            </div>
+            <div class="metric-icon icon-emerald">
+                <i class="fas fa-coins"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Sheet Status</span>
+                <span class="value status-pending-text">Draft / Pending</span>
+            </div>
+            <div class="metric-icon icon-amber">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Layout -->
+    <main class="main-content-grid">
+
+        <!-- Weekly Timesheet Grid -->
+        <div class="glass-card timesheet-card">
+            <div class="card-header flex-between">
+                <div>
+                    <h2>Weekly Hours Entry</h2>
+                    <p class="subtitle">Log daily working hours against specific projects & tasks</p>
+                </div>
+                <button class="btn btn-outline btn-sm">
+                    <i class="fas fa-plus"></i> <span>Add Row</span>
+                </button>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="timesheet-table">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 200px;">Project</th>
+                                <th style="min-width: 180px;">Task / Activity</th>
+                                <th>Mon<br><small>27</small></th>
+                                <th>Tue<br><small>28</small></th>
+                                <th>Wed<br><small>29</small></th>
+                                <th>Thu<br><small>30</small></th>
+                                <th>Fri<br><small>31</small></th>
+                                <th>Sat<br><small>01</small></th>
+                                <th>Sun<br><small>02</small></th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Row 1 -->
+                            <tr>
+                                <td>
+                                    <select class="form-control-sm">
+                                        <option>🚀 E-Commerce Redesign</option>
+                                        <option>📱 Banking App v3.2</option>
+                                        <option>☁️ Cloud Migration</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control-sm" value="Frontend UI Components" />
+                                </td>
+                                <td><input type="number" class="time-input" value="8.0" step="0.5" /></td>
+                                <td><input type="number" class="time-input" value="7.5" step="0.5" /></td>
+                                <td><input type="number" class="time-input" value="8.0" step="0.5" /></td>
+                                <td><input type="number" class="time-input" value="8.0" step="0.5" /></td>
+                                <td><input type="number" class="time-input" value="7.0" step="0.5" /></td>
+                                <td><input type="number" class="time-input weekend" value="0.0" step="0.5" /></td>
+                                <td><input type="number" class="time-input weekend" value="0.0" step="0.5" /></td>
+                                <td><strong class="row-total">38.5 h</strong></td>
+                                <td>
+                                    <button class="icon-btn text-danger" title="Delete Row"><i class="fas fa-trash-alt"></i></button>
+                                </td>
+                            </tr>
+
+                            <!-- Row 2 -->
+                            <tr>
+                                <td>
+                                    <select class="form-control-sm">
+                                        <option>📱 Banking App v3.2</option>
+                                        <option selected>🚀 E-Commerce Redesign</option>
+                                        <option>☁️ Cloud Migration</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control-sm" value="Code Review & Bugs" />
+                                </td>
+                                <td><input type="number" class="time-input" value="0.0" step="0.5" /></td>
+                                <td><input type="number" class="time-input" value="1.0" step="0.5" /></td>
+                                <td><input type="number" class="time-input" value="0.0" step="0.5" /></td>
+                                <td><input type="number" class="time-input" value="0.0" step="0.5" /></td>
+                                <td><input type="number" class="time-input" value="1.0" step="0.5" /></td>
+                                <td><input type="number" class="time-input weekend" value="0.0" step="0.5" /></td>
+                                <td><input type="number" class="time-input weekend" value="0.0" step="0.5" /></td>
+                                <td><strong class="row-total">2.0 h</strong></td>
+                                <td>
+                                    <button class="icon-btn text-danger" title="Delete Row"><i class="fas fa-trash-alt"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="2"><strong>Day Total</strong></td>
+                                <td><strong>8.0h</strong></td>
+                                <td><strong>8.5h</strong></td>
+                                <td><strong>8.0h</strong></td>
+                                <td><strong>8.0h</strong></td>
+                                <td><strong>8.0h</strong></td>
+                                <td><strong class="text-muted">0.0h</strong></td>
+                                <td><strong class="text-muted">0.0h</strong></td>
+                                <td><strong class="grand-total">40.5 h</strong></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Submitted History Panel -->
+        <div class="glass-card history-panel">
+            <div class="card-header">
+                <h2>Recent Submissions</h2>
+                <p class="subtitle">Status of previously submitted timesheets</p>
+            </div>
+            <div class="card-body">
+                <div class="history-list">
+                    <div class="history-item">
+                        <div class="history-info">
+                            <span class="history-date">Jul 20 - Jul 26, 2026</span>
+                            <span class="history-meta">40.0 hrs • Approved by Lead</span>
+                        </div>
+                        <span class="status-badge status-approved"><i class="fas fa-check-circle"></i> Approved</span>
+                    </div>
+
+                    <div class="history-item">
+                        <div class="history-info">
+                            <span class="history-date">Jul 13 - Jul 19, 2026</span>
+                            <span class="history-meta">39.0 hrs • Approved by Lead</span>
+                        </div>
+                        <span class="status-badge status-approved"><i class="fas fa-check-circle"></i> Approved</span>
+                    </div>
+
+                    <div class="history-item">
+                        <div class="history-info">
+                            <span class="history-date">Jul 06 - Jul 12, 2026</span>
+                            <span class="history-meta">42.0 hrs • Overtime Flagged</span>
+                        </div>
+                        <span class="status-badge status-rejected"><i class="fas fa-times-circle"></i> Rejected</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>

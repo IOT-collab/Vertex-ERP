@@ -1,0 +1,220 @@
+﻿@{
+    ViewData["Title"] = "Assign & Monitor Tasks";
+    Layout = "_Layout";
+}
+<link href="~/css/assigntask.css" rel="stylesheet" />
+
+<div class="task-assignment-container">
+    <!-- Header Section -->
+    <header class="task-header">
+        <div class="header-content">
+            <div class="header-icon-wrapper">
+                <div class="icon-circle">
+                    <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+            </div>
+            <div class="header-text">
+                <h1>Task Management</h1>
+                <p>Assign, track, and monitor project tasks seamlessly across your team.</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary">
+                <i class="fas fa-filter"></i> <span>Filter</span>
+            </button>
+            <button class="btn btn-primary" id="btnOpenAssignModal">
+                <i class="fas fa-plus"></i> <span>Assign Task</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Overview Stats Cards -->
+    <section class="stats-grid" aria-label="Task Statistics">
+        <div class="stat-card">
+            <div class="stat-icon total">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">24</span>
+                <span class="stat-label">Total Tasks</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon pending">
+                <i class="fas fa-spinner fa-spin-pulse"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">8</span>
+                <span class="stat-label">In Progress</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon completed">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">14</span>
+                <span class="stat-label">Completed</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon overdue">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">2</span>
+                <span class="stat-label">Overdue</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Layout -->
+    <main class="content-grid">
+        <!-- Task Assignment Form Card -->
+        <div class="card form-card">
+            <div class="card-header">
+                <h2>Assign New Task</h2>
+            </div>
+            <div class="card-body">
+                <form id="assignTaskForm" method="post" asp-action="AssignTask">
+                    <div class="form-group">
+                        <label for="taskTitle">Task Title</label>
+                        <input type="text" id="taskTitle" name="Title" class="form-control" placeholder="Enter task title..." required />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label for="projectName">Project</label>
+                            <select id="projectName" name="ProjectId" class="form-control" required>
+                                <option value="" disabled selected>Select Project</option>
+                                <option value="1">Website Redesign</option>
+                                <option value="2">Mobile App Development</option>
+                                <option value="3">API Integration</option>
+                            </select>
+                        </div>
+                        <div class="form-group col">
+                            <label for="assignee">Assign To</label>
+                            <select id="assignee" name="AssignedTo" class="form-control" required>
+                                <option value="" disabled selected>Select Member</option>
+                                <option value="1">Rahul Sharma</option>
+                                <option value="2">Priya Patel</option>
+                                <option value="3">Amit Kumar</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label for="priority">Priority</label>
+                            <select id="priority" name="Priority" class="form-control">
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                                <option value="Urgent">Urgent</option>
+                            </select>
+                        </div>
+                        <div class="form-group col">
+                            <label for="dueDate">Due Date</label>
+                            <input type="date" id="dueDate" name="DueDate" class="form-control" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="Description" class="form-control" rows="3" placeholder="Add detailed instructions..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="reset" class="btn btn-outline">Reset</button>
+                        <button type="submit" class="btn btn-primary">Assign Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Task List / Monitor Section -->
+        <div class="card list-card">
+            <div class="card-header flex-between">
+                <h2>Active Tasks</h2>
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" placeholder="Search tasks..." class="search-input" />
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="task-table">
+                        <thead>
+                            <tr>
+                                <th>Task</th>
+                                <th>Assigned To</th>
+                                <th>Priority</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th class="text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td data-label="Task">
+                                    <div class="task-name">Dashboard UI Polish</div>
+                                    <span class="project-tag">Website Redesign</span>
+                                </td>
+                                <td data-label="Assigned To">
+                                    <div class="user-info">
+                                        <div class="avatar">RS</div>
+                                        <span>Rahul Sharma</span>
+                                    </div>
+                                </td>
+                                <td data-label="Priority"><span class="badge badge-high">High</span></td>
+                                <td data-label="Due Date">30 Jul 2026</td>
+                                <td data-label="Status"><span class="status-pill status-progress"><i class="fas fa-circle"></i> In Progress</span></td>
+                                <td data-label="Action" class="text-right">
+                                    <button class="btn-icon" title="Edit"><i class="fas fa-pen"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td data-label="Task">
+                                    <div class="task-name">Auth API Endpoint</div>
+                                    <span class="project-tag">API Integration</span>
+                                </td>
+                                <td data-label="Assigned To">
+                                    <div class="user-info">
+                                        <div class="avatar avatar-purple">PP</div>
+                                        <span>Priya Patel</span>
+                                    </div>
+                                </td>
+                                <td data-label="Priority"><span class="badge badge-urgent">Urgent</span></td>
+                                <td data-label="Due Date">29 Jul 2026</td>
+                                <td data-label="Status"><span class="status-pill status-pending"><i class="fas fa-circle"></i> Pending</span></td>
+                                <td data-label="Action" class="text-right">
+                                    <button class="btn-icon" title="Edit"><i class="fas fa-pen"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td data-label="Task">
+                                    <div class="task-name">Push Notifications</div>
+                                    <span class="project-tag">Mobile App</span>
+                                </td>
+                                <td data-label="Assigned To">
+                                    <div class="user-info">
+                                        <div class="avatar avatar-teal">AK</div>
+                                        <span>Amit Kumar</span>
+                                    </div>
+                                </td>
+                                <td data-label="Priority"><span class="badge badge-medium">Medium</span></td>
+                                <td data-label="Due Date">02 Aug 2026</td>
+                                <td data-label="Status"><span class="status-pill status-completed"><i class="fas fa-circle"></i> Completed</span></td>
+                                <td data-label="Action" class="text-right">
+                                    <button class="btn-icon" title="Edit"><i class="fas fa-pen"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

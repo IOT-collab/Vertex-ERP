@@ -1,0 +1,229 @@
+﻿@{
+    ViewData["Title"] = "Budget Tracking";
+    Layout = "_Layout";
+}
+
+<!-- FontAwesome Icons CDN Link -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="stylesheet" href="~/css/BudgetTracking.css" />
+
+<div class="budget-container">
+    <!-- Header Section -->
+    <header class="page-header">
+        <div class="header-title-group">
+            <div class="icon-avatar">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div>
+                <h1>Budget Tracking</h1>
+                <p>Monitor project expenses, allocate budgets, and track financial health.</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="date-filter">
+                <i class="far fa-calendar-alt"></i>
+                <select class="select-clean">
+                    <option>This Quarter (Q3 2026)</option>
+                    <option>This Month (July 2026)</option>
+                    <option>Financial Year 2026</option>
+                </select>
+            </div>
+            <button class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> <span>Add Expense</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Top Financial KPI Cards -->
+    <section class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Total Allocated Budget</span>
+                <span class="value">$125,000</span>
+            </div>
+            <div class="metric-icon icon-blue">
+                <i class="fas fa-sack-dollar"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Total Spent</span>
+                <span class="value">$82,450 <small>(66%)</small></span>
+            </div>
+            <div class="metric-icon icon-purple">
+                <i class="fas fa-chart-line"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Remaining Balance</span>
+                <span class="value text-emerald">$42,550</span>
+            </div>
+            <div class="metric-icon icon-emerald">
+                <i class="fas fa-piggy-bank"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Over-Budget Projects</span>
+                <span class="value text-danger">1 Project</span>
+            </div>
+            <div class="metric-icon icon-rose">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <main class="main-content-grid">
+
+        <!-- Project Budget Breakdown Progress -->
+        <div class="glass-card budget-breakdown-card">
+            <div class="card-header flex-between">
+                <div>
+                    <h2>Project Budget Breakdown</h2>
+                    <p class="subtitle">Real-time expenditure tracking per active project</p>
+                </div>
+                <button class="btn btn-outline btn-sm">
+                    <i class="fas fa-download"></i> <span>Export Report</span>
+                </button>
+            </div>
+
+            <div class="card-body">
+                <div class="project-budget-list">
+
+                    <!-- Project 1 -->
+                    <div class="project-budget-item">
+                        <div class="item-header flex-between">
+                            <div class="project-title-meta">
+                                <h3>🚀 E-Commerce Redesign</h3>
+                                <span class="badge badge-success">On Track</span>
+                            </div>
+                            <div class="budget-figures">
+                                <strong>$35,000</strong> <span class="text-muted">/ $50,000</span>
+                            </div>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar progress-blue" style="width: 70%;"></div>
+                        </div>
+                        <div class="item-footer flex-between">
+                            <small class="text-muted">Spent: 70%</small>
+                            <small class="text-emerald">Remaining: $15,000</small>
+                        </div>
+                    </div>
+
+                    <!-- Project 2 -->
+                    <div class="project-budget-item">
+                        <div class="item-header flex-between">
+                            <div class="project-title-meta">
+                                <h3>📱 Banking App v3.2</h3>
+                                <span class="badge badge-danger">Over Budget</span>
+                            </div>
+                            <div class="budget-figures">
+                                <strong class="text-danger">$42,450</strong> <span class="text-muted">/ $40,000</span>
+                            </div>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar progress-danger" style="width: 106%;"></div>
+                        </div>
+                        <div class="item-footer flex-between">
+                            <small class="text-danger">Spent: 106%</small>
+                            <small class="text-danger">Overrun: +$2,450</small>
+                        </div>
+                    </div>
+
+                    <!-- Project 3 -->
+                    <div class="project-budget-item">
+                        <div class="item-header flex-between">
+                            <div class="project-title-meta">
+                                <h3>☁️ Cloud Migration</h3>
+                                <span class="badge badge-warning">Under Utilized</span>
+                            </div>
+                            <div class="budget-figures">
+                                <strong>$5,000</strong> <span class="text-muted">/ $35,000</span>
+                            </div>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar progress-purple" style="width: 14%;"></div>
+                        </div>
+                        <div class="item-footer flex-between">
+                            <small class="text-muted">Spent: 14%</small>
+                            <small class="text-emerald">Remaining: $30,000</small>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Expenses Log -->
+        <div class="glass-card expenses-card">
+            <div class="card-header">
+                <h2>Recent Expenses</h2>
+                <p class="subtitle">Latest financial transactions logged across projects</p>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="expense-table">
+                        <thead>
+                            <tr>
+                                <th>Category / Desc</th>
+                                <th>Project</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="expense-category">
+                                        <i class="fas fa-server cat-icon"></i>
+                                        <div>
+                                            <strong>AWS Server Billing</strong>
+                                            <small>Infrastructure</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="project-tag">Cloud Migration</span></td>
+                                <td><strong class="amount">$1,200</strong></td>
+                                <td><small class="text-muted">Jul 28, 2026</small></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="expense-category">
+                                        <i class="fas fa-paint-brush cat-icon"></i>
+                                        <div>
+                                            <strong>Figma Pro License</strong>
+                                            <small>Software Tool</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="project-tag">Banking App</span></td>
+                                <td><strong class="amount">$450</strong></td>
+                                <td><small class="text-muted">Jul 25, 2026</small></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="expense-category">
+                                        <i class="fas fa-user-ninja cat-icon"></i>
+                                        <div>
+                                            <strong>External QA Testing</strong>
+                                            <small>Contractor</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="project-tag">E-Commerce</span></td>
+                                <td><strong class="amount">$2,800</strong></td>
+                                <td><small class="text-muted">Jul 22, 2026</small></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>

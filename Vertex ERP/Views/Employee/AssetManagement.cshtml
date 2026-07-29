@@ -1,0 +1,261 @@
+﻿@{
+    ViewData["Title"] = "Asset Management";
+    Layout = "_Layout";
+}
+
+<!-- FontAwesome Icons CDN Link -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="stylesheet" href="~/css/AssetManagement.css" />
+
+<div class="asset-container">
+    <!-- Header Section with Mobile-Optimized Back Arrow -->
+    <header class="page-header">
+        <div class="header-title-group">
+            <!-- Functional Back Button -->
+            <button type="button" class="btn-back" onclick="goBack()" aria-label="Go Back" title="Go Back">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+
+            <div class="icon-avatar">
+                <i class="fas fa-laptop-house"></i>
+            </div>
+            <div class="header-text-content">
+                <h1>Asset Management</h1>
+                <p>Track and manage company hardware, laptops, and peripheral accessories assigned to employees.</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" placeholder="Search asset tag, employee..." class="form-control-search" />
+            </div>
+            <button class="btn btn-primary">
+                <i class="fas fa-plus"></i> <span>Issue New Asset</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Top KPI Metrics -->
+    <section class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Total Issued Assets</span>
+                <span class="value">148</span>
+            </div>
+            <div class="metric-icon icon-blue">
+                <i class="fas fa-boxes-stacked"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Laptops & Workstations</span>
+                <span class="value">42 <small>Units</small></span>
+            </div>
+            <div class="metric-icon icon-purple">
+                <i class="fas fa-laptop"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Accessories (Mouse/Keyboard/Audio)</span>
+                <span class="value">106 <small>Items</small></span>
+            </div>
+            <div class="metric-icon icon-emerald">
+                <i class="fas fa-keyboard"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Pending Return / Repair</span>
+                <span class="value text-amber">5 Items</span>
+            </div>
+            <div class="metric-icon icon-amber">
+                <i class="fas fa-tools"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Table Card -->
+    <main class="glass-card">
+        <div class="card-header flex-between">
+            <div>
+                <h2>Issued Hardware & Accessories Inventory</h2>
+                <p class="subtitle">Live record of hardware allocated across active employees</p>
+            </div>
+            <div class="filter-actions">
+                <select class="select-clean">
+                    <option value="">All Category</option>
+                    <option value="Laptop">Laptops</option>
+                    <option value="Monitors">Monitors</option>
+                    <option value="Peripherals">Accessories (Mouse/Keyboard)</option>
+                </select>
+                <button class="btn btn-outline btn-sm">
+                    <i class="fas fa-filter"></i> <span>Filter</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="asset-table">
+                    <thead>
+                        <tr>
+                            <th>Asset Details</th>
+                            <th>Category</th>
+                            <th>Assigned To</th>
+                            <th>Asset Tag / Serial No.</th>
+                            <th>Issue Date</th>
+                            <th>Status</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Row 1 -->
+                        <tr>
+                            <td>
+                                <div class="asset-item-info">
+                                    <div class="asset-icon-box blue-bg">
+                                        <i class="fas fa-laptop"></i>
+                                    </div>
+                                    <div>
+                                        <strong class="asset-name">MacBook Pro M2 16"</strong>
+                                        <small class="text-muted">Apple • 16GB / 512GB</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="category-chip">Laptop</span></td>
+                            <td>
+                                <div class="emp-profile">
+                                    <div class="emp-avatar">RS</div>
+                                    <div>
+                                        <div class="emp-name">Rahul Sharma</div>
+                                        <small class="text-muted">Sr. Frontend Dev</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><code class="asset-tag">VTX-LPT-2024-09</code></td>
+                            <td>Jul 12, 2024</td>
+                            <td><span class="status-badge status-active"><i class="fas fa-check-circle"></i> Active</span></td>
+                            <td class="text-right">
+                                <button class="icon-btn" title="View Details"><i class="fas fa-eye"></i></button>
+                                <button class="icon-btn" title="Return/Revoke"><i class="fas fa-undo-alt"></i></button>
+                            </td>
+                        </tr>
+
+                        <!-- Row 2 -->
+                        <tr>
+                            <td>
+                                <div class="asset-item-info">
+                                    <div class="asset-icon-box purple-bg">
+                                        <i class="fas fa-mouse"></i>
+                                    </div>
+                                    <div>
+                                        <strong class="asset-name">Logitech MX Master 3S</strong>
+                                        <small class="text-muted">Wireless Ergonomic Mouse</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="category-chip">Accessories</span></td>
+                            <td>
+                                <div class="emp-profile">
+                                    <div class="emp-avatar">PP</div>
+                                    <div>
+                                        <div class="emp-name">Priya Patel</div>
+                                        <small class="text-muted">UI/UX Designer</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><code class="asset-tag">VTX-ACC-2025-41</code></td>
+                            <td>Jan 05, 2025</td>
+                            <td><span class="status-badge status-active"><i class="fas fa-check-circle"></i> Active</span></td>
+                            <td class="text-right">
+                                <button class="icon-btn" title="View Details"><i class="fas fa-eye"></i></button>
+                                <button class="icon-btn" title="Return/Revoke"><i class="fas fa-undo-alt"></i></button>
+                            </td>
+                        </tr>
+
+                        <!-- Row 3 -->
+                        <tr>
+                            <td>
+                                <div class="asset-item-info">
+                                    <div class="asset-icon-box emerald-bg">
+                                        <i class="fas fa-keyboard"></i>
+                                    </div>
+                                    <div>
+                                        <strong class="asset-name">Dell Mechanical Keyboard</strong>
+                                        <small class="text-muted">USB Backlit Keyboard</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="category-chip">Accessories</span></td>
+                            <td>
+                                <div class="emp-profile">
+                                    <div class="emp-avatar">AK</div>
+                                    <div>
+                                        <div class="emp-name">Amit Kumar</div>
+                                        <small class="text-muted">Backend Engineer</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><code class="asset-tag">VTX-ACC-2025-12</code></td>
+                            <td>Mar 18, 2025</td>
+                            <td><span class="status-badge status-repair"><i class="fas fa-tools"></i> In Repair</span></td>
+                            <td class="text-right">
+                                <button class="icon-btn" title="View Details"><i class="fas fa-eye"></i></button>
+                                <button class="icon-btn" title="Return/Revoke"><i class="fas fa-undo-alt"></i></button>
+                            </td>
+                        </tr>
+
+                        <!-- Row 4 -->
+                        <tr>
+                            <td>
+                                <div class="asset-item-info">
+                                    <div class="asset-icon-box amber-bg">
+                                        <i class="fas fa-desktop"></i>
+                                    </div>
+                                    <div>
+                                        <strong class="asset-name">Dell UltraSharp 27" 4K Monitor</strong>
+                                        <small class="text-muted">Dual Monitor Setup</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="category-chip">Monitors</span></td>
+                            <td>
+                                <div class="emp-profile">
+                                    <div class="emp-avatar">SK</div>
+                                    <div>
+                                        <div class="emp-name">Sanjay Kumar</div>
+                                        <small class="text-muted">DevOps Specialist</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><code class="asset-tag">VTX-MON-2024-03</code></td>
+                            <td>Nov 10, 2024</td>
+                            <td><span class="status-badge status-active"><i class="fas fa-check-circle"></i> Active</span></td>
+                            <td class="text-right">
+                                <button class="icon-btn" title="View Details"><i class="fas fa-eye"></i></button>
+                                <button class="icon-btn" title="Return/Revoke"><i class="fas fa-undo-alt"></i></button>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Safe Back Navigation Script -->
+<script>
+    function goBack() {
+        if (window.history.length > 1 && document.referrer !== "") {
+            window.history.back();
+        } else {
+            // Fallback redirection to the Employee Index action if browser history is empty
+            window.location.href = '@Url.Action("Index", "Employee")';
+        }
+    }
+</script>

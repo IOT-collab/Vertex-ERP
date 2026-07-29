@@ -1,0 +1,798 @@
+﻿/* ==========================================================================
+   ProjectTimeline.css - Ultra Modern Dark Glassmorphism Design
+   ========================================================================== */
+
+:root {
+    --bg-main: #0B0F19;
+    --bg-card: rgba(17, 24, 39, 0.85);
+    --bg-card-hover: rgba(26, 36, 56, 0.95);
+    --bg-input: #1F2937;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-highlight: rgba(255, 255, 255, 0.15);
+    --text-primary: #F9FAFB;
+    --text-secondary: #9CA3AF;
+    --text-muted: #6B7280;
+    --blue: #3B82F6;
+    --blue-glow: rgba(59, 130, 246, 0.3);
+    --emerald: #10B981;
+    --emerald-glow: rgba(16, 185, 129, 0.25);
+    --purple: #8B5CF6;
+    --amber: #F59E0B;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-full: 9999px;
+    --shadow-lg: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.timeline-wrapper {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* --- Top Bar --- */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.page-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.title-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: #FFF;
+    box-shadow: 0 4px 15px var(--blue-glow);
+}
+
+.page-title h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.page-title p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.top-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* --- Buttons --- */
+.btn {
+    padding: 0.65rem 1.2rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2563EB, #1D4ED8);
+    color: #FFF;
+    box-shadow: 0 4px 14px var(--blue-glow);
+}
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px var(--blue-glow);
+    }
+
+.btn-secondary {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+    .btn-secondary:hover {
+        background-color: var(--bg-input);
+    }
+
+/* --- Project Selector Hero Card --- */
+.project-selector-card {
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.7) 0%, rgba(17, 24, 39, 0.9) 100%);
+    border: 1px solid var(--border-highlight);
+    backdrop-filter: blur(12px);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.selector-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+    min-width: 280px;
+}
+
+.selector-label {
+    font-size: 0.775rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--blue);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.project-dropdown {
+    width: 100%;
+    appearance: none;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    border: 1px solid var(--border-highlight);
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    transition: var(--transition);
+}
+
+    .project-dropdown:focus {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px var(--blue-glow);
+    }
+
+.select-arrow {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.project-meta-pills {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.meta-pill {
+    display: flex;
+    flex-direction: column;
+}
+
+.meta-title {
+    font-size: 0.725rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.meta-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.health-green {
+    color: var(--emerald);
+}
+
+/* --- Metrics Grid --- */
+.metrics-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1.25rem;
+}
+
+.metric-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.75rem;
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition);
+}
+
+    .metric-box:hover {
+        transform: translateY(-3px);
+        border-color: var(--border-highlight);
+    }
+
+.metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.metric-icon {
+    font-size: 1.1rem;
+}
+
+.icon-blue {
+    color: var(--blue);
+}
+
+.icon-purple {
+    color: var(--purple);
+}
+
+.icon-emerald {
+    color: var(--emerald);
+}
+
+.icon-amber {
+    color: var(--amber);
+}
+
+.metric-body {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.metric-number {
+    font-size: 1.7rem;
+    font-weight: 700;
+}
+
+    .metric-number small {
+        font-size: 1rem;
+        color: var(--text-muted);
+    }
+
+.metric-title-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--purple);
+}
+
+.trend-up {
+    font-size: 0.75rem;
+    color: var(--emerald);
+    font-weight: 600;
+}
+
+.text-muted {
+    font-size: 0.775rem;
+    color: var(--text-muted);
+}
+
+/* Progress and Steps */
+.progress-track {
+    width: 100%;
+    height: 6px;
+    background-color: var(--bg-input);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--emerald));
+    border-radius: var(--radius-full);
+}
+
+.fill-blue {
+    background: var(--blue);
+}
+
+.milestone-progress-bar {
+    display: flex;
+    gap: 4px;
+}
+
+.step {
+    flex: 1;
+    height: 6px;
+    background-color: var(--bg-input);
+    border-radius: 2px;
+}
+
+    .step.done {
+        background-color: var(--emerald);
+    }
+
+    .step.active {
+        background-color: var(--blue);
+        box-shadow: 0 0 8px var(--blue);
+    }
+
+/* Avatars */
+.avatar-group {
+    display: flex;
+    align-items: center;
+}
+
+.avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--blue);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-card);
+    margin-left: -8px;
+}
+
+    .avatar:first-child {
+        margin-left: 0;
+    }
+
+.avatar-purple {
+    background-color: var(--purple);
+}
+
+.avatar-emerald {
+    background-color: var(--emerald);
+}
+
+.avatar-more {
+    background-color: var(--bg-input);
+    color: var(--text-secondary);
+}
+
+/* --- Main Layout Cards --- */
+.timeline-main-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.glass-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+    .card-header h2 {
+        font-size: 1.1rem;
+        margin: 0 0 0.2rem 0;
+    }
+
+.card-subtitle {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Time Filter Buttons */
+.time-filter {
+    display: flex;
+    background-color: var(--bg-input);
+    padding: 3px;
+    border-radius: var(--radius-sm);
+}
+
+.filter-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 0.4rem 0.9rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+    .filter-btn.active {
+        background-color: var(--blue);
+        color: white;
+    }
+
+/* --- Gantt View --- */
+.gantt-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-x: auto;
+}
+
+.gantt-months {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding-left: 180px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.gantt-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.gantt-row {
+    display: flex;
+    align-items: center;
+}
+
+.phase-name {
+    width: 180px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    flex-shrink: 0;
+}
+
+.gantt-track {
+    flex: 1;
+    height: 32px;
+    background-color: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-sm);
+    position: relative;
+    border: 1px dashed var(--border-color);
+}
+
+.gantt-bar {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding: 0 0.75rem;
+    font-size: 0.725rem;
+    font-weight: 600;
+    color: #FFF;
+    white-space: nowrap;
+}
+
+.bar-done {
+    background: linear-gradient(90deg, #059669, #10B981);
+}
+
+.bar-active {
+    background: linear-gradient(90deg, #2563EB, #3B82F6);
+    box-shadow: 0 0 12px var(--blue-glow);
+}
+
+.bar-upcoming {
+    background: rgba(107, 114, 128, 0.3);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+/* --- Vertical Roadmap --- */
+.search-sm {
+    position: relative;
+    width: 200px;
+}
+
+    .search-sm i {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .search-sm input {
+        width: 100%;
+        background-color: var(--bg-input);
+        border: 1px solid var(--border-color);
+        padding: 0.4rem 0.75rem 0.4rem 2rem;
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-size: 0.8rem;
+    }
+
+.vertical-roadmap {
+    position: relative;
+    padding-left: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+    .vertical-roadmap::before {
+        content: '';
+        position: absolute;
+        left: 11px;
+        top: 15px;
+        bottom: 15px;
+        width: 2px;
+        background-color: var(--border-color);
+    }
+
+.roadmap-card {
+    position: relative;
+}
+
+.roadmap-node {
+    position: absolute;
+    left: -2rem;
+    top: 12px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--bg-main);
+    border: 2px solid var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.status-completed .roadmap-node {
+    background-color: var(--emerald);
+    border-color: var(--emerald);
+    color: #FFF;
+    font-size: 0.7rem;
+}
+
+.status-active .roadmap-node {
+    background-color: var(--blue);
+    border-color: var(--blue);
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #FFF;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px var(--blue-glow);
+}
+
+.roadmap-card-body {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    padding: 1.25rem;
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+    .roadmap-card-body:hover {
+        border-color: var(--border-highlight);
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+.roadmap-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+    .roadmap-top h3 {
+        margin: 0 0 0.2rem 0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+.date-badge {
+    font-size: 0.775rem;
+    color: var(--text-muted);
+}
+
+.roadmap-card-body p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0 0 1rem 0;
+}
+
+.inline-progress {
+    background: rgba(0, 0, 0, 0.25);
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1rem;
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+}
+
+.roadmap-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+}
+
+.assignee {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-secondary);
+}
+
+.avatar-xs {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: var(--blue);
+    color: #FFF;
+    font-size: 0.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tags {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.tag {
+    background-color: var(--bg-input);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.badge {
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
+    font-size: 0.725rem;
+    font-weight: 600;
+}
+
+.badge-emerald {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34D399;
+}
+
+.badge-blue {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60A5FA;
+}
+
+.badge-gray {
+    background: rgba(107, 114, 128, 0.2);
+    color: #9CA3AF;
+}
+
+/* ==========================================================================
+   Responsive Styles
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+    .gantt-months {
+        padding-left: 140px;
+    }
+
+    .phase-name {
+        width: 140px;
+    }
+}
+
+@media (max-width: 768px) {
+    .timeline-wrapper {
+        padding: 0.75rem;
+    }
+
+    .top-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .top-actions {
+        width: 100%;
+    }
+
+        .top-actions .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+    .project-selector-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .project-meta-pills {
+        justify-content: space-between;
+    }
+
+    .roadmap-top {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .search-sm {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .vertical-roadmap {
+        padding-left: 1.5rem;
+    }
+
+    .roadmap-node {
+        left: -1.5rem;
+        width: 18px;
+        height: 18px;
+    }
+
+    .vertical-roadmap::before {
+        left: 8px;
+    }
+}

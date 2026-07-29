@@ -47,46 +47,72 @@
     <!-- Core Interactive Operations Module Grid Matrix -->
     <div class="module-grid">
 
+
         <div class="module-card">
             <div class="icon">📁</div>
             <h3>Project Creation</h3>
             <p>Create and manage company projects.</p>
-            <button class="btn-action">Open Module</button>
+            <a asp-controller="ProjectMgm"
+               asp-action="ProjectCreation"
+               class="btn-module-action">
+                Open
+            </a>
         </div>
+
 
         <div class="module-card">
             <div class="icon">✅</div>
             <h3>Tasks</h3>
             <p>Assign and monitor project tasks.</p>
-            <button class="btn-action">Open Module</button>
+            <a asp-controller="ProjectMgm"
+               asp-action="AssignTask"
+               class="btn-module-action">
+                Open
+            </a>
         </div>
 
         <div class="module-card">
             <div class="icon">📊</div>
-            <h3>Gantt Chart</h3>
+            <h3>Project Timeline</h3>
             <p>Track project timeline visually.</p>
-            <button class="btn-action">Open Module</button>
+            <a asp-controller="ProjectMgm"
+               asp-action="ProjectTimeline"
+               class="btn-module-action">
+                Open
+            </a>
         </div>
 
         <div class="module-card">
             <div class="icon">👥</div>
             <h3>Resource Allocation</h3>
             <p>Allocate employees and resources.</p>
-            <button class="btn-action">Open Module</button>
+            <a asp-controller="ProjectMgm"
+               asp-action="ResourceAllocation"
+               class="btn-module-action">
+                Open
+            </a>
         </div>
 
         <div class="module-card">
             <div class="icon">⏱</div>
             <h3>Timesheet</h3>
             <p>Manage employee work hours.</p>
-            <button class="btn-action">Open Module</button>
+            <a asp-controller="ProjectMgm"
+               asp-action="Timesheet"
+               class="btn-module-action">
+                Open
+            </a>
         </div>
 
         <div class="module-card">
             <div class="icon">💰</div>
             <h3>Budget Tracking</h3>
             <p>Monitor project expenses & budget.</p>
-            <button class="btn-action">Open Module</button>
+            <a asp-controller="ProjectMgm"
+               asp-action="BudgetTracking"
+               class="btn-module-action">
+                Open
+            </a>
         </div>
 
     </div>

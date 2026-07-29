@@ -1,0 +1,283 @@
+﻿@{
+    ViewData["Title"] = "Task Management";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link href="~/css/taskmgm.css" rel="stylesheet" />
+
+<div class="task-dash-container">
+
+    <!-- PAGE HEADER WITH BACK ARROW & ACTIONS -->
+    <div class="dash-header">
+        <div class="header-title-group">
+            <!-- BACK BUTTON -->
+            <button type="button" class="btn-back" onclick="goBack()" title="Go Back">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div>
+                <h2><i class="fas fa-tasks"></i> Task Management</h2>
+                <p>Assign, track, and manage team tasks efficiently</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <!-- Trigger Button for Assign Task Modal -->
+            <button class="btn btn-primary" onclick="openAssignTaskModal()">
+                <i class="fas fa-plus"></i> Assign New Task
+            </button>
+        </div>
+    </div>
+
+    <!-- METRIC CARDS -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-icon bg-blue"><i class="fas fa-list-check"></i></div>
+            <div class="metric-info">
+                <span>Total Tasks</span>
+                <h3>24</h3>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-amber"><i class="fas fa-spinner"></i></div>
+            <div class="metric-info">
+                <span>In Progress</span>
+                <h3>08</h3>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-green"><i class="fas fa-circle-check"></i></div>
+            <div class="metric-info">
+                <span>Completed</span>
+                <h3>14</h3>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-red"><i class="fas fa-exclamation-circle"></i></div>
+            <div class="metric-info">
+                <span>Overdue</span>
+                <h3>02</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTERS & SEARCH BAR -->
+    <div class="filter-bar">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search tasks by name or ID..." />
+        </div>
+        <div class="filter-group">
+            <select class="form-select">
+                <option value="">All Assignees</option>
+                <option value="1">Rahul Sharma</option>
+                <option value="2">Priya Verma</option>
+                <option value="3">Amit Kumar</option>
+            </select>
+            <select class="form-select">
+                <option value="">All Priorities</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- KANBAN TASK BOARD -->
+    <div class="kanban-board">
+
+        <!-- COLUMN 1: TO DO -->
+        <div class="kanban-col">
+            <div class="col-header col-todo">
+                <h4><i class="far fa-circle"></i> To Do <span class="count">2</span></h4>
+            </div>
+            <div class="kanban-cards">
+                <div class="task-card">
+                    <div class="task-card-header">
+                        <span class="badge badge-red">High Priority</span>
+                        <span class="task-id">#TSK-104</span>
+                    </div>
+                    <h5>API Webhook Integration</h5>
+                    <p>Integrate attendance webhook endpoints for real-time sync.</p>
+                    <div class="task-meta">
+                        <span><i class="far fa-calendar"></i> Due: Aug 02</span>
+                        <div class="assignee-avatar" title="Priya Verma">PV</div>
+                    </div>
+                </div>
+
+                <div class="task-card">
+                    <div class="task-card-header">
+                        <span class="badge badge-amber">Medium</span>
+                        <span class="task-id">#TSK-105</span>
+                    </div>
+                    <h5>Setup Audit Logs</h5>
+                    <p>Maintain user activity history for system security.</p>
+                    <div class="task-meta">
+                        <span><i class="far fa-calendar"></i> Due: Aug 05</span>
+                        <div class="assignee-avatar" title="Amit Kumar">AK</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN 2: IN PROGRESS -->
+        <div class="kanban-col">
+            <div class="col-header col-progress">
+                <h4><i class="fas fa-spinner"></i> In Progress <span class="count">2</span></h4>
+            </div>
+            <div class="kanban-cards">
+                <div class="task-card">
+                    <div class="task-card-header">
+                        <span class="badge badge-red">High Priority</span>
+                        <span class="task-id">#TSK-101</span>
+                    </div>
+                    <h5>Fix Responsive UI Bug</h5>
+                    <p>Resolve sidebar overlapping issues on mobile devices.</p>
+                    <div class="task-meta">
+                        <span><i class="far fa-calendar"></i> Due: Today</span>
+                        <div class="assignee-avatar" title="Rahul Sharma">RS</div>
+                    </div>
+                </div>
+
+                <div class="task-card">
+                    <div class="task-card-header">
+                        <span class="badge badge-blue">Low</span>
+                        <span class="task-id">#TSK-102</span>
+                    </div>
+                    <h5>Update Documentation</h5>
+                    <p>Add API usage guides for third-party developers.</p>
+                    <div class="task-meta">
+                        <span><i class="far fa-calendar"></i> Due: Jul 30</span>
+                        <div class="assignee-avatar" title="Rahul Sharma">RS</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN 3: IN REVIEW -->
+        <div class="kanban-col">
+            <div class="col-header col-review">
+                <h4><i class="fas fa-eye"></i> In Review <span class="count">1</span></h4>
+            </div>
+            <div class="kanban-cards">
+                <div class="task-card">
+                    <div class="task-card-header">
+                        <span class="badge badge-amber">Medium</span>
+                        <span class="task-id">#TSK-099</span>
+                    </div>
+                    <h5>Database Query Optimization</h5>
+                    <p>Optimize slow-running SQL stored procedures.</p>
+                    <div class="task-meta">
+                        <span><i class="far fa-calendar"></i> Due: Yesterday</span>
+                        <div class="assignee-avatar" title="Amit Kumar">AK</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN 4: COMPLETED -->
+        <div class="kanban-col">
+            <div class="col-header col-done">
+                <h4><i class="fas fa-check-circle"></i> Completed <span class="count">1</span></h4>
+            </div>
+            <div class="kanban-cards">
+                <div class="task-card completed-card">
+                    <div class="task-card-header">
+                        <span class="badge badge-green">Completed</span>
+                        <span class="task-id">#TSK-095</span>
+                    </div>
+                    <h5>User Authentication Module</h5>
+                    <p>Implement JWT token authentication with Refresh flow.</p>
+                    <div class="task-meta">
+                        <span><i class="far fa-calendar"></i> Done Jul 25</span>
+                        <div class="assignee-avatar" title="Priya Verma">PV</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ASSIGN TASK MODAL POPUP -->
+<div class="modal-backdrop" id="assignTaskModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> Assign New Task</h3>
+                <button class="btn-close" onclick="closeAssignTaskModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="assignTaskForm">
+                    <div class="form-group">
+                        <label>Task Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-input" placeholder="e.g., Fix Navigation UI Overflow" required />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Assign To <span class="text-danger">*</span></label>
+                            <select class="form-input" required>
+                                <option value="">Select Employee</option>
+                                <option value="1">Rahul Sharma (Sr. Developer)</option>
+                                <option value="2">Priya Verma (UI/UX Designer)</option>
+                                <option value="3">Amit Kumar (QA Engineer)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Priority <span class="text-danger">*</span></label>
+                            <select class="form-input" required>
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Due Date & Time <span class="text-danger">*</span></label>
+                            <input type="datetime-local" class="form-input" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Module / Project</label>
+                            <input type="text" class="form-input" placeholder="e.g., HRMS Portal" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description / Instructions</label>
+                        <textarea class="form-input" rows="3" placeholder="Detail out the requirements, edge cases, or links..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Attachment (Optional)</label>
+                        <input type="file" class="form-input-file" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAssignTaskModal()">Cancel</button>
+                <button class="btn btn-primary" type="button" onclick="closeAssignTaskModal()"><i class="fas fa-paper-plane"></i> Assign Task</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function goBack() {
+        if (document.referrer) {
+            window.history.back();
+        } else {
+            window.location.href = '/Home/Index'; // Fallback redirect if no history
+        }
+    }
+
+    function openAssignTaskModal() {
+        document.getElementById('assignTaskModal').classList.add('active');
+    }
+
+    function closeAssignTaskModal() {
+        document.getElementById('assignTaskModal').classList.remove('active');
+    }
+</script>

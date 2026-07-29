@@ -196,6 +196,11 @@ namespace Shiva_Gautam.Controllers
             return View();
         }
 
+        public IActionResult TaskMgm()
+        {
+            return View();
+        }
+
         public IActionResult ProjectMgm()
         {
             return View();

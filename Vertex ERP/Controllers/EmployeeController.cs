@@ -53,9 +53,15 @@ namespace Vertex_ERP.Controllers
             return View();
         }
 
+        public IActionResult AssetManagement()
+        {
+            return View();
+        }
+
         public IActionResult HrmReports()
         {
             return View();
         }
+
     }
 }

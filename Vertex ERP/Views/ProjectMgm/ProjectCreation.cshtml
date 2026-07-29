@@ -1,0 +1,184 @@
+﻿@* Project Creation View - ProjectMgm Controller *@
+@{
+    ViewData["Title"] = "Project Creation";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/projectcreation.css" rel="stylesheet" />
+
+<div class="project-page">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Project Creation</h2>
+            <p>Create, configure, and manage new company projects.</p>
+        </div>
+
+        <a href="@Url.Action("Index", "ProjectMgm")" class="btn-secondary-action">
+            &larr; Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Summary Metrics Bar -->
+    <div class="summary">
+        <div class="summary-card">
+            <h2>18</h2>
+            <p>Total Projects</p>
+        </div>
+        <div class="summary-card">
+            <h2>12</h2>
+            <p>Active Projects</p>
+        </div>
+        <div class="summary-card">
+            <h2>4</h2>
+            <p>In Planning</p>
+        </div>
+        <div class="summary-card">
+            <h2>2</h2>
+            <p>On Hold</p>
+        </div>
+    </div>
+
+    <!-- Main Content Layout -->
+    <div class="content-layout">
+
+        <!-- SECTION 1: Project Creation Form -->
+        <div class="form-card">
+            <div class="card-header">
+                <h3>📁 New Project Form</h3>
+                <span class="badge badge-info">Step 1 of 2</span>
+            </div>
+
+            <form method="post" action="@Url.Action("ProjectCreation", "ProjectMgm")" class="project-form">
+
+                <!-- Row 1: Name & Code -->
+                <div class="form-row">
+                    <div class="form-group col-8">
+                        <label for="ProjectName">Project Name <span class="req">*</span></label>
+                        <input type="text" id="ProjectName" name="ProjectName" class="form-control" placeholder="e.g. ERP System Redesign" required />
+                    </div>
+                    <div class="form-group col-4">
+                        <label for="ProjectCode">Project Code <span class="req">*</span></label>
+                        <input type="text" id="ProjectCode" name="ProjectCode" class="form-control" placeholder="PRJ-2026-01" required />
+                    </div>
+                </div>
+
+                <!-- Row 2: Category, Manager, Priority -->
+                <div class="form-row">
+                    <div class="form-group col-4">
+                        <label for="Category">Category</label>
+                        <select id="Category" name="Category" class="form-control">
+                            <option value="Development">Software Development</option>
+                            <option value="Infrastructure">IT Infrastructure</option>
+                            <option value="Marketing">Digital Marketing</option>
+                            <option value="Design">UI/UX & Branding</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-4">
+                        <label for="ProjectManager">Project Manager <span class="req">*</span></label>
+                        <select id="ProjectManager" name="ProjectManager" class="form-control" required>
+                            <option value="">-- Select Manager --</option>
+                            <option value="Rahul Sharma">Rahul Sharma</option>
+                            <option value="Priya Patel">Priya Patel</option>
+                            <option value="Amit Verma">Amit Verma</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-4">
+                        <label for="Priority">Priority</label>
+                        <select id="Priority" name="Priority" class="form-control">
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Critical">Critical</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Row 3: Start Date, End Date, Budget -->
+                <div class="form-row">
+                    <div class="form-group col-4">
+                        <label for="StartDate">Start Date <span class="req">*</span></label>
+                        <input type="date" id="StartDate" name="StartDate" class="form-control" required />
+                    </div>
+                    <div class="form-group col-4">
+                        <label for="EndDate">Estimated End Date <span class="req">*</span></label>
+                        <input type="date" id="EndDate" name="EndDate" class="form-control" required />
+                    </div>
+                    <div class="form-group col-4">
+                        <label for="EstimatedBudget">Budget (₹)</label>
+                        <input type="number" id="EstimatedBudget" name="EstimatedBudget" class="form-control" placeholder="e.g. 500000" />
+                    </div>
+                </div>
+
+                <!-- Row 4: Description -->
+                <div class="form-row">
+                    <div class="form-group col-12">
+                        <label for="Description">Project Description & Scope</label>
+                        <textarea id="Description" name="Description" class="form-control" rows="3" placeholder="Enter project objectives, key deliverables, and scope..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="form-actions">
+                    <button type="reset" class="btn-reset">Reset Form</button>
+                    <button type="submit" class="btn-submit">+ Save & Create Project</button>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- SECTION 2: Recent Projects List -->
+        <div class="table-card">
+            <div class="card-header">
+                <h3>📑 Recent Projects</h3>
+                <span class="text-muted">Showing last 4 entries</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Project Name</th>
+                            <th>Manager</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>PRJ-2026-01</strong></td>
+                            <td>ERP Core Portal</td>
+                            <td>Rahul Sharma</td>
+                            <td><span class="status-pill status-active">Active</span></td>
+                            <td><a href="#" class="tbl-btn">Edit</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>PRJ-2026-02</strong></td>
+                            <td>Mobile App V2</td>
+                            <td>Priya Patel</td>
+                            <td><span class="status-pill status-planning">Planning</span></td>
+                            <td><a href="#" class="tbl-btn">Edit</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>PRJ-2026-03</strong></td>
+                            <td>Cloud Migration</td>
+                            <td>Amit Verma</td>
+                            <td><span class="status-pill status-active">Active</span></td>
+                            <td><a href="#" class="tbl-btn">Edit</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>PRJ-2026-04</strong></td>
+                            <td>Security Audit</td>
+                            <td>Rahul Sharma</td>
+                            <td><span class="status-pill status-hold">On Hold</span></td>
+                            <td><a href="#" class="tbl-btn">Edit</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>

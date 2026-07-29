@@ -1,202 +1,167 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-    ViewData["Title"] = "Employees";
+﻿@{
+    ViewData["Title"] = "Employee Portal";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
-<link href="~/css/employees.css" rel="stylesheet" />
 
-<div class="hr-dashboard-container">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link href="~/css/employee11.css" rel="stylesheet" />
 
-    <!-- Page Header Setup -->
-    <div class="page-header">
-        <div class="header-text">
-            <h2>Employee Requirements & Profiles</h2>
-            <p>Manage standard verification parameters, required checklists, onboarding paperwork, and profile configuration rules.</p>
+<div class="emp-dash-container">
+
+    <!-- TOP HEADER / PROFILE BAR -->
+    <div class="emp-profile-bar">
+        <div class="emp-user-info">
+            <div class="emp-avatar">RS</div>
+            <div>
+                <h2>Rahul Sharma <span class="badge badge-active">Active</span></h2>
+                <p>Sr. Frontend Developer • Core Engineering (VTX-2024-089)</p>
+            </div>
         </div>
-
-        <a href="@Url.Action("EmpAddRequirement", "Guest")" class="save-btn" style="text-decoration: none; display: inline-flex; align-items: center;">
-            <span class="custom-btn-icon"></span>
-            Add Requirement
-        </a>
+        <div class="emp-actions">
+            <div class="timer-box">Logged in: <strong>04h 25m</strong></div>
+            <button class="btn btn-primary"><i class="fas fa-clock"></i> Punch Out</button>
+            <button class="btn btn-secondary"><i class="fas fa-id-card"></i> ID Card</button>
+        </div>
     </div>
 
-    <!-- Dynamic Smart-Grid Layout Wrapper -->
-    <div class="settings-grid">
-
-        <!-- 01. GENERAL PROFILE REQUIREMENTS -->
-        <div class="setting-card block-admin">
-            <div class="card-header">
-                <h3>01. GENERAL PROFILE REQUIREMENTS</h3>
-            </div>
-            <div class="card-body">
-                <div class="center-icon">
-                    <div class="icon-user">
-                        <div class="user-head"></div>
-                        <div class="user-body"></div>
-                    </div>
-                </div>
-                <ul class="feature-list">
-                    <li>Full Name (As per Govt ID)</li>
-                    <li>Official Email & Mobile No</li>
-                    <li>Date of Birth & Gender Setup</li>
-                    <li>Blood Group Designation</li>
-                    <li>Emergency Contacts Verification</li>
-                    <li>Marital Status Confirmation</li>
-                </ul>
-                <div class="doc-action-hub">
-                    <label class="btn-upload">
-                        <input type="file" />
-                        Update
-                    </label>
-                    <button class="btn-view">View</button>
-                    <button class="btn-delete">Delete</button>
-                </div>
+    <!-- QUICK STATS (4 METRICS) -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon icon-blue"><i class="fas fa-calendar-check"></i></div>
+            <div class="stat-data">
+                <span class="stat-value">96.5%</span>
+                <span class="stat-label">Attendance</span>
             </div>
         </div>
-
-        <!-- 02. KYCS & MANDATORY DOCUMENTS -->
-        <div class="setting-card block-hr">
-            <div class="card-header">
-                <h3>02. KYCS & MANDATORY DOCUMENTS</h3>
+       @*  <div class="stat-card">
+            <div class="stat-icon icon-green"><i class="fas fa-umbrella-beach"></i></div>
+            <div class="stat-data">
+                <span class="stat-value">12 Days</span>
+                <span class="stat-label">Leave Balance</span>
             </div>
-            <div class="card-body">
-                <div class="center-icon">
-                    <div class="icon-doc">
-                        <div class="doc-fold"></div>
-                        <div class="doc-line line1"></div>
-                        <div class="doc-line line2"></div>
-                    </div>
-                </div>
-                <ul class="feature-list">
-                    <li>Aadhaar Card Verification</li>
-                    <li>PAN Card Mandatory Input</li>
-                    <li>Passport Copy (If applicable)</li>
-                    <li>Permanent Address Proof</li>
-                    <li>Current Residential Address</li>
-                    <li>Digital Signature Upload</li>
-                </ul>
-                <div class="doc-action-hub">
-                    <label class="btn-upload"><input type="file" />Update</label>
-                    <button class="btn-view">View</button>
-                    <button class="btn-delete">Delete</button>
-                </div>
+        </div> *@
+        <div class="stat-card">
+            <div class="stat-icon icon-purple"><i class="fas fa-laptop"></i></div>
+            <div class="stat-data">
+                <span class="stat-value">3 Assets</span>
+                <span class="stat-label">Assigned Hardware</span>
             </div>
         </div>
-
-        <!-- 03. ACADEMIC & EXPERIENCE PROOFS -->
-        <div class="setting-card block-system">
-            <div class="card-header">
-                <h3>03. ACADEMIC & EXPERIENCE PROOFS</h3>
-            </div>
-            <div class="card-body">
-                <div class="center-icon">
-                    <div class="icon-badge">
-                        <div class="badge-ribbon1"></div>
-                        <div class="badge-ribbon2"></div>
-                        <div class="badge-circle"></div>
-                    </div>
-                </div>
-                <ul class="feature-list">
-                    <li>Highest Graduation Degree</li>
-                    <li>Previous Company Relieving Letter</li>
-                    <li>Last 3 Months Salary Slips</li>
-                    <li>Experience Certificates List</li>
-                    <li>Professional Reference Checks</li>
-                    <li>Background Check Consent Form</li>
-                </ul>
-                <div class="doc-action-hub">
-                    <label class="btn-upload"><input type="file" />Update</label>
-                    <button class="btn-view">View</button>
-                    <button class="btn-delete">Delete</button>
-                </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-amber"><i class="fas fa-tasks"></i></div>
+            <div class="stat-data">
+                <span class="stat-value">3 / 5</span>
+                <span class="stat-label">Today's Tasks</span>
             </div>
         </div>
+    </div>
 
-        <!-- 04. BANKING & TAXATION RULES -->
-        <div class="setting-card block-supply">
-            <div class="card-header">
-                <h3>04. BANKING & TAXATION RULES</h3>
+    <!-- MAIN TWO-COLUMN DASHBOARD GRID -->
+    <div class="dash-grid">
+
+        <!-- LEFT COLUMN: TODAY'S TASKS & QUICK ACTIONS -->
+        <div class="dash-column">
+
+            <!-- TODAY'S TASKS CARD -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-tasks"></i> Today's Tasks</h3>
+                    <button class="btn btn-sm btn-secondary"><i class="fas fa-plus"></i> Add Log</button>
+                </div>
+                <div class="card-body">
+                    <ul class="task-list">
+                        <li class="task-item">
+                            <input type="checkbox" id="t1" class="task-check" />
+                            <label for="t1" class="task-details">
+                                <strong>Fix Responsive Grid UI Overlap Issue</strong>
+                                <small>Vertex ERP • Due: 02:00 PM</small>
+                            </label>
+                            <span class="tag tag-red">High</span>
+                        </li>
+                        <li class="task-item">
+                            <input type="checkbox" id="t2" class="task-check" />
+                            <label for="t2" class="task-details">
+                                <strong>Integrate Attendance Webhook</strong>
+                                <small>API Pipeline • Due: 05:30 PM</small>
+                            </label>
+                            <span class="tag tag-amber">Medium</span>
+                        </li>
+                        <li class="task-item completed">
+                            <input type="checkbox" id="t3" class="task-check" checked />
+                            <label for="t3" class="task-details">
+                                <strong>Submit Weekly Progress Report</strong>
+                                <small>HR Compliance • Done 11:15 AM</small>
+                            </label>
+                            <span class="tag tag-green">Done</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="center-icon">
-                    <div class="icon-card">
-                        <div class="card-strip"></div>
+
+            <!-- ANNOUNCEMENTS & SUPPORT -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-bullhorn"></i> Announcement</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert-box">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <strong>Quarterly All-Hands Townhall</strong>
+                            <p>Scheduled for Friday at 04:00 PM in Conference Room A / Teams.</p>
+                        </div>
                     </div>
                 </div>
-                <ul class="feature-list">
-                    <li>Salary Bank Account Number</li>
-                    <li>Bank IFSC Code Verification</li>
-                    <li>Cancelled Cheque Scan Upload</li>
-                    <li>PF Form 11 Declaration</li>
-                    <li>Income Tax Declaration Form</li>
-                    <li>ESI Eligibility Declaration</li>
-                </ul>
-                <div class="doc-action-hub">
-                    <label class="btn-upload"><input type="file" />Update</label>
-                    <button class="btn-view">View</button>
-                    <button class="btn-download-slip" title="Download Monthly Payslip">Download Slip</button>
+                <div class="card-footer">
+                    <button class="btn btn-secondary w-100"><i class="fas fa-headset"></i> Raise Helpdesk Ticket</button>
                 </div>
             </div>
+
         </div>
 
-        <!-- 05. JOB PROFILE & ROLES -->
-        <div class="setting-card block-hr">
-            <div class="card-header">
-                <h3>05. JOB PROFILE & ROLES</h3>
-            </div>
-            <div class="card-body">
-                <div class="center-icon">
-                    <div class="icon-org">
-                        <div class="org-box box-top"></div>
-                        <div class="org-line"></div>
-                        <div class="org-box box-left"></div>
-                        <div class="org-box box-right"></div>
-                    </div>
-                </div>
-                <ul class="feature-list">
-                    <li>Allocated Core Department</li>
-                    <li>Designation Assignment</li>
-                    <li>Reporting Manager Mapping</li>
-                    <li>CTC Structure Acknowledgment</li>
-                    <li>Work Location & Branch Setup</li>
-                    <li>Probation Period Track Rule</li>
-                </ul>
-                <div class="doc-action-hub">
-                    <label class="btn-upload"><input type="file" />Update</label>
-                    <button class="btn-view">View</button>
-                    <button class="btn-delete">Delete</button>
-                </div>
-            </div>
-        </div>
+        <!-- RIGHT COLUMN: CORE INFORMATION & PAYROLL -->
+        <div class="dash-column">
 
-        <!-- 06. ASSETS & CREDENTIALS SETTINGS -->
-        <div class="setting-card block-comm">
-            <div class="card-header">
-                <h3>06. ASSETS & CREDENTIALS SETTINGS</h3>
-            </div>
-            <div class="card-body">
-                <div class="center-icon">
-                    <div class="icon-clock">
-                        <div class="clock-hand"></div>
+            <!-- PROFILE & CORE INFO -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-user-circle"></i> Core Profile</h3>
+                    <span class="badge badge-green">KYC Verified</span>
+                </div>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-row"><span>Manager:</span> <strong>Vikram Malhotra</strong></div>
+                        <div class="info-row"><span>Email:</span> <strong>rahul.sharma@company.com</strong></div>
+                        <div class="info-row"><span>Location:</span> <strong>Noida HQ (Tower B)</strong></div>
+                        <div class="info-row"><span>Verification:</span> <strong>PAN & Compliance Verified</strong></div>
                     </div>
                 </div>
-                <ul class="feature-list">
-                    <li>Official Biometric ID Link</li>
-                    <li>Company System/Laptop Allocation</li>
-                    <li>Official Email Account Activation</li>
-                    <li>ID Card Generation Request</li>
-                    <li>ERP Portal Login Activation</li>
-                    <li>Security Access Token Rules</li>
-                </ul>
-                <div class="doc-action-hub">
-                    <label class="btn-upload"><input type="file" />Update</label>
-                    <button class="btn-view">View</button>
-                    <button class="btn-delete">Delete</button>
-                </div>
             </div>
+
+            <!-- ATTENDANCE & PAYROLL SUMMARY -->
+@*             <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-wallet"></i> Attendance & Payroll Summary</h3>
+                </div>
+                <div class="card-body">
+                    <div class="pill-group">
+                        <div class="pill-box"><span>Casual Leave</span><strong>5 Days</strong></div>
+                        <div class="pill-box"><span>Sick Leave</span><strong>4 Days</strong></div>
+                        <div class="pill-box"><span>Earned Leave</span><strong>3 Days</strong></div>
+                    </div>
+                    <div class="info-grid mt-10">
+                        <div class="info-row"><span>Salary Bank:</span> <strong>HDFC Bank (•••• 4321)</strong></div>
+                        <div class="info-row"><span>Latest Payslip:</span> <strong>June 2026 Disbursed</strong></div>
+                    </div>
+                </div>
+                <div class="card-footer gap-10">
+                    <button class="btn btn-primary"><i class="fas fa-plane"></i> Apply Leave</button>
+                    <button class="btn btn-secondary"><i class="fas fa-download"></i> Payslip</button>
+                </div>
+            </div> *@
+
         </div>
 
     </div>
+
 </div>

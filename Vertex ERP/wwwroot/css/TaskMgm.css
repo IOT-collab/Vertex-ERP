@@ -1,0 +1,519 @@
+﻿:root {
+    --bg-main: #0f172a;
+    --card-bg: #1e293b;
+    --card-inner: #0f172a;
+    --border-color: #334155;
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-green: #22c55e;
+    --accent-amber: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-purple: #a855f7;
+}
+
+.task-dash-container {
+    padding: 24px;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* HEADER SECTION WITH BACK BUTTON */
+.dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.header-title-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* BACK BUTTON STYLE */
+.btn-back {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+    .btn-back:hover {
+        background: var(--border-color);
+        color: var(--accent-blue);
+        transform: translateX(-2px);
+    }
+
+.dash-header h2 {
+    margin: 0;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dash-header p {
+    margin: 3px 0 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* BUTTONS */
+.btn {
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--accent-blue);
+    color: #fff;
+}
+
+    .btn-primary:hover {
+        opacity: 0.9;
+    }
+
+.btn-secondary {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+    .btn-secondary:hover {
+        background: #475569;
+    }
+
+/* METRICS GRID */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.metric-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.metric-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.bg-blue {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent-blue);
+}
+
+.bg-amber {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--accent-amber);
+}
+
+.bg-green {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--accent-green);
+}
+
+.bg-red {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--accent-red);
+}
+
+.metric-info span {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: block;
+}
+
+.metric-info h3 {
+    margin: 2px 0 0 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* FILTERS & SEARCH */
+.filter-bar {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 12px 16px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    background: var(--card-inner);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 6px 12px;
+    gap: 8px;
+    flex: 1;
+    max-width: 350px;
+}
+
+    .search-box i {
+        color: var(--text-muted);
+    }
+
+    .search-box input {
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        outline: none;
+        font-size: 13px;
+        width: 100%;
+    }
+
+.filter-group {
+    display: flex;
+    gap: 10px;
+}
+
+.form-select {
+    background: var(--card-inner);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+}
+
+/* KANBAN BOARD */
+.kanban-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    align-items: start;
+}
+
+.kanban-col {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.col-header {
+    border-bottom: 2px solid transparent;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+}
+
+    .col-header h4 {
+        margin: 0;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .col-header .count {
+        background: var(--card-inner);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        margin-left: auto;
+    }
+
+.col-todo {
+    border-color: var(--text-muted);
+}
+
+.col-progress {
+    border-color: var(--accent-amber);
+}
+
+.col-review {
+    border-color: var(--accent-blue);
+}
+
+.col-done {
+    border-color: var(--accent-green);
+}
+
+.kanban-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.task-card {
+    background: var(--card-inner);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    transition: transform 0.2s, border-color 0.2s;
+    cursor: pointer;
+}
+
+    .task-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent-blue);
+    }
+
+.completed-card {
+    opacity: 0.6;
+}
+
+.task-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.task-id {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.task-card h5 {
+    margin: 0 0 6px 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.task-card p {
+    margin: 0 0 12px 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.task-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.assignee-avatar {
+    width: 26px;
+    height: 26px;
+    background: var(--accent-blue);
+    border-radius: 50%;
+    color: #fff;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+/* BADGES */
+.badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.badge-red {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--accent-red);
+}
+
+.badge-amber {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--accent-amber);
+}
+
+.badge-blue {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--accent-blue);
+}
+
+.badge-green {
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--accent-green);
+}
+
+/* ASSIGN TASK MODAL POPUP */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s ease;
+    z-index: 9999;
+    padding: 16px;
+}
+
+    .modal-backdrop.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+.modal-dialog {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 550px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+.btn-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 14px;
+}
+
+    .form-group label {
+        display: block;
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+    }
+
+.text-danger {
+    color: var(--accent-red);
+}
+
+.form-input {
+    width: 100%;
+    background: var(--card-inner);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 9px 12px;
+    color: var(--text-primary);
+    font-size: 13px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+    .form-input:focus {
+        border-color: var(--accent-blue);
+    }
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.form-input-file {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.modal-footer {
+    padding: 14px 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* RESPONSIVE DESIGN ADJUSTMENTS */
+@media (max-width: 768px) {
+    .dash-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+        .header-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box {
+        max-width: 100%;
+    }
+
+    .filter-group {
+        flex-direction: column;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
