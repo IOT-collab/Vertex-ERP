@@ -87,6 +87,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .timer-box {
@@ -132,6 +133,16 @@
 
     .btn-secondary:hover {
         background: #475569;
+    }
+
+.btn-outline-primary {
+    background: transparent;
+    border: 1px solid var(--accent-blue);
+    color: var(--accent-blue);
+}
+
+    .btn-outline-primary:hover {
+        background: rgba(59, 130, 246, 0.1);
     }
 
 .btn-sm {
@@ -231,6 +242,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
     .card-header h3 {
@@ -260,14 +273,14 @@
     font-weight: 600;
 }
 
-.badge-active {
+.badge-active, .badge-green {
     background: rgba(34, 197, 94, 0.2);
     color: var(--accent-green);
 }
 
-.badge-green {
-    background: rgba(34, 197, 94, 0.2);
-    color: var(--accent-green);
+.badge-purple {
+    background: rgba(168, 85, 247, 0.2);
+    color: var(--accent-purple);
 }
 
 .tag {
@@ -290,6 +303,11 @@
 .tag-green {
     background: rgba(34, 197, 94, 0.2);
     color: var(--accent-green);
+}
+
+.tag-blue {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--accent-blue);
 }
 
 /* TASK LIST */
@@ -325,7 +343,6 @@
 
 .task-details {
     flex-grow: 1;
-    cursor: pointer;
 }
 
     .task-details strong {
@@ -336,6 +353,89 @@
     .task-details small {
         color: var(--text-muted);
         font-size: 11px;
+    }
+
+/* UPCOMING TASKS (30-DAY PLAN) SPECIFIC STYLES */
+.plan-badge-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.plan-period {
+    color: var(--text-muted);
+}
+
+.progress-bar-container {
+    background: var(--card-inner);
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+    .progress-info span {
+        color: var(--text-muted);
+    }
+
+    .progress-info strong {
+        color: var(--accent-green);
+    }
+
+.progress-track {
+    width: 100%;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent-green);
+    border-radius: 3px;
+}
+
+.upcoming-expanded-list {
+    display: none;
+    transition: all 0.3s ease-in-out;
+}
+
+    .upcoming-expanded-list.show {
+        display: block;
+    }
+
+.task-date-badge {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 6px;
+    padding: 4px 8px;
+    text-align: center;
+    min-width: 36px;
+}
+
+    .task-date-badge .day {
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--accent-blue);
+        line-height: 1;
+    }
+
+    .task-date-badge .month {
+        display: block;
+        font-size: 9px;
+        color: var(--text-muted);
+        font-weight: 600;
     }
 
 /* INFO GRID & PILLS */
@@ -355,31 +455,6 @@
 
     .info-row span {
         color: var(--text-muted);
-    }
-
-.pill-group {
-    display: flex;
-    gap: 10px;
-}
-
-.pill-box {
-    flex: 1;
-    background: var(--card-inner);
-    border: 1px solid var(--border-color);
-    padding: 8px;
-    border-radius: 6px;
-    text-align: center;
-}
-
-    .pill-box span {
-        display: block;
-        font-size: 11px;
-        color: var(--text-muted);
-    }
-
-    .pill-box strong {
-        font-size: 14px;
-        color: var(--text-primary);
     }
 
 /* ALERT BOX */
@@ -408,3 +483,20 @@
         font-size: 11px;
         color: var(--text-muted);
     }
+
+/* RESPONSIVE ADJUSTMENTS FOR MOBILE */
+@media (max-width: 576px) {
+    .emp-profile-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .emp-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .task-item {
+        flex-wrap: wrap;
+    }
+}

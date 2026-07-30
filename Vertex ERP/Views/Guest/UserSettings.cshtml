@@ -7,108 +7,121 @@
 }
 
 <link href="~/css/UserSettings.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <div class="user-settings-page">
-    <div class="page-header">
+
+    <!-- Header Section -->
+    <header class="page-header">
         <div class="header-text">
+            <span class="badge-pill"><i class="fa-solid fa-user-gear"></i> Account Access Center</span>
             <h2>User Login Settings</h2>
-            <p>Manage employee login IDs, roles, and account access for Vertex ERP.</p>
+            <p>Manage employee login IDs, roles, and security access controls for Vertex ERP.</p>
         </div>
 
         <div class="user-summary">
             <strong>@activeUsers</strong>
-            <span>Total Logins</span>
+            <span>Active Logins</span>
         </div>
-    </div>
+    </header>
 
+    <!-- Alert Notifications -->
     @if (TempData["UserSettingMessage"] != null)
     {
-        <div class="user-alert success">@TempData["UserSettingMessage"]</div>
+        <div class="user-alert success">
+            <i class="fa-solid fa-circle-check"></i> @TempData["UserSettingMessage"]
+        </div>
     }
 
     @if (TempData["UserSettingError"] != null)
     {
-        <div class="user-alert error">@TempData["UserSettingError"]</div>
+        <div class="user-alert error">
+            <i class="fa-solid fa-circle-exclamation"></i> @TempData["UserSettingError"]
+        </div>
     }
 
+    <!-- Setup Form & Policies Grid -->
     <section class="user-settings-grid">
         <div class="create-user-card">
             <div class="section-title">
-                <h3>Create Employee Login</h3>
-                <p>Use this when a new employee joins and needs ERP access.</p>
+                <h3><i class="fa-solid fa-user-plus"></i> Create Employee Login</h3>
+                <p>Use this when a new employee joins and needs system credentials.</p>
             </div>
 
             <form asp-action="CreateUser" asp-controller="Guest" method="post" autocomplete="off" class="create-user-form">
                 <div class="form-group">
                     <label for="username">Employee ID / Username</label>
-                    <input id="username" name="username" type="text" placeholder="Example: VAS0180" required />
+                    <input id="username" name="username" type="text" placeholder="e.g. VAS0180" required />
                 </div>
 
                 <div class="form-group">
                     <label for="fullName">Employee Name</label>
-                    <input id="fullName" name="fullName" type="text" placeholder="Example: Krishna Sharma" required />
+                    <input id="fullName" name="fullName" type="text" placeholder="e.g. Krishna Sharma" required />
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input id="password" name="password" type="text" placeholder="Example: Krishna1234" required />
+                    <input id="password" name="password" type="text" placeholder="e.g. Krishna1234" required />
                 </div>
 
                 <div class="form-group">
-                    <label for="role">Role</label>
+                    <label for="role">Assigned Role</label>
                     <select id="role" name="role">
-                        <option>User</option>
-                        <option>Supervisor</option>
-                        <option>Admin</option>
+                        <option value="User">User</option>
+                        <option value="Supervisor">Supervisor</option>
+                        <option value="Admin">Admin</option>
                     </select>
                 </div>
 
-                <button type="submit" class="btn-create-user">Create Login</button>
+                <button type="submit" class="btn-create-user">
+                    <i class="fa-solid fa-key"></i> Generate Credentials
+                </button>
             </form>
         </div>
 
         <div class="login-policy-card">
             <div class="section-title">
-                <h3>Default Login Rule</h3>
-                <p>Imported employees can log in using their employee code.</p>
+                <h3><i class="fa-solid fa-shield-halved"></i> Default Login Rules</h3>
+                <p>Standard policy rules generated during initial record imports.</p>
             </div>
 
             <div class="policy-list">
-                <div>
-                    <span>Username</span>
-                    <strong>Employee ID</strong>
+                <div class="policy-item">
+                    <span>Username Format</span>
+                    <strong>Employee Code ID</strong>
                 </div>
-                <div>
-                    <span>Password</span>
-                    <strong>FirstName1234</strong>
+                <div class="policy-item">
+                    <span>Password Pattern</span>
+                    <strong>FirstName + 1234</strong>
                 </div>
-                <div>
-                    <span>Example</span>
-                    <strong>Krishna1234</strong>
+                <div class="policy-item">
+                    <span>Sample Passphrase</span>
+                    <code>Krishna1234</code>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Employee Login Directory Section -->
     <section class="users-table-card">
-        <div class="section-title table-title">
-            <div>
-                <h3>Employee Login Directory</h3>
-                <p>Passwords are securely hashed in the database. The visible password below is the initial generated rule for imported users.</p>
+        <div class="table-header-bar">
+            <div class="section-title">
+                <h3><i class="fa-solid fa-address-book"></i> Employee Directory</h3>
+                <p>Database passwords are encrypted. Displayed codes represent initial system-assigned credentials.</p>
             </div>
-            <span class="status-pill">@activeUsers Active</span>
+            <span class="status-pill"><i class="fa-solid fa-circle"></i> @activeUsers Active Accounts</span>
         </div>
 
         <div class="users-table-wrap">
             <table class="users-table">
                 <thead>
                     <tr>
-                        <th>Employee ID / Username</th>
+                        <th>Employee ID</th>
                         <th>Employee Name</th>
-                        <th>Designation / Role</th>
-                        <th>Initial Password Rule</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <th>Role Access</th>
+                        <th>Initial Rule Pass</th>
+                        <th>Account Status</th>
+                        <th class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -122,100 +135,49 @@
                             "supervisor" => "Supervisor1234",
                             _ => $"{firstName.Replace("Mr.", "").Trim()}1234"
                         };
+
                         <tr class="user-row">
-                            <td><strong>@user.Username</strong></td>
+                            <form asp-action="UpdateUser" asp-controller="Guest" method="post">
+                                <input type="hidden" name="id" value="@user.Id" />
+
                             <td>
-                                <span class="display-value user-name-display">@user.FullName</span>
-                                <form id="edit-user-@user.Id" asp-action="UpdateUser" asp-controller="Guest" method="post" class="edit-user-form">
-                                    <input type="hidden" name="id" value="@user.Id" />
-                                    <input class="edit-input" name="fullName" type="text" value="@user.FullName" required />
-                                </form>
+                                <strong class="user-id-code">@user.Username</strong>
                             </td>
+
                             <td>
-                                <span class="display-value role-badge">@user.Role</span>
-                                <select form="edit-user-@user.Id" class="edit-select" name="role">
-                                    @if (user.Role == "User")
-                                    {
-                                        <option selected>User</option>
-                                    }
-                                    else
-                                    {
-                                        <option>User</option>
-                                    }
-                                    @if (user.Role == "Supervisor")
-                                    {
-                                        <option selected>Supervisor</option>
-                                    }
-                                    else
-                                    {
-                                        <option>Supervisor</option>
-                                    }
-                                    @if (user.Role == "Admin")
-                                    {
-                                        <option selected>Admin</option>
-                                    }
-                                    else
-                                    {
-                                        <option>Admin</option>
-                                    }
+                                <input class="table-input" name="fullName" type="text" value="@user.FullName" required />
+                            </td>
+
+                            <td>
+                                <select class="table-select" name="role">
+                                    <option value="User" selected="@(user.Role == "User")">User</option>
+                                    <option value="Supervisor" selected="@(user.Role == "Supervisor")">Supervisor</option>
+                                    <option value="Admin" selected="@(user.Role == "Admin")">Admin</option>
                                 </select>
                             </td>
-                            <td><code>@initialPassword</code></td>
+
                             <td>
-                                <span class="display-value status-badge @(user.IsActive ? "active" : "inactive")">
-                                    @(user.IsActive ? "Active" : "Inactive")
-                                </span>
-                                <select form="edit-user-@user.Id" class="edit-select" name="isActive">
-                                    @if (user.IsActive)
-                                    {
-                                        <option value="true" selected>Active</option>
-                                        <option value="false">Inactive</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="true">Active</option>
-                                        <option value="false" selected>Inactive</option>
-                                    }
+                                <code class="password-chip">@initialPassword</code>
+                            </td>
+
+                            <td>
+                                <select class="table-select status-select @(user.IsActive ? "is-active" : "is-inactive")" name="isActive">
+                                    <option value="true" selected="@user.IsActive">Active</option>
+                                    <option value="false" selected="@(!user.IsActive)">Inactive</option>
                                 </select>
                             </td>
-                            <td>
-                                <div class="row-actions">
-                                    <button type="button" class="btn-row-edit" data-edit-row>Edit</button>
-                                    <button type="submit" form="edit-user-@user.Id" class="btn-row-save">Save</button>
-                                    <button type="button" class="btn-row-cancel" data-cancel-row>Cancel</button>
-                                </div>
+
+                            <td class="text-center">
+                                <button type="submit" class="btn-table-save" title="Save Changes">
+                                    <i class="fa-solid fa-floppy-disk"></i> Update
+                                </button>
                             </td>
+                            </form>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
     </section>
+
 </div>
-
-<script>
-    const closeEditingRows = (exceptRow = null) => {
-        document.querySelectorAll(".user-row.is-editing").forEach((row) => {
-            if (row !== exceptRow) {
-                row.querySelector("form")?.reset();
-                row.classList.remove("is-editing");
-            }
-        });
-    };
-
-    document.querySelectorAll("[data-edit-row]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const row = button.closest(".user-row");
-            closeEditingRows(row);
-            row?.classList.add("is-editing");
-        });
-    });
-
-    document.querySelectorAll("[data-cancel-row]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const row = button.closest(".user-row");
-            row?.querySelector("form")?.reset();
-            row?.classList.remove("is-editing");
-        });
-    });
-</script>

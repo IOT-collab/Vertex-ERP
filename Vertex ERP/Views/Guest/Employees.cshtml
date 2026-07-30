@@ -33,13 +33,6 @@
                 <span class="stat-label">Attendance</span>
             </div>
         </div>
-       @*  <div class="stat-card">
-            <div class="stat-icon icon-green"><i class="fas fa-umbrella-beach"></i></div>
-            <div class="stat-data">
-                <span class="stat-value">12 Days</span>
-                <span class="stat-label">Leave Balance</span>
-            </div>
-        </div> *@
         <div class="stat-card">
             <div class="stat-icon icon-purple"><i class="fas fa-laptop"></i></div>
             <div class="stat-data">
@@ -54,12 +47,19 @@
                 <span class="stat-label">Today's Tasks</span>
             </div>
         </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-green"><i class="fas fa-calendar-alt"></i></div>
+            <div class="stat-data">
+                <span class="stat-value">12 Tasks</span>
+                <span class="stat-label">Upcoming (30 Days)</span>
+            </div>
+        </div>
     </div>
 
     <!-- MAIN TWO-COLUMN DASHBOARD GRID -->
     <div class="dash-grid">
 
-        <!-- LEFT COLUMN: TODAY'S TASKS & QUICK ACTIONS -->
+        <!-- LEFT COLUMN: TODAY'S TASKS & UPCOMING 30-DAY PLAN -->
         <div class="dash-column">
 
             <!-- TODAY'S TASKS CARD -->
@@ -98,6 +98,107 @@
                 </div>
             </div>
 
+            <!-- UPCOMING TASKS (30-DAY MONTHLY PLAN) -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-calendar-week"></i> Upcoming Tasks</h3>
+                    <button class="btn btn-sm btn-outline-primary" id="toggleUpcomingBtn" onclick="toggleUpcomingTasks()">
+                        <i class="fas fa-eye"></i> View 30-Day Plan
+                    </button>
+                </div>
+                <div class="card-body">
+
+                    <!-- SUMMARY PREVIEW (Visible by default) -->
+                    <div class="upcoming-summary" id="upcomingSummary">
+                        <div class="plan-badge-bar">
+                            <span class="plan-period"><i class="far fa-clock"></i> Next 30 Days Target</span>
+                            <span class="badge badge-purple">12 Deliverables Scheduled</span>
+                        </div>
+                        <div class="progress-bar-container mt-10">
+                            <div class="progress-info">
+                                <span>Monthly Progress</span>
+                                <strong>25% Completed</strong>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill" style="width: 25%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FULL 30-DAY TASK LIST (Expandable) -->
+                    <div class="upcoming-expanded-list" id="upcomingTaskList">
+                        <ul class="task-list mt-10">
+                            <li class="task-item">
+                                <div class="task-date-badge">
+                                    <span class="day">05</span>
+                                    <span class="month">AUG</span>
+                                </div>
+                                <div class="task-details">
+                                    <strong>Sprint Planning & Design Review</strong>
+                                    <small>Vertex ERP v2.0 • Phase 1 Kickoff</small>
+                                </div>
+                                <span class="tag tag-blue">Scheduled</span>
+                            </li>
+                            <li class="task-item">
+                                <div class="task-date-badge">
+                                    <span class="day">12</span>
+                                    <span class="month">AUG</span>
+                                </div>
+                                <div class="task-details">
+                                    <strong>OAuth2 Authorization Security Audit</strong>
+                                    <small>Core Security Compliance</small>
+                                </div>
+                                <span class="tag tag-red">High Priority</span>
+                            </li>
+                            <li class="task-item">
+                                <div class="task-date-badge">
+                                    <span class="day">18</span>
+                                    <span class="month">AUG</span>
+                                </div>
+                                <div class="task-details">
+                                    <strong>Database Migration to PostgreSQL</strong>
+                                    <small>Infrastructure Upgrade</small>
+                                </div>
+                                <span class="tag tag-amber">Medium</span>
+                            </li>
+                            <li class="task-item">
+                                <div class="task-date-badge">
+                                    <span class="day">25</span>
+                                    <span class="month">AUG</span>
+                                </div>
+                                <div class="task-details">
+                                    <strong>End-to-End Testing & Bug Scrub</strong>
+                                    <small>QA & Release Preparation</small>
+                                </div>
+                                <span class="tag tag-blue">Planned</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: CORE INFORMATION & ANNOUNCEMENTS -->
+        <div class="dash-column">
+
+            <!-- PROFILE & CORE INFO -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-user-circle"></i> Core Profile</h3>
+                    <span class="badge badge-green">KYC Verified</span>
+                </div>
+                <div class="card-body">
+                    <div class="info-grid">
+                        <div class="info-row"><span>Manager:</span> <strong>Vikram Malhotra</strong></div>
+                        <div class="info-row"><span>Email:</span> <strong>rahul.sharma@company.com</strong></div>
+                        <div class="info-row"><span>Location:</span> <strong>Noida HQ (Tower B)</strong></div>
+                        <div class="info-row"><span>Verification:</span> <strong>PAN & Compliance Verified</strong></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- ANNOUNCEMENTS & SUPPORT -->
             <div class="card">
                 <div class="card-header">
@@ -119,49 +220,22 @@
 
         </div>
 
-        <!-- RIGHT COLUMN: CORE INFORMATION & PAYROLL -->
-        <div class="dash-column">
-
-            <!-- PROFILE & CORE INFO -->
-            <div class="card">
-                <div class="card-header">
-                    <h3><i class="fas fa-user-circle"></i> Core Profile</h3>
-                    <span class="badge badge-green">KYC Verified</span>
-                </div>
-                <div class="card-body">
-                    <div class="info-grid">
-                        <div class="info-row"><span>Manager:</span> <strong>Vikram Malhotra</strong></div>
-                        <div class="info-row"><span>Email:</span> <strong>rahul.sharma@company.com</strong></div>
-                        <div class="info-row"><span>Location:</span> <strong>Noida HQ (Tower B)</strong></div>
-                        <div class="info-row"><span>Verification:</span> <strong>PAN & Compliance Verified</strong></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ATTENDANCE & PAYROLL SUMMARY -->
-@*             <div class="card">
-                <div class="card-header">
-                    <h3><i class="fas fa-wallet"></i> Attendance & Payroll Summary</h3>
-                </div>
-                <div class="card-body">
-                    <div class="pill-group">
-                        <div class="pill-box"><span>Casual Leave</span><strong>5 Days</strong></div>
-                        <div class="pill-box"><span>Sick Leave</span><strong>4 Days</strong></div>
-                        <div class="pill-box"><span>Earned Leave</span><strong>3 Days</strong></div>
-                    </div>
-                    <div class="info-grid mt-10">
-                        <div class="info-row"><span>Salary Bank:</span> <strong>HDFC Bank (•••• 4321)</strong></div>
-                        <div class="info-row"><span>Latest Payslip:</span> <strong>June 2026 Disbursed</strong></div>
-                    </div>
-                </div>
-                <div class="card-footer gap-10">
-                    <button class="btn btn-primary"><i class="fas fa-plane"></i> Apply Leave</button>
-                    <button class="btn btn-secondary"><i class="fas fa-download"></i> Payslip</button>
-                </div>
-            </div> *@
-
-        </div>
-
     </div>
 
 </div>
+
+<!-- TOGGLE SCRIPT -->
+<script>
+    function toggleUpcomingTasks() {
+        const taskList = document.getElementById('upcomingTaskList');
+        const btn = document.getElementById('toggleUpcomingBtn');
+
+        if (taskList.classList.contains('show')) {
+            taskList.classList.remove('show');
+            btn.innerHTML = '<i class="fas fa-eye"></i> View 30-Day Plan';
+        } else {
+            taskList.classList.add('show');
+            btn.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Plan';
+        }
+    }
+</script>
