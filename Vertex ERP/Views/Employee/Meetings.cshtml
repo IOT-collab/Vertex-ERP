@@ -1,0 +1,223 @@
+﻿@model dynamic
+@{
+    ViewData["Title"] = "Schedule Meeting";
+}
+<link href="~/css/meetings.css" rel="stylesheet" />
+
+<div class="erp-page-wrapper">
+    <div class="meeting-container">
+
+        <!-- Header Section -->
+        <div class="meeting-header">
+            <a href="#" onclick="history.back(); return false;" class="btn-back" title="Go Back">
+                &#8592; Back to Dashboard
+            </a>
+            <div class="header-title-group">
+                <h2>📅 Schedule New Meeting</h2>
+                <span class="badge-erp">ERP Module</span>
+            </div>
+            <p>Configure meeting details, select channels, and assign required team members.</p>
+        </div>
+
+        <form asp-controller="Meeting" asp-action="Schedule" method="post" class="meeting-form">
+
+            <!-- Section 1: Platform Selection -->
+            <div class="form-section">
+                <label class="section-label">1. Select Platform / Location</label>
+                <div class="platform-grid">
+
+                    <label class="platform-card">
+                        <input type="radio" name="Platform" value="Zoom" checked />
+                        <div class="card-content">
+                            <span class="platform-icon zoom">📹</span>
+                            <span class="platform-name">Zoom</span>
+                        </div>
+                    </label>
+
+                    <label class="platform-card">
+                        <input type="radio" name="Platform" value="GoogleMeet" />
+                        <div class="card-content">
+                            <span class="platform-icon meet">🟢</span>
+                            <span class="platform-name">Google Meet</span>
+                        </div>
+                    </label>
+
+                    <label class="platform-card">
+                        <input type="radio" name="Platform" value="Teams" />
+                        <div class="card-content">
+                            <span class="platform-icon teams">👥</span>
+                            <span class="platform-name">MS Teams</span>
+                        </div>
+                    </label>
+
+                    <label class="platform-card">
+                        <input type="radio" name="Platform" value="InPerson" />
+                        <div class="card-content">
+                            <span class="platform-icon inperson">🏢</span>
+                            <span class="platform-name">In-Person</span>
+                        </div>
+                    </label>
+
+                </div>
+            </div>
+
+            <!-- Section 2: Meeting Details -->
+            <div class="form-section">
+                <label class="section-label">2. Basic Details</label>
+
+                <div class="form-group">
+                    <label for="Title">Meeting Title <span class="required">*</span></label>
+                    <input type="text" id="Title" name="Title" placeholder="e.g., Q3 Project Review & Resource Allocation" required />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="MeetingDate">Date <span class="required">*</span></label>
+                        <input type="date" id="MeetingDate" name="MeetingDate" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="StartTime">Start Time <span class="required">*</span></label>
+                        <input type="time" id="StartTime" name="StartTime" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="Duration">Duration</label>
+                        <select id="Duration" name="Duration">
+                            <option value="15">15 Mins</option>
+                            <option value="30" selected>30 Mins</option>
+                            <option value="45">45 Mins</option>
+                            <option value="60">1 Hour</option>
+                            <option value="90">1.5 Hours</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="MeetingLink">Meeting Link / Room Location</label>
+                    <input type="url" id="MeetingLink" name="MeetingLink" placeholder="https://zoom.us/j/... or Conference Room 3B" />
+                </div>
+            </div>
+
+            <!-- Section 3: ERP Participant Selection -->
+            <div class="form-section">
+                <label class="section-label">3. Involve Participants & Departments</label>
+                <p class="section-desc">Select employees or whole teams that need to attend this meeting.</p>
+
+                <div class="participants-erp-box">
+
+                    <!-- Department: Management & Leads -->
+                    <div class="dept-group">
+                        <div class="dept-header">
+                            <label class="dept-title">
+                                <input type="checkbox" onclick="toggleDept(this, 'dept-mgmt')" />
+                                Management & Team Leads
+                            </label>
+                        </div>
+                        <div class="employee-list dept-mgmt">
+                            <label class="emp-chip">
+                                <input type="checkbox" name="Attendees" value="alex@company.com" />
+                                <span class="emp-avatar">AR</span>
+                                <span class="emp-info">
+                                    <strong>Alex Robinson</strong>
+                                    <small>Project Manager</small>
+                                </span>
+                            </label>
+                            <label class="emp-chip">
+                                <input type="checkbox" name="Attendees" value="sarah@company.com" />
+                                <span class="emp-avatar">SK</span>
+                                <span class="emp-info">
+                                    <strong>Sarah Khan</strong>
+                                    <small>Lead Architect</small>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Department: Development Team -->
+                    <div class="dept-group">
+                        <div class="dept-header">
+                            <label class="dept-title">
+                                <input type="checkbox" onclick="toggleDept(this, 'dept-dev')" />
+                                Engineering & Development
+                            </label>
+                        </div>
+                        <div class="employee-list dept-dev">
+                            <label class="emp-chip">
+                                <input type="checkbox" name="Attendees" value="john@company.com" />
+                                <span class="emp-avatar">JD</span>
+                                <span class="emp-info">
+                                    <strong>John Doe</strong>
+                                    <small>Full Stack Dev</small>
+                                </span>
+                            </label>
+                            <label class="emp-chip">
+                                <input type="checkbox" name="Attendees" value="rohit@company.com" />
+                                <span class="emp-avatar">RS</span>
+                                <span class="emp-info">
+                                    <strong>Rohit Sharma</strong>
+                                    <small>Backend Engineer</small>
+                                </span>
+                            </label>
+                            <label class="emp-chip">
+                                <input type="checkbox" name="Attendees" value="neha@company.com" />
+                                <span class="emp-avatar">NV</span>
+                                <span class="emp-info">
+                                    <strong>Neha Verma</strong>
+                                    <small>UI/UX Designer</small>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Department: HR & Sales -->
+                    <div class="dept-group">
+                        <div class="dept-header">
+                            <label class="dept-title">
+                                <input type="checkbox" onclick="toggleDept(this, 'dept-hr')" />
+                                HR & Operations
+                            </label>
+                        </div>
+                        <div class="employee-list dept-hr">
+                            <label class="emp-chip">
+                                <input type="checkbox" name="Attendees" value="priya@company.com" />
+                                <span class="emp-avatar">PM</span>
+                                <span class="emp-info">
+                                    <strong>Priya Mehta</strong>
+                                    <small>HR Executive</small>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Optional External Emails Input -->
+                <div class="form-group mt-3">
+                    <label for="ExternalAttendees">External Invites (Optional Emails)</label>
+                    <input type="text" id="ExternalAttendees" name="ExternalAttendees" placeholder="client@externaldomain.com, vendor@partner.com" />
+                </div>
+            </div>
+
+            <!-- Section 4: Agenda -->
+            <div class="form-section">
+                <div class="form-group">
+                    <label for="Agenda">Agenda & Notes</label>
+                    <textarea id="Agenda" name="Agenda" rows="3" placeholder="Outline discussion points, targets, or deliverables..."></textarea>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="button" onclick="history.back();" class="btn-cancel">Cancel</button>
+                <button type="submit" class="btn-submit">Schedule & Send Invites</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleDept(source, deptClass) {
+        let checkboxes = document.querySelectorAll('.' + deptClass + ' input[type="checkbox"]');
+        checkboxes.forEach(cb => cb.checked = source.checked);
+    }
+</script>

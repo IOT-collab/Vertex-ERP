@@ -34,5 +34,12 @@ namespace Vertex_ERP.Controllers
         {
             return View();
         }
+
+        public IActionResult RaisedEnquiry()
+        {
+            return View();
+        }
+
+
     }
 }

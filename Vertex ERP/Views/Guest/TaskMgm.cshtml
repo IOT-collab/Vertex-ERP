@@ -4,280 +4,429 @@
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-<link href="~/css/taskmgm.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.css" />
+<link href="~/css/taskmgm.css" rel="stylesheet" asp-append-version="true" />
 
 <div class="task-dash-container">
 
-    <!-- PAGE HEADER WITH BACK ARROW & ACTIONS -->
+    <!-- TOP HEADER -->
     <div class="dash-header">
-        <div class="header-title-group">
-            <!-- BACK BUTTON -->
+        <div class="header-left">
             <button type="button" class="btn-back" onclick="goBack()" title="Go Back">
                 <i class="fas fa-arrow-left"></i>
             </button>
-            <div>
-                <h2><i class="fas fa-tasks"></i> Task Management</h2>
+            <div class="header-title">
+                <h2><i class="fas fa-tasks text-accent"></i> Task Management</h2>
                 <p>Assign, track, and manage team tasks efficiently</p>
             </div>
         </div>
-        <div class="header-actions">
-            <!-- Trigger Button for Assign Task Modal -->
-            <button class="btn btn-primary" onclick="openAssignTaskModal()">
+
+        <div class="header-right">
+            <div class="view-switcher">
+                <button type="button" class="switch-btn active" id="btnKanbanView" onclick="switchView('kanban')">
+                    <i class="fas fa-columns"></i> Kanban
+                </button>
+                <button type="button" class="switch-btn" id="btnGanttView" onclick="switchView('gantt')">
+                    <i class="fas fa-chart-gantt"></i> Gantt
+                </button>
+            </div>
+
+            <button type="button" class="btn-assign" onclick="openAssignTaskModal()">
                 <i class="fas fa-plus"></i> Assign New Task
             </button>
         </div>
     </div>
 
-    <!-- METRIC CARDS -->
+    <!-- METRICS CARDS -->
     <div class="metrics-grid">
         <div class="metric-card">
-            <div class="metric-icon bg-blue"><i class="fas fa-list-check"></i></div>
-            <div class="metric-info">
-                <span>Total Tasks</span>
-                <h3>24</h3>
-            </div>
+            <div class="metric-icon bg-blue"><i class="fas fa-user-tie"></i></div>
+            <div class="metric-info"><span>Managers</span><h3>06</h3></div>
         </div>
         <div class="metric-card">
-            <div class="metric-icon bg-amber"><i class="fas fa-spinner"></i></div>
-            <div class="metric-info">
-                <span>In Progress</span>
-                <h3>08</h3>
-            </div>
+            <div class="metric-icon bg-purple"><i class="fas fa-users"></i></div>
+            <div class="metric-info"><span>Employees</span><h3>32</h3></div>
         </div>
         <div class="metric-card">
-            <div class="metric-icon bg-green"><i class="fas fa-circle-check"></i></div>
-            <div class="metric-info">
-                <span>Completed</span>
-                <h3>14</h3>
-            </div>
+            <div class="metric-icon bg-teal"><i class="fas fa-list-check"></i></div>
+            <div class="metric-info"><span>Total Tasks</span><h3>24</h3></div>
         </div>
         <div class="metric-card">
             <div class="metric-icon bg-red"><i class="fas fa-exclamation-circle"></i></div>
-            <div class="metric-info">
-                <span>Overdue</span>
-                <h3>02</h3>
-            </div>
+            <div class="metric-info"><span>Overdue</span><h3>02</h3></div>
         </div>
     </div>
 
-    <!-- FILTERS & SEARCH BAR -->
+    <!-- MANAGER TO EMPLOYEE ASSIGNMENTS TABLE -->
+    <div class="assignment-overview-panel">
+        <div class="panel-header">
+            <h3><i class="fas fa-sitemap text-accent"></i> Manager to Employee Task Mapping</h3>
+            <span class="sub-text">Konsa task kis manager ne kis employee ko assign kiya hai</span>
+        </div>
+        <div class="table-responsive">
+            <table class="assignment-table">
+                <thead>
+                    <tr>
+                        <th>Task ID & Title</th>
+                        <th>Assigned By (Manager)</th>
+                        <th>Assigned To (Employee)</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <strong class="text-white">API Webhook Integration</strong>
+                            <div class="task-id-sub">#TSK-104</div>
+                        </td>
+                        <td>
+                            <div class="user-pill"><i class="fas fa-user-shield text-blue"></i> Rahul Sharma</div>
+                        </td>
+                        <td>
+                            <div class="user-pill"><i class="fas fa-user text-purple"></i> Priya Verma</div>
+                        </td>
+                        <td><span class="badge badge-red">High</span></td>
+                        <td><span class="status-dot dot-blue"></span> To Do</td>
+                        <td>Aug 02, 2026</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong class="text-white">Fix Responsive UI Bug</strong>
+                            <div class="task-id-sub">#TSK-101</div>
+                        </td>
+                        <td>
+                            <div class="user-pill"><i class="fas fa-user-shield text-blue"></i> Rahul Sharma</div>
+                        </td>
+                        <td>
+                            <div class="user-pill"><i class="fas fa-user text-purple"></i> Rahul Sharma</div>
+                        </td>
+                        <td><span class="badge badge-red">High</span></td>
+                        <td><span class="status-dot dot-red"></span> In Progress (Overdue)</td>
+                        <td class="text-red">Jul 30, 2026</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong class="text-white">Database Query Optimization</strong>
+                            <div class="task-id-sub">#TSK-099</div>
+                        </td>
+                        <td>
+                            <div class="user-pill"><i class="fas fa-user-shield text-blue"></i> Priya Verma</div>
+                        </td>
+                        <td>
+                            <div class="user-pill"><i class="fas fa-user text-purple"></i> Amit Kumar</div>
+                        </td>
+                        <td><span class="badge badge-amber">Medium</span></td>
+                        <td><span class="status-dot dot-amber"></span> In Review</td>
+                        <td>Yesterday</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong class="text-white">User Authentication Module</strong>
+                            <div class="task-id-sub">#TSK-095</div>
+                        </td>
+                        <td>
+                            <div class="user-pill"><i class="fas fa-user-shield text-blue"></i> Rahul Sharma</div>
+                        </td>
+                        <td>
+                            <div class="user-pill"><i class="fas fa-user text-purple"></i> Priya Verma</div>
+                        </td>
+                        <td><span class="badge badge-green">Low</span></td>
+                        <td><span class="status-dot dot-green"></span> Completed</td>
+                        <td>Jul 25, 2026</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SEARCH & FILTERS BAR -->
     <div class="filter-bar">
         <div class="search-box">
             <i class="fas fa-search"></i>
             <input type="text" placeholder="Search tasks by name or ID..." />
         </div>
-        <div class="filter-group">
-            <select class="form-select">
-                <option value="">All Assignees</option>
+        <div class="filter-dropdowns">
+            <select class="filter-select">
+                <option value="">All Managers</option>
                 <option value="1">Rahul Sharma</option>
                 <option value="2">Priya Verma</option>
-                <option value="3">Amit Kumar</option>
             </select>
-            <select class="form-select">
+            <select class="filter-select">
+                <option value="">All Assignees</option>
+                <option value="1">Amit Kumar</option>
+                <option value="2">Priya Verma</option>
+            </select>
+            <select class="filter-select">
                 <option value="">All Priorities</option>
                 <option value="High">High</option>
                 <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
             </select>
         </div>
     </div>
 
-    <!-- KANBAN TASK BOARD -->
-    <div class="kanban-board">
-
-        <!-- COLUMN 1: TO DO -->
+    <!-- KANBAN BOARD -->
+    <div class="kanban-board" id="kanbanView">
+        <!-- TO DO -->
         <div class="kanban-col">
-            <div class="col-header col-todo">
-                <h4><i class="far fa-circle"></i> To Do <span class="count">2</span></h4>
+            <div class="col-header">
+                <h4><i class="far fa-circle"></i> To Do</h4>
+                <span class="count-badge">2</span>
             </div>
             <div class="kanban-cards">
                 <div class="task-card">
-                    <div class="task-card-header">
+                    <div class="card-top">
                         <span class="badge badge-red">High Priority</span>
                         <span class="task-id">#TSK-104</span>
                     </div>
                     <h5>API Webhook Integration</h5>
                     <p>Integrate attendance webhook endpoints for real-time sync.</p>
-                    <div class="task-meta">
-                        <span><i class="far fa-calendar"></i> Due: Aug 02</span>
-                        <div class="assignee-avatar" title="Priya Verma">PV</div>
+                    <div class="assignment-details">
+                        <div><i class="fas fa-user text-muted"></i> By: <span>Rahul Sharma</span></div>
+                        <div><i class="fas fa-user-check text-muted"></i> To: <span>Priya Verma</span></div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-bar-container"><div class="progress-fill" style="width: 35%;"></div></div>
+                        <span class="progress-val">35%</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="due-date"><i class="far fa-calendar"></i> Due: Aug 02</span>
+                        <div class="avatar-circle">PV</div>
                     </div>
                 </div>
 
                 <div class="task-card">
-                    <div class="task-card-header">
+                    <div class="card-top">
                         <span class="badge badge-amber">Medium</span>
                         <span class="task-id">#TSK-105</span>
                     </div>
                     <h5>Setup Audit Logs</h5>
                     <p>Maintain user activity history for system security.</p>
-                    <div class="task-meta">
-                        <span><i class="far fa-calendar"></i> Due: Aug 05</span>
-                        <div class="assignee-avatar" title="Amit Kumar">AK</div>
+                    <div class="assignment-details">
+                        <div><i class="fas fa-user text-muted"></i> By: <span>Priya Verma</span></div>
+                        <div><i class="fas fa-user-check text-muted"></i> To: <span>Amit Kumar</span></div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-bar-container"><div class="progress-fill" style="width: 10%;"></div></div>
+                        <span class="progress-val">10%</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="due-date"><i class="far fa-calendar"></i> Due: Aug 05</span>
+                        <div class="avatar-circle">AK</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- COLUMN 2: IN PROGRESS -->
+        <!-- IN PROGRESS -->
         <div class="kanban-col">
-            <div class="col-header col-progress">
-                <h4><i class="fas fa-spinner"></i> In Progress <span class="count">2</span></h4>
+            <div class="col-header">
+                <h4><i class="fas fa-spinner"></i> In Progress</h4>
+                <span class="count-badge">1</span>
             </div>
             <div class="kanban-cards">
-                <div class="task-card">
-                    <div class="task-card-header">
+                <div class="task-card border-overdue">
+                    <div class="card-top">
                         <span class="badge badge-red">High Priority</span>
                         <span class="task-id">#TSK-101</span>
                     </div>
                     <h5>Fix Responsive UI Bug</h5>
                     <p>Resolve sidebar overlapping issues on mobile devices.</p>
-                    <div class="task-meta">
-                        <span><i class="far fa-calendar"></i> Due: Today</span>
-                        <div class="assignee-avatar" title="Rahul Sharma">RS</div>
+                    <div class="assignment-details">
+                        <div><i class="fas fa-user text-muted"></i> By: <span>Rahul Sharma</span></div>
+                        <div><i class="fas fa-user-check text-muted"></i> To: <span>Rahul Sharma</span></div>
                     </div>
-                </div>
-
-                <div class="task-card">
-                    <div class="task-card-header">
-                        <span class="badge badge-blue">Low</span>
-                        <span class="task-id">#TSK-102</span>
+                    <div class="progress-section">
+                        <div class="progress-bar-container"><div class="progress-fill" style="width: 60%;"></div></div>
+                        <span class="progress-val">60%</span>
                     </div>
-                    <h5>Update Documentation</h5>
-                    <p>Add API usage guides for third-party developers.</p>
-                    <div class="task-meta">
-                        <span><i class="far fa-calendar"></i> Due: Jul 30</span>
-                        <div class="assignee-avatar" title="Rahul Sharma">RS</div>
+                    <div class="card-footer text-red">
+                        <span class="due-date"><i class="far fa-calendar"></i> Overdue (Jul 30)</span>
+                        <div class="avatar-circle">RS</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- COLUMN 3: IN REVIEW -->
+        <!-- IN REVIEW -->
         <div class="kanban-col">
-            <div class="col-header col-review">
-                <h4><i class="fas fa-eye"></i> In Review <span class="count">1</span></h4>
+            <div class="col-header">
+                <h4><i class="fas fa-eye"></i> In Review</h4>
+                <span class="count-badge">1</span>
             </div>
             <div class="kanban-cards">
                 <div class="task-card">
-                    <div class="task-card-header">
+                    <div class="card-top">
                         <span class="badge badge-amber">Medium</span>
                         <span class="task-id">#TSK-099</span>
                     </div>
                     <h5>Database Query Optimization</h5>
                     <p>Optimize slow-running SQL stored procedures.</p>
-                    <div class="task-meta">
-                        <span><i class="far fa-calendar"></i> Due: Yesterday</span>
-                        <div class="assignee-avatar" title="Amit Kumar">AK</div>
+                    <div class="assignment-details">
+                        <div><i class="fas fa-user text-muted"></i> By: <span>Priya Verma</span></div>
+                        <div><i class="fas fa-user-check text-muted"></i> To: <span>Amit Kumar</span></div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-bar-container"><div class="progress-fill" style="width: 85%;"></div></div>
+                        <span class="progress-val">85%</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="due-date"><i class="far fa-calendar"></i> Due: Yesterday</span>
+                        <div class="avatar-circle">AK</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- COLUMN 4: COMPLETED -->
+        <!-- COMPLETED -->
         <div class="kanban-col">
-            <div class="col-header col-done">
-                <h4><i class="fas fa-check-circle"></i> Completed <span class="count">1</span></h4>
+            <div class="col-header">
+                <h4><i class="fas fa-check-circle"></i> Completed</h4>
+                <span class="count-badge">1</span>
             </div>
             <div class="kanban-cards">
-                <div class="task-card completed-card">
-                    <div class="task-card-header">
+                <div class="task-card">
+                    <div class="card-top">
                         <span class="badge badge-green">Completed</span>
                         <span class="task-id">#TSK-095</span>
                     </div>
                     <h5>User Authentication Module</h5>
                     <p>Implement JWT token authentication with Refresh flow.</p>
-                    <div class="task-meta">
-                        <span><i class="far fa-calendar"></i> Done Jul 25</span>
-                        <div class="assignee-avatar" title="Priya Verma">PV</div>
+                    <div class="assignment-details">
+                        <div><i class="fas fa-user text-muted"></i> By: <span>Rahul Sharma</span></div>
+                        <div><i class="fas fa-user-check text-muted"></i> To: <span>Priya Verma</span></div>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-bar-container"><div class="progress-fill bg-green" style="width: 100%;"></div></div>
+                        <span class="progress-val">100%</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="due-date"><i class="far fa-calendar"></i> Done Jul 25</span>
+                        <div class="avatar-circle">PV</div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
+    <!-- PREMIUM GANTT CHART -->
+    <div class="gantt-wrapper" id="ganttView" style="display: none;">
+        <div class="gantt-controls-container">
+            <span class="gantt-control-label"><i class="far fa-calendar-alt"></i> Timeline View:</span>
+            <div class="gantt-controls">
+                <button type="button" class="btn-gantt-mode active" onclick="setGanttMode(this, 'Day')">Day</button>
+                <button type="button" class="btn-gantt-mode" onclick="setGanttMode(this, 'Week')">Week</button>
+                <button type="button" class="btn-gantt-mode" onclick="setGanttMode(this, 'Month')">Month</button>
+            </div>
+        </div>
+        <div class="gantt-container"><svg id="gantt"></svg></div>
     </div>
 
 </div>
 
-<!-- ASSIGN TASK MODAL POPUP -->
-<div class="modal-backdrop" id="assignTaskModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-user-plus"></i> Assign New Task</h3>
-                <button class="btn-close" onclick="closeAssignTaskModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="assignTaskForm">
+<!-- ASSIGN TASK MODAL -->
+<div class="modal-overlay" id="assignTaskModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="fas fa-plus-circle text-accent"></i> Assign New Task</h3>
+            <button type="button" class="btn-close-modal" onclick="closeAssignTaskModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="assignTaskForm">
+                <div class="form-group">
+                    <label>Task Title <span class="text-red">*</span></label>
+                    <input type="text" class="form-control" placeholder="Enter task title" required />
+                </div>
+                <div class="form-row">
                     <div class="form-group">
-                        <label>Task Title <span class="text-danger">*</span></label>
-                        <input type="text" class="form-input" placeholder="e.g., Fix Navigation UI Overflow" required />
+                        <label>Assigned By (Manager)</label>
+                        <select class="form-control">
+                            <option value="1">Rahul Sharma</option>
+                            <option value="2">Priya Verma</option>
+                        </select>
                     </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Assign To <span class="text-danger">*</span></label>
-                            <select class="form-input" required>
-                                <option value="">Select Employee</option>
-                                <option value="1">Rahul Sharma (Sr. Developer)</option>
-                                <option value="2">Priya Verma (UI/UX Designer)</option>
-                                <option value="3">Amit Kumar (QA Engineer)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Priority <span class="text-danger">*</span></label>
-                            <select class="form-input" required>
-                                <option value="Low">Low</option>
-                                <option value="Medium" selected>Medium</option>
-                                <option value="High">High</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Due Date & Time <span class="text-danger">*</span></label>
-                            <input type="datetime-local" class="form-input" required />
-                        </div>
-                        <div class="form-group">
-                            <label>Module / Project</label>
-                            <input type="text" class="form-input" placeholder="e.g., HRMS Portal" />
-                        </div>
-                    </div>
-
                     <div class="form-group">
-                        <label>Description / Instructions</label>
-                        <textarea class="form-input" rows="3" placeholder="Detail out the requirements, edge cases, or links..."></textarea>
+                        <label>Assign To (Employee) <span class="text-red">*</span></label>
+                        <select class="form-control" required>
+                            <option value="">Select Employee</option>
+                            <option value="1">Amit Kumar</option>
+                            <option value="2">Priya Verma</option>
+                        </select>
                     </div>
-
+                </div>
+                <div class="form-row">
                     <div class="form-group">
-                        <label>Attachment (Optional)</label>
-                        <input type="file" class="form-input-file" />
+                        <label>Priority <span class="text-red">*</span></label>
+                        <select class="form-control" required>
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                        </select>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeAssignTaskModal()">Cancel</button>
-                <button class="btn btn-primary" type="button" onclick="closeAssignTaskModal()"><i class="fas fa-paper-plane"></i> Assign Task</button>
-            </div>
+                    <div class="form-group">
+                        <label>Due Date <span class="text-red">*</span></label>
+                        <input type="date" class="form-control" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" rows="3" placeholder="Task details..."></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeAssignTaskModal()">Cancel</button>
+            <button type="button" class="btn-submit" onclick="closeAssignTaskModal()">Assign Task</button>
         </div>
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
 <script>
-    function goBack() {
-        if (document.referrer) {
-            window.history.back();
-        } else {
-            window.location.href = '/Home/Index'; // Fallback redirect if no history
+    function goBack() { window.history.back(); }
+    function openAssignTaskModal() { document.getElementById('assignTaskModal').classList.add('active'); }
+    function closeAssignTaskModal() { document.getElementById('assignTaskModal').classList.remove('active'); }
+
+    let ganttChart = null;
+    const tasks = [
+        { id: 'TSK-095', name: 'User Authentication Module', start: '2026-07-20', end: '2026-07-25', progress: 100 },
+        { id: 'TSK-099', name: 'Database Query Optimization', start: '2026-07-26', end: '2026-07-30', progress: 85 },
+        { id: 'TSK-101', name: 'Fix Responsive UI Bug', start: '2026-07-28', end: '2026-07-31', progress: 60 },
+        { id: 'TSK-104', name: 'API Webhook Integration', start: '2026-08-01', end: '2026-08-02', progress: 35 }
+    ];
+
+    function initGantt() {
+        if (!ganttChart) {
+            ganttChart = new Gantt("#gantt", tasks, { view_mode: 'Day' });
         }
     }
 
-    function openAssignTaskModal() {
-        document.getElementById('assignTaskModal').classList.add('active');
+    function setGanttMode(btn, mode) {
+        document.querySelectorAll('.btn-gantt-mode').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (ganttChart) {
+            ganttChart.change_view_mode(mode);
+        }
     }
 
-    function closeAssignTaskModal() {
-        document.getElementById('assignTaskModal').classList.remove('active');
+    function switchView(viewName) {
+        const kanban = document.getElementById('kanbanView');
+        const gantt = document.getElementById('ganttView');
+        const btnKanban = document.getElementById('btnKanbanView');
+        const btnGantt = document.getElementById('btnGanttView');
+
+        if (viewName === 'gantt') {
+            kanban.style.display = 'none';
+            gantt.style.display = 'block';
+            btnKanban.classList.remove('active');
+            btnGantt.classList.add('active');
+            initGantt();
+        } else {
+            gantt.style.display = 'none';
+            kanban.style.display = 'grid';
+            btnGantt.classList.remove('active');
+            btnKanban.classList.add('active');
+        }
     }
 </script>

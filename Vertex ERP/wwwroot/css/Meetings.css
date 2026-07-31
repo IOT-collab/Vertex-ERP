@@ -1,0 +1,433 @@
+﻿/* Custom Scrollbar for Dark Theme */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0b0f19;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 4px;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #4b5563;
+    }
+
+/* Base Layout matching ERP Background */
+html, body {
+    background-color: #111927 !important;
+    color: #f3f4f6;
+    margin: 0;
+    padding: 0;
+}
+
+.erp-page-wrapper {
+    background-color: #111927 !important;
+    padding: 2rem 1rem;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+/* Card Container with Seamless Dark Look */
+.meeting-container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.5rem;
+    background-color: #1f2937;
+    border-radius: 12px;
+    border: 1px solid #374151;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+/* Header Section */
+.meeting-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #374151;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 6px;
+    background-color: #111827;
+    border: 1px solid #374151;
+    transition: all 0.2s ease;
+}
+
+    .btn-back:hover {
+        color: #ffffff;
+        background-color: #374151;
+        transform: translateX(-3px);
+    }
+
+.header-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.meeting-header h2 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.65rem;
+    font-weight: 700;
+}
+
+.badge-erp {
+    background-color: #2563eb;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.meeting-header p {
+    color: #9ca3af;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    font-size: 0.95rem;
+}
+
+/* Inner Sections */
+.form-section {
+    margin-bottom: 1.75rem;
+    padding: 1.25rem;
+    background-color: #111827;
+    border: 1px solid #374151;
+    border-radius: 10px;
+}
+
+.section-label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: #f3f4f6;
+}
+
+.section-desc {
+    font-size: 0.85rem;
+    color: #9ca3af;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.required {
+    color: #f87171;
+}
+
+/* Platform Cards */
+.platform-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.85rem;
+    margin-top: 0.75rem;
+}
+
+.platform-card {
+    cursor: pointer;
+    position: relative;
+}
+
+    .platform-card input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+.card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.85rem;
+    border: 2px solid #374151;
+    border-radius: 8px;
+    background-color: #1f2937;
+    transition: all 0.2s ease-in-out;
+}
+
+.platform-icon {
+    font-size: 1.6rem;
+    margin-bottom: 0.3rem;
+}
+
+.platform-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #d1d5db;
+}
+
+.platform-card input[type="radio"]:checked + .card-content {
+    border-color: #3b82f6;
+    background-color: #1e3a8a;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+    .platform-card input[type="radio"]:checked + .card-content .platform-name {
+        color: #ffffff;
+    }
+
+.platform-card:hover .card-content {
+    border-color: #6b7280;
+}
+
+/* Dark Input Fields */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-group.mt-3 {
+        margin-top: 1rem;
+    }
+
+    .form-group label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #e5e7eb;
+        margin-bottom: 0.4rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0.7rem 0.85rem;
+        border: 1px solid #374151;
+        border-radius: 6px;
+        font-size: 0.925rem;
+        color: #ffffff;
+        background-color: #1f2937;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #6b7280;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+.form-row {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1fr;
+    gap: 1rem;
+}
+
+/* Participant List Items */
+.participants-erp-box {
+    border: 1px solid #374151;
+    border-radius: 8px;
+    background-color: #1f2937;
+    padding: 0.85rem;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.dept-group {
+    margin-bottom: 0.85rem;
+    background-color: #111827;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    padding: 0.75rem;
+}
+
+    .dept-group:last-child {
+        margin-bottom: 0;
+    }
+
+.dept-header {
+    border-bottom: 1px solid #374151;
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
+}
+
+.dept-title {
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: #f3f4f6;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.employee-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 0.5rem;
+}
+
+.emp-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.65rem;
+    background-color: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+}
+
+    .emp-chip:hover {
+        border-color: #6b7280;
+        background-color: #374151;
+    }
+
+.emp-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #2563eb;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.emp-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    overflow: hidden;
+}
+
+    .emp-info strong {
+        font-size: 0.825rem;
+        color: #f3f4f6;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .emp-info small {
+        font-size: 0.725rem;
+        color: #9ca3af;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+/* Action Buttons */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-cancel {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: #d1d5db;
+    background-color: #111827;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+    .btn-cancel:hover {
+        background-color: #374151;
+        color: #ffffff;
+    }
+
+.btn-submit {
+    padding: 0.75rem 1.75rem;
+    border: none;
+    border-radius: 6px;
+    background-color: #2563eb;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    transition: all 0.2s;
+}
+
+    .btn-submit:hover {
+        background-color: #1d4ed8;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.6);
+    }
+
+/* Responsive Media Queries */
+@media (max-width: 768px) {
+    .meeting-container {
+        padding: 1.5rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+        .form-row .form-group:last-child {
+            grid-column: span 2;
+        }
+}
+
+@media (max-width: 540px) {
+    .erp-page-wrapper {
+        padding: 0.5rem;
+    }
+
+    .meeting-container {
+        padding: 1rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+        .form-row .form-group:last-child {
+            grid-column: span 1;
+        }
+
+    .platform-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .employee-list {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .btn-cancel, .btn-submit {
+        width: 100%;
+    }
+}
