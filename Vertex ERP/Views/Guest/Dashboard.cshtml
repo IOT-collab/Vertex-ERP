@@ -4,6 +4,18 @@
 @{
     ViewData["Title"] = "ERP Master Dashboard";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var currentName = Context.Session.GetString("fullName") ?? Context.Session.GetString("username") ?? "Employee";
+    var currentRole = Context.Session.GetString("role") ?? "User";
+    var initials = string.Concat(currentName
+        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+        .Take(2)
+        .Select(part => part[0]))
+        .ToUpperInvariant();
+
+    if (string.IsNullOrWhiteSpace(initials))
+    {
+        initials = currentRole.Length >= 2 ? currentRole.Substring(0, 2).ToUpperInvariant() : "US";
+    }
 }
 <link href="~/css/Dashboard.css" rel="stylesheet" asp-append-version="true" />
 
@@ -14,7 +26,7 @@
         <div class="header-text">
             <span class="system-badge">Enterprise Resource Planning v2.4</span>
             <h2>Enterprise Overview</h2>
-            <p>Welcome back, <strong>Admin</strong>. Here is your operational summary for today.</p>
+            <p>Welcome back, <strong>@currentName</strong>. Here is your operational summary for today.</p>
         </div>
 
         <div class="header-actions">
@@ -41,8 +53,8 @@
                 🔔 <span class="dot"></span>
             </button>
 
-            <div class="user-avatar" title="Admin">
-                <span>AD</span>
+            <div class="user-avatar" title="@currentName">
+                <span>@initials</span>
             </div>
         </div>
     </header>
@@ -339,60 +351,87 @@
             </div>
         </div>
 
-        <!-- Attendance & Quick Visual Side Panel -->
+        <!-- Vertex AI Command Side Panel -->
         <div class="side-panel">
-            <div class="attendance-box">
-                <div class="box-header">
-                    <h3>Attendance Split</h3>
-                    <span class="sub-text">Today</span>
+            <div class="ai-greeting-box" data-employee-name="@currentName" data-employee-role="@currentRole">
+                <div class="ai-card-topline">
+                    <div class="ai-brand-lockup">
+                        <span class="ai-spark">AI</span>
+                        <strong>Vertex AI</strong>
+                        <span class="ai-beta">Beta</span>
+                    </div>
+                    <button type="button" class="ai-card-close" title="Keep assistant minimized">×</button>
                 </div>
 
-                <!-- Visual Progress Bar -->
-                <div class="progress-stacked">
-                    <div class="progress-bar bg-green" style="width: 75%;" title="Present"></div>
-                    <div class="progress-bar bg-blue" style="width: 10%;" title="Late"></div>
-                    <div class="progress-bar bg-orange" style="width: 8%;" title="Leave"></div>
-                    <div class="progress-bar bg-red" style="width: 7%;" title="Absent"></div>
+                <div class="ai-greeting-visual" aria-hidden="true">
+                    <div class="ai-face">
+                        <span class="ai-ear left"></span>
+                        <span class="ai-ear right"></span>
+                        <span class="ai-eye left"></span>
+                        <span class="ai-eye right"></span>
+                        <span class="ai-mouth"></span>
+                    </div>
+                    <span class="ai-shoulder"></span>
                 </div>
 
-                <div class="attendance-list">
-                    <div class="attendance-item">
-                        <span class="label-group"><span class="indicator green"></span> Present</span>
-                        <strong class="metric-val">128</strong>
+                <div class="ai-greeting-content">
+                    <h3><span id="dashboardGreeting">Good Morning</span>, @currentName <span class="wave-mark">Hi</span></h3>
+                    <p class="employee-role-line">@currentRole</p>
+                    <p>I'm your AI assistant. How can I help you today?</p>
+                </div>
+
+                <div class="ai-insight-list">
+                    <div class="ai-insight-item trend">
+                        <span class="ai-insight-icon">UP</span>
+                        <div>
+                            <strong>Sales increased by 12%</strong>
+                            <p>Compared to last month</p>
+                        </div>
                     </div>
-                    <div class="attendance-item">
-                        <span class="label-group"><span class="indicator blue"></span> Late Entry</span>
-                        <strong class="metric-val">06</strong>
+                    <div class="ai-insight-item stock">
+                        <span class="ai-insight-icon">IN</span>
+                        <div>
+                            <strong>Inventory low on 5 items</strong>
+                            <p>Reorder recommended</p>
+                        </div>
                     </div>
-                    <div class="attendance-item">
-                        <span class="label-group"><span class="indicator orange"></span> On Leave</span>
-                        <strong class="metric-val">08</strong>
+                    <div class="ai-insight-item invoice">
+                        <span class="ai-insight-icon">IV</span>
+                        <div>
+                            <strong>12 invoices are pending</strong>
+                            <p>Worth Rs 2,45,000</p>
+                        </div>
                     </div>
-                    <div class="attendance-item">
-                        <span class="label-group"><span class="indicator red"></span> Absent</span>
-                        <strong class="metric-val">05</strong>
+                    <div class="ai-insight-item purchase">
+                        <span class="ai-insight-icon">PO</span>
+                        <div>
+                            <strong>3 purchase orders</strong>
+                            <p>Need your approval</p>
+                        </div>
+                    </div>
+                    <div class="ai-insight-item attendance">
+                        <span class="ai-insight-icon">HR</span>
+                        <div>
+                            <strong>5 employees are absent today</strong>
+                            <p>Check attendance</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Operational Alerts Card -->
-            <div class="alerts-box">
-                <h3>Priority Alerts</h3>
-                <div class="alert-list">
-                    <div class="alert-item warning">
-                        <span class="alert-icon">⚡</span>
-                        <div>
-                            <strong>Low Stock Warning</strong>
-                            <p>18 SKUs below threshold level.</p>
-                        </div>
-                    </div>
-                    <div class="alert-item info">
-                        <span class="alert-icon">💳</span>
-                        <div>
-                            <strong>Payroll Cycle</strong>
-                            <p>Cutoff in 2 days. 4 pending timesheets.</p>
-                        </div>
-                    </div>
+            <div class="ai-quick-actions-box">
+                <h3>Quick Actions</h3>
+                <div class="ai-quick-grid">
+                    <button type="button"><span>CI</span>Create Invoice</button>
+                    <button type="button"><span>PO</span>Create PO</button>
+                    <button type="button"><span>AC</span>Add Customer</button>
+                    <button type="button"><span>AE</span>Add Employee</button>
+                    <button type="button"><span>GR</span>Generate Report</button>
+                    <button type="button"><span>SR</span>Send Reminder</button>
+                </div>
+                <div class="ai-ask-shell">
+                    <input type="text" id="aiSideInput" placeholder="Ask me anything..." />
+                    <button type="button" id="aiSideSend" title="Send question">Send</button>
                 </div>
             </div>
         </div>
@@ -505,8 +544,21 @@
         const aiMic = document.getElementById("aiMic");
         const aiHeaderMic = document.getElementById("aiHeaderMic");
         const aiMessages = document.getElementById("aiMessages");
+        const dashboardGreeting = document.getElementById("dashboardGreeting");
+        const aiCardClose = document.querySelector(".ai-card-close");
+        const aiGreetingBox = document.querySelector(".ai-greeting-box");
+        const aiSideInput = document.getElementById("aiSideInput");
+        const aiSideSend = document.getElementById("aiSideSend");
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+
+        if (dashboardGreeting) {
+            const currentHour = new Date().getHours();
+            dashboardGreeting.textContent =
+                currentHour < 12 ? "Good Morning" :
+                currentHour < 17 ? "Good Afternoon" :
+                "Good Evening";
+        }
 
         if (recognition) {
             recognition.lang = "en-IN";
@@ -637,6 +689,28 @@
 
         aiMic.addEventListener("click", startListening);
         aiHeaderMic.addEventListener("click", startListening);
+        aiCardClose?.addEventListener("click", () => {
+            aiGreetingBox?.classList.add("is-hidden");
+        });
+
+        const sendSideQuestion = () => {
+            const question = aiSideInput?.value.trim();
+            if (!question) {
+                return;
+            }
+
+            aiPanel.classList.add("open");
+            aiInput.value = question;
+            aiSideInput.value = "";
+            askAssistant();
+        };
+
+        aiSideSend?.addEventListener("click", sendSideQuestion);
+        aiSideInput?.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                sendSideQuestion();
+            }
+        });
 
         if (recognition) {
             recognition.onresult = (event) => {
