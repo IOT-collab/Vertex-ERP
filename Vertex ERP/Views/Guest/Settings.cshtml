@@ -1,13 +1,24 @@
 ﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+    Settings Hub Dashboard - Dynamic ERP UI Configuration
 *@
 @{
-    ViewData["Title"] = "Settings";
+    ViewData["Title"] = "System Settings";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
 <link href="~/css/settings.css" rel="stylesheet" />
 
 <div class="settings-page">
+
+    <!-- Top Back Navigation Bar -->
+    <div class="top-nav-bar">
+        <button type="button" class="btn-back" onclick="window.history.back()" title="Go Back">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            
+        </button>
+    </div>
 
     <!-- Responsive Page Header Layer -->
     <div class="page-header">
@@ -16,18 +27,22 @@
             <p>Manage your ERP configuration, integrations, and preferences from one centralized dashboard.</p>
         </div>
 
-        <button class="save-btn">
+        <button type="button" class="save-btn" id="btnSaveSettings">
             <!-- Custom Save SVG Icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-            Save Changes
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span>Save Changes</span>
         </button>
     </div>
 
-    <!-- Fluid Auto-Scaling Grid Wrapper -->
+    <!-- Dynamic Auto-Scaling Grid Wrapper -->
     <div class="settings-grid">
 
-        <!-- Company -->
-        <div class="setting-card">
+        <!-- Company Profile -->
+        <a asp-controller="Settings" asp-action="Company" class="setting-card">
             <div class="card-icon icon-company">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="16"></line><line x1="15" y1="22" x2="15" y2="16"></line><line x1="9" y1="16" x2="15" y2="16"></line><path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01"></path></svg>
             </div>
@@ -35,21 +50,21 @@
                 <h4>Company</h4>
                 <p>Company Profile & Branding</p>
             </div>
-        </div>
+        </a>
 
         <!-- Users & Roles -->
-        <div class="setting-card">
+        <a asp-controller="Settings" asp-action="UsersAndRoles" class="setting-card">
             <div class="card-icon icon-users">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             </div>
             <div class="card-content">
-                <h4>User & Roles</h4>
+                <h4>Users & Roles</h4>
                 <p>Manage Employees & Permissions</p>
             </div>
-        </div>
+        </a>
 
         <!-- Security -->
-        <div class="setting-card">
+        <a asp-controller="Settings" asp-action="Security" class="setting-card">
             <div class="card-icon icon-security">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
             </div>
@@ -57,10 +72,10 @@
                 <h4>Security</h4>
                 <p>Password & Authentication</p>
             </div>
-        </div>
+        </a>
 
         <!-- Email SMTP -->
-        <div class="setting-card">
+        <a asp-controller="Settings" asp-action="Email" class="setting-card">
             <div class="card-icon icon-email">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
             </div>
@@ -68,150 +83,150 @@
                 <h4>Email SMTP</h4>
                 <p>Email Configuration</p>
             </div>
-        </div>
+        </a>
 
-        <!-- SMS -->
-        <div class="setting-card">
+        <!-- SMS Gateway -->
+        <a asp-controller="Settings" asp-action="Sms" class="setting-card">
             <div class="card-icon icon-sms">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
             </div>
             <div class="card-content">
-                <h4>SMS</h4>
-                <p>SMS Gateway Settings</p>
+                <h4>SMS Gateway</h4>
+                <p>SMS Provider Settings</p>
             </div>
-        </div>
+        </a>
 
-        <!-- Language -->
-        <div class="setting-card">
+        <!-- Language & Timezone -->
+        <a asp-controller="Settings" asp-action="Localization" class="setting-card">
             <div class="card-icon icon-language">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"></path></svg>
             </div>
             <div class="card-content">
                 <h4>Language</h4>
                 <p>Language & Timezone</p>
             </div>
-        </div>
+        </a>
 
-        <!-- Finance -->
-        <div class="setting-card">
+        <!-- Finance & Tax -->
+        <a asp-controller="Settings" asp-action="Finance" class="setting-card">
             <div class="card-icon icon-finance">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
             </div>
             <div class="card-content">
                 <h4>Finance</h4>
-                <p>Currency & Tax</p>
+                <p>Currency & Tax Rules</p>
             </div>
-        </div>
+        </a>
 
         <!-- Attendance -->
-        <div class="setting-card">
+        <a asp-controller="Settings" asp-action="Attendance" class="setting-card">
             <div class="card-icon icon-attendance">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><polyline points="9 16 11 18 15 14"></polyline></svg>
             </div>
             <div class="card-content">
                 <h4>Attendance</h4>
-                <p>Attendance Rules</p>
+                <p>Attendance Policies</p>
             </div>
-        </div>
+        </a>
 
-        <!-- Shift -->
-        <div class="setting-card">
+        <!-- Shift Timings -->
+        <a asp-controller="Settings" asp-action="Shifts" class="setting-card">
             <div class="card-icon icon-shift">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             </div>
             <div class="card-content">
                 <h4>Shift</h4>
-                <p>Shift Timing</p>
+                <p>Shift & Roster Management</p>
             </div>
-        </div>
+        </a>
 
         <!-- Inventory -->
-        <div class="setting-card">
+        <a asp-controller="Settings" asp-action="Inventory" class="setting-card">
             <div class="card-icon icon-inventory">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
             </div>
             <div class="card-content">
                 <h4>Inventory</h4>
-                <p>Warehouse Configuration</p>
+                <p>Warehouse & Stock Parameters</p>
             </div>
-        </div>
+        </a>
 
-        <!-- Print -->
-        <div class="setting-card">
+        <!-- Print & Hardware -->
+        <a asp-controller="Settings" asp-action="Print" class="setting-card">
             <div class="card-icon icon-print">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
             </div>
             <div class="card-content">
                 <h4>Print</h4>
-                <p>Invoice & Barcode Printer</p>
+                <p>Invoice & Barcode Formatting</p>
             </div>
-        </div>
+        </a>
 
         <!-- Notifications -->
-        <div class="setting-card">
+        <a asp-controller="Settings" asp-action="Notifications" class="setting-card">
             <div class="card-icon icon-bell">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
             </div>
             <div class="card-content">
                 <h4>Notifications</h4>
-                <p>Email & Push Alerts</p>
+                <p>System & Push Alerts</p>
             </div>
-        </div>
+        </a>
 
-        <!-- Backup -->
-        <div class="setting-card">
+        <!-- Backup & Recovery -->
+        <a asp-controller="Settings" asp-action="Backup" class="setting-card">
             <div class="card-icon icon-backup">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path></svg>
             </div>
             <div class="card-content">
                 <h4>Backup</h4>
-                <p>Database Backup & Restore</p>
+                <p>Database Backups & Recovery</p>
             </div>
-        </div>
+        </a>
 
-        <!-- API -->
-        <div class="setting-card">
+        <!-- API Integrations -->
+        <a asp-controller="Settings" asp-action="Api" class="setting-card">
             <div class="card-icon icon-api">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="8"></line><line x1="18" y1="3" x2="18" y2="8"></line><line x1="12" y1="3" x2="12" y2="8"></line><line x1="6" y1="16" x2="6" y2="21"></line><line x1="18" y1="16" x2="18" y2="21"></line><line x1="12" y1="16" x2="12" y2="21"></line><path d="M3 8h18v8H3z"></path></svg>
             </div>
             <div class="card-content">
                 <h4>API</h4>
-                <p>Integration Settings</p>
+                <p>Webhooks & API Keys</p>
             </div>
-        </div>
+        </a>
 
         <!-- Appearance -->
-        <div class="setting-card">
+        <a asp-controller="Settings" asp-action="Appearance" class="setting-card">
             <div class="card-icon icon-appearance">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 14.7255 3.09032 17.1962 4.85857 19C5.02449 19.1659 5.29872 19.1424 5.43673 18.9514C6.44297 17.56 8.11306 16.6667 10 16.6667H14C14.7364 16.6667 15.4199 16.9453 15.9382 17.4024C16.4883 17.8876 16.6667 18.6277 16.4011 19.3174C15.3406 22.071 12.3582 22 12 22Z"></path><circle cx="7.5" cy="10.5" r="1.5"></circle><circle cx="11.5" cy="7.5" r="1.5"></circle><circle cx="16.5" cy="9.5" r="1.5"></circle></svg>
             </div>
             <div class="card-content">
                 <h4>Appearance</h4>
-                <p>Theme & Colors</p>
+                <p>Theme, Branding & Layout</p>
             </div>
-        </div>
+        </a>
 
         <!-- Audit Logs -->
-        <div class="setting-card">
+        <a asp-controller="Settings" asp-action="AuditLogs" class="setting-card">
             <div class="card-icon icon-audit">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
             </div>
             <div class="card-content">
                 <h4>Audit Logs</h4>
-                <p>User Activity Logs</p>
+                <p>System Activity Logs</p>
             </div>
-        </div>
+        </a>
 
         <!-- Maintenance -->
-        <div class="setting-card">
+        <a asp-controller="Settings" asp-action="Maintenance" class="setting-card">
             <div class="card-icon icon-maintenance">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
             </div>
             <div class="card-content">
                 <h4>Maintenance</h4>
-                <p>System Health</p>
+                <p>System Health & Maintenance</p>
             </div>
-        </div>
+        </a>
 
     </div>
 </div>

@@ -1,75 +1,104 @@
-﻿/* Core Structural Layout Base */
+﻿/* Container Layout Base */
 .attendance-panel-container {
-    padding: 30px;
+    padding: 24px 30px;
     width: 100%;
     min-height: 100vh;
-    background: #f4f7fc;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Inter, system-ui, sans-serif;
 }
 
-/* Operational Back Route Link Component */
-.back-link {
-    display: inline-block;
-    color: #2563eb;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-    .back-link:hover {
-        transform: translateX(-4px);
+    .attendance-panel-container * {
+        box-sizing: border-box;
     }
 
-.page-header h2 {
-    color: #1e3a5f;
-    font-size: 26px;
-    font-weight: 700;
-}
+    /* Header Box */
+    .attendance-panel-container .page-header {
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
 
-.page-header p {
-    color: #64748b;
-    margin-top: 6px;
-    font-size: 14px;
-    line-height: 1.5;
-}
+    .attendance-panel-container .header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
 
-/* Workspace Grid Card Containers */
+    .attendance-panel-container .page-header h2 {
+        color: #0f172a !important;
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .attendance-panel-container .page-header p {
+        color: #475569 !important;
+        margin: 4px 0 0 0;
+        font-size: 13.5px;
+    }
+
+    /* Back Button */
+    .attendance-panel-container .btn-back {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        color: #0f172a !important;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+        .attendance-panel-container .btn-back:hover {
+            background: #e2e8f0;
+            border-color: #2563eb;
+            color: #2563eb !important;
+            transform: translateX(-3px);
+        }
+
+/* Main Form Wrapper */
 .form-container-wrapper {
-    background: #fff;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1;
     border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, .03);
-    margin-top: 25px;
-    padding: 30px;
+    padding: 28px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-/* Interactive Layout Workspace Grids */
+/* Form Layout Grids */
 .form-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
-    gap: 30px;
+    gap: 28px;
 }
 
 .form-main-section,
 .form-side-section {
     display: flex;
     flex-direction: column;
-    gap: 22px;
+    gap: 20px;
 }
 
-/* Linear Balanced Input Row Components */
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
+    gap: 16px;
 }
 
     .form-row.triple-row {
-        grid-template-columns: 1fr 1fr 1fr; /* Multi-unit grid metrics elements alignment */
+        grid-template-columns: 1fr 1fr 1fr;
     }
 
-/* Standard Input Control Nodes */
+/* Strict High-Contrast Labels & Inputs Fix */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -77,9 +106,10 @@
 }
 
     .form-group label {
-        font-size: 13.5px;
-        font-weight: 600;
-        color: #334155;
+        font-size: 13.5px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important; /* Force visible Dark Color */
+        display: block;
     }
 
     .form-group input[type="text"],
@@ -89,27 +119,38 @@
     .form-group select,
     .form-group textarea {
         width: 100%;
-        padding: 11px 14px;
-        border: 1px solid #cbd5e1;
+        padding: 10px 14px;
+        border: 1px solid #94a3b8 !important;
         border-radius: 8px;
-        font-size: 14px;
+        font-size: 13.5px;
         outline: none;
-        background-color: #fff;
-        color: #1e293b;
-        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        transition: all 0.2s ease;
     }
+
+        .form-group select option {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #64748b !important;
+        }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+            background-color: #ffffff !important;
         }
 
-/* Contextual Right Side Panel Config Box Styling */
+/* Right Side Config Panel Fix */
 .config-card {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1;
     border-radius: 10px;
     padding: 20px;
     display: flex;
@@ -118,15 +159,15 @@
 }
 
     .config-card h3 {
-        font-size: 14px;
-        color: #1e3a5f;
-        font-weight: 700;
+        font-size: 13px !important;
+        color: #1e3a5f !important;
+        font-weight: 800 !important;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 4px;
+        margin: 0 0 4px 0;
     }
 
-/* Micro Toggle Checkbox Elements Framework */
+/* Custom Checkboxes */
 .checkbox-group {
     display: flex;
     align-items: center;
@@ -138,9 +179,9 @@
     position: relative;
     padding-left: 28px;
     cursor: pointer;
-    font-size: 13.5px;
-    font-weight: 500;
-    color: #475569;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
     user-select: none;
 }
 
@@ -154,12 +195,12 @@
 
 .checkmark {
     position: absolute;
-    top: 5px;
+    top: 1px;
     left: 0;
     height: 18px;
     width: 18px;
-    background-color: #fff;
-    border: 1px solid #cbd5e1;
+    background-color: #ffffff;
+    border: 1px solid #64748b;
     border-radius: 4px;
 }
 
@@ -192,82 +233,77 @@
     transform: rotate(45deg);
 }
 
-/* Alert Exception Information Boxes */
+/* Info Alert Box */
 .info-alert-box {
-    background: #eff6ff;
+    background: #eff6ff !important;
     border-left: 4px solid #2563eb;
     border-radius: 6px;
     padding: 14px;
 }
 
     .info-alert-box h4 {
-        font-size: 13px;
-        color: #1e40af;
-        font-weight: 700;
-        margin-bottom: 4px;
+        font-size: 13px !important;
+        color: #1e40af !important;
+        font-weight: 700 !important;
+        margin: 0 0 4px 0;
     }
 
     .info-alert-box p {
-        font-size: 12.5px;
-        color: #1e3a8a;
+        font-size: 12.5px !important;
+        color: #1e3a8a !important;
         line-height: 1.5;
+        margin: 0;
     }
 
-/* Operational Footprint Command Actions Buttons Panel */
+/* Action Buttons */
 .form-actions-footer {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    margin-top: 30px;
+    margin-top: 24px;
     padding-top: 20px;
     border-top: 1px solid #e2e8f0;
 }
 
 .btn-cancel,
 .btn-submit {
-    padding: 11px 24px;
+    padding: 10px 22px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 13.5px;
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
     text-align: center;
-    transition: background-color 0.15s ease;
+    transition: all 0.2s ease;
 }
 
 .btn-cancel {
-    background: #fff;
-    color: #64748b;
+    background: #ffffff !important;
+    color: #475569 !important;
     border: 1px solid #cbd5e1;
 }
 
     .btn-cancel:hover {
-        background: #f8fafc;
-        color: #334155;
+        background: #f8fafc !important;
+        color: #0f172a !important;
     }
 
 .btn-submit {
-    background: #2563eb;
-    color: #fff;
+    background: #2563eb !important;
+    color: #ffffff !important;
     border: none;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
 }
 
     .btn-submit:hover {
-        background: #1d4ed8;
+        background: #1d4ed8 !important;
     }
 
-/* ==========================================================================
-   DYNAMIC MEDIA QUERY VIEWPORT MATRIX (BREAKPOINT RESPONSIVENESS CONTROLS)
-   ========================================================================== */
-
+/* Responsive Grid */
 @media (max-width: 992px) {
     .form-grid {
-        grid-template-columns: 1fr; /* Stacks columns securely down to unified rows layout */
-        gap: 25px;
-    }
-
-    .form-side-section {
-        flex-direction: column-reverse; /* Repositions warnings panel blocks safely under statuses configurations */
+        grid-template-columns: 1fr;
+        gap: 24px;
     }
 }
 
@@ -278,31 +314,22 @@
 
     .form-container-wrapper {
         padding: 20px;
-        margin-top: 15px;
-    }
-
-    .page-header h2 {
-        font-size: 22px;
-    }
-
-    .page-header p {
-        font-size: 13px;
     }
 
     .form-row,
     .form-row.triple-row {
-        grid-template-columns: 1fr; /* Standard horizontal fields wrap completely layout-wise into standard blocks */
-        gap: 20px;
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
 
     .form-actions-footer {
-        flex-direction: column-reverse; /* Action buttons stack natively for tactile UI mapping layout targets */
+        flex-direction: column-reverse;
         gap: 10px;
     }
 
     .btn-cancel,
     .btn-submit {
         width: 100%;
-        padding: 13px;
+        padding: 12px;
     }
 }

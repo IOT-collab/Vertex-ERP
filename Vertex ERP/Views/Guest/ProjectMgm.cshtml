@@ -1,72 +1,70 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-    ViewData["Title"] = "ProjectMgm";
+﻿@{
+    ViewData["Title"] = "Project Management";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
 <link href="~/css/projectmgm.css" rel="stylesheet" />
 
 <div class="project-page">
 
-    <!-- Adaptive Page Header Layout -->
+    <!-- Top Action Navigation Bar -->
+    <div class="top-nav-bar">
+        <button type="button" class="btn-back" onclick="window.history.back()" title="Go Back">
+            <span class="back-icon">&#8592;</span> 
+        </button>
+    </div>
+
+    <!-- Page Header Hub -->
     <div class="page-header">
         <div class="header-text">
             <h2>Project Management</h2>
             <p>Manage Projects, Tasks & Resources</p>
         </div>
 
-        <a href="@Url.Action("AddProjectMgm", "Guest")" class="btn-add" style="text-decoration: none; display: inline-flex; align-items: center;">
+        <a href="@Url.Action("AddProjectMgm", "Guest")" class="btn-add">
             + Create Project
         </a>
     </div>
 
-    <!-- Summary Metrics Grid Row -->
+    <!-- Analytics Metrics Row -->
     <div class="summary">
         <div class="summary-card">
-            <h2>18</h2>
+            <h2>@(ViewBag.TotalProjects ?? 0)</h2>
             <p>Total Projects</p>
         </div>
 
         <div class="summary-card">
-            <h2>126</h2>
+            <h2>@(ViewBag.ActiveTasks ?? 0)</h2>
             <p>Active Tasks</p>
         </div>
 
         <div class="summary-card">
-            <h2>9</h2>
+            <h2>@(ViewBag.RunningProjects ?? 0)</h2>
             <p>Running Projects</p>
         </div>
 
         <div class="summary-card">
-            <h2>92%</h2>
+            <h2>@(ViewBag.CompletionRate ?? "0%")</h2>
             <p>Completion</p>
         </div>
     </div>
 
-    <!-- Core Interactive Operations Module Grid Matrix -->
+    <!-- Operational Modules Grid -->
     <div class="module-grid">
-
 
         <div class="module-card">
             <div class="icon">📁</div>
             <h3>Project Creation</h3>
             <p>Create and manage company projects.</p>
-            <a asp-controller="ProjectMgm"
-               asp-action="ProjectCreation"
-               class="btn-module-action">
+            <a asp-controller="ProjectMgm" asp-action="ProjectCreation" class="btn-module-action">
                 Open
             </a>
         </div>
-
 
         <div class="module-card">
             <div class="icon">✅</div>
             <h3>Tasks</h3>
             <p>Assign and monitor project tasks.</p>
-            <a asp-controller="ProjectMgm"
-               asp-action="AssignTask"
-               class="btn-module-action">
+            <a asp-controller="ProjectMgm" asp-action="AssignTask" class="btn-module-action">
                 Open
             </a>
         </div>
@@ -75,9 +73,7 @@
             <div class="icon">📊</div>
             <h3>Project Timeline</h3>
             <p>Track project timeline visually.</p>
-            <a asp-controller="ProjectMgm"
-               asp-action="ProjectTimeline"
-               class="btn-module-action">
+            <a asp-controller="ProjectMgm" asp-action="ProjectTimeline" class="btn-module-action">
                 Open
             </a>
         </div>
@@ -86,9 +82,7 @@
             <div class="icon">👥</div>
             <h3>Resource Allocation</h3>
             <p>Allocate employees and resources.</p>
-            <a asp-controller="ProjectMgm"
-               asp-action="ResourceAllocation"
-               class="btn-module-action">
+            <a asp-controller="ProjectMgm" asp-action="ResourceAllocation" class="btn-module-action">
                 Open
             </a>
         </div>
@@ -97,9 +91,7 @@
             <div class="icon">⏱</div>
             <h3>Timesheet</h3>
             <p>Manage employee work hours.</p>
-            <a asp-controller="ProjectMgm"
-               asp-action="Timesheet"
-               class="btn-module-action">
+            <a asp-controller="ProjectMgm" asp-action="Timesheet" class="btn-module-action">
                 Open
             </a>
         </div>
@@ -108,9 +100,7 @@
             <div class="icon">💰</div>
             <h3>Budget Tracking</h3>
             <p>Monitor project expenses & budget.</p>
-            <a asp-controller="ProjectMgm"
-               asp-action="BudgetTracking"
-               class="btn-module-action">
+            <a asp-controller="ProjectMgm" asp-action="BudgetTracking" class="btn-module-action">
                 Open
             </a>
         </div>
@@ -118,10 +108,8 @@
         <div class="module-card">
             <div class="icon">🎫</div>
             <h3>Raise Enquiry</h3>
-            <p>Create support tickets, track issue status and communicate with the support team.</p>
-            <a asp-controller="ProjectMgm"
-               asp-action="RaisedEnquiry"
-               class="btn-module-action">
+            <p>Create support tickets and track issue status.</p>
+            <a asp-controller="ProjectMgm" asp-action="RaisedEnquiry" class="btn-module-action">
                 Open
             </a>
         </div>

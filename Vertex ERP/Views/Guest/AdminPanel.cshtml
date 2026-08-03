@@ -9,6 +9,13 @@
 
 <div class="admin-control-page">
 
+    <!-- Back Navigation Bar -->
+    <div class="top-nav-bar">
+        <button type="button" class="btn-back" onclick="window.history.back()" title="Go Back">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+    </div>
+
     <!-- Top Navigation Header -->
     <header class="dashboard-header">
         <div class="header-text">
@@ -21,40 +28,40 @@
             <button type="button" class="btn-secondary">
                 <i class="fa-solid fa-power-off"></i> Maintenance Mode
             </button>
-            <button type="submit" class="save-btn">
+            <button type="button" class="save-btn">
                 <i class="fa-solid fa-floppy-disk"></i> Save System State
             </button>
         </div>
     </header>
 
-    <!-- Quick Metrics & System Health Bar -->
+    <!-- Metrics & System Health Bar -->
     <section class="metrics-grid">
         <div class="metric-card">
             <div class="metric-icon bg-blue-light"><i class="fa-solid fa-cubes text-blue"></i></div>
             <div class="metric-info">
                 <span class="metric-title">Active Modules</span>
-                <span class="metric-value">06 / 06</span>
+                <span class="metric-value">@(ViewBag.ActiveModules ?? "0")</span>
             </div>
         </div>
         <div class="metric-card">
             <div class="metric-icon bg-green-light"><i class="fa-solid fa-server text-green"></i></div>
             <div class="metric-info">
                 <span class="metric-title">System Health</span>
-                <span class="metric-value">99.9% <small>Optimal</small></span>
+                <span class="metric-value">@(ViewBag.SystemHealth ?? "100%") <small>Optimal</small></span>
             </div>
         </div>
         <div class="metric-card">
             <div class="metric-icon bg-purple-light"><i class="fa-solid fa-users text-purple"></i></div>
             <div class="metric-info">
                 <span class="metric-title">Active Sessions</span>
-                <span class="metric-value">142 Users</span>
+                <span class="metric-value">@(ViewBag.ActiveSessions ?? "0") Users</span>
             </div>
         </div>
         <div class="metric-card">
             <div class="metric-icon bg-orange-light"><i class="fa-solid fa-database text-orange"></i></div>
             <div class="metric-info">
                 <span class="metric-title">DB Backup Status</span>
-                <span class="metric-value">Today, 04:00 AM</span>
+                <span class="metric-value">@(ViewBag.BackupStatus ?? "Up-to-date")</span>
             </div>
         </div>
     </section>
@@ -66,10 +73,10 @@
             <input type="text" placeholder="Search modules, configurations, or settings..." />
         </div>
         <div class="toolbar-actions">
-            <a asp-controller="Guest" asp-action="AddAdminPanel" class="btn-quick-config">
+            <a asp-controller="Admin" asp-action="GlobalSettings" class="btn-quick-config">
                 <i class="fa-solid fa-gear"></i> Global App Settings
             </a>
-            <a asp-controller="Guest" asp-action="AddAdminPanel" class="btn-quick-config">
+            <a asp-controller="Admin" asp-action="RolesAndPermissions" class="btn-quick-config">
                 <i class="fa-solid fa-user-lock"></i> RBAC & Roles
             </a>
         </div>
@@ -93,12 +100,12 @@
                 <p>Manage application branding, regional setups, active company profiles, and global metadata variables.</p>
 
                 <ul class="quick-links">
-                    <li><a asp-controller="Guest" asp-action="AddAdminPanel"><i class="fa-solid fa-angle-right"></i> Branding & Logo Setup</a></li>
-                    <li><a asp-controller="Guest" asp-action="AddAdminPanel"><i class="fa-solid fa-angle-right"></i> Tax & Currency Rules</a></li>
+                    <li><a asp-controller="Admin" asp-action="Branding"><i class="fa-solid fa-angle-right"></i> Branding & Logo Setup</a></li>
+                    <li><a asp-controller="Admin" asp-action="TaxCurrency"><i class="fa-solid fa-angle-right"></i> Tax & Currency Rules</a></li>
                 </ul>
 
                 <div class="module-footer">
-                    <a asp-controller="Guest" asp-action="AddAdminPanel" class="btn-action">
+                    <a asp-controller="Admin" asp-action="SystemConfig" class="btn-action">
                         <i class="fa-solid fa-wrench"></i> Configure All
                     </a>
                     <span class="status-badge badge-active"><i class="fa-solid fa-circle"></i> Active</span>
@@ -121,12 +128,12 @@
                 <p>Global employee masters, permission overrides, departmental routing matrices, and authorization levels.</p>
 
                 <ul class="quick-links">
-                    <li><a asp-controller="Guest" asp-action="AddAdminPanel"><i class="fa-solid fa-angle-right"></i> Employee Master Directory</a></li>
-                    <li><a asp-controller="Guest" asp-action="AddAdminPanel"><i class="fa-solid fa-angle-right"></i> Department & Designation Rules</a></li>
+                    <li><a asp-controller="Admin" asp-action="EmployeeDirectory"><i class="fa-solid fa-angle-right"></i> Employee Master Directory</a></li>
+                    <li><a asp-controller="Admin" asp-action="Departments"><i class="fa-solid fa-angle-right"></i> Department & Designation Rules</a></li>
                 </ul>
 
                 <div class="module-footer">
-                    <a asp-controller="Guest" asp-action="AddAdminPanel" class="btn-action">
+                    <a asp-controller="Admin" asp-action="HRAccess" class="btn-action">
                         <i class="fa-solid fa-user-shield"></i> Manage HR Access
                     </a>
                     <span class="status-badge badge-active"><i class="fa-solid fa-circle"></i> Active</span>
@@ -149,12 +156,12 @@
                 <p>Biometric device gateways, shift allocation engines, manual overrides, and structural late/overtime policies.</p>
 
                 <ul class="quick-links">
-                    <li><a asp-controller="Guest" asp-action="AddAdminPanel"><i class="fa-solid fa-angle-right"></i> Biometric Device Sync</a></li>
-                    <li><a asp-controller="Guest" asp-action="AddAdminPanel"><i class="fa-solid fa-angle-right"></i> Shift Timings & Overtime</a></li>
+                    <li><a asp-controller="Admin" asp-action="BiometricSync"><i class="fa-solid fa-angle-right"></i> Biometric Device Sync</a></li>
+                    <li><a asp-controller="Admin" asp-action="ShiftTimings"><i class="fa-solid fa-angle-right"></i> Shift Timings & Overtime</a></li>
                 </ul>
 
                 <div class="module-footer">
-                    <a asp-controller="Guest" asp-action="AddAdminPanel" class="btn-action">
+                    <a asp-controller="Admin" asp-action="Gateways" class="btn-action">
                         <i class="fa-solid fa-network-wired"></i> Open Gateways
                     </a>
                     <span class="status-badge badge-active"><i class="fa-solid fa-circle"></i> Active</span>
@@ -177,12 +184,12 @@
                 <p>Warehouse racking rules, barcode mapping systems, live stock tracking, and validation rules setup.</p>
 
                 <ul class="quick-links">
-                    <li><a asp-controller="Guest" asp-action="AddAdminPanel"><i class="fa-solid fa-angle-right"></i> Warehouse Allocation</a></li>
-                    <li><a asp-controller="Guest" asp-action="AddAdminPanel"><i class="fa-solid fa-angle-right"></i> Stock Alert Thresholds</a></li>
+                    <li><a asp-controller="Admin" asp-action="WarehouseAllocation"><i class="fa-solid fa-angle-right"></i> Warehouse Allocation</a></li>
+                    <li><a asp-controller="Admin" asp-action="StockAlerts"><i class="fa-solid fa-angle-right"></i> Stock Alert Thresholds</a></li>
                 </ul>
 
                 <div class="module-footer">
-                    <a asp-controller="Guest" asp-action="AddAdminPanel" class="btn-action">
+                    <a asp-controller="Admin" asp-action="InventoryConfig" class="btn-action">
                         <i class="fa-solid fa-boxes-packing"></i> Configure Stock
                     </a>
                     <span class="status-badge badge-active"><i class="fa-solid fa-circle"></i> Active</span>
@@ -205,12 +212,12 @@
                 <p>Salary structure allocation, tax deduction engines, payslip generation locks, and direct dispersal gates.</p>
 
                 <ul class="quick-links">
-                    <li><a asp-controller="Guest" asp-action="AddAdminPanel"><i class="fa-solid fa-angle-right"></i> Tax & Deductions Master</a></li>
-                    <li><a asp-controller="Guest" asp-action="AddAdminPanel"><i class="fa-solid fa-angle-right"></i> Payslip Lock & Release</a></li>
+                    <li><a asp-controller="Admin" asp-action="TaxDeductions"><i class="fa-solid fa-angle-right"></i> Tax & Deductions Master</a></li>
+                    <li><a asp-controller="Admin" asp-action="PayslipRelease"><i class="fa-solid fa-angle-right"></i> Payslip Lock & Release</a></li>
                 </ul>
 
                 <div class="module-footer">
-                    <a asp-controller="Guest" asp-action="AddAdminPanel" class="btn-action">
+                    <a asp-controller="Admin" asp-action="PayrollVault" class="btn-action">
                         <i class="fa-solid fa-vault"></i> Access Vault
                     </a>
                     <span class="status-badge badge-active"><i class="fa-solid fa-circle"></i> Active</span>
@@ -233,12 +240,12 @@
                 <p>Webhook management, core encryption keys lifecycle, cloud data synchronization logs, and system diagnostics.</p>
 
                 <ul class="quick-links">
-                    <li><a asp-controller="Guest" asp-action="AddAdminPanel"><i class="fa-solid fa-angle-right"></i> API Tokens & Webhooks</a></li>
-                    <li><a asp-controller="Guest" asp-action="AddAdminPanel"><i class="fa-solid fa-angle-right"></i> Security Audit Logs</a></li>
+                    <li><a asp-controller="Admin" asp-action="ApiTokens"><i class="fa-solid fa-angle-right"></i> API Tokens & Webhooks</a></li>
+                    <li><a asp-controller="Admin" asp-action="AuditLogs"><i class="fa-solid fa-angle-right"></i> Security Audit Logs</a></li>
                 </ul>
 
                 <div class="module-footer">
-                    <a asp-controller="Guest" asp-action="AddAdminPanel" class="btn-action">
+                    <a asp-controller="Admin" asp-action="CoreSecurity" class="btn-action">
                         <i class="fa-solid fa-code-compare"></i> Core Settings
                     </a>
                     <span class="status-badge badge-active"><i class="fa-solid fa-circle"></i> Active</span>

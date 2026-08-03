@@ -44,6 +44,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+    width: 100%;
 }
 
 /* --- Page Header --- */
@@ -59,7 +60,30 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-wrap: wrap;
 }
+
+/* Back Button Styles */
+.btn-back {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+    .btn-back:hover {
+        background-color: var(--bg-input);
+        border-color: var(--border-highlight);
+        transform: translateY(-2px);
+    }
 
 .icon-avatar {
     width: 48px;
@@ -72,6 +96,7 @@ body {
     font-size: 1.3rem;
     color: #FFF;
     box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    flex-shrink: 0;
 }
 
 .header-title-group h1 {
@@ -89,6 +114,7 @@ body {
 .header-actions {
     display: flex;
     gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 /* --- Buttons --- */
@@ -103,6 +129,7 @@ body {
     align-items: center;
     gap: 0.5rem;
     transition: var(--transition);
+    white-space: nowrap;
 }
 
 .btn-primary {
@@ -130,6 +157,7 @@ body {
     padding: 0.35rem 0.75rem;
     font-size: 0.75rem;
     border-radius: var(--radius-sm);
+    white-space: nowrap;
 }
 
 /* --- Metric Cards --- */
@@ -177,6 +205,7 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 1.1rem;
+    flex-shrink: 0;
 }
 
 .icon-blue {
@@ -212,6 +241,7 @@ body {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     overflow: hidden;
+    min-width: 0;
 }
 
 .card-header {
@@ -246,6 +276,7 @@ body {
 .search-bar-sm {
     position: relative;
     width: 220px;
+    max-width: 100%;
 }
 
     .search-bar-sm i {
@@ -272,12 +303,14 @@ body {
 .table-responsive {
     width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .allocation-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
+    min-width: 700px;
 }
 
     .allocation-table th {
@@ -287,6 +320,7 @@ body {
         color: var(--text-muted);
         border-bottom: 1px solid var(--border-color);
         font-weight: 600;
+        white-space: nowrap;
     }
 
     .allocation-table td {
@@ -304,6 +338,7 @@ body {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    min-width: 180px;
 }
 
 .avatar {
@@ -340,12 +375,14 @@ body {
     display: block;
     font-weight: 600;
     color: var(--text-primary);
+    white-space: nowrap;
 }
 
 .user-email {
     display: block;
     font-size: 0.75rem;
     color: var(--text-muted);
+    white-space: nowrap;
 }
 
 .badge-role {
@@ -355,11 +392,13 @@ body {
     font-size: 0.75rem;
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
+    white-space: nowrap;
 }
 
 .project-pill {
     font-size: 0.8rem;
     font-weight: 500;
+    white-space: nowrap;
 }
 
 .capacity-cell {
@@ -368,6 +407,7 @@ body {
     gap: 0.35rem;
     font-size: 0.75rem;
     color: var(--text-secondary);
+    min-width: 120px;
 }
 
 .mini-progress {
@@ -400,6 +440,7 @@ body {
     border-radius: var(--radius-full);
     font-size: 0.725rem;
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .status-optimal {
@@ -455,13 +496,14 @@ body {
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
+    gap: 0.5rem;
 }
 
 /* ==========================================================================
    Responsive Styles
    ========================================================================== */
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
     .main-content-grid {
         grid-template-columns: 1fr;
     }
@@ -475,6 +517,10 @@ body {
     .page-header {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .header-title-group {
+        width: 100%;
     }
 
     .header-actions {

@@ -1,30 +1,38 @@
-﻿@{
+﻿@* Add namespace where PriorityEnum is defined (or update the namespace name if different) *@
+@using Vertex_ERP.Models
+
+@{
     ViewData["Title"] = "Assign & Monitor Tasks";
     Layout = "_Layout";
 }
-<link href="~/css/assigntask.css" rel="stylesheet" />
+<link href="~/css/AssignTask.css" rel="stylesheet" />
 
 <div class="task-assignment-container">
+
+
     <!-- Header Section -->
     <header class="task-header">
-        <div class="header-content">
-            <div class="header-icon-wrapper">
-                <div class="icon-circle">
-                    <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
+        <div class="header-left">
+           
+            <div class="header-content">
+                <div class="header-icon-wrapper">
+                    <div class="top-nav-bar">
+                        <button type="button" class="btn-back" onclick="window.history.back()" title="Go Back">
+                            <span class="back-icon">&#8592;</span>
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div class="header-text">
-                <h1>Task Management</h1>
-                <p>Assign, track, and monitor project tasks seamlessly across your team.</p>
+                <div class="header-text">
+                    <h1>Task Management</h1>
+                    <p>Assign, track, and monitor project tasks seamlessly across your team.</p>
+                </div>
             </div>
         </div>
         <div class="header-actions">
-            <button class="btn btn-secondary">
+            <button type="button" class="btn btn-secondary" id="btnFilter">
                 <i class="fas fa-filter"></i> <span>Filter</span>
             </button>
-            <button class="btn btn-primary" id="btnOpenAssignModal">
+            <button type="button" class="btn btn-primary" id="btnOpenAssignModal">
                 <i class="fas fa-plus"></i> <span>Assign Task</span>
             </button>
         </div>
@@ -37,7 +45,7 @@
                 <i class="fas fa-tasks"></i>
             </div>
             <div class="stat-info">
-                <span class="stat-value">24</span>
+                <span class="stat-value">@(Model?.TotalTasks ?? 0)</span>
                 <span class="stat-label">Total Tasks</span>
             </div>
         </div>
@@ -46,7 +54,7 @@
                 <i class="fas fa-spinner fa-spin-pulse"></i>
             </div>
             <div class="stat-info">
-                <span class="stat-value">8</span>
+                <span class="stat-value">@(Model?.InProgressTasks ?? 0)</span>
                 <span class="stat-label">In Progress</span>
             </div>
         </div>
@@ -55,7 +63,7 @@
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-info">
-                <span class="stat-value">14</span>
+                <span class="stat-value">@(Model?.CompletedTasks ?? 0)</span>
                 <span class="stat-label">Completed</span>
             </div>
         </div>
@@ -64,7 +72,7 @@
                 <i class="fas fa-exclamation-triangle"></i>
             </div>
             <div class="stat-info">
-                <span class="stat-value">2</span>
+                <span class="stat-value">@(Model?.OverdueTasks ?? 0)</span>
                 <span class="stat-label">Overdue</span>
             </div>
         </div>
@@ -87,29 +95,25 @@
                     <div class="form-row">
                         <div class="form-group col">
                             <label for="projectName">Project</label>
-                            <select id="projectName" name="ProjectId" class="form-control" required>
+                            <select id="projectName" name="ProjectId" class="form-control" required asp-items="@(ViewBag.Projects as IEnumerable<SelectListItem>)">
                                 <option value="" disabled selected>Select Project</option>
-                                <option value="1">Website Redesign</option>
-                                <option value="2">Mobile App Development</option>
-                                <option value="3">API Integration</option>
                             </select>
                         </div>
                         <div class="form-group col">
                             <label for="assignee">Assign To</label>
-                            <select id="assignee" name="AssignedTo" class="form-control" required>
+                            <select id="assignee" name="AssignedTo" class="form-control" required asp-items="@(ViewBag.Members as IEnumerable<SelectListItem>)">
                                 <option value="" disabled selected>Select Member</option>
-                                <option value="1">Rahul Sharma</option>
-                                <option value="2">Priya Patel</option>
-                                <option value="3">Amit Kumar</option>
                             </select>
                         </div>
                     </div>
 
+                    <!-- Priority Select (Fixed Enum binding & explicit HTML options fallback) -->
                     <div class="form-group">
                         <label for="priority">Priority</label>
-                        <select id="priority" name="Priority" class="form-control">
+                        <select id="priority" name="Priority" class="form-control" required>
+                            <option value="" disabled selected>Select Priority</option>
                             <option value="Low">Low</option>
-                            <option value="Medium" selected>Medium</option>
+                            <option value="Medium">Medium</option>
                             <option value="High">High</option>
                             <option value="Urgent">Urgent</option>
                         </select>
@@ -146,7 +150,7 @@
                 <h2>Active Tasks</h2>
                 <div class="search-box">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" placeholder="Search tasks..." class="search-input" />
+                    <input type="text" id="taskSearchInput" placeholder="Search tasks..." class="search-input" />
                 </div>
             </div>
             <div class="card-body p-0">
@@ -163,60 +167,44 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td data-label="Task">
-                                    <div class="task-name">Dashboard UI Polish</div>
-                                    <span class="project-tag">Website Redesign</span>
-                                </td>
-                                <td data-label="Assigned To">
-                                    <div class="user-info">
-                                        <div class="avatar">RS</div>
-                                        <span>Rahul Sharma</span>
-                                    </div>
-                                </td>
-                                <td data-label="Priority"><span class="badge badge-high">High</span></td>
-                                <td data-label="Due Date">30 Jul 2026</td>
-                                <td data-label="Status"><span class="status-pill status-progress"><i class="fas fa-circle"></i> In Progress</span></td>
-                                <td data-label="Action" class="text-right">
-                                    <button class="btn-icon" title="Edit"><i class="fas fa-pen"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td data-label="Task">
-                                    <div class="task-name">Auth API Endpoint</div>
-                                    <span class="project-tag">API Integration</span>
-                                </td>
-                                <td data-label="Assigned To">
-                                    <div class="user-info">
-                                        <div class="avatar avatar-purple">PP</div>
-                                        <span>Priya Patel</span>
-                                    </div>
-                                </td>
-                                <td data-label="Priority"><span class="badge badge-urgent">Urgent</span></td>
-                                <td data-label="Due Date">29 Jul 2026</td>
-                                <td data-label="Status"><span class="status-pill status-pending"><i class="fas fa-circle"></i> Pending</span></td>
-                                <td data-label="Action" class="text-right">
-                                    <button class="btn-icon" title="Edit"><i class="fas fa-pen"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td data-label="Task">
-                                    <div class="task-name">Push Notifications</div>
-                                    <span class="project-tag">Mobile App</span>
-                                </td>
-                                <td data-label="Assigned To">
-                                    <div class="user-info">
-                                        <div class="avatar avatar-teal">AK</div>
-                                        <span>Amit Kumar</span>
-                                    </div>
-                                </td>
-                                <td data-label="Priority"><span class="badge badge-medium">Medium</span></td>
-                                <td data-label="Due Date">02 Aug 2026</td>
-                                <td data-label="Status"><span class="status-pill status-completed"><i class="fas fa-circle"></i> Completed</span></td>
-                                <td data-label="Action" class="text-right">
-                                    <button class="btn-icon" title="Edit"><i class="fas fa-pen"></i></button>
-                                </td>
-                            </tr>
+                            @if (Model != null && Model.Tasks != null && Model.Tasks.Count > 0)
+                            {
+                                foreach (var item in Model.Tasks)
+                                {
+                                    <tr>
+                                        <td data-label="Task">
+                                            <div class="task-name">@item.Title</div>
+                                            <span class="project-tag">@item.ProjectName</span>
+                                        </td>
+                                        <td data-label="Assigned To">
+                                            <div class="user-info">
+                                                <div class="avatar">@item.AssigneeInitials</div>
+                                                <span>@item.AssigneeName</span>
+                                            </div>
+                                        </td>
+                                        <td data-label="Priority">
+                                            <span class="badge badge-@(item.Priority?.ToString().ToLower())">@item.Priority</span>
+                                        </td>
+                                        <td data-label="Due Date">@item.DueDate.ToString("dd MMM yyyy")</td>
+                                        <td data-label="Status">
+                                            <span class="status-pill status-@item.StatusClass">
+                                                <i class="fas fa-circle"></i> @item.Status
+                                            </span>
+                                        </td>
+                                        <td data-label="Action" class="text-right">
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn-icon" title="Edit">
+                                                <i class="fas fa-pen"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center empty-state">No tasks available.</td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>

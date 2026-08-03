@@ -7,34 +7,49 @@
 
 <div class="project-page">
 
-    <!-- Page Header -->
+
+    <div class="top-nav-bar">
+        <button type="button" class="btn-back" onclick="window.history.back()" title="Go Back">
+            <span class="back-icon">&#8592;</span>
+        </button>
+    </div>
+
+    <!-- Page Header with Exact Vertical Pill Back Button -->
     <div class="page-header">
-        <div class="header-text">
-            <h2>Project Creation</h2>
-            <p>Create, configure, and manage new company projects.</p>
+        <div class="header-left">
+            <!-- Image Exact Vertical Pill Back Button -->
+            <a href="/Guest/ProjectMgm" class="pill-back-btn" title="Back to Project Management" aria-label="Go Back">
+                <span class="pill-knob"></span>
+            </a>
+            <div class="header-text">
+                <h2>Project Creation</h2>
+                <p>Create, configure, and manage new company projects.</p>
+            </div>
         </div>
 
-        <a href="@Url.Action("Index", "ProjectMgm")" class="btn-secondary-action">
-            &larr; Back to Dashboard
-        </a>
+       @*  <a href="/Guest/ProjectMgm" class="btn-secondary-action" title="Dashboard" aria-label="Dashboard">
+            <i class="fas fa-th-large"></i>
+        </a> *@
     </div>
+
+
 
     <!-- Summary Metrics Bar -->
     <div class="summary">
         <div class="summary-card">
-            <h2>18</h2>
+            <h2>0</h2>
             <p>Total Projects</p>
         </div>
         <div class="summary-card">
-            <h2>12</h2>
+            <h2>0</h2>
             <p>Active Projects</p>
         </div>
         <div class="summary-card">
-            <h2>4</h2>
+            <h2>0</h2>
             <p>In Planning</p>
         </div>
         <div class="summary-card">
-            <h2>2</h2>
+            <h2>0</h2>
             <p>On Hold</p>
         </div>
     </div>
@@ -68,28 +83,27 @@
                     <div class="form-group col-4">
                         <label for="Category">Category</label>
                         <select id="Category" name="Category" class="form-control">
-                            <option value="Development">Software Development</option>
-                            <option value="Infrastructure">IT Infrastructure</option>
-                            <option value="Marketing">Digital Marketing</option>
-                            <option value="Design">UI/UX & Branding</option>
+                            <option value="" disabled selected>-- Select Category --</option>
+                            <option value="Software Development">Software Development</option>
+                            <option value="IT Infrastructure">IT Infrastructure</option>
+                            <option value="Digital Marketing">Digital Marketing</option>
+                            <option value="UI/UX & Branding">UI/UX & Branding</option>
                         </select>
                     </div>
                     <div class="form-group col-4">
                         <label for="ProjectManager">Project Manager <span class="req">*</span></label>
                         <select id="ProjectManager" name="ProjectManager" class="form-control" required>
-                            <option value="">-- Select Manager --</option>
-                            <option value="Rahul Sharma">Rahul Sharma</option>
-                            <option value="Priya Patel">Priya Patel</option>
-                            <option value="Amit Verma">Amit Verma</option>
+                            <option value="" disabled selected>-- Select Manager --</option>
                         </select>
                     </div>
                     <div class="form-group col-4">
                         <label for="Priority">Priority</label>
                         <select id="Priority" name="Priority" class="form-control">
+                            <option value="" disabled selected>-- Select Priority --</option>
+                            <option value="Low">Low</option>
                             <option value="Medium">Medium</option>
                             <option value="High">High</option>
                             <option value="Critical">Critical</option>
-                            <option value="Low">Low</option>
                         </select>
                     </div>
                 </div>
@@ -106,7 +120,7 @@
                     </div>
                     <div class="form-group col-4">
                         <label for="EstimatedBudget">Budget (₹)</label>
-                        <input type="number" id="EstimatedBudget" name="EstimatedBudget" class="form-control" placeholder="e.g. 500000" />
+                        <input type="number" id="EstimatedBudget" name="EstimatedBudget" step="0.01" class="form-control" placeholder="e.g. 500000" />
                     </div>
                 </div>
 
@@ -131,7 +145,7 @@
         <div class="table-card">
             <div class="card-header">
                 <h3>📑 Recent Projects</h3>
-                <span class="text-muted">Showing last 4 entries</span>
+                <span class="text-muted">Showing latest entries</span>
             </div>
 
             <div class="table-responsive">
@@ -142,37 +156,14 @@
                             <th>Project Name</th>
                             <th>Manager</th>
                             <th>Status</th>
-                            <th>Action</th>
+                            <th class="text-right">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><strong>PRJ-2026-01</strong></td>
-                            <td>ERP Core Portal</td>
-                            <td>Rahul Sharma</td>
-                            <td><span class="status-pill status-active">Active</span></td>
-                            <td><a href="#" class="tbl-btn">Edit</a></td>
-                        </tr>
-                        <tr>
-                            <td><strong>PRJ-2026-02</strong></td>
-                            <td>Mobile App V2</td>
-                            <td>Priya Patel</td>
-                            <td><span class="status-pill status-planning">Planning</span></td>
-                            <td><a href="#" class="tbl-btn">Edit</a></td>
-                        </tr>
-                        <tr>
-                            <td><strong>PRJ-2026-03</strong></td>
-                            <td>Cloud Migration</td>
-                            <td>Amit Verma</td>
-                            <td><span class="status-pill status-active">Active</span></td>
-                            <td><a href="#" class="tbl-btn">Edit</a></td>
-                        </tr>
-                        <tr>
-                            <td><strong>PRJ-2026-04</strong></td>
-                            <td>Security Audit</td>
-                            <td>Rahul Sharma</td>
-                            <td><span class="status-pill status-hold">On Hold</span></td>
-                            <td><a href="#" class="tbl-btn">Edit</a></td>
+                            <td colspan="5" class="text-center empty-state">
+                                No recent projects found.
+                            </td>
                         </tr>
                     </tbody>
                 </table>

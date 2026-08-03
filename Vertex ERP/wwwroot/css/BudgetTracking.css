@@ -44,9 +44,10 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+    width: 100%;
 }
 
-/* --- Page Header --- */
+/* --- Page Header & Back Button --- */
 .page-header {
     display: flex;
     justify-content: space-between;
@@ -59,7 +60,28 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-wrap: wrap;
 }
+
+.btn-back {
+    width: 40px;
+    height: 40px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+    .btn-back:hover {
+        background-color: var(--bg-input);
+        border-color: var(--border-highlight);
+        transform: translateX(-2px);
+    }
 
 .icon-avatar {
     width: 48px;
@@ -72,6 +94,7 @@ body {
     font-size: 1.3rem;
     color: #FFF;
     box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    flex-shrink: 0;
 }
 
 .header-title-group h1 {
@@ -112,6 +135,7 @@ body {
     font-size: 0.85rem;
     outline: none;
     cursor: pointer;
+    max-width: 100%;
 }
 
     .select-clean option {
@@ -131,6 +155,7 @@ body {
     align-items: center;
     gap: 0.5rem;
     transition: var(--transition);
+    white-space: nowrap;
 }
 
 .btn-primary {
@@ -189,6 +214,7 @@ body {
 .metric-info .value {
     font-size: 1.4rem;
     font-weight: 700;
+    word-break: break-word;
 }
 
     .metric-info .value small {
@@ -204,6 +230,7 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 1.1rem;
+    flex-shrink: 0;
 }
 
 .icon-blue {
@@ -295,6 +322,7 @@ body {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
     .project-title-meta h3 {
@@ -355,12 +383,14 @@ body {
 .table-responsive {
     width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .expense-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
+    min-width: 500px; /* Forces safe horizontal scroll on extremely small viewports */
 }
 
     .expense-table th {
@@ -393,6 +423,7 @@ body {
     justify-content: center;
     color: var(--blue);
     font-size: 0.85rem;
+    flex-shrink: 0;
 }
 
 .expense-category strong {
@@ -411,18 +442,20 @@ body {
     border-radius: 4px;
     font-size: 0.75rem;
     color: var(--text-secondary);
+    white-space: nowrap;
 }
 
 .amount {
     font-size: 0.875rem;
     color: var(--text-primary);
+    white-space: nowrap;
 }
 
 /* ==========================================================================
    Responsive Breakpoints
    ========================================================================== */
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
     .main-content-grid {
         grid-template-columns: 1fr;
     }
@@ -438,6 +471,10 @@ body {
         align-items: stretch;
     }
 
+    .header-title-group {
+        width: 100%;
+    }
+
     .header-actions {
         width: 100%;
         justify-content: space-between;
@@ -445,6 +482,26 @@ body {
 
     .date-filter {
         flex: 1;
+        justify-content: center;
+    }
+
+    .metric-card {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .date-filter {
+        width: 100%;
+    }
+
+    .btn-primary {
+        width: 100%;
         justify-content: center;
     }
 }

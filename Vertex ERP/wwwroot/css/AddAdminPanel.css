@@ -212,6 +212,9 @@
         }
 }
 
+/*this code is form responsive css*/
+
+
 @media (max-width: 360px) {
     /* Safe fallback for extremely narrow screen mobile devices */
     .admin-control-page .admin-modules-grid {

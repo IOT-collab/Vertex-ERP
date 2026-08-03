@@ -1,114 +1,113 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-    ViewData["Title"] = "Reports";
+﻿@{
+    ViewData["Title"] = "Reports Dashboard";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
 <link href="~/css/report.css" rel="stylesheet" />
 
+<!-- FontAwesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
 <div class="report-container">
 
-    <!-- Adaptive Page Header Layout -->
-    <div class="report-header">
+    <!-- Top Back Navigation Bar -->
+    <div class="top-nav-bar">
+        <button type="button" class="btn-back" onclick="window.history.back()" title="Go Back">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+    </div>
+
+    <!-- Page Header Section -->
+    <header class="report-header">
         <div class="header-text">
-            <h2>Reports Dashboard</h2>
-            <p>View and generate ERP reports</p>
+            <h2><i class="fa-solid fa-chart-pie text-primary-icon"></i> Reports Dashboard</h2>
+            <p>View, filter, and generate real-time ERP analytics & reports.</p>
         </div>
 
         <div class="header-buttons">
-            <button class="btn-primary">Generate Report</button>
-            <button class="btn-secondary">Export Excel</button>
+            <button type="button" class="btn-primary">
+                <i class="fa-solid fa-plus"></i> Generate Report
+            </button>
+            <button type="button" class="btn-secondary">
+                <i class="fa-solid fa-file-excel"></i> Export Excel
+            </button>
         </div>
-    </div>
+    </header>
 
-    <!-- Summary KPI Row Fluid Grid -->
-    <div class="report-cards">
+    <!-- Dynamic Dynamic Metrics / Summary KPI Row -->
+    <section class="report-cards">
         <div class="report-card blue">
-            <h3>156</h3>
-            <p>Total Reports</p>
+            <h3>@(ViewBag.TotalReports ?? "0")</h3>
+            <p><i class="fa-solid fa-folder-open"></i> Total Reports</p>
         </div>
 
         <div class="report-card green">
-            <h3>12</h3>
-            <p>Today's Reports</p>
+            <h3>@(ViewBag.TodayReports ?? "0")</h3>
+            <p><i class="fa-solid fa-calendar-day"></i> Today's Reports</p>
         </div>
 
         <div class="report-card orange">
-            <h3>25</h3>
-            <p>Pending Reports</p>
+            <h3>@(ViewBag.PendingReports ?? "0")</h3>
+            <p><i class="fa-solid fa-clock"></i> Pending Reports</p>
         </div>
 
         <div class="report-card red">
-            <h3>8</h3>
-            <p>Failed Reports</p>
+            <h3>@(ViewBag.FailedReports ?? "0")</h3>
+            <p><i class="fa-solid fa-circle-exclamation"></i> Failed Reports</p>
         </div>
-    </div>
+    </section>
 
     <!-- Dynamic Query Filter Consolidation Panel -->
-    <div class="filter-panel">
+    <form method="get" asp-action="Index" class="filter-panel">
         <div class="filter-field">
-            <input type="text" placeholder="Search Report">
+            <label class="filter-label"><i class="fa-solid fa-magnifying-glass"></i> Search</label>
+            <input type="text" name="searchQuery" value="@ViewBag.SearchQuery" placeholder="Search by name or ID..." />
         </div>
 
         <div class="filter-field">
-            <select>
-                <option>Report Type</option>
-                <option>Employee</option>
-                <option>Attendance</option>
-                <option>Inventory</option>
-                <option>Payroll</option>
+            <label class="filter-label"><i class="fa-solid fa-filter"></i> Module Type</label>
+            <select name="reportType" asp-items="ViewBag.ReportTypes">
+                <option value="">All Categories</option>
             </select>
         </div>
 
         <div class="filter-field">
-            <input type="date">
+            <label class="filter-label"><i class="fa-solid fa-calendar-alt"></i> From Date</label>
+            <input type="date" name="fromDate" value="@ViewBag.FromDate" />
         </div>
 
         <div class="filter-field">
-            <input type="date">
+            <label class="filter-label"><i class="fa-solid fa-calendar-alt"></i> To Date</label>
+            <input type="date" name="toDate" value="@ViewBag.ToDate" />
         </div>
 
         <div class="filter-field action-field">
-            <button class="btn-search">Search</button>
+            <button type="submit" class="btn-search">
+                <i class="fa-solid fa-filter"></i> Apply Filters
+            </button>
         </div>
-    </div>
+    </form>
 
-    <!-- Report Categories Matrix Auto-Grid -->
-    <div class="category-grid">
-        <div class="category-card">
-            <h4>Employee Report</h4>
-            <p>Employee master and details</p>
-        </div>
+    <!-- Report Categories Matrix -->
+    <section class="category-grid">
+        @if (ViewBag.Categories != null)
+        {
+            foreach (var cat in ViewBag.Categories)
+            {
+                <a href="@cat.Url" class="category-card">
+                    <div class="cat-icon-box">
+                        <i class="@(cat.IconClass ?? "fa-solid fa-file-lines")"></i>
+                    </div>
+                    <div>
+                        <h4>@cat.Title</h4>
+                        <p>@cat.Description</p>
+                    </div>
+                </a>
+            }
+        }
+    </section>
 
-        <div class="category-card">
-            <h4>Attendance Report</h4>
-            <p>Daily & Monthly attendance</p>
-        </div>
-
-        <div class="category-card">
-            <h4>Inventory Report</h4>
-            <p>Stock & warehouse summary</p>
-        </div>
-
-        <div class="category-card">
-            <h4>Payroll Report</h4>
-            <p>Salary & payment reports</p>
-        </div>
-
-        <div class="category-card">
-            <h4>Leave Report</h4>
-            <p>Leave history & approvals</p>
-        </div>
-
-        <div class="category-card">
-            <h4>Sales Report</h4>
-            <p>Revenue & invoice summary</p>
-        </div>
-    </div>
-
-    <!-- Core Database Roster Log Data Table Container -->
-    <div class="table-box">
+    <!-- Dynamic Database Log / Data Table -->
+    <section class="table-box">
         <table class="modern-table">
             <thead>
                 <tr>
@@ -121,38 +120,44 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><strong>Monthly Attendance</strong></td>
-                    <td>Attendance</td>
-                    <td>Admin</td>
-                    <td>15-Jul-2026</td>
-                    <td>
-                        <span class="status completed">Completed</span>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="view-btn">View</button>
-                            <button class="download-btn">Download</button>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Inventory Summary</strong></td>
-                    <td>Inventory</td>
-                    <td>Admin</td>
-                    <td>15-Jul-2026</td>
-                    <td>
-                        <span class="status pending">Pending</span>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="view-btn">View</button>
-                            <button class="download-btn">Download</button>
-                        </div>
-                    </td>
-                </tr>
+                @if (Model != null)
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><strong>@item.ReportName</strong></td>
+                            <td>@item.ModuleName</td>
+                            <td>@item.GeneratedBy</td>
+                            <td>@item.CreatedDate?.ToString("dd-MMM-yyyy")</td>
+                            <td>
+                                <span class="status @item.StatusClass">
+                                    @item.Status
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a asp-action="ViewReport" asp-route-id="@item.Id" class="view-btn" title="View Details">
+                                        <i class="fa-solid fa-eye"></i> View
+                                    </a>
+                                    <a asp-action="Download" asp-route-id="@item.Id" class="download-btn" title="Download Document">
+                                        <i class="fa-solid fa-download"></i> Download
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="no-data-cell">
+                            <i class="fa-solid fa-inbox no-data-icon"></i>
+                            <p>No report records found.</p>
+                        </td>
+                    </tr>
+                }
             </tbody>
         </table>
-    </div>
+    </section>
 
 </div>

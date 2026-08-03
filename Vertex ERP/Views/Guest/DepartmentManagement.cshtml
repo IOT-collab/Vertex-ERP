@@ -2,51 +2,66 @@
     ViewData["Title"] = "Department Management";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
-<link href="~/css/departmentmgm.css" rel="stylesheet" />
 
+<link href="~/css/departmentmgm.css" rel="stylesheet" />
 
 <div class="department-page">
 
-    <!-- Header -->
+    <!-- ================= HEADER ================= -->
     <div class="page-header">
-        <div>
-            <h2>Department Management</h2>
-            <p>Create and manage departments, designations and teams.</p>
+
+        <div class="header-left">
+
+            <button type="button"
+                    class="back-btn"
+                    onclick="history.back()"
+                    aria-label="Go Back">
+                <span>&larr;</span>
+            </button>
+
+            <div class="header-content">
+                <h2>Department Management</h2>
+                <p>Create and manage departments, designations and teams.</p>
+            </div>
+
         </div>
 
-        <button class="btn-primary">
-            + Add Department
+        <button type="button" class="btn-primary">
+            <span class="plus-icon">+</span>
+            Add Department
         </button>
+
     </div>
 
-    <!-- Statistics -->
+
+    <!-- ================= STATISTICS ================= -->
 
     <div class="stats-grid">
 
         <div class="stat-card">
-            <h3>12</h3>
             <span>Total Departments</span>
+            <h3>--</h3>
         </div>
 
         <div class="stat-card">
-            <h3>45</h3>
             <span>Total Designations</span>
+            <h3>--</h3>
         </div>
 
         <div class="stat-card">
-            <h3>18</h3>
             <span>Total Teams</span>
+            <h3>--</h3>
         </div>
 
         <div class="stat-card">
-            <h3>320</h3>
             <span>Total Employees</span>
+            <h3>--</h3>
         </div>
 
     </div>
 
 
-    <!-- Add Department -->
+    <!-- ================= ADD DEPARTMENT ================= -->
 
     <div class="card">
 
@@ -56,39 +71,53 @@
 
             <div class="form-group">
                 <label>Department Name</label>
-                <input type="text" placeholder="IT Department">
+
+                <input type="text"
+                       placeholder="Enter department name" />
             </div>
+
 
             <div class="form-group">
                 <label>Department Code</label>
-                <input type="text" placeholder="IT001">
+
+                <input type="text"
+                       placeholder="Enter department code" />
             </div>
+
 
             <div class="form-group">
                 <label>Department Head</label>
-                <input type="text" placeholder="John Smith">
+
+                <input type="text"
+                       placeholder="Select department head" />
             </div>
 
+
             <div class="form-group">
+
                 <label>Status</label>
+
                 <select>
-                    <option>Active</option>
-                    <option>Inactive</option>
+                    <option value="">Select status</option>
                 </select>
+
             </div>
 
         </div>
 
+
         <div class="btn-area">
-            <button class="btn-primary">Save Department</button>
+
+            <button type="button" class="btn-primary">
+                Save Department
+            </button>
+
         </div>
 
     </div>
 
 
-
-    <!-- Department List -->
-
+    <!-- ================= DEPARTMENT LIST ================= -->
 
     <div class="card">
 
@@ -96,9 +125,17 @@
 
             <h3>Department List</h3>
 
-            <input type="text" placeholder="Search Department">
+            <div class="search-box">
+
+                <span class="search-icon">&#128269;</span>
+
+                <input type="text"
+                       placeholder="Search department..." />
+
+            </div>
 
         </div>
+
 
         <div class="table-responsive">
 
@@ -107,7 +144,6 @@
                 <thead>
 
                     <tr>
-
                         <th>ID</th>
                         <th>Department</th>
                         <th>Code</th>
@@ -115,81 +151,53 @@
                         <th>Employees</th>
                         <th>Status</th>
                         <th>Action</th>
-
                     </tr>
 
                 </thead>
 
                 <tbody>
-
-                    <tr>
-
-                        <td>1</td>
-                        <td>IT</td>
-                        <td>IT001</td>
-                        <td>Rahul</td>
-                        <td>54</td>
-                        <td><span class="active">Active</span></td>
-                        <td>Edit | Delete</td>
-
-                    </tr>
-
-                    <tr>
-
-                        <td>2</td>
-                        <td>HR</td>
-                        <td>HR001</td>
-                        <td>Priya</td>
-                        <td>16</td>
-                        <td><span class="active">Active</span></td>
-                        <td>Edit | Delete</td>
-
-                    </tr>
-
+                    <!-- Department data will come from database -->
                 </tbody>
 
             </table>
 
         </div>
 
+
+        <div class="empty-state">
+            No departments available.
+        </div>
+
     </div>
 
 
-
-    <!-- Bottom Grid -->
+    <!-- ================= BOTTOM SECTION ================= -->
 
     <div class="bottom-grid">
 
-        <div class="card">
 
-            <h3>Designation</h3>
+        <!-- Designations -->
 
-            <ul>
+        <div class="card bottom-card">
 
-                <li>Software Engineer</li>
-                <li>Senior Developer</li>
-                <li>HR Manager</li>
-                <li>Project Manager</li>
-                <li>QA Engineer</li>
+            <h3>Designations</h3>
 
-            </ul>
+            <div class="empty-state">
+                No designations available.
+            </div>
 
         </div>
 
 
-        <div class="card">
+        <!-- Teams -->
+
+        <div class="card bottom-card">
 
             <h3>Teams</h3>
 
-            <ul>
-
-                <li>Frontend Team</li>
-                <li>Backend Team</li>
-                <li>QA Team</li>
-                <li>Support Team</li>
-                <li>DevOps Team</li>
-
-            </ul>
+            <div class="empty-state">
+                No teams available.
+            </div>
 
         </div>
 

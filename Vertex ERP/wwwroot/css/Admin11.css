@@ -30,6 +30,36 @@
         box-sizing: border-box;
     }
 
+    /* Top Back Navigation */
+    .admin-control-page .top-nav-bar {
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+    }
+
+    .admin-control-page .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: var(--radius-md);
+        color: #0f172a;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+        .admin-control-page .btn-back:hover {
+            background: #f1f5f9;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: translateX(-3px);
+        }
+
 /* Color Helpers */
 .bg-blue-light {
     background-color: #eff6ff;
@@ -292,11 +322,11 @@
 /* Modules Grid Layout */
 .admin-modules-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(clamp(280px, 100%, 360px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 22px;
 }
 
-/* Card Module Component Structure */
+/* Card Module Structure */
 .module-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -360,7 +390,7 @@
     line-height: 1.5;
 }
 
-/* Navigation Links */
+/* Links List */
 .quick-links {
     list-style: none;
     padding: 10px;
@@ -491,7 +521,7 @@ input:checked + .slider {
         border-radius: 50%;
     }
 
-/* Card Colored Accents */
+/* Colored Accents */
 .card-blue {
     border-top: 4px solid #3b82f6;
 }
@@ -516,7 +546,7 @@ input:checked + .slider {
     border-top: 4px solid #8b5cf6;
 }
 
-/* Responsive Adjustments */
+/* Responsive Rules */
 @media (max-width: 768px) {
     .dashboard-header {
         flex-direction: column;
@@ -545,6 +575,10 @@ input:checked + .slider {
         flex: 1;
         justify-content: center;
     }
+
+    .admin-modules-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 480px) {
@@ -554,5 +588,10 @@ input:checked + .slider {
 
     .metrics-grid {
         grid-template-columns: 1fr;
+    }
+
+    .btn-back {
+        width: 100%;
+        justify-content: center;
     }
 }

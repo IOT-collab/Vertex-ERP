@@ -2,110 +2,156 @@
     ViewData["Title"] = "Leave Management";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
+
 <link href="~/css/leavemgm.css" rel="stylesheet" />
 
 <div class="leave-page">
 
+    <!-- ================= HEADER ================= -->
     <div class="page-header">
-        <div>
-            <h2>Leave Management</h2>
-            <p>Manage employee leave requests, balances and holidays.</p>
+
+        <div class="header-left">
+
+            <button type="button"
+                    class="back-btn"
+                    onclick="history.back()"
+                    aria-label="Go Back">
+                <span>←</span>
+            </button>
+
+            <div class="header-content">
+                <h2>Leave Management</h2>
+                <p>Manage employee leave requests, balances and holidays.</p>
+            </div>
+
         </div>
 
-        <button class="btn-primary">
-            + Apply Leave
+        <button type="button" class="btn-primary">
+            <span class="plus-icon">+</span>
+            Apply Leave
         </button>
+
     </div>
 
-    <!-- Statistics -->
+
+    <!-- ================= STATISTICS ================= -->
+    <!-- Values will come from Controller / Database -->
 
     <div class="stats-grid">
 
         <div class="stat-card">
-            <h3>45</h3>
-            <span>Total Leaves</span>
+            <span class="stat-label">Total Leaves</span>
+            <h3>--</h3>
         </div>
 
         <div class="stat-card">
-            <h3>08</h3>
-            <span>Pending Requests</span>
+            <span class="stat-label">Pending Requests</span>
+            <h3>--</h3>
         </div>
 
         <div class="stat-card">
-            <h3>30</h3>
-            <span>Approved</span>
+            <span class="stat-label">Approved</span>
+            <h3>--</h3>
         </div>
 
         <div class="stat-card">
-            <h3>07</h3>
-            <span>Rejected</span>
+            <span class="stat-label">Rejected</span>
+            <h3>--</h3>
         </div>
 
     </div>
 
 
-    <!-- Apply Leave -->
+    <!-- ================= APPLY LEAVE ================= -->
 
     <div class="card">
 
-        <h3>Apply Leave</h3>
+        <div class="card-title">
+            <h3>Apply Leave</h3>
+        </div>
 
         <div class="form-grid">
 
             <div class="form-group">
                 <label>Leave Type</label>
+
                 <select>
-                    <option>Casual Leave</option>
-                    <option>Sick Leave</option>
-                    <option>Earned Leave</option>
+                    <option value="">Select Leave Type</option>
                 </select>
             </div>
 
+
             <div class="form-group">
                 <label>From Date</label>
-                <input type="date">
+                <input type="date" />
             </div>
+
 
             <div class="form-group">
                 <label>To Date</label>
-                <input type="date">
+                <input type="date" />
             </div>
+
 
             <div class="form-group">
                 <label>Total Days</label>
-                <input type="number">
+
+                <input type="number"
+                       placeholder="Total Days"
+                       readonly />
             </div>
 
         </div>
 
+
         <div class="form-group full-width">
+
             <label>Reason</label>
-            <textarea rows="4"></textarea>
+
+            <textarea rows="4"
+                      placeholder="Enter reason for leave"></textarea>
+
         </div>
 
-        <button class="btn-primary">Submit Leave</button>
+
+        <div class="form-actions">
+
+            <button type="button" class="btn-primary">
+                Submit Leave
+            </button>
+
+        </div>
 
     </div>
 
 
-    <!-- Leave Requests -->
+    <!-- ================= LEAVE REQUESTS ================= -->
 
     <div class="card">
 
         <div class="table-header">
 
-            <h3>Leave Requests</h3>
+            <div>
+                <h3>Leave Requests</h3>
+            </div>
 
-            <input type="text" placeholder="Search Employee">
+            <div class="search-box">
+
+                <span class="search-icon">⌕</span>
+
+                <input type="text"
+                       placeholder="Search employee..." />
+
+            </div>
 
         </div>
+
 
         <div class="table-responsive">
 
             <table>
 
                 <thead>
-
                     <tr>
                         <th>Employee</th>
                         <th>Leave Type</th>
@@ -115,68 +161,55 @@
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
-
                 </thead>
 
                 <tbody>
-
-                    <tr>
-                        <td>Rahul</td>
-                        <td>Casual</td>
-                        <td>10/08/26</td>
-                        <td>12/08/26</td>
-                        <td>3</td>
-                        <td><span class="pending">Pending</span></td>
-                        <td>Approve | Reject</td>
-                    </tr>
-
-                    <tr>
-                        <td>Aman</td>
-                        <td>Sick</td>
-                        <td>05/08/26</td>
-                        <td>06/08/26</td>
-                        <td>2</td>
-                        <td><span class="approved">Approved</span></td>
-                        <td>View</td>
-                    </tr>
-
+                    <!-- Leave request data will come from database -->
                 </tbody>
 
             </table>
 
         </div>
 
+        <!-- Empty State -->
+        <div class="empty-state">
+            No leave requests available.
+        </div>
+
     </div>
 
 
-    <!-- Bottom Cards -->
+    <!-- ================= BOTTOM SECTION ================= -->
 
     <div class="bottom-grid">
 
-        <div class="card">
 
-            <h3>Leave Balance</h3>
+        <!-- Leave Balance -->
 
-            <ul>
-                <li>Casual Leave <strong>8 Days</strong></li>
-                <li>Sick Leave <strong>5 Days</strong></li>
-                <li>Earned Leave <strong>12 Days</strong></li>
-                <li>Maternity Leave <strong>0 Days</strong></li>
-            </ul>
+        <div class="card bottom-card">
+
+            <div class="card-title">
+                <h3>Leave Balance</h3>
+            </div>
+
+            <div class="empty-state small-empty">
+                Leave balance data not available.
+            </div>
 
         </div>
 
 
-        <div class="card">
+        <!-- Holiday Calendar -->
 
-            <h3>Holiday Calendar</h3>
+        <div class="card bottom-card">
 
-            <ul>
-                <li>15 Aug - Independence Day</li>
-                <li>02 Oct - Gandhi Jayanti</li>
-                <li>25 Dec - Christmas</li>
-                <li>01 Jan - New Year</li>
-            </ul>
+            <div class="card-title">
+                <h3>Holiday Calendar</h3>
+            </div>
+
+            <div class="empty-state small-empty">
+                No holidays available.
+            </div>
 
         </div>
 

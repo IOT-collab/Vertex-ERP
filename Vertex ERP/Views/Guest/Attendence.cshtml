@@ -1,8 +1,6 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@* Attendance Management View *@
 @{
-    ViewData["Title"] = "Attendence";
+    ViewData["Title"] = "Attendance";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
 
@@ -12,65 +10,73 @@
 
     <!-- Header Hub -->
     <div class="page-header">
-        <div class="header-text">
-            <h2>Attendance Management</h2>
-            <p>Track global checkpoints, monthly metrics, total late limits, and remaining leave buckets.</p>
+        <div class="header-left">
+            <!-- Back Arrow Button -->
+            <button type="button" class="btn-back" onclick="history.back()" title="Go Back">
+                &#8592;
+            </button>
+            <div class="header-text">
+                <h2>Attendance Management</h2>
+                <p>Track global checkpoints, monthly metrics, total late limits, and remaining leave buckets.</p>
+            </div>
         </div>
 
-        <a href="@Url.Action("AddAttendance", "Guest")" class="btn-add" style="text-decoration: none; display: inline-flex; align-items: center;">
-            + Mark Attendence
-        </a>
+        <!-- Action Group -->
+        <div class="header-actions">
+            <a href="@Url.Action("AddAttendance", "Guest")" class="btn-add">
+                + Mark Attendance
+            </a>
+        </div>
     </div>
 
-    <!-- Top Grid Cards Counters: Dynamic Flex/Grid Matrix -->
+    <!-- Top Grid Cards Counters -->
     <div class="dashboard-cards">
         <div class="card present">
-            <h3>120</h3>
+            <h3>@ViewBag.PresentCount</h3>
             <span>Present Today</span>
         </div>
         <div class="card absent">
-            <h3>08</h3>
+            <h3>@ViewBag.AbsentCount</h3>
             <span>Absent Today</span>
         </div>
         <div class="card leave">
-            <h3>05</h3>
+            <h3>@ViewBag.LeaveCount</h3>
             <span>On Leave</span>
         </div>
         <div class="card late">
-            <h3>12</h3>
+            <h3>@ViewBag.LateCount</h3>
             <span>Late Arrivals</span>
         </div>
     </div>
 
     <!-- Query Filter Hub -->
-    <div class="filter-box">
-        <div class="filter-field">
-            <input type="text" placeholder="Search Employee...">
+    <form asp-action="Index" asp-controller="Attendance" method="get">
+        <div class="filter-box">
+            <div class="filter-field">
+                <input type="text" name="searchQuery" placeholder="Search Employee...">
+            </div>
+            <div class="filter-field">
+                <select name="departmentId" asp-items="ViewBag.Departments">
+                    <option value="">All Departments</option>
+                </select>
+            </div>
+            <div class="filter-field">
+                <input type="date" name="filterDate">
+            </div>
+            <div class="filter-field">
+                <select name="status">
+                    <option value="">All Statuses</option>
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                    <option value="Leave">Leave</option>
+                    <option value="Late">Late</option>
+                </select>
+            </div>
+            <div class="filter-field action-field">
+                <button type="submit" class="btn-search">Run Search</button>
+            </div>
         </div>
-        <div class="filter-field">
-            <select>
-                <option>All Departments</option>
-                <option>IT Component</option>
-                <option>HR Department</option>
-                <option>Sales Matrix</option>
-            </select>
-        </div>
-        <div class="filter-field">
-            <input type="date">
-        </div>
-        <div class="filter-field">
-            <select>
-                <option>All Statuses</option>
-                <option>Present</option>
-                <option>Absent</option>
-                <option>Leave</option>
-                <option>Late</option>
-            </select>
-        </div>
-        <div class="filter-field action-field">
-            <button class="btn-search">Run Search</button>
-        </div>
-    </div>
+    </form>
 
     <!-- Core Database Full Width Roster Table Container -->
     <div class="table-box">
@@ -92,69 +98,43 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>101</td>
-                    <td><strong>Sanjeev Kumar</strong></td>
-                    <td>IT</td>
-                    <td>15-Jul-2026</td>
-                    <td>09:02 AM</td>
-                    <td>06:12 PM</td>
-                    <td class="txt-total">24</td>
-                    <td class="txt-used">04</td>
-                    <td class="txt-avail">20</td>
-                    <td class="txt-late">03 Days</td>
-                    <td>
-                        <span class="status present-status">Present</span>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="edit">Edit</button>
-                            <button class="delete">Delete</button>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>102</td>
-                    <td><strong>Tarun Sharma</strong></td>
-                    <td>HR</td>
-                    <td>15-Jul-2026</td>
-                    <td>09:45 AM</td>
-                    <td>06:00 PM</td>
-                    <td class="txt-total">24</td>
-                    <td class="txt-used">06</td>
-                    <td class="txt-avail">18</td>
-                    <td class="txt-late">07 Days</td>
-                    <td>
-                        <span class="status late-status">Late</span>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="edit">Edit</button>
-                            <button class="delete">Delete</button>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>103</td>
-                    <td><strong>Amit Verma</strong></td>
-                    <td>Sales</td>
-                    <td>15-Jul-2026</td>
-                    <td>--:--</td>
-                    <td>--:--</td>
-                    <td class="txt-total">24</td>
-                    <td class="txt-used">05</td>
-                    <td class="txt-avail">19</td>
-                    <td class="txt-late">01 Day</td>
-                    <td>
-                        <span class="status leave-status">Leave</span>
-                    </td>
-                    <td>
-                        <div class="action-buttons">
-                            <button class="edit">Edit</button>
-                            <button class="delete">Delete</button>
-                        </div>
-                    </td>
-                </tr>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.EmpId</td>
+                            <td>@item.EmployeeName</td>
+                            <td>@item.Department</td>
+                            <td>@item.Date.ToString("yyyy-MM-dd")</td>
+                            <td>@item.CheckIn</td>
+                            <td>@item.CheckOut</td>
+                            <td><span class="txt-total">@item.TotalLeaves</span></td>
+                            <td><span class="txt-used">@item.LeavesTaken</span></td>
+                            <td><span class="txt-avail">@item.LeavesLeft</span></td>
+                            <td><span class="txt-late">@item.LateDays</span></td>
+                            <td>
+                                <span class="status @(item.Status.ToLower())-status">
+                                    @item.Status
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="@Url.Action("Edit", "Attendance", new { id = item.Id })" class="edit">Edit</a>
+                                    <a href="@Url.Action("Delete", "Attendance", new { id = item.Id })" class="delete" onclick="return confirm('Are you sure?');">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="12" style="text-align: center; color: #64748b; padding: 24px;">
+                            No attendance records found.
+                        </td>
+                    </tr>
+                }
             </tbody>
         </table>
     </div>

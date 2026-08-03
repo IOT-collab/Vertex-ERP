@@ -8,404 +8,1071 @@
 
 <div class="emp-dash-container">
 
-    <!-- TOP HEADER -->
-    <div class="emp-profile-bar">
-        <div class="emp-user-info">
-            <div class="emp-avatar">RS</div>
-            <div>
-                <h2>Rahul Sharma <span class="badge badge-active">Active</span></h2>
-                <p>Sr. Frontend Developer • Core Engineering (VTX-2024-089)</p>
-            </div>
-        </div>
-        <div class="emp-actions">
-            <div class="timer-box">Logged in: <strong>04h 25m</strong></div>
-            <a href="#openReportModal" class="btn btn-warning">
-                <i class="fas fa-file-invoice"></i> <span>Submit Work Report</span>
-            </a>
-            <button class="btn btn-primary" type="button"><i class="fas fa-clock"></i> Punch Out</button>
-        </div>
+    <!-- BACK BUTTON -->
+    <div class="emp-page-navigation">
+        <button type="button"
+                class="emp-back-btn"
+                onclick="history.back()"
+                title="Go Back">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+
+        <span>Employee Portal</span>
     </div>
 
-    <!-- STATS GRID -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon icon-blue"><i class="fas fa-calendar-check"></i></div>
+
+    <!-- =========================
+         TOP HEADER
+    ========================== -->
+    <div class="emp-profile-bar">
+
+        <div class="emp-user-info">
+
+            <div class="emp-avatar"></div>
+
             <div>
-                <span class="stat-value">96.5%</span>
+                <h2>
+                    <!-- Employee Name -->
+
+                    <span class="badge badge-active"></span>
+                </h2>
+
+                <p>
+                    <!--
+                        Designation • Department • Employee ID
+                        will come from database
+                    -->
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="emp-actions">
+
+            <div class="timer-box">
+                Logged in:
+                <strong></strong>
+            </div>
+
+            <a href="#openReportModal"
+               class="btn btn-warning">
+
+                <i class="fas fa-file-invoice"></i>
+
+                <span>Submit Work Report</span>
+
+            </a>
+
+
+            <button class="btn btn-primary"
+                    type="button">
+
+                <i class="fas fa-clock"></i>
+                Punch Out
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         STATS GRID
+    ========================== -->
+    <div class="stats-grid">
+
+        <!-- Attendance -->
+        <div class="stat-card">
+
+            <div class="stat-icon icon-blue">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+
+            <div>
+                <span class="stat-value"></span>
                 <span class="stat-label">Attendance</span>
             </div>
+
         </div>
+
+
+        <!-- Assets -->
         <div class="stat-card">
-            <div class="stat-icon icon-purple"><i class="fas fa-laptop"></i></div>
+
+            <div class="stat-icon icon-purple">
+                <i class="fas fa-laptop"></i>
+            </div>
+
             <div>
-                <span class="stat-value">3 Assets</span>
+                <span class="stat-value"></span>
                 <span class="stat-label">Hardware Assigned</span>
             </div>
+
         </div>
+
+
+        <!-- Today's Progress -->
         <div class="stat-card">
-            <div class="stat-icon icon-amber"><i class="fas fa-tasks"></i></div>
-            <div>
-                <span class="stat-value" id="todayTaskStats">1 / 2 Completed</span>
-                <span class="stat-label">Today's Progress</span>
+
+            <div class="stat-icon icon-amber">
+                <i class="fas fa-tasks"></i>
             </div>
+
+            <div>
+                <span class="stat-value"
+                      id="todayTaskStats"></span>
+
+                <span class="stat-label">
+                    Today's Progress
+                </span>
+            </div>
+
         </div>
+
+
+        <!-- Upcoming Tasks -->
         <div class="stat-card">
-            <div class="stat-icon icon-green"><i class="fas fa-calendar-alt"></i></div>
-            <div>
-                <span class="stat-value">12 Tasks</span>
-                <span class="stat-label">Upcoming Tasks</span>
+
+            <div class="stat-icon icon-green">
+                <i class="fas fa-calendar-alt"></i>
             </div>
+
+            <div>
+                <span class="stat-value"></span>
+
+                <span class="stat-label">
+                    Upcoming Tasks
+                </span>
+            </div>
+
         </div>
+
     </div>
 
-    <!-- 2-COLUMN GRID -->
+
+    <!-- =========================
+         MAIN DASHBOARD
+    ========================== -->
     <div class="dash-grid">
 
-        <!-- LEFT COLUMN -->
+
+        <!-- =====================
+             LEFT COLUMN
+        ====================== -->
         <div class="dash-column">
-            <!-- TODAY'S TASKS WITH COMPLETION CHECKBOX & REASON ACTION -->
+
+
+            <!-- TODAY'S TASKS -->
             <div class="card">
+
                 <div class="card-header">
-                    <h3><i class="fas fa-tasks"></i> Today's Tasks</h3>
-                    <a href="#openReportModal" class="btn btn-sm btn-secondary"><i class="fas fa-plus"></i> Add Log</a>
+
+                    <h3>
+                        <i class="fas fa-tasks"></i>
+                        Today's Tasks
+                    </h3>
+
+                    <a href="#openReportModal"
+                       class="btn btn-sm btn-secondary">
+
+                        <i class="fas fa-plus"></i>
+                        Add Log
+
+                    </a>
+
                 </div>
+
+
                 <div class="card-body">
+
                     <ul class="task-list">
-                        <!-- TASK 1 -->
-                        <li class="task-item" id="task-1">
-                            <label class="custom-checkbox-container" title="Mark as Completed">
-                                <input type="checkbox" onchange="toggleTaskStatus('task-1', 'Fix Responsive Grid UI Overlap Issue', this)" />
-                                <span class="checkmark"></span>
-                            </label>
-                            <div class="task-details">
-                                <strong>Fix Responsive Grid UI Overlap Issue</strong>
-                                <small>Vertex ERP • Due: 02:00 PM</small>
-                            </div>
-                            <div class="task-status-actions">
-                                <span class="tag tag-red status-tag">Pending</span>
-                                <button type="button" class="btn-reason" onclick="openReasonModal('task-1', 'Fix Responsive Grid UI Overlap Issue')" title="Add Reason for Incomplete">
-                                    <i class="fas fa-exclamation-circle"></i> Reason
-                                </button>
-                            </div>
-                        </li>
 
-                        <!-- TASK 2 -->
-                        <li class="task-item completed" id="task-2">
-                            <label class="custom-checkbox-container" title="Mark as Completed">
-                                <input type="checkbox" checked onchange="toggleTaskStatus('task-2', 'Integrate Attendance Webhook', this)" />
-                                <span class="checkmark"></span>
-                            </label>
-                            <div class="task-details">
-                                <strong>Integrate Attendance Webhook</strong>
-                                <small>API Pipeline • Due: 05:30 PM</small>
-                            </div>
-                            <div class="task-status-actions">
-                                <span class="tag tag-green status-tag">Completed</span>
-                                <button type="button" class="btn-reason" style="display:none;" onclick="openReasonModal('task-2', 'Integrate Attendance Webhook')" title="Add Reason for Incomplete">
-                                    <i class="fas fa-exclamation-circle"></i> Reason
-                                </button>
-                            </div>
-                        </li>
+                        <!--
+                            Today's tasks will
+                            come from database
+                        -->
+
                     </ul>
+
                 </div>
+
             </div>
 
-            <!-- UPCOMING TASKS (30-DAY PLAN WITH JS TOGGLE) -->
+
+            <!-- UPCOMING TASKS -->
             <div class="card">
+
                 <div class="card-header">
-                    <h3><i class="fas fa-calendar-week"></i> Upcoming Tasks</h3>
-                    <button class="btn btn-sm btn-outline-primary" type="button" id="toggleUpcomingBtn" onclick="toggleUpcomingTasks()">
-                        <i class="fas fa-eye"></i> View 30-Day Plan
+
+                    <h3>
+                        <i class="fas fa-calendar-week"></i>
+                        Upcoming Tasks
+                    </h3>
+
+                    <button class="btn btn-sm btn-outline-primary"
+                            type="button"
+                            id="toggleUpcomingBtn"
+                            onclick="toggleUpcomingTasks()">
+
+                        <i class="fas fa-eye"></i>
+                        View 30-Day Plan
+
                     </button>
+
                 </div>
+
+
                 <div class="card-body">
-                    <!-- Progress Bar Summary -->
+
+
+                    <!-- Monthly Progress -->
                     <div class="progress-bar-container">
+
                         <div class="progress-info">
+
                             <span>Monthly Progress</span>
-                            <strong>25% Completed</strong>
+
+                            <strong></strong>
+
                         </div>
+
+
                         <div class="progress-track">
-                            <div class="progress-fill" style="width: 25%;"></div>
+
+                            <div class="progress-fill"></div>
+
                         </div>
+
                     </div>
 
-                    <!-- EXPANDABLE LIST -->
-                    <div class="upcoming-expanded-list" id="upcomingTaskList">
+
+                    <!-- Upcoming Task List -->
+                    <div class="upcoming-expanded-list"
+                         id="upcomingTaskList">
+
                         <ul class="task-list mt-10">
-                            <li class="task-item upcoming-item">
-                                <div class="task-date-badge">
-                                    <span class="day">05</span>
-                                    <span class="month">AUG</span>
-                                </div>
-                                <div class="task-details">
-                                    <strong>Sprint Planning & Design Review</strong>
-                                    <small>Vertex ERP v2.0 • Phase 1 Kickoff</small>
-                                </div>
-                                <div class="allocation-info">
-                                    <span class="alloc-badge"><i class="fas fa-stopwatch"></i> 24 Hrs</span>
-                                </div>
-                                <span class="tag tag-blue">Scheduled</span>
-                            </li>
-                            <li class="task-item upcoming-item">
-                                <div class="task-date-badge">
-                                    <span class="day">12</span>
-                                    <span class="month">AUG</span>
-                                </div>
-                                <div class="task-details">
-                                    <strong>OAuth2 Security Audit</strong>
-                                    <small>Core Security Compliance</small>
-                                </div>
-                                <div class="allocation-info">
-                                    <span class="alloc-badge"><i class="fas fa-stopwatch"></i> 16 Hrs</span>
-                                </div>
-                                <span class="tag tag-red">High Priority</span>
-                            </li>
+
+                            <!--
+                                Upcoming tasks will
+                                come from database
+                            -->
+
                         </ul>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
 
-        <!-- RIGHT COLUMN -->
+
+        <!-- =====================
+             RIGHT COLUMN
+        ====================== -->
         <div class="dash-column">
+
+
+            <!-- PROFILE OVERVIEW -->
             <div class="card">
+
                 <div class="card-header">
-                    <h3><i class="fas fa-user-circle"></i> Profile Overview</h3>
-                    <span class="badge badge-green">Verified</span>
+
+                    <h3>
+                        <i class="fas fa-user-circle"></i>
+                        Profile Overview
+                    </h3>
+
+                    <span class="badge badge-green"></span>
+
                 </div>
+
+
                 <div class="card-body">
-                    <div class="info-row"><span>Manager:</span> <strong>Vikram Malhotra</strong></div>
-                    <div class="info-row"><span>Email:</span> <strong>rahul.sharma@company.com</strong></div>
-                    <div class="info-row"><span>Location:</span> <strong>Noida HQ (Tower B)</strong></div>
+
+                    <div class="info-row">
+
+                        <span>Manager:</span>
+
+                        <strong></strong>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span>Email:</span>
+
+                        <strong></strong>
+
+                    </div>
+
+
+                    <div class="info-row">
+
+                        <span>Location:</span>
+
+                        <strong></strong>
+
+                    </div>
+
                 </div>
+
             </div>
 
+
+            <!-- ANNOUNCEMENT -->
             <div class="card">
+
                 <div class="card-header">
-                    <h3><i class="fas fa-bullhorn"></i> Announcement</h3>
+
+                    <h3>
+                        <i class="fas fa-bullhorn"></i>
+                        Announcement
+                    </h3>
+
                 </div>
+
+
                 <div class="card-body">
+
                     <div class="alert-box">
+
                         <i class="fas fa-info-circle"></i>
+
                         <div>
-                            <strong>Quarterly All-Hands Townhall</strong>
-                            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Scheduled for Friday at 04:00 PM in Main Hall.</p>
+
+                            <!--
+                                Latest announcement
+                                will come from database
+                            -->
+
                         </div>
+
                     </div>
+
                 </div>
+
+
                 <div class="card-footer">
-                    <button class="btn btn-secondary" style="width: 100%; justify-content: center;" type="button">Raise Ticket</button>
+
+                    <button class="btn btn-secondary"
+                            style="width:100%; justify-content:center;"
+                            type="button">
+
+                        Raise Ticket
+
+                    </button>
+
                 </div>
+
             </div>
+
         </div>
 
     </div>
+
 </div>
 
-<!-- REPORT MODAL WITH IMAGE UPLOAD -->
-<div class="report-modal-overlay" id="openReportModal">
+
+<!-- =====================================
+     DAILY WORK REPORT MODAL
+====================================== -->
+<div class="report-modal-overlay"
+     id="openReportModal">
+
     <div class="report-modal">
+
+
         <div class="report-modal-header">
-            <h3><i class="fas fa-clipboard-list"></i> Daily Work Report</h3>
-            <a href="#" class="close-btn">&times;</a>
+
+            <h3>
+                <i class="fas fa-clipboard-list"></i>
+                Daily Work Report
+            </h3>
+
+            <a href="#"
+               class="close-btn">
+                &times;
+            </a>
+
         </div>
+
+
         <form onsubmit="handleFormSubmit(event)">
+
+
             <div class="report-modal-body">
+
+
+                <!-- DATE -->
                 <div class="form-row-2col">
+
+
                     <div class="form-group">
-                        <label class="form-label" for="reportDate">Report Date *</label>
-                        <input type="date" class="form-control" id="reportDate" required onchange="updateDayName(this.value)" />
+
+                        <label class="form-label"
+                               for="reportDate">
+
+                            Report Date *
+
+                        </label>
+
+                        <input type="date"
+                               class="form-control"
+                               id="reportDate"
+                               required
+                               onchange="updateDayName(this.value)" />
+
                     </div>
+
+
                     <div class="form-group">
-                        <label class="form-label" for="reportDay">Day</label>
-                        <input type="text" id="reportDay" class="form-control readonly-input" readonly placeholder="Auto-filled" />
+
+                        <label class="form-label"
+                               for="reportDay">
+
+                            Day
+
+                        </label>
+
+                        <input type="text"
+                               id="reportDay"
+                               class="form-control readonly-input"
+                               readonly
+                               placeholder="Auto-filled" />
+
                     </div>
+
                 </div>
 
+
+                <!-- SUMMARY -->
                 <div class="form-group">
-                    <label class="form-label" for="reportSummary">Work Summary / Log Highlights *</label>
-                    <textarea id="reportSummary" class="form-control" rows="3" placeholder="Briefly describe what tasks you completed today..." required></textarea>
+
+                    <label class="form-label"
+                           for="reportSummary">
+
+                        Work Summary / Log Highlights *
+
+                    </label>
+
+                    <textarea id="reportSummary"
+                              class="form-control"
+                              rows="3"
+                              placeholder="Briefly describe what tasks you completed today..."
+                              required></textarea>
+
                 </div>
 
+
+                <!-- HOURS -->
                 <div class="form-group">
-                    <label class="form-label" for="reportHours">Total Hours Worked *</label>
-                    <input type="number" id="reportHours" step="0.5" class="form-control" value="8.0" required />
+
+                    <label class="form-label"
+                           for="reportHours">
+
+                        Total Hours Worked *
+
+                    </label>
+
+                    <input type="number"
+                           id="reportHours"
+                           step="0.5"
+                           class="form-control"
+                           required />
+
                 </div>
 
-                <!-- IMAGE UPLOAD SECTION -->
+
+                <!-- IMAGE UPLOAD -->
                 <div class="form-group">
-                    <label class="form-label">Attach Screenshots / Proof (Images)</label>
-                    <div class="file-drop-zone" onclick="document.getElementById('reportImages').click()">
+
+                    <label class="form-label">
+                        Attach Screenshots / Proof (Images)
+                    </label>
+
+
+                    <div class="file-drop-zone"
+                         onclick="document.getElementById('reportImages').click()">
+
                         <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                        <p>Drag & Drop or <span>Browse Files</span></p>
-                        <small>Supported: JPG, PNG, WEBP (Max 5MB)</small>
-                        <input type="file" id="reportImages" accept="image/*" multiple style="display: none;" onchange="handleFilePreview(this)" />
+
+                        <p>
+                            Drag & Drop or
+                            <span>Browse Files</span>
+                        </p>
+
+                        <small>
+                            Supported: JPG, PNG, WEBP (Max 5MB)
+                        </small>
+
+
+                        <input type="file"
+                               id="reportImages"
+                               accept="image/*"
+                               multiple
+                               style="display:none;"
+                               onchange="handleFilePreview(this)" />
+
                     </div>
-                    <div class="image-preview-grid" id="imagePreviewContainer"></div>
+
+
+                    <div class="image-preview-grid"
+                         id="imagePreviewContainer">
+                    </div>
+
                 </div>
+
             </div>
+
 
             <div class="report-modal-footer">
-                <a href="#" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-warning"><i class="fas fa-paper-plane"></i> Submit Report</button>
+
+                <a href="#"
+                   class="btn btn-secondary">
+
+                    Cancel
+
+                </a>
+
+
+                <button type="submit"
+                        class="btn btn-warning">
+
+                    <i class="fas fa-paper-plane"></i>
+
+                    Submit Report
+
+                </button>
+
             </div>
+
         </form>
+
     </div>
+
 </div>
 
-<!-- INCOMPLETE TASK REASON MODAL -->
-<div class="report-modal-overlay" id="taskReasonModal">
+
+<!-- =====================================
+     INCOMPLETE TASK REASON MODAL
+====================================== -->
+<div class="report-modal-overlay"
+     id="taskReasonModal">
+
     <div class="report-modal">
+
+
         <div class="report-modal-header">
-            <h3><i class="fas fa-exclamation-triangle text-amber"></i> Task Incomplete Reason</h3>
-            <button type="button" class="close-btn-js" onclick="closeReasonModal()">&times;</button>
+
+            <h3>
+
+                <i class="fas fa-exclamation-triangle text-amber"></i>
+
+                Task Incomplete Reason
+
+            </h3>
+
+
+            <button type="button"
+                    class="close-btn-js"
+                    onclick="closeReasonModal()">
+
+                &times;
+
+            </button>
+
         </div>
+
+
         <form onsubmit="handleReasonSubmit(event)">
-            <input type="hidden" id="modalTaskId" />
+
+
+            <input type="hidden"
+                   id="modalTaskId" />
+
+
             <div class="report-modal-body">
+
+
+                <!-- TASK -->
                 <div class="form-group">
-                    <label class="form-label">Task Name</label>
-                    <input type="text" id="modalTaskTitle" class="form-control readonly-input" readonly />
+
+                    <label class="form-label">
+                        Task Name
+                    </label>
+
+                    <input type="text"
+                           id="modalTaskTitle"
+                           class="form-control readonly-input"
+                           readonly />
+
                 </div>
 
+
+                <!-- REASON CATEGORY -->
                 <div class="form-group">
-                    <label class="form-label" for="taskReasonCategory">Reason Category *</label>
-                    <select class="form-control" id="taskReasonCategory" required>
-                        <option value="">Select Category</option>
-                        <option value="Dependency Blocked">Blocked by Another Team / Dependency</option>
-                        <option value="Requirement Change">Requirements Changed / Unclear</option>
-                        <option value="Technical Issue">Technical Bug / Infrastructure Issue</option>
-                        <option value="Time Constraint">High Workload / Time Shortage</option>
-                        <option value="Other">Other Reason</option>
+
+                    <label class="form-label"
+                           for="taskReasonCategory">
+
+                        Reason Category *
+
+                    </label>
+
+
+                    <select class="form-control"
+                            id="taskReasonCategory"
+                            required>
+
+                        <option value="">
+                            Select Category
+                        </option>
+
+                        <option value="Dependency Blocked">
+                            Blocked by Another Team / Dependency
+                        </option>
+
+                        <option value="Requirement Change">
+                            Requirements Changed / Unclear
+                        </option>
+
+                        <option value="Technical Issue">
+                            Technical Bug / Infrastructure Issue
+                        </option>
+
+                        <option value="Time Constraint">
+                            High Workload / Time Shortage
+                        </option>
+
+                        <option value="Other">
+                            Other Reason
+                        </option>
+
                     </select>
+
                 </div>
 
+
+                <!-- DESCRIPTION -->
                 <div class="form-group">
-                    <label class="form-label" for="taskReasonDetails">Reason Description / Details *</label>
-                    <textarea id="taskReasonDetails" class="form-control" rows="3" placeholder="Explain why this task could not be completed today..." required></textarea>
+
+                    <label class="form-label"
+                           for="taskReasonDetails">
+
+                        Reason Description / Details *
+
+                    </label>
+
+
+                    <textarea id="taskReasonDetails"
+                              class="form-control"
+                              rows="3"
+                              placeholder="Explain why this task could not be completed today..."
+                              required></textarea>
+
                 </div>
 
+
+                <!-- ETA -->
                 <div class="form-group">
-                    <label class="form-label" for="taskNewETA">Expected Completion Date *</label>
-                    <input type="date" class="form-control" id="taskNewETA" required />
+
+                    <label class="form-label"
+                           for="taskNewETA">
+
+                        Expected Completion Date *
+
+                    </label>
+
+
+                    <input type="date"
+                           class="form-control"
+                           id="taskNewETA"
+                           required />
+
                 </div>
+
             </div>
+
 
             <div class="report-modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeReasonModal()">Cancel</button>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Reason</button>
+
+                <button type="button"
+                        class="btn btn-secondary"
+                        onclick="closeReasonModal()">
+
+                    Cancel
+
+                </button>
+
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    <i class="fas fa-save"></i>
+
+                    Save Reason
+
+                </button>
+
             </div>
+
         </form>
+
     </div>
+
 </div>
 
-<!-- CLIENT JAVASCRIPT -->
+
+<!-- =====================================
+     JAVASCRIPT
+====================================== -->
 <script>
+
     document.addEventListener('DOMContentLoaded', function () {
-        const today = new Date().toISOString().split('T')[0];
-        const dateInput = document.getElementById('reportDate');
+
+        const today =
+            new Date().toISOString().split('T')[0];
+
+        const dateInput =
+            document.getElementById('reportDate');
+
         if (dateInput) {
+
             dateInput.value = today;
+
             updateDayName(today);
+
         }
+
     });
 
+
     function updateDayName(dateString) {
-        if (!dateString) return;
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const selectedDate = new Date(dateString + 'T00:00:00');
-        document.getElementById('reportDay').value = days[selectedDate.getDay()];
+
+        if (!dateString)
+            return;
+
+        const days = [
+            'Sunday',
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday'
+        ];
+
+        const selectedDate =
+            new Date(dateString + 'T00:00:00');
+
+        const dayInput =
+            document.getElementById('reportDay');
+
+        if (dayInput) {
+
+            dayInput.value =
+                days[selectedDate.getDay()];
+
+        }
+
     }
 
-    /* TASK CHECKBOX STATUS TOGGLE */
-    function toggleTaskStatus(taskId, taskTitle, checkbox) {
-        const taskItem = document.getElementById(taskId);
-        const tag = taskItem.querySelector('.status-tag');
-        const reasonBtn = taskItem.querySelector('.btn-reason');
+
+    /* =========================
+       TASK STATUS
+    ========================== */
+
+    function toggleTaskStatus(
+        taskId,
+        taskTitle,
+        checkbox
+    ) {
+
+        const taskItem =
+            document.getElementById(taskId);
+
+        if (!taskItem)
+            return;
+
+
+        const tag =
+            taskItem.querySelector('.status-tag');
+
+        const reasonBtn =
+            taskItem.querySelector('.btn-reason');
+
 
         if (checkbox.checked) {
+
             taskItem.classList.add('completed');
-            tag.className = 'tag tag-green status-tag';
-            tag.textContent = 'Completed';
-            if (reasonBtn) reasonBtn.style.display = 'none';
-        } else {
-            taskItem.classList.remove('completed');
-            tag.className = 'tag tag-red status-tag';
-            tag.textContent = 'Pending';
-            if (reasonBtn) reasonBtn.style.display = 'inline-flex';
 
-            // Incomplete status hote hi modal prompt optional/auto open
-            openReasonModal(taskId, taskTitle);
+
+            if (tag) {
+
+                tag.className =
+                    'tag tag-green status-tag';
+
+                tag.textContent =
+                    'Completed';
+
+            }
+
+
+            if (reasonBtn) {
+
+                reasonBtn.style.display =
+                    'none';
+
+            }
+
         }
+        else {
+
+            taskItem.classList.remove('completed');
+
+
+            if (tag) {
+
+                tag.className =
+                    'tag tag-red status-tag';
+
+                tag.textContent =
+                    'Pending';
+
+            }
+
+
+            if (reasonBtn) {
+
+                reasonBtn.style.display =
+                    'inline-flex';
+
+            }
+
+
+            openReasonModal(
+                taskId,
+                taskTitle
+            );
+
+        }
+
     }
 
-    /* REASON MODAL HANDLERS */
-    function openReasonModal(taskId, taskTitle) {
-        document.getElementById('modalTaskId').value = taskId;
-        document.getElementById('modalTaskTitle').value = taskTitle;
-        document.getElementById('taskReasonModal').style.display = 'flex';
+
+    /* =========================
+       REASON MODAL
+    ========================== */
+
+    function openReasonModal(
+        taskId,
+        taskTitle
+    ) {
+
+        const idInput =
+            document.getElementById('modalTaskId');
+
+        const titleInput =
+            document.getElementById('modalTaskTitle');
+
+        const modal =
+            document.getElementById('taskReasonModal');
+
+
+        if (idInput)
+            idInput.value = taskId;
+
+        if (titleInput)
+            titleInput.value = taskTitle;
+
+        if (modal)
+            modal.style.display = 'flex';
+
     }
+
 
     function closeReasonModal() {
-        document.getElementById('taskReasonModal').style.display = 'none';
+
+        const modal =
+            document.getElementById('taskReasonModal');
+
+        if (modal)
+            modal.style.display = 'none';
+
     }
+
 
     function handleReasonSubmit(e) {
+
         e.preventDefault();
-        const taskId = document.getElementById('modalTaskId').value;
-        const taskItem = document.getElementById(taskId);
 
-        const tag = taskItem.querySelector('.status-tag');
-        tag.className = 'tag tag-amber status-tag';
-        tag.textContent = 'Incomplete Logged';
+        const taskId =
+            document.getElementById('modalTaskId')?.value;
 
-        alert('Reason for incomplete task saved successfully!');
-        closeReasonModal();
-    }
+        const taskItem =
+            document.getElementById(taskId);
 
-    /* TOGGLE UPCOMING TASKS */
-    function toggleUpcomingTasks() {
-        const taskList = document.getElementById('upcomingTaskList');
-        const btn = document.getElementById('toggleUpcomingBtn');
 
-        if (taskList.classList.contains('show')) {
-            taskList.classList.remove('show');
-            btn.innerHTML = '<i class="fas fa-eye"></i> View 30-Day Plan';
-        } else {
-            taskList.classList.add('show');
-            btn.innerHTML = '<i class="fas fa-eye-slash"></i> Hide Plan';
+        if (taskItem) {
+
+            const tag =
+                taskItem.querySelector('.status-tag');
+
+            if (tag) {
+
+                tag.className =
+                    'tag tag-amber status-tag';
+
+                tag.textContent =
+                    'Incomplete Logged';
+
+            }
+
         }
+
+
+        closeReasonModal();
+
     }
 
-    /* IMAGE UPLOAD PREVIEW & REMOVE */
+
+    /* =========================
+       UPCOMING TASKS
+    ========================== */
+
+    function toggleUpcomingTasks() {
+
+        const taskList =
+            document.getElementById('upcomingTaskList');
+
+        const btn =
+            document.getElementById('toggleUpcomingBtn');
+
+
+        if (!taskList || !btn)
+            return;
+
+
+        if (
+            taskList.classList.contains('show')
+        ) {
+
+            taskList.classList.remove('show');
+
+            btn.innerHTML =
+                '<i class="fas fa-eye"></i> View 30-Day Plan';
+
+        }
+        else {
+
+            taskList.classList.add('show');
+
+            btn.innerHTML =
+                '<i class="fas fa-eye-slash"></i> Hide Plan';
+
+        }
+
+    }
+
+
+    /* =========================
+       IMAGE PREVIEW
+    ========================== */
+
     function handleFilePreview(input) {
-        const container = document.getElementById('imagePreviewContainer');
+
+        const container =
+            document.getElementById(
+                'imagePreviewContainer'
+            );
+
+
+        if (!container)
+            return;
+
+
         container.innerHTML = '';
 
+
         if (input.files) {
-            Array.from(input.files).forEach((file) => {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        const previewItem = document.createElement('div');
-                        previewItem.className = 'preview-item';
-                        previewItem.innerHTML = `
-                            <img src="${e.target.result}" alt="Preview" />
-                            <span class="remove-img" onclick="this.parentElement.remove()">&times;</span>
-                        `;
-                        container.appendChild(previewItem);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
+
+            Array.from(input.files)
+                .forEach(file => {
+
+                    if (
+                        file.type.startsWith('image/')
+                    ) {
+
+                        const reader =
+                            new FileReader();
+
+
+                        reader.onload =
+                            function (e) {
+
+                                const previewItem =
+                                    document.createElement('div');
+
+
+                                previewItem.className =
+                                    'preview-item';
+
+
+                                previewItem.innerHTML = `
+
+                                    <img
+                                        src="${e.target.result}"
+                                        alt="Preview" />
+
+                                    <span
+                                        class="remove-img"
+                                        onclick="this.parentElement.remove()">
+
+                                        &times;
+
+                                    </span>
+
+                                `;
+
+
+                                container.appendChild(
+                                    previewItem
+                                );
+
+                            };
+
+
+                        reader.readAsDataURL(file);
+
+                    }
+
+                });
+
         }
+
     }
 
-    /* FORM SUBMIT HANDLER */
+
+    /* =========================
+       REPORT SUBMIT
+    ========================== */
+
     function handleFormSubmit(e) {
+
         e.preventDefault();
-        alert('Work Report Submitted Successfully!');
-        window.location.hash = ''; // Modal band karne ke liye
+
+        /*
+            Later this form will
+            submit data to Controller/API.
+        */
+
+        window.location.hash = '';
+
     }
+
 </script>
