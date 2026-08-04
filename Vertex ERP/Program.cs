@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 var appDataPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data");
 Directory.CreateDirectory(appDataPath);
 
-var databaseFilePath = Path.Combine(appDataPath, "VertexErpAuth.mdf");
+var databaseFilePath = Path.Combine(appDataPath, "VertexErpAuth.db");
 var authConnectionString = builder.Configuration
     .GetConnectionString("DefaultConnection")?
     .Replace("{DatabaseFile}", databaseFilePath);
@@ -15,14 +15,14 @@ var authConnectionString = builder.Configuration
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(authConnectionString));
+    options.UseSqlite(authConnectionString));
 
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    //var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    //DatabaseInitializer.SeedDefaultUsers(dbContext);
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    DatabaseInitializer.SeedDefaultUsers(dbContext);
 }
 
 // Configure the HTTP request pipeline.
@@ -40,10 +40,29 @@ app.UseRouting();
 
 app.UseSession();
 
+// Every ERP page requires an authenticated session.  The login endpoint stays
+// anonymous so a user can always reach it, including after an expired session.
+app.Use(async (context, next) =>
+{
+    var controller = context.Request.RouteValues["controller"]?.ToString();
+    var action = context.Request.RouteValues["action"]?.ToString();
+    var isLoginRequest = string.Equals(controller, "Guest", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(action, "Login", StringComparison.OrdinalIgnoreCase);
+
+    if (!isLoginRequest && string.IsNullOrWhiteSpace(context.Session.GetString("username")))
+    {
+        var returnUrl = context.Request.PathBase + context.Request.Path + context.Request.QueryString;
+        context.Response.Redirect($"/Guest/Login?returnUrl={Uri.EscapeDataString(returnUrl)}");
+        return;
+    }
+
+    await next();
+});
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-   pattern: "{controller=Guest}/{action=Dashboard}/{id?}");
+   pattern: "{controller=Guest}/{action=Login}/{id?}");
 
 app.Run();
