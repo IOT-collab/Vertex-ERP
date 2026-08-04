@@ -7,7 +7,7 @@
     <!-- Header Section -->
     <div class="rpt-header">
         <div class="rpt-header-main">
-            <button class="rpt-btn-icon" onclick="history.back()" title="Go Back">
+            <button class="rpt-btn-icon" onclick="history.back()" title="Go Back" aria-label="Go Back">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
             </button>
             <div>
@@ -30,46 +30,46 @@
             <div class="rpt-stat-top">
                 <div>
                     <span class="rpt-stat-label">Total Staff Reports</span>
-                    <h3 class="rpt-stat-value">142</h3>
+                    <h3 class="rpt-stat-value" id="statTotalStaff">--</h3>
                 </div>
                 <div class="rpt-icon-box icon-blue">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
                 </div>
             </div>
-            <span class="rpt-stat-sub text-emerald">12 Departments Active</span>
+            <span class="rpt-stat-sub text-emerald" id="statActiveDepts">-- Active Departments</span>
         </div>
 
         <div class="rpt-stat-card">
             <div class="rpt-stat-top">
                 <div>
                     <span class="rpt-stat-label">Manager Level Reports</span>
-                    <h3 class="rpt-stat-value">18</h3>
+                    <h3 class="rpt-stat-value" id="statTotalManagers">--</h3>
                 </div>
                 <div class="rpt-icon-box icon-purple">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" /></svg>
                 </div>
             </div>
-            <span class="rpt-stat-sub text-emerald">100% Team Coverage</span>
+            <span class="rpt-stat-sub text-emerald">Team Coverage</span>
         </div>
 
         <div class="rpt-stat-card">
             <div class="rpt-stat-top">
                 <div>
                     <span class="rpt-stat-label">Avg Attendance Rate</span>
-                    <h3 class="rpt-stat-value">96.4%</h3>
+                    <h3 class="rpt-stat-value" id="statAvgAttendance">--%</h3>
                 </div>
                 <div class="rpt-icon-box icon-green">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
                 </div>
             </div>
-            <span class="rpt-stat-sub text-emerald">+2.1% This Month</span>
+            <span class="rpt-stat-sub text-emerald">Current Cycle</span>
         </div>
 
         <div class="rpt-stat-card">
             <div class="rpt-stat-top">
                 <div>
                     <span class="rpt-stat-label">Pending Claims</span>
-                    <h3 class="rpt-stat-value">05</h3>
+                    <h3 class="rpt-stat-value" id="statPendingClaims">--</h3>
                 </div>
                 <div class="rpt-icon-box icon-amber">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
@@ -132,9 +132,7 @@
 
                 <select class="rpt-select" id="deptFilter" onchange="filterReportsTable()">
                     <option value="All">All Departments</option>
-                    <option value="Engineering">Engineering</option>
-                    <option value="HR">HR & Operations</option>
-                    <option value="Sales">Sales & Marketing</option>
+                    <!-- Dynamically populated or bound via backend model -->
                 </select>
             </div>
         </div>
@@ -153,81 +151,10 @@
                         <th style="text-align: right;">Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <div class="rpt-user-info">
-                                <span class="user-name">Vikram Malhotra</span>
-                                <span class="user-id">EMP-1002</span>
-                            </div>
-                        </td>
-                        <td><span class="role-badge badge-manager">Manager</span></td>
-                        <td>Sales & Marketing</td>
-                        <td>98%</td>
-                        <td class="rpt-amount">₹24,500</td>
-                        <td><span class="score-pill score-high">9.2 / 10</span></td>
-                        <td style="text-align: right;">
-                            <button class="rpt-btn-action" onclick="downloadRowReport('Vikram Malhotra')">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                            </button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <div class="rpt-user-info">
-                                <span class="user-name">Rajesh Sharma</span>
-                                <span class="user-id">EMP-1005</span>
-                            </div>
-                        </td>
-                        <td><span class="role-badge badge-manager">Manager</span></td>
-                        <td>Engineering</td>
-                        <td>96%</td>
-                        <td class="rpt-amount">₹18,200</td>
-                        <td><span class="score-pill score-high">9.5 / 10</span></td>
-                        <td style="text-align: right;">
-                            <button class="rpt-btn-action" onclick="downloadRowReport('Rajesh Sharma')">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                            </button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <div class="rpt-user-info">
-                                <span class="user-name">Rahul Verma</span>
-                                <span class="user-id">EMP-1088</span>
-                            </div>
-                        </td>
-                        <td><span class="role-badge badge-employee">Employee</span></td>
-                        <td>Engineering</td>
-                        <td>94%</td>
-                        <td class="rpt-amount">₹16,350</td>
-                        <td><span class="score-pill score-mid">8.4 / 10</span></td>
-                        <td style="text-align: right;">
-                            <button class="rpt-btn-action" onclick="downloadRowReport('Rahul Verma')">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                            </button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <div class="rpt-user-info">
-                                <span class="user-name">Priya Verma</span>
-                                <span class="user-id">EMP-1042</span>
-                            </div>
-                        </td>
-                        <td><span class="role-badge badge-employee">Employee</span></td>
-                        <td>HR & Operations</td>
-                        <td>99%</td>
-                        <td class="rpt-amount">₹3,400</td>
-                        <td><span class="score-pill score-high">9.0 / 10</span></td>
-                        <td style="text-align: right;">
-                            <button class="rpt-btn-action" onclick="downloadRowReport('Priya Verma')">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                            </button>
-                        </td>
+                <tbody id="reportsTableBody">
+                    <!-- Dynamic content injected via backend or AJAX fetch -->
+                    <tr class="rpt-empty-row">
+                        <td colspan="7" style="text-align: center; color: #64748b; padding: 32px;">No data available</td>
                     </tr>
                 </tbody>
             </table>
@@ -240,7 +167,7 @@
     <div class="rpt-modal">
         <div class="rpt-modal-header">
             <h2>Export Custom HR Report</h2>
-            <button class="rpt-modal-close" onclick="closeDownloadModal()">&times;</button>
+            <button class="rpt-modal-close" onclick="closeDownloadModal()" aria-label="Close modal">&times;</button>
         </div>
         <div class="rpt-modal-body">
             <div class="rpt-form-group">
@@ -255,11 +182,11 @@
             <div class="rpt-form-row">
                 <div class="rpt-form-group">
                     <label>From Date</label>
-                    <input type="date" class="rpt-input" value="2026-04-01" />
+                    <input type="date" class="rpt-input" id="exportFromDate" />
                 </div>
                 <div class="rpt-form-group">
                     <label>To Date</label>
-                    <input type="date" class="rpt-input" value="2026-04-30" />
+                    <input type="date" class="rpt-input" id="exportToDate" />
                 </div>
             </div>
 
@@ -298,16 +225,16 @@
     }
 
     function processDownload() {
-        alert("Preparing report download...");
+        // Implement export trigger logic here
         closeDownloadModal();
     }
 
     function downloadSingleReport(title) {
-        alert("Downloading " + title + "...");
+        // Implement template download logic here
     }
 
     function downloadRowReport(name) {
-        alert("Downloading individual report for " + name);
+        // Implement individual row report download logic here
     }
 
     function filterReportsTable() {
@@ -319,6 +246,7 @@
         const tr = table.getElementsByTagName("tr");
 
         for (let i = 1; i < tr.length; i++) {
+            if (tr[i].classList.contains('rpt-empty-row')) continue;
             const rowText = tr[i].textContent || tr[i].innerText;
             const matchesSearch = rowText.toUpperCase().indexOf(searchVal) > -1;
             const matchesRole = roleVal === "ALL" || rowText.toUpperCase().indexOf(roleVal) > -1;

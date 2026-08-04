@@ -6,17 +6,18 @@
 .rpt-container {
     width: 100%;
     min-height: 100vh;
-    padding: 24px;
+    padding: clamp(12px, 3vw, 24px);
     background-color: #0b0f19;
     color: #f1f5f9;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
 }
 
 /* Header */
 .rpt-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 24px;
     gap: 16px;
     flex-wrap: wrap;
@@ -24,8 +25,10 @@
 
 .rpt-header-main {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 14px;
+    flex: 1 1 280px;
+    min-width: 0;
 }
 
 .rpt-btn-icon {
@@ -40,6 +43,7 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
     .rpt-btn-icon:hover {
@@ -49,23 +53,26 @@
     }
 
 .rpt-title {
-    font-size: 24px;
+    font-size: clamp(20px, 4vw, 24px);
     font-weight: 700;
     margin: 0;
     color: #ffffff;
     letter-spacing: -0.3px;
+    word-break: break-word;
 }
 
 .rpt-subtitle {
-    font-size: 13px;
+    font-size: clamp(12px, 2vw, 13px);
     color: #64748b;
     margin: 3px 0 0 0;
+    word-break: break-word;
 }
 
 .rpt-header-actions {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
 .rpt-btn-primary {
@@ -82,6 +89,7 @@
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
     .rpt-btn-primary:hover {
@@ -97,6 +105,7 @@
     font-weight: 600;
     font-size: 13px;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 /* Grid Stats */
@@ -116,12 +125,14 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    min-width: 0;
 }
 
 .rpt-stat-top {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    gap: 8px;
 }
 
 .rpt-stat-label {
@@ -134,10 +145,11 @@
 }
 
 .rpt-stat-value {
-    font-size: 20px;
+    font-size: clamp(18px, 3vw, 20px);
     font-weight: 700;
     color: #ffffff;
     margin: 6px 0 0 0;
+    word-break: break-word;
 }
 
 .rpt-stat-sub {
@@ -187,7 +199,7 @@
 /* Templates Grid */
 .rpt-templates-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 16px;
     margin-bottom: 24px;
 }
@@ -200,6 +212,7 @@
     display: flex;
     align-items: center;
     gap: 14px;
+    min-width: 0;
 }
 
 .rpt-tpl-icon {
@@ -215,18 +228,26 @@
 
 .rpt-tpl-info {
     flex: 1;
+    min-width: 0;
 }
 
     .rpt-tpl-info h4 {
         margin: 0 0 4px 0;
         font-size: 14px;
         color: #ffffff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .rpt-tpl-info p {
         margin: 0;
         font-size: 11px;
         color: #64748b;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
 .rpt-btn-download {
@@ -239,6 +260,8 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
     .rpt-btn-download:hover {
@@ -252,7 +275,7 @@
     background: #111827;
     border: 1px solid #1e293b;
     border-radius: 14px;
-    padding: 20px;
+    padding: clamp(12px, 3vw, 20px);
 }
 
 .rpt-controls {
@@ -268,9 +291,8 @@
 
 .rpt-search-box {
     position: relative;
-    flex: 1;
-    max-width: 340px;
-    min-width: 240px;
+    flex: 1 1 240px;
+    max-width: 100%;
 }
 
 .rpt-search-icon {
@@ -295,6 +317,8 @@
 .rpt-filters {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
 }
 
 .rpt-select {
@@ -305,18 +329,21 @@
     border-radius: 10px;
     font-size: 13px;
     outline: none;
+    flex: 1 1 140px;
 }
 
 /* Table Design */
 .rpt-table-responsive {
     width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .rpt-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
+    white-space: nowrap;
 }
 
     .rpt-table th {
@@ -421,6 +448,7 @@
     align-items: center;
     justify-content: center;
     z-index: 999;
+    padding: 16px;
 }
 
 .rpt-modal {
@@ -429,8 +457,10 @@
     border-radius: 16px;
     width: 100%;
     max-width: 480px;
-    padding: 24px;
+    padding: clamp(16px, 4vw, 24px);
     box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .rpt-modal-header {
@@ -486,10 +516,11 @@
 .rpt-format-options {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .format-chip {
-    flex: 1;
+    flex: 1 1 100px;
     background: #0b0f19;
     border: 1px solid #28354f;
     border-radius: 8px;
@@ -507,9 +538,14 @@
     justify-content: flex-end;
     gap: 12px;
     margin-top: 24px;
+    flex-wrap: wrap;
 }
 
-/* Responsive Rules */
+    .rpt-modal-footer button {
+        flex: 1 1 auto;
+    }
+
+/* Responsive Media Queries */
 @media (max-width: 1024px) {
     .rpt-grid-stats {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -523,12 +559,25 @@
 
     .rpt-header {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+    }
+
+    .rpt-header-actions {
+        width: 100%;
+    }
+
+    .rpt-btn-primary {
+        width: 100%;
+        justify-content: center;
     }
 
     .rpt-filters {
         width: 100%;
         flex-direction: column;
+    }
+
+    .rpt-select {
+        width: 100%;
     }
 
     .rpt-form-row {

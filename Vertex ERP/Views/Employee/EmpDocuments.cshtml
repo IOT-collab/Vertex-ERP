@@ -1,14 +1,31 @@
-﻿@{
-    ViewData["Title"] = "Employee Documents";
+﻿@model dynamic
+@{
+    ViewData["Title"] = Model?.Title ?? "Employee Documents";
+    Layout = "_Layout";
+
+    // Dynamic metrics & statistics with fallbacks
+    var totalDocuments = Model?.TotalDocuments ?? 0;
+    var pendingReview = Model?.PendingReview ?? 0;
+    var expiringSoon = Model?.ExpiringSoon ?? 0;
+    var verifiedRate = Model?.VerifiedRate ?? "0%";
+
+    // List of dynamic documents from backend
+    IEnumerable<dynamic> documentsList = Model?.Documents ?? new List<dynamic>();
+
+    // Action URLs
+    var uploadUrl = Model?.UploadUrl ?? Url.Action("UploadDocument", "HR");
+    var getDocumentUrl = Model?.GetDocumentUrl ?? Url.Action("ViewDocument", "HR");
 }
 <link href="~/css/empdocuments.css" rel="stylesheet" />
 
+<!-- FontAwesome CDN for modern icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <div class="emp-docs-container">
     <!-- Top Header -->
     <div class="header-section">
         <div class="header-left">
-            <button class="btn-back" id="btnBack" onclick="history.back()">
+            <button class="btn-back" id="btnBack" onclick="goBack()" title="Go Back" aria-label="Go Back">
                 <i class="fa-solid fa-arrow-left"></i>
             </button>
             <div>
@@ -16,10 +33,10 @@
                 <p class="page-subtitle">Manage, verify, and store employee records & compliance files</p>
             </div>
         </div>
-        <button class="btn-primary" onclick="openUploadModal()">
+        <a href="@uploadUrl" class="btn-primary">
             <i class="fa-solid fa-cloud-arrow-up"></i>
             <span>Upload Document</span>
-        </button>
+        </a>
     </div>
 
     <!-- Stats Cards Grid -->
@@ -28,20 +45,20 @@
             <div class="stat-content">
                 <div>
                     <span class="stat-title">Total Documents</span>
-                    <h3 class="stat-value">248</h3>
+                    <h3 class="stat-value">@totalDocuments</h3>
                 </div>
                 <div class="stat-icon icon-blue">
                     <i class="fa-solid fa-folder-closed"></i>
                 </div>
             </div>
-            <p class="stat-meta text-emerald"><i class="fa-solid fa-arrow-up"></i> +12% this month</p>
+            <p class="stat-meta text-emerald"><i class="fa-solid fa-arrow-up"></i> Active Repository</p>
         </div>
 
         <div class="stat-card">
             <div class="stat-content">
                 <div>
                     <span class="stat-title">Pending Review</span>
-                    <h3 class="stat-value">14</h3>
+                    <h3 class="stat-value">@pendingReview</h3>
                 </div>
                 <div class="stat-icon icon-amber">
                     <i class="fa-solid fa-clock"></i>
@@ -54,7 +71,7 @@
             <div class="stat-content">
                 <div>
                     <span class="stat-title">Expiring Soon</span>
-                    <h3 class="stat-value">5</h3>
+                    <h3 class="stat-value">@expiringSoon</h3>
                 </div>
                 <div class="stat-icon icon-orange">
                     <i class="fa-solid fa-triangle-exclamation"></i>
@@ -67,13 +84,13 @@
             <div class="stat-content">
                 <div>
                     <span class="stat-title">Verified Rate</span>
-                    <h3 class="stat-value">94%</h3>
+                    <h3 class="stat-value">@verifiedRate</h3>
                 </div>
                 <div class="stat-icon icon-green">
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
             </div>
-            <p class="stat-meta">Compliance compliant</p>
+            <p class="stat-meta text-emerald">Compliance compliant</p>
         </div>
     </div>
 
@@ -101,15 +118,10 @@
                     <option value="Pending">Pending Review</option>
                     <option value="Expiring">Expiring Soon</option>
                 </select>
-
-                <button class="btn-secondary">
-                    <i class="fa-solid fa-filter"></i>
-                    <span class="hide-mobile">More Filters</span>
-                </button>
             </div>
         </div>
 
-        <!-- Table View -->
+        <!-- Table View / Dynamic Feed -->
         <div class="table-wrapper">
             <table class="data-table" id="docsTable">
                 <thead>
@@ -124,98 +136,71 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>
-                            <div class="doc-title-cell">
-                                <i class="fa-solid fa-file-pdf doc-type-icon pdf"></i>
-                                <div>
-                                    <span class="doc-name">Employment Contract - Rahul Sharma.pdf</span>
-                                    <span class="doc-sub">DOC-2026-001 • 2.4 MB</span>
+                    @if (documentsList != null && documentsList.Any())
+                    {
+                        foreach (dynamic doc in documentsList)
+                        {
+                            if (doc == null) continue;
+
+                            var docId = doc.Id?.ToString() ?? "";
+                            var docName = doc.Name?.ToString() ?? "Untitled Document";
+                            var docCode = doc.Code?.ToString() ?? "DOC-000";
+                            var fileSize = doc.FileSize?.ToString() ?? "1.0 MB";
+                            var fileExtension = (doc.Extension?.ToString() ?? "pdf").ToLower();
+
+                            var empName = doc.EmployeeName?.ToString() ?? "Unknown Employee";
+                            var empMeta = doc.EmployeeMeta?.ToString() ?? "EMP-000 • General";
+                            var category = doc.Category?.ToString() ?? "General";
+                            var uploadDate = doc.UploadDate?.ToString() ?? "—";
+                            var expiryDate = doc.ExpiryDate?.ToString() ?? "—";
+                            var status = doc.Status?.ToString() ?? "Verified";
+
+                            // Determine status UI badge class & icon
+                            string badgeClass = "badge-green";
+                            string statusIcon = "fa-circle-check";
+                            if (status.Contains("Pending", StringComparison.OrdinalIgnoreCase)) { badgeClass = "badge-amber"; statusIcon = "fa-clock"; }
+                            else if (status.Contains("Expiring", StringComparison.OrdinalIgnoreCase)) { badgeClass = "badge-orange"; statusIcon = "fa-triangle-exclamation"; }
+
+                            // Determine icon type
+                            string iconClass = fileExtension == "docx" || fileExtension == "doc" ? "fa-file-word word" : "fa-file-pdf pdf";
+                            string viewUrl = $"{getDocumentUrl}/{docId}";
+
+                            <tr data-category="@category" data-status="@status">
+                                <td>
+                                    <div class="doc-title-cell">
+                                        <i class="fa-solid @iconClass doc-type-icon"></i>
+                                        <div>
+                                            <span class="doc-name">@docName</span>
+                                            <span class="doc-sub">@docCode • @fileSize</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="emp-name">@empName</div>
+                                    <div class="emp-sub">@empMeta</div>
+                                </td>
+                                <td><span class="category-chip">@category</span></td>
+                                <td>@uploadDate</td>
+                                <td class="@(status.Contains("Expiring") ? "text-orange" : "")">@expiryDate</td>
+                                <td><span class="badge @badgeClass"><i class="fa-solid @statusIcon"></i> @status</span></td>
+                                <td class="text-right">
+                                    <a href="@viewUrl" class="btn-action" title="View Document"><i class="fa-regular fa-eye"></i></a>
+                                    <a href="@viewUrl?download=true" class="btn-action" title="Download"><i class="fa-solid fa-download"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="empty-state-cell">
+                                <div class="empty-state">
+                                    <i class="fa-solid fa-folder-open empty-icon"></i>
+                                    <p>No documents found in the system.</p>
                                 </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="emp-name">Rahul Sharma</div>
-                            <div class="emp-sub">EMP-1024 • Engineering</div>
-                        </td>
-                        <td><span class="category-chip">Contracts</span></td>
-                        <td>12 Jul 2026</td>
-                        <td>—</td>
-                        <td><span class="badge badge-green"><i class="fa-solid fa-circle-check"></i> Verified</span></td>
-                        <td class="text-right">
-                            <button class="btn-action" title="View Document"><i class="fa-regular fa-eye"></i></button>
-                            <button class="btn-action" title="Download"><i class="fa-solid fa-download"></i></button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="doc-title-cell">
-                                <i class="fa-solid fa-file-pdf doc-type-icon pdf"></i>
-                                <div>
-                                    <span class="doc-name">Aadhaar & PAN Verification.pdf</span>
-                                    <span class="doc-sub">DOC-2026-002 • 1.8 MB</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="emp-name">Priya Patel</div>
-                            <div class="emp-sub">EMP-1088 • Product Design</div>
-                        </td>
-                        <td><span class="category-chip">KYC</span></td>
-                        <td>20 Jul 2026</td>
-                        <td>—</td>
-                        <td><span class="badge badge-green"><i class="fa-solid fa-circle-check"></i> Verified</span></td>
-                        <td class="text-right">
-                            <button class="btn-action" title="View Document"><i class="fa-regular fa-eye"></i></button>
-                            <button class="btn-action" title="Download"><i class="fa-solid fa-download"></i></button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="doc-title-cell">
-                                <i class="fa-solid fa-file-word doc-type-icon word"></i>
-                                <div>
-                                    <span class="doc-name">Form 16 Tax Declaration.docx</span>
-                                    <span class="doc-sub">DOC-2026-003 • 3.1 MB</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="emp-name">Vikram Malhotra</div>
-                            <div class="emp-sub">EMP-1012 • Finance</div>
-                        </td>
-                        <td><span class="category-chip">Tax</span></td>
-                        <td>24 Jul 2026</td>
-                        <td>31 Mar 2027</td>
-                        <td><span class="badge badge-amber"><i class="fa-solid fa-clock"></i> Pending Review</span></td>
-                        <td class="text-right">
-                            <button class="btn-action" title="View Document"><i class="fa-regular fa-eye"></i></button>
-                            <button class="btn-action" title="Download"><i class="fa-solid fa-download"></i></button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="doc-title-cell">
-                                <i class="fa-solid fa-file-pdf doc-type-icon pdf"></i>
-                                <div>
-                                    <span class="doc-name">Work Visa & Passport Copy.pdf</span>
-                                    <span class="doc-sub">DOC-2026-004 • 4.2 MB</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="emp-name">Ananya Deshmukh</div>
-                            <div class="emp-sub">EMP-1145 • Marketing</div>
-                        </td>
-                        <td><span class="category-chip">KYC</span></td>
-                        <td>05 Jan 2024</td>
-                        <td class="text-orange">15 Aug 2026</td>
-                        <td><span class="badge badge-orange"><i class="fa-solid fa-triangle-exclamation"></i> Expiring Soon</span></td>
-                        <td class="text-right">
-                            <button class="btn-action" title="View Document"><i class="fa-regular fa-eye"></i></button>
-                            <button class="btn-action" title="Download"><i class="fa-solid fa-download"></i></button>
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
@@ -225,22 +210,37 @@
 <script>
     function filterTable() {
         const input = document.getElementById("searchInput").value.toUpperCase();
+        const categoryFilter = document.getElementById("categoryFilter").value;
+        const statusFilter = document.getElementById("statusFilter").value;
+
         const table = document.getElementById("docsTable");
         const tr = table.getElementsByTagName("tr");
 
         for (let i = 1; i < tr.length; i++) {
-            let visible = false;
-            const tdArray = tr[i].getElementsByTagName("td");
-            for (let j = 0; j < tdArray.length; j++) {
-                if (tdArray[j]) {
-                    const txtValue = tdArray[j].textContent || tdArray[j].innerText;
-                    if (txtValue.toUpperCase().indexOf(input) > -1) {
-                        visible = true;
-                        break;
-                    }
-                }
+            const row = tr[i];
+            if (row.classList.contains("empty-state-cell") || row.querySelector(".empty-state")) continue;
+
+            const textContent = row.textContent || row.innerText;
+            const rowCategory = row.getAttribute("data-category") || "";
+            const rowStatus = row.getAttribute("data-status") || "";
+
+            const matchesSearch = textContent.toUpperCase().indexOf(input) > -1;
+            const matchesCategory = (categoryFilter === "All" || rowCategory === categoryFilter);
+            const matchesStatus = (statusFilter === "All" || rowStatus.includes(statusFilter));
+
+            if (matchesSearch && matchesCategory && matchesStatus) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
             }
-            tr[i].style.display = visible ? "" : "none";
+        }
+    }
+
+    function goBack() {
+        if (window.history.length > 1 && document.referrer !== "") {
+            window.history.back();
+        } else {
+            window.location.href = '@Url.Action("Index", "Dashboard")';
         }
     }
 </script>

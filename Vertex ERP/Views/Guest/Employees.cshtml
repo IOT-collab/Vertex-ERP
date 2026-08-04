@@ -1,1078 +1,351 @@
-﻿@{
-    ViewData["Title"] = "Employee Portal";
-}
+﻿@model dynamic
+@{
+    ViewData["Title"] = "Employee Self-Service Dashboard";
 
-<!-- CSS & Icons -->
-<link rel="stylesheet" href="~/css/employee11.css" asp-append-version="true" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    var employeeName = Model?.FullName ?? "";
+    var employeeRole = Model?.Designation ?? "";
+    var departmentName = Model?.Department ?? "";
+    var employeeInitials = Model?.Initials ?? "";
+    var employeeStatus = Model?.Status ?? "Active";
+    var shiftTiming = Model?.ShiftTime ?? "";
+
+    var leaveBalance = Model?.LeaveBalanceDays ?? "";
+    var loggedHours = Model?.LoggedHoursThisMonth ?? "";
+    var employmentType = Model?.EmploymentType ?? "";
+
+    var empId = Model?.EmployeeId ?? "";
+    var officialEmail = Model?.Email ?? "";
+    var phoneNumber = Model?.Phone ?? "";
+    var joiningDate = Model?.JoiningDate ?? "";
+    var reportingManager = Model?.ManagerName ?? "";
+
+    var casualLeaveCount = Model?.CasualLeaveCount ?? "";
+    var sickLeaveCount = Model?.SickLeaveCount ?? "";
+    var earnedLeaveCount = Model?.EarnedLeaveCount ?? "";
+
+    var bankName = Model?.BankName ?? "";
+    var accountNumber = Model?.AccountNumber ?? "";
+    var routingCode = Model?.RoutingCode ?? "";
+}
+<link href="~/css/employee11.css" rel="stylesheet" />
 
 <div class="emp-dash-container">
 
-    <!-- BACK BUTTON -->
-    <div class="emp-page-navigation">
-        <button type="button"
-                class="emp-back-btn"
-                onclick="history.back()"
-                title="Go Back">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-
-        <span>Employee Portal</span>
+    <!-- NAVIGATION BAR WITH BACK ARROW ICON -->
+    <div class="emp-nav-header">
+        <a href="#" onclick="history.back(); return false;" class="btn-back" title="Go Back">
+            &#8592;
+        </a>
+        <div class="breadcrumb-text">Dashboard / <strong>Employee Self-Service</strong></div>
     </div>
 
-
-    <!-- =========================
-         TOP HEADER
-    ========================== -->
+    <!-- TOP PROFILE BAR -->
     <div class="emp-profile-bar">
-
         <div class="emp-user-info">
-
-            <div class="emp-avatar"></div>
-
-            <div>
-                <h2>
-                    <!-- Employee Name -->
-
-                    <span class="badge badge-active"></span>
-                </h2>
-
-                <p>
-                    <!--
-                        Designation • Department • Employee ID
-                        will come from database
-                    -->
-                </p>
+            <div class="emp-avatar">
+                <span>@employeeInitials</span>
             </div>
-
+            <div>
+                <h2>@employeeName <span class="badge badge-active">@employeeStatus</span></h2>
+                <p>@employeeRole &bull; @departmentName</p>
+            </div>
         </div>
-
-
         <div class="emp-actions">
-
-            <div class="timer-box">
-                Logged in:
-                <strong></strong>
-            </div>
-
-            <a href="#openReportModal"
-               class="btn btn-warning">
-
-                <i class="fas fa-file-invoice"></i>
-
-                <span>Submit Work Report</span>
-
-            </a>
-
-
-            <button class="btn btn-primary"
-                    type="button">
-
-                <i class="fas fa-clock"></i>
-                Punch Out
-
+            @if (!string.IsNullOrEmpty(shiftTiming))
+            {
+                <div class="timer-box">
+                    Shift: <strong>@shiftTiming</strong>
+                </div>
+            }
+            <button type="button" class="btn btn-secondary" onclick="openModal('profileDetailsModal')">
+                <i class="fa-solid fa-user"></i> View Profile
             </button>
-
+            <button type="button" class="btn btn-primary" onclick="openModal('applyLeaveModal')">
+                <i class="fa-solid fa-calendar-plus"></i> Apply Leave
+            </button>
         </div>
-
     </div>
 
-
-    <!-- =========================
-         STATS GRID
-    ========================== -->
-    <div class="stats-grid">
-
-        <!-- Attendance -->
+    <!-- METRICS GRID -->
+    <div class="stats-grid-3">
         <div class="stat-card">
-
-            <div class="stat-icon icon-blue">
-                <i class="fas fa-calendar-check"></i>
-            </div>
-
+            <div class="stat-icon icon-green"><i class="fa-solid fa-calendar-check"></i></div>
             <div>
-                <span class="stat-value"></span>
-                <span class="stat-label">Attendance</span>
+                <span class="stat-value">@leaveBalance</span>
+                <span class="stat-label">Leave Balance Available</span>
             </div>
-
         </div>
-
-
-        <!-- Assets -->
         <div class="stat-card">
-
-            <div class="stat-icon icon-purple">
-                <i class="fas fa-laptop"></i>
-            </div>
-
+            <div class="stat-icon icon-purple"><i class="fa-solid fa-business-time"></i></div>
             <div>
-                <span class="stat-value"></span>
-                <span class="stat-label">Hardware Assigned</span>
+                <span class="stat-value">@loggedHours</span>
+                <span class="stat-label">Productive Hours Logged</span>
             </div>
-
         </div>
-
-
-        <!-- Today's Progress -->
         <div class="stat-card">
-
-            <div class="stat-icon icon-amber">
-                <i class="fas fa-tasks"></i>
-            </div>
-
+            <div class="stat-icon icon-blue"><i class="fa-solid fa-id-card"></i></div>
             <div>
-                <span class="stat-value"
-                      id="todayTaskStats"></span>
-
-                <span class="stat-label">
-                    Today's Progress
-                </span>
+                <span class="stat-value">@employmentType</span>
+                <span class="stat-label">Employment Status</span>
             </div>
-
         </div>
-
-
-        <!-- Upcoming Tasks -->
-        <div class="stat-card">
-
-            <div class="stat-icon icon-green">
-                <i class="fas fa-calendar-alt"></i>
-            </div>
-
-            <div>
-                <span class="stat-value"></span>
-
-                <span class="stat-label">
-                    Upcoming Tasks
-                </span>
-            </div>
-
-        </div>
-
     </div>
 
-
-    <!-- =========================
-         MAIN DASHBOARD
-    ========================== -->
+    <!-- MAIN GRID -->
     <div class="dash-grid">
-
-
-        <!-- =====================
-             LEFT COLUMN
-        ====================== -->
         <div class="dash-column">
 
+            <!-- PROFILE DATA -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-id-card text-amber"></i> Profile & Professional Data</h3>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="location.href='@Url.Action("EditProfile", "Employee")'">Update</button>
+                </div>
+                <div class="card-body">
+                    <div class="info-row"><span>Employee Unique ID</span><strong>@empId</strong></div>
+                    <div class="info-row"><span>Corporate Email Address</span><strong>@officialEmail</strong></div>
+                    <div class="info-row"><span>Contact Phone Number</span><strong>@phoneNumber</strong></div>
+                    <div class="info-row"><span>Date of Onboarding</span><strong>@joiningDate</strong></div>
+                    <div class="info-row"><span>Direct Reporting Supervisor</span><strong>@reportingManager</strong></div>
+                </div>
+            </div>
 
             <!-- TODAY'S TASKS -->
             <div class="card">
-
                 <div class="card-header">
-
-                    <h3>
-                        <i class="fas fa-tasks"></i>
-                        Today's Tasks
-                    </h3>
-
-                    <a href="#openReportModal"
-                       class="btn btn-sm btn-secondary">
-
-                        <i class="fas fa-plus"></i>
-                        Add Log
-
-                    </a>
-
+                    <h3><i class="fa-solid fa-list-check text-amber"></i> Today's Tasks & Priorities</h3>
+                    <span class="badge badge-purple">Active</span>
                 </div>
-
-
                 <div class="card-body">
-
                     <ul class="task-list">
-
-                        <!--
-                            Today's tasks will
-                            come from database
-                        -->
-
+                        <li class="task-item" id="task1">
+                            <div class="task-check">
+                                <input type="checkbox" onchange="toggleTaskStatus('task1', 'statusTag1')" style="width: 18px; height: 18px; cursor: pointer;" />
+                                <span style="font-size: 14px;">Complete daily sprint standup & sync with team</span>
+                            </div>
+                            <div class="task-actions-group">
+                                <span id="statusTag1" class="tag tag-amber">Pending</span>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="openModal('taskReasonModal')"><i class="fa-solid fa-pen-to-square"></i> Reason</button>
+                            </div>
+                        </li>
                     </ul>
-
                 </div>
-
             </div>
-
 
             <!-- UPCOMING TASKS -->
             <div class="card">
-
                 <div class="card-header">
-
-                    <h3>
-                        <i class="fas fa-calendar-week"></i>
-                        Upcoming Tasks
-                    </h3>
-
-                    <button class="btn btn-sm btn-outline-primary"
-                            type="button"
-                            id="toggleUpcomingBtn"
-                            onclick="toggleUpcomingTasks()">
-
-                        <i class="fas fa-eye"></i>
-                        View 30-Day Plan
-
-                    </button>
-
+                    <h3><i class="fa-solid fa-calendar-days text-amber"></i> Upcoming 30 Days Tasks & Milestones</h3>
+                    <span class="badge badge-active">Roadmap</span>
                 </div>
-
-
                 <div class="card-body">
-
-
-                    <!-- Monthly Progress -->
-                    <div class="progress-bar-container">
-
-                        <div class="progress-info">
-
-                            <span>Monthly Progress</span>
-
-                            <strong></strong>
-
-                        </div>
-
-
-                        <div class="progress-track">
-
-                            <div class="progress-fill"></div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- Upcoming Task List -->
-                    <div class="upcoming-expanded-list"
-                         id="upcomingTaskList">
-
-                        <ul class="task-list mt-10">
-
-                            <!--
-                                Upcoming tasks will
-                                come from database
-                            -->
-
-                        </ul>
-
-                    </div>
-
+                    <ul class="task-list">
+                        <li class="task-item" id="taskUp1">
+                            <div class="task-check">
+                                <input type="checkbox" onchange="toggleTaskStatus('taskUp1', 'upcomingTag1')" style="width: 18px; height: 18px; cursor: pointer;" />
+                                <span style="font-size: 14px;">Quarterly performance appraisal and goals submission</span>
+                            </div>
+                            <div class="task-actions-group">
+                                <span id="upcomingTag1" class="tag tag-blue">Upcoming</span>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="openModal('taskReasonModal')"><i class="fa-solid fa-pen-to-square"></i> Reason</button>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
-
             </div>
 
+            <!-- LEAVE TRACKING -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-umbrella-beach text-amber"></i> Leave Tracking & Distribution</h3>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="openModal('applyLeaveModal')">New Request</button>
+                </div>
+                <div class="card-body">
+                    <div class="leave-grid-3">
+                        <div class="progress-bar-container" style="text-align: center;">
+                            <span class="stat-label">Casual Leaves</span>
+                            <strong style="font-size: 16px; display: block; margin-top: 4px;">@casualLeaveCount</strong>
+                        </div>
+                        <div class="progress-bar-container" style="text-align: center;">
+                            <span class="stat-label">Sick Leaves</span>
+                            <strong style="font-size: 16px; display: block; margin-top: 4px;">@sickLeaveCount</strong>
+                        </div>
+                        <div class="progress-bar-container" style="text-align: center;">
+                            <span class="stat-label">Earned Leaves</span>
+                            <strong style="font-size: 16px; display: block; margin-top: 4px;">@earnedLeaveCount</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-
-        <!-- =====================
-             RIGHT COLUMN
-        ====================== -->
         <div class="dash-column">
 
-
-            <!-- PROFILE OVERVIEW -->
+            <!-- SALARY SLIP -->
             <div class="card">
-
                 <div class="card-header">
-
-                    <h3>
-                        <i class="fas fa-user-circle"></i>
-                        Profile Overview
-                    </h3>
-
-                    <span class="badge badge-green"></span>
-
+                    <h3><i class="fa-solid fa-file-invoice-dollar text-amber"></i> Payroll & Salary Slips</h3>
                 </div>
-
-
-                <div class="card-body">
-
-                    <div class="info-row">
-
-                        <span>Manager:</span>
-
-                        <strong></strong>
-
-                    </div>
-
-
-                    <div class="info-row">
-
-                        <span>Email:</span>
-
-                        <strong></strong>
-
-                    </div>
-
-
-                    <div class="info-row">
-
-                        <span>Location:</span>
-
-                        <strong></strong>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- ANNOUNCEMENT -->
-            <div class="card">
-
-                <div class="card-header">
-
-                    <h3>
-                        <i class="fas fa-bullhorn"></i>
-                        Announcement
-                    </h3>
-
-                </div>
-
-
-                <div class="card-body">
-
+                <div class="card-body" style="display: flex; flex-direction: column; gap: 12px;">
                     <div class="alert-box">
-
-                        <i class="fas fa-info-circle"></i>
-
+                        <i class="fa-solid fa-circle-info"></i>
+                        <div style="font-size: 13px;">Download your latest official monthly salary statement / payslip securely.</div>
+                    </div>
+                    <div class="info-row" style="align-items: center;">
                         <div>
-
-                            <!--
-                                Latest announcement
-                                will come from database
-                            -->
-
+                            <strong>Current Month Statement</strong>
+                            <p style="font-size: 11px; color: var(--text-muted);">Available for download</p>
                         </div>
-
+                        <a href="@Url.Action("DownloadCurrentPayslip", "Payroll")" class="btn btn-sm btn-primary" style="white-space: nowrap;">
+                            <i class="fa-solid fa-download"></i> Download Slip
+                        </a>
                     </div>
-
                 </div>
-
-
-                <div class="card-footer">
-
-                    <button class="btn btn-secondary"
-                            style="width:100%; justify-content:center;"
-                            type="button">
-
-                        Raise Ticket
-
-                    </button>
-
-                </div>
-
             </div>
 
+            <!-- BANKING INFORMATION -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-building-columns text-amber"></i> Banking Information</h3>
+                </div>
+                <div class="card-body">
+                    <div class="info-row"><span>Institution Name</span><strong>@bankName</strong></div>
+                    <div class="info-row"><span>Encrypted Account Number</span><strong>@accountNumber</strong></div>
+                    <div class="info-row"><span>Routing / IFSC Reference</span><strong>@routingCode</strong></div>
+                </div>
+            </div>
         </div>
-
     </div>
-
 </div>
 
-
-<!-- =====================================
-     DAILY WORK REPORT MODAL
-====================================== -->
-<div class="report-modal-overlay"
-     id="openReportModal">
-
+<!-- PROFILE MODAL -->
+<div id="profileDetailsModal" class="report-modal-overlay">
     <div class="report-modal">
-
-
         <div class="report-modal-header">
-
-            <h3>
-                <i class="fas fa-clipboard-list"></i>
-                Daily Work Report
-            </h3>
-
-            <a href="#"
-               class="close-btn">
-                &times;
-            </a>
-
+            <h3 style="font-size: 16px;"><i class="fa-solid fa-user text-amber"></i> Profile Overview</h3>
+            <button type="button" class="close-btn" onclick="closeModal('profileDetailsModal')">&times;</button>
         </div>
-
-
-        <form onsubmit="handleFormSubmit(event)">
-
-
-            <div class="report-modal-body">
-
-
-                <!-- DATE -->
-                <div class="form-row-2col">
-
-
-                    <div class="form-group">
-
-                        <label class="form-label"
-                               for="reportDate">
-
-                            Report Date *
-
-                        </label>
-
-                        <input type="date"
-                               class="form-control"
-                               id="reportDate"
-                               required
-                               onchange="updateDayName(this.value)" />
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label class="form-label"
-                               for="reportDay">
-
-                            Day
-
-                        </label>
-
-                        <input type="text"
-                               id="reportDay"
-                               class="form-control readonly-input"
-                               readonly
-                               placeholder="Auto-filled" />
-
-                    </div>
-
+        <div class="report-modal-body">
+            <div style="text-align: center; margin-bottom: 10px;">
+                <div class="emp-avatar" style="margin: 0 auto 10px auto; width: 60px; height: 60px; font-size: 20px;">
+                    <span>@employeeInitials</span>
                 </div>
-
-
-                <!-- SUMMARY -->
-                <div class="form-group">
-
-                    <label class="form-label"
-                           for="reportSummary">
-
-                        Work Summary / Log Highlights *
-
-                    </label>
-
-                    <textarea id="reportSummary"
-                              class="form-control"
-                              rows="3"
-                              placeholder="Briefly describe what tasks you completed today..."
-                              required></textarea>
-
-                </div>
-
-
-                <!-- HOURS -->
-                <div class="form-group">
-
-                    <label class="form-label"
-                           for="reportHours">
-
-                        Total Hours Worked *
-
-                    </label>
-
-                    <input type="number"
-                           id="reportHours"
-                           step="0.5"
-                           class="form-control"
-                           required />
-
-                </div>
-
-
-                <!-- IMAGE UPLOAD -->
-                <div class="form-group">
-
-                    <label class="form-label">
-                        Attach Screenshots / Proof (Images)
-                    </label>
-
-
-                    <div class="file-drop-zone"
-                         onclick="document.getElementById('reportImages').click()">
-
-                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
-
-                        <p>
-                            Drag & Drop or
-                            <span>Browse Files</span>
-                        </p>
-
-                        <small>
-                            Supported: JPG, PNG, WEBP (Max 5MB)
-                        </small>
-
-
-                        <input type="file"
-                               id="reportImages"
-                               accept="image/*"
-                               multiple
-                               style="display:none;"
-                               onchange="handleFilePreview(this)" />
-
-                    </div>
-
-
-                    <div class="image-preview-grid"
-                         id="imagePreviewContainer">
-                    </div>
-
-                </div>
-
+                <h3 style="font-size: 16px;">@employeeName</h3>
+                <p style="color: var(--text-muted); font-size: 12px;">@employeeRole</p>
             </div>
-
-
-            <div class="report-modal-footer">
-
-                <a href="#"
-                   class="btn btn-secondary">
-
-                    Cancel
-
-                </a>
-
-
-                <button type="submit"
-                        class="btn btn-warning">
-
-                    <i class="fas fa-paper-plane"></i>
-
-                    Submit Report
-
-                </button>
-
-            </div>
-
-        </form>
-
+            <div class="info-row"><span>Full Name</span><strong>@employeeName</strong></div>
+            <div class="info-row"><span>Designation</span><strong>@employeeRole</strong></div>
+            <div class="info-row"><span>Department</span><strong>@departmentName</strong></div>
+            <div class="info-row"><span>Official Email</span><strong>@officialEmail</strong></div>
+            <div class="info-row"><span>Phone Number</span><strong>@phoneNumber</strong></div>
+        </div>
+        <div class="report-modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('profileDetailsModal')">Close</button>
+        </div>
     </div>
-
 </div>
 
-
-<!-- =====================================
-     INCOMPLETE TASK REASON MODAL
-====================================== -->
-<div class="report-modal-overlay"
-     id="taskReasonModal">
-
+<!-- LEAVE MODAL -->
+<div id="applyLeaveModal" class="report-modal-overlay">
     <div class="report-modal">
-
-
         <div class="report-modal-header">
-
-            <h3>
-
-                <i class="fas fa-exclamation-triangle text-amber"></i>
-
-                Task Incomplete Reason
-
-            </h3>
-
-
-            <button type="button"
-                    class="close-btn-js"
-                    onclick="closeReasonModal()">
-
-                &times;
-
-            </button>
-
+            <h3 style="font-size: 16px;"><i class="fa-solid fa-calendar-plus text-amber"></i> Submit Leave Application</h3>
+            <button type="button" class="close-btn" onclick="closeModal('applyLeaveModal')">&times;</button>
         </div>
-
-
-        <form onsubmit="handleReasonSubmit(event)">
-
-
-            <input type="hidden"
-                   id="modalTaskId" />
-
-
+        @using (Html.BeginForm("SubmitLeave", "Employee", FormMethod.Post))
+        {
             <div class="report-modal-body">
-
-
-                <!-- TASK -->
                 <div class="form-group">
-
-                    <label class="form-label">
-                        Task Name
-                    </label>
-
-                    <input type="text"
-                           id="modalTaskTitle"
-                           class="form-control readonly-input"
-                           readonly />
-
-                </div>
-
-
-                <!-- REASON CATEGORY -->
-                <div class="form-group">
-
-                    <label class="form-label"
-                           for="taskReasonCategory">
-
-                        Reason Category *
-
-                    </label>
-
-
-                    <select class="form-control"
-                            id="taskReasonCategory"
-                            required>
-
-                        <option value="">
-                            Select Category
-                        </option>
-
-                        <option value="Dependency Blocked">
-                            Blocked by Another Team / Dependency
-                        </option>
-
-                        <option value="Requirement Change">
-                            Requirements Changed / Unclear
-                        </option>
-
-                        <option value="Technical Issue">
-                            Technical Bug / Infrastructure Issue
-                        </option>
-
-                        <option value="Time Constraint">
-                            High Workload / Time Shortage
-                        </option>
-
-                        <option value="Other">
-                            Other Reason
-                        </option>
-
+                    <label class="form-label">Leave Category</label>
+                    <select name="LeaveType" class="form-control">
+                        <option value="Casual">Casual Leave</option>
+                        <option value="Sick">Sick Leave</option>
+                        <option value="Earned">Earned Leave</option>
                     </select>
-
                 </div>
-
-
-                <!-- DESCRIPTION -->
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="StartDate" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="EndDate" class="form-control" required />
+                    </div>
+                </div>
                 <div class="form-group">
-
-                    <label class="form-label"
-                           for="taskReasonDetails">
-
-                        Reason Description / Details *
-
-                    </label>
-
-
-                    <textarea id="taskReasonDetails"
-                              class="form-control"
-                              rows="3"
-                              placeholder="Explain why this task could not be completed today..."
-                              required></textarea>
-
+                    <label class="form-label">Reason</label>
+                    <textarea name="Reason" class="form-control" rows="3" placeholder="Enter reason..." required></textarea>
                 </div>
-
-
-                <!-- ETA -->
-                <div class="form-group">
-
-                    <label class="form-label"
-                           for="taskNewETA">
-
-                        Expected Completion Date *
-
-                    </label>
-
-
-                    <input type="date"
-                           class="form-control"
-                           id="taskNewETA"
-                           required />
-
-                </div>
-
             </div>
-
-
             <div class="report-modal-footer">
-
-                <button type="button"
-                        class="btn btn-secondary"
-                        onclick="closeReasonModal()">
-
-                    Cancel
-
-                </button>
-
-
-                <button type="submit"
-                        class="btn btn-primary">
-
-                    <i class="fas fa-save"></i>
-
-                    Save Reason
-
-                </button>
-
+                <button type="button" class="btn btn-secondary" onclick="closeModal('applyLeaveModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit</button>
             </div>
-
-        </form>
-
+        }
     </div>
-
 </div>
 
+<!-- PENDING TASK REASON & IMAGE UPLOAD MODAL -->
+<div id="taskReasonModal" class="report-modal-overlay">
+    <div class="report-modal">
+        <div class="report-modal-header">
+            <h3 style="font-size: 16px;"><i class="fa-solid fa-triangle-exclamation text-amber"></i> Task Pending Reason & Proof</h3>
+            <button type="button" class="close-btn" onclick="closeModal('taskReasonModal')">&times;</button>
+        </div>
+        <form action="javascript:void(0);" onsubmit="submitTaskReason()">
+            <div class="report-modal-body">
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label class="form-label">Select Date</label>
+                        <input type="date" id="taskDate" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Day</label>
+                        <input type="text" id="taskDay" class="form-control" placeholder="e.g. Monday" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reason / Explanation for Delay</label>
+                    <textarea id="taskReasonText" class="form-control" rows="3" placeholder="Enter why this task is pending..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Upload Image / Supporting Proof</label>
+                    <input type="file" id="taskImage" class="form-control" accept="image/*" />
+                </div>
+            </div>
+            <div class="report-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('taskReasonModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Details</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-<!-- =====================================
-     JAVASCRIPT
-====================================== -->
 <script>
-
-    document.addEventListener('DOMContentLoaded', function () {
-
-        const today =
-            new Date().toISOString().split('T')[0];
-
-        const dateInput =
-            document.getElementById('reportDate');
-
-        if (dateInput) {
-
-            dateInput.value = today;
-
-            updateDayName(today);
-
-        }
-
-    });
-
-
-    function updateDayName(dateString) {
-
-        if (!dateString)
-            return;
-
-        const days = [
-            'Sunday',
-            'Monday',
-            'Tuesday',
-            'Wednesday',
-            'Thursday',
-            'Friday',
-            'Saturday'
-        ];
-
-        const selectedDate =
-            new Date(dateString + 'T00:00:00');
-
-        const dayInput =
-            document.getElementById('reportDay');
-
-        if (dayInput) {
-
-            dayInput.value =
-                days[selectedDate.getDay()];
-
-        }
-
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
     }
-
-
-    /* =========================
-       TASK STATUS
-    ========================== */
-
-    function toggleTaskStatus(
-        taskId,
-        taskTitle,
-        checkbox
-    ) {
-
-        const taskItem =
-            document.getElementById(taskId);
-
-        if (!taskItem)
-            return;
-
-
-        const tag =
-            taskItem.querySelector('.status-tag');
-
-        const reasonBtn =
-            taskItem.querySelector('.btn-reason');
-
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+    function toggleTaskStatus(taskContainerId, tagId) {
+        let taskContainer = document.getElementById(taskContainerId);
+        let checkbox = taskContainer.querySelector('input[type="checkbox"]');
+        let tag = document.getElementById(tagId);
 
         if (checkbox.checked) {
-
-            taskItem.classList.add('completed');
-
-
-            if (tag) {
-
-                tag.className =
-                    'tag tag-green status-tag';
-
-                tag.textContent =
-                    'Completed';
-
-            }
-
-
-            if (reasonBtn) {
-
-                reasonBtn.style.display =
-                    'none';
-
-            }
-
+            tag.className = "tag tag-green";
+            tag.innerText = "Completed";
+            taskContainer.classList.add('completed');
+        } else {
+            tag.className = "tag tag-amber";
+            tag.innerText = "Pending";
+            taskContainer.classList.remove('completed');
         }
-        else {
-
-            taskItem.classList.remove('completed');
-
-
-            if (tag) {
-
-                tag.className =
-                    'tag tag-red status-tag';
-
-                tag.textContent =
-                    'Pending';
-
-            }
-
-
-            if (reasonBtn) {
-
-                reasonBtn.style.display =
-                    'inline-flex';
-
-            }
-
-
-            openReasonModal(
-                taskId,
-                taskTitle
-            );
-
-        }
-
     }
-
-
-    /* =========================
-       REASON MODAL
-    ========================== */
-
-    function openReasonModal(
-        taskId,
-        taskTitle
-    ) {
-
-        const idInput =
-            document.getElementById('modalTaskId');
-
-        const titleInput =
-            document.getElementById('modalTaskTitle');
-
-        const modal =
-            document.getElementById('taskReasonModal');
-
-
-        if (idInput)
-            idInput.value = taskId;
-
-        if (titleInput)
-            titleInput.value = taskTitle;
-
-        if (modal)
-            modal.style.display = 'flex';
-
+    function submitTaskReason() {
+        alert('Task reason and image uploaded successfully!');
+        closeModal('taskReasonModal');
     }
-
-
-    function closeReasonModal() {
-
-        const modal =
-            document.getElementById('taskReasonModal');
-
-        if (modal)
-            modal.style.display = 'none';
-
-    }
-
-
-    function handleReasonSubmit(e) {
-
-        e.preventDefault();
-
-        const taskId =
-            document.getElementById('modalTaskId')?.value;
-
-        const taskItem =
-            document.getElementById(taskId);
-
-
-        if (taskItem) {
-
-            const tag =
-                taskItem.querySelector('.status-tag');
-
-            if (tag) {
-
-                tag.className =
-                    'tag tag-amber status-tag';
-
-                tag.textContent =
-                    'Incomplete Logged';
-
-            }
-
-        }
-
-
-        closeReasonModal();
-
-    }
-
-
-    /* =========================
-       UPCOMING TASKS
-    ========================== */
-
-    function toggleUpcomingTasks() {
-
-        const taskList =
-            document.getElementById('upcomingTaskList');
-
-        const btn =
-            document.getElementById('toggleUpcomingBtn');
-
-
-        if (!taskList || !btn)
-            return;
-
-
-        if (
-            taskList.classList.contains('show')
-        ) {
-
-            taskList.classList.remove('show');
-
-            btn.innerHTML =
-                '<i class="fas fa-eye"></i> View 30-Day Plan';
-
-        }
-        else {
-
-            taskList.classList.add('show');
-
-            btn.innerHTML =
-                '<i class="fas fa-eye-slash"></i> Hide Plan';
-
-        }
-
-    }
-
-
-    /* =========================
-       IMAGE PREVIEW
-    ========================== */
-
-    function handleFilePreview(input) {
-
-        const container =
-            document.getElementById(
-                'imagePreviewContainer'
-            );
-
-
-        if (!container)
-            return;
-
-
-        container.innerHTML = '';
-
-
-        if (input.files) {
-
-            Array.from(input.files)
-                .forEach(file => {
-
-                    if (
-                        file.type.startsWith('image/')
-                    ) {
-
-                        const reader =
-                            new FileReader();
-
-
-                        reader.onload =
-                            function (e) {
-
-                                const previewItem =
-                                    document.createElement('div');
-
-
-                                previewItem.className =
-                                    'preview-item';
-
-
-                                previewItem.innerHTML = `
-
-                                    <img
-                                        src="${e.target.result}"
-                                        alt="Preview" />
-
-                                    <span
-                                        class="remove-img"
-                                        onclick="this.parentElement.remove()">
-
-                                        &times;
-
-                                    </span>
-
-                                `;
-
-
-                                container.appendChild(
-                                    previewItem
-                                );
-
-                            };
-
-
-                        reader.readAsDataURL(file);
-
-                    }
-
-                });
-
-        }
-
-    }
-
-
-    /* =========================
-       REPORT SUBMIT
-    ========================== */
-
-    function handleFormSubmit(e) {
-
-        e.preventDefault();
-
-        /*
-            Later this form will
-            submit data to Controller/API.
-        */
-
-        window.location.hash = '';
-
-    }
-
 </script>

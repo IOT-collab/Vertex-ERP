@@ -8,8 +8,9 @@ body {
 }
 
 .recruitment-container {
+    width: 100%;
     min-height: 100vh;
-    padding: 24px;
+    padding: clamp(1rem, 3vw, 24px);
     box-sizing: border-box;
 }
 
@@ -27,6 +28,7 @@ body {
     display: flex;
     align-items: center;
     gap: 16px;
+    flex-wrap: wrap;
 }
 
 .btn-back {
@@ -37,14 +39,18 @@ body {
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
     .btn-back:hover {
         background: rgba(55, 65, 81, 0.8);
+        color: #ffffff;
     }
 
 .page-title {
-    font-size: 26px;
+    font-size: clamp(1.35rem, 2.5vw, 26px);
     font-weight: 700;
     margin: 0;
     background: linear-gradient(135deg, #ffffff, #9ca3af);
@@ -84,6 +90,8 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 16px;
     margin-bottom: 32px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .stat-card {
@@ -92,6 +100,7 @@ body {
     border: 1px solid rgba(31, 41, 55, 0.8);
     border-radius: 16px;
     padding: 20px;
+    box-sizing: border-box;
 }
 
 .stat-content {
@@ -123,6 +132,7 @@ body {
     justify-content: center;
     color: white;
     font-size: 18px;
+    flex-shrink: 0;
 }
 
 .icon-blue {
@@ -153,7 +163,9 @@ body {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(31, 41, 55, 0.8);
     border-radius: 16px;
-    padding: 24px;
+    padding: clamp(1rem, 2vw, 24px);
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .controls-bar {
@@ -196,6 +208,7 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
 .search-box {
@@ -244,6 +257,7 @@ body {
 /* Data Table */
 .table-wrapper {
     overflow-x: auto;
+    width: 100%;
 }
 
 .data-table {
@@ -291,6 +305,7 @@ body {
     border-radius: 20px;
     font-size: 12px;
     font-weight: 500;
+    display: inline-block;
 }
 
 .badge-blue {
@@ -337,6 +352,8 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .job-card {
@@ -344,6 +361,7 @@ body {
     border: 1px solid rgba(55, 65, 81, 0.5);
     border-radius: 12px;
     padding: 20px;
+    box-sizing: border-box;
 }
 
 .job-dept {
@@ -373,6 +391,8 @@ body {
     margin-top: 20px;
     padding-top: 12px;
     border-top: 1px solid rgba(31, 41, 55, 0.8);
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .hidden {
@@ -391,5 +411,15 @@ body {
 
     .action-group {
         width: 100%;
+    }
+
+    .header-section {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .btn-primary {
+        width: 100%;
+        justify-content: center;
     }
 }

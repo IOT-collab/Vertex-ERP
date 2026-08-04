@@ -6,13 +6,16 @@
     padding: 2rem;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     box-sizing: border-box;
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
 }
 
     .payroll-dashboard-wrapper * {
         box-sizing: border-box;
     }
 
-/* Header */
+/* Header & Back Arrow */
 .dashboard-header {
     display: flex;
     justify-content: space-between;
@@ -22,18 +25,50 @@
     gap: 1rem;
 }
 
-    .dashboard-header h2 {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #ffffff;
-        margin: 0;
+.header-left-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.back-arrow-btn {
+    background: #111827;
+    border: 1px solid #1f293d;
+    color: #cbd5e1;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+    .back-arrow-btn svg {
+        width: 20px;
+        height: 20px;
     }
 
-    .dashboard-header p {
-        color: #94a3b8;
-        margin: 0.3rem 0 0 0;
-        font-size: 0.95rem;
+    .back-arrow-btn:hover {
+        background: #1e293b;
+        color: #ffffff;
+        border-color: #334155;
     }
+
+.dashboard-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+}
+
+.dashboard-header p {
+    color: #94a3b8;
+    margin: 0.3rem 0 0 0;
+    font-size: 0.95rem;
+}
 
 /* Stats Summary Cards */
 .stats-grid {
@@ -51,6 +86,7 @@
     display: flex;
     align-items: flex-start;
     gap: 1rem;
+    width: 100%;
 }
 
     .stat-card.accent-green {
@@ -96,18 +132,23 @@
 .stat-info {
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .stat-label {
     font-size: 0.8rem;
     color: #94a3b8;
     margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .stat-value {
     font-size: 1.4rem;
     font-weight: 700;
     color: #ffffff;
+    word-break: break-word;
 }
 
 .stat-meta {
@@ -131,6 +172,7 @@
     border-radius: 18px;
     padding: 1.5rem;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    width: 100%;
 }
 
 .card-header {
@@ -138,6 +180,8 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
     .card-header h3 {
@@ -178,6 +222,7 @@
         color: #cbd5e1;
         padding-bottom: 0.5rem;
         border-bottom: 1px dashed #1e293b;
+        gap: 1rem;
     }
 
         .breakdown-list li.col-total {
@@ -195,6 +240,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
     .net-payout-banner span {
@@ -236,6 +283,7 @@
         font-size: 0.9rem;
         color: #f8fafc;
         font-weight: 600;
+        word-break: break-all;
     }
 
 .font-mono {
@@ -251,6 +299,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .tax-info h5 {
@@ -314,6 +364,7 @@
     align-items: center;
     gap: 0.4rem;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
     .btn-action svg {
@@ -364,6 +415,7 @@
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 700;
+    display: inline-block;
 }
 
 .badge-paid {
@@ -388,6 +440,7 @@
     border-collapse: collapse;
     text-align: left;
     font-size: 0.9rem;
+    white-space: nowrap;
 }
 
     .modern-table th {
@@ -405,34 +458,55 @@
     }
 
 .table-responsive {
+    width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 1100px) {
+/* Responsive Media Queries for Maximum Fluidity */
+@media (max-width: 1200px) {
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+}
 
+@media (max-width: 992px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .payroll-dashboard-wrapper {
         padding: 1rem;
     }
 
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
     .breakdown-columns {
         grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
     .account-details {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .btn-secondary-glow {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
         grid-template-columns: 1fr;
     }
 }

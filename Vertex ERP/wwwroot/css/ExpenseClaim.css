@@ -40,6 +40,7 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
     .exp-btn-icon:hover {
@@ -362,6 +363,7 @@
     align-items: center;
     justify-content: center;
     z-index: 999;
+    padding: 1rem;
 }
 
 .exp-modal {
@@ -372,6 +374,8 @@
     max-width: 540px;
     padding: 24px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .exp-modal-header {
@@ -457,6 +461,10 @@
 }
 
 @media (max-width: 600px) {
+    .exp-container {
+        padding: 12px;
+    }
+
     .exp-grid-stats {
         grid-template-columns: 1fr !important;
     }
@@ -469,4 +477,12 @@
     .exp-form-row {
         grid-template-columns: 1fr;
     }
+
+    .exp-header-actions, .exp-header-actions .exp-btn-primary {
+        width: 100%;
+    }
+
+        .exp-header-actions button {
+            justify-content: center;
+        }
 }

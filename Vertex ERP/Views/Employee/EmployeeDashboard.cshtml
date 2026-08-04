@@ -1,124 +1,150 @@
-﻿@{
+﻿
+@{
     ViewData["Title"] = "Employee Dashboard";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
 <link href="~/css/employeedashboard.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-<div class="employee-dashboard">
+<div class="employee-dashboard-wrapper">
 
-    <!-- Header -->
-    <div class="page-header">
-        <div>
-            <h2>Employee Management</h2>
-            <p>Manage employees, departments and employee information.</p>
+    <!-- Page Header Section with Add Button on Right -->
+    <div class="dashboard-header-card">
+        <div class="header-left">
+            <a href="javascript:history.back()" class="back-arrow-btn" title="Go back">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h2>Employee Management</h2>
+                <p>Manage employees, departments and system users efficiently.</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <button type="button" class="btn-primary-glow" id="addEmployeeBtn">
+                <i class="fa-solid fa-user-plus"></i> Add Employee
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Grid Section -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon total-icon">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-value">@(Model?.TotalEmployees ?? 0)</span>
+                <span class="stat-label">Total Employees</span>
+            </div>
         </div>
 
-        <button class="add-btn">
-            + Add Employee
+        <div class="stat-card">
+            <div class="stat-icon active-icon">
+                <i class="fa-solid fa-user-check"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-value">@(Model?.ActiveEmployees ?? 0)</span>
+                <span class="stat-label">Active</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon inactive-icon">
+                <i class="fa-solid fa-user-xmark"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-value">@(Model?.InactiveEmployees ?? 0)</span>
+                <span class="stat-label">Inactive</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon dept-icon">
+                <i class="fa-solid fa-briefcase"></i>
+            </div>
+            <div class="stat-details">
+                <span class="stat-value">@(Model?.TotalDepartments ?? 0)</span>
+                <span class="stat-label">Departments</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Single Clean Search Toolbar -->
+    <div class="toolbar-card">
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchEmployeeInput" placeholder="Search by name, employee code or department..." />
+        </div>
+        <button type="button" class="btn-secondary" id="searchBtn">
+            <i class="fa-solid fa-filter"></i> Filter
         </button>
     </div>
 
-    <!-- Statistics -->
-
-    <div class="stats-grid">
-
-        <div class="stat-card">
-            <h3>250</h3>
-            <span>Total Employees</span>
+    <!-- Employee Directory Table Section -->
+    <div class="glass-card table-section">
+        <div class="card-header">
+            <div class="card-title-group">
+                <h3>Employee Directory</h3>
+                <span class="badge-accent">Live Records</span>
+            </div>
         </div>
 
-        <div class="stat-card active">
-            <h3>228</h3>
-            <span>Active</span>
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Employee Code</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model?.Employees != null && Model.Employees.Count > 0)
+                    {
+                        @foreach (var emp in Model.Employees)
+                        {
+                            <tr>
+                                <td>
+                                    <img src="@(string.IsNullOrEmpty(emp.PhotoUrl) ? "/images/default-user.png" : emp.PhotoUrl)" alt="@emp.Name" class="emp-avatar" />
+                                </td>
+                                <td><span class="code-text">@emp.EmployeeCode</span></td>
+                                <td class="fw-semibold">@emp.Name</td>
+                                <td>@emp.Department</td>
+                                <td>@emp.Designation</td>
+                                <td>
+                                    <span class="status-badge @emp.StatusBadgeClass">@emp.Status</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="action-buttons">
+                                        <button type="button" class="action-btn edit-action" title="Edit" data-id="@emp.Id">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                        <button type="button" class="action-btn delete-action" title="Delete" data-id="@emp.Id">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center-muted">
+                                <div class="empty-state">
+                                    <i class="fa-solid fa-folder-open"></i>
+                                    <p>No employee records found.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
-
-        <div class="stat-card inactive">
-            <h3>22</h3>
-            <span>Inactive</span>
-        </div>
-
-        <div class="stat-card dept">
-            <h3>12</h3>
-            <span>Departments</span>
-        </div>
-
-    </div>
-
-
-    <!-- Search -->
-
-    <div class="toolbar">
-
-        <input type="text"
-               placeholder="Search Employee..." />
-
-        <button>Search</button>
-
-    </div>
-
-
-    <!-- Table -->
-
-    <div class="table-card">
-
-        <table>
-
-            <thead>
-
-                <tr>
-
-                    <th>Photo</th>
-                    <th>Employee Code</th>
-                    <th>Name</th>
-                    <th>Department</th>
-                    <th>Designation</th>
-                    <th>Status</th>
-                    <th>Action</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                <tr>
-
-                    <td>
-                        <img src="https://via.placeholder.com/45" />
-                    </td>
-
-                    <td>EMP001</td>
-
-                    <td>Rahul Sharma</td>
-
-                    <td>IT</td>
-
-                    <td>Software Engineer</td>
-
-                    <td>
-
-                        <span class="status active-status">
-
-                            Active
-
-                        </span>
-
-                    </td>
-
-                    <td>
-
-                        <button class="edit-btn">Edit</button>
-
-                        <button class="delete-btn">Delete</button>
-
-                    </td>
-
-                </tr>
-
-            </tbody>
-
-        </table>
-
     </div>
 
 </div>

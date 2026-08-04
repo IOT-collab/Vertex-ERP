@@ -103,7 +103,7 @@
         background: #1d4ed8;
     }
 
-/* KPI Cards Layout (Explicit CSS Grid override) */
+/* KPI Cards Layout */
 .hc-grid-stats {
     display: grid !important;
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
@@ -263,6 +263,7 @@
 .hc-table-wrapper {
     width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .hc-table {
@@ -359,6 +360,7 @@
     border-radius: 6px;
     font-size: 11px;
     font-weight: 600;
+    display: inline-block;
 }
 
 .pill-blue {
@@ -391,15 +393,20 @@
 }
 
 /* Responsive Layout */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
     .hc-grid-stats {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+    .hc-container {
+        padding: 12px;
+    }
+
     .hc-grid-stats {
         grid-template-columns: 1fr !important;
+        gap: 12px !important;
     }
 
     .hc-header {
@@ -414,5 +421,11 @@
 
     .hc-search-box {
         max-width: 100%;
+        min-width: 100%;
+    }
+
+    .hc-controls {
+        flex-direction: column;
+        align-items: stretch;
     }
 }

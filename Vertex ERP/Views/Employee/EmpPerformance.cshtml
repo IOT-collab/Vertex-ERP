@@ -1,24 +1,31 @@
-﻿@{
+﻿
+
+@{
     ViewData["Title"] = "Performance & Reviews";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
-<link href="~/css/empperformance.css" rel="stylesheet" />
 
+<link href="~/css/empperformance.css" rel="stylesheet" />
 
 <div class="perf-dashboard-wrapper">
 
-    <!-- Page Header -->
+    <!-- Page Header with Back Arrow -->
     <div class="dashboard-header">
-        <div class="header-text">
-            <h2>Performance &amp; Employee Reviews</h2>
-            <p>Track your KPIs, self-assessments, manager reviews, and active goals.</p>
+        <div class="header-left-group">
+            <button type="button" class="btn-back" onclick="history.back()" title="Go Back">
+                &#8592;
+            </button>
+            <div class="header-text">
+                <h2>Performance &amp; Employee Reviews</h2>
+                <p>Track your KPIs, self-assessments, manager reviews, and active goals.</p>
+            </div>
         </div>
         <div class="header-actions">
-            <button class="btn-primary-glow">
+            <button class="btn-primary-glow" onclick="location.href='@Url.Action("SelfAssessment", "Performance")'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                 Self Assessment
             </button>
-            <button class="btn-secondary-glow">
+            <button class="btn-secondary-glow" onclick="location.href='@Url.Action("DownloadReviewLetter", "Performance")'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
                 Download Review Letter
             </button>
@@ -33,8 +40,8 @@
             </div>
             <div class="stat-info">
                 <span class="stat-label">Overall Performance Score</span>
-                <span class="stat-value">4.8 <small>/ 5.0</small></span>
-                <small class="stat-meta text-purple">★ Exceeds Expectations</small>
+                <span class="stat-value">@(Model?.OverallScore ?? "0.0") <small>/ 5.0</small></span>
+                <small class="stat-meta text-purple">★ @(Model?.ScoreLabel ?? "N/A")</small>
             </div>
         </div>
 
@@ -44,8 +51,8 @@
             </div>
             <div class="stat-info">
                 <span class="stat-label">KPI Completion Rate</span>
-                <span class="stat-value">88%</span>
-                <small class="stat-meta text-green">↑ 6% higher than Q1</small>
+                <span class="stat-value">@(Model?.KpiCompletionRate ?? "0%")</span>
+                <small class="stat-meta text-green">@(Model?.KpiMeta ?? "N/A")</small>
             </div>
         </div>
 
@@ -55,8 +62,8 @@
             </div>
             <div class="stat-info">
                 <span class="stat-label">Review Cycle</span>
-                <span class="stat-value">Q2 - 2026</span>
-                <small class="stat-meta text-amber">Status: Manager Submitted</small>
+                <span class="stat-value">@(Model?.ReviewCycle ?? "N/A")</span>
+                <small class="stat-meta text-amber">Status: @(Model?.ReviewStatus ?? "N/A")</small>
             </div>
         </div>
 
@@ -66,8 +73,8 @@
             </div>
             <div class="stat-info">
                 <span class="stat-label">Goals &amp; Milestones</span>
-                <span class="stat-value">12 / 14</span>
-                <small class="stat-meta text-green">2 In Progress</small>
+                <span class="stat-value">@(Model?.GoalsCompleted ?? "0") / @(Model?.GoalsTotal ?? "0")</span>
+                <small class="stat-meta text-green">@(Model?.GoalsInProgress ?? "0") In Progress</small>
             </div>
         </div>
     </div>
@@ -80,91 +87,40 @@
             <div class="card-header">
                 <div>
                     <h3>Key Performance Indicators (KPIs)</h3>
-                    <p class="subtitle">Current Evaluation Period (Q2 2026)</p>
+                    <p class="subtitle">Current Evaluation Period (@(Model?.ReviewCycle ?? "N/A"))</p>
                 </div>
-                <span class="badge-cycle">Weightage Total: 100%</span>
+                <span class="badge-cycle">Weightage Total: @(Model?.TotalWeightage ?? "100%")</span>
             </div>
 
             <div class="kpi-list">
-                <!-- KPI Item 1 -->
-                <div class="kpi-item">
-                    <div class="kpi-head">
-                        <div class="kpi-title">
-                            <strong>Project Deliverables &amp; Code Quality</strong>
-                            <span class="kpi-weight">Weightage: 40%</span>
+                @if (Model?.KpiList != null)
+                {
+                    foreach (var kpi in Model.KpiList)
+                    {
+                        <div class="kpi-item">
+                            <div class="kpi-head">
+                                <div class="kpi-title">
+                                    <strong>@kpi.Title</strong>
+                                    <span class="kpi-weight">Weightage: @kpi.Weightage</span>
+                                </div>
+                                <span class="status-badge @kpi.StatusBadgeClass">@kpi.StatusText</span>
+                            </div>
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-info">
+                                    <span>Target: @kpi.TargetDescription</span>
+                                    <span class="progress-perc">@kpi.ProgressPercentage</span>
+                                </div>
+                                <div class="progress-track">
+                                    <div class="progress-fill @kpi.ProgressBarClass" style="width: @kpi.ProgressValue%;"></div>
+                                </div>
+                            </div>
                         </div>
-                        <span class="status-badge badge-success">On Track</span>
-                    </div>
-                    <div class="progress-bar-wrapper">
-                        <div class="progress-info">
-                            <span>Target: 95% Code Coverage &amp; Zero Critical Bugs</span>
-                            <span class="progress-perc">92%</span>
-                        </div>
-                        <div class="progress-track">
-                            <div class="progress-fill fill-purple" style="width: 92%;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- KPI Item 2 -->
-                <div class="kpi-item">
-                    <div class="kpi-head">
-                        <div class="kpi-title">
-                            <strong>UI/UX Response Time Optimization</strong>
-                            <span class="kpi-weight">Weightage: 30%</span>
-                        </div>
-                        <span class="status-badge badge-success">Exceeded</span>
-                    </div>
-                    <div class="progress-bar-wrapper">
-                        <div class="progress-info">
-                            <span>Target: &lt; 200ms Page Load Time</span>
-                            <span class="progress-perc">100%</span>
-                        </div>
-                        <div class="progress-track">
-                            <div class="progress-fill fill-green" style="width: 100%;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- KPI Item 3 -->
-                <div class="kpi-item">
-                    <div class="kpi-head">
-                        <div class="kpi-title">
-                            <strong>Team Collaboration &amp; Mentorship</strong>
-                            <span class="kpi-weight">Weightage: 20%</span>
-                        </div>
-                        <span class="status-badge badge-warning">Needs Review</span>
-                    </div>
-                    <div class="progress-bar-wrapper">
-                        <div class="progress-info">
-                            <span>Target: Conduct 4 Knowledge Sharing Sessions</span>
-                            <span class="progress-perc">75%</span>
-                        </div>
-                        <div class="progress-track">
-                            <div class="progress-fill fill-amber" style="width: 75%;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- KPI Item 4 -->
-                <div class="kpi-item">
-                    <div class="kpi-head">
-                        <div class="kpi-title">
-                            <strong>Documentation &amp; Process Adherence</strong>
-                            <span class="kpi-weight">Weightage: 10%</span>
-                        </div>
-                        <span class="status-badge badge-success">On Track</span>
-                    </div>
-                    <div class="progress-bar-wrapper">
-                        <div class="progress-info">
-                            <span>Target: Complete Architecture Docs</span>
-                            <span class="progress-perc">85%</span>
-                        </div>
-                        <div class="progress-track">
-                            <div class="progress-fill fill-blue" style="width: 85%;"></div>
-                        </div>
-                    </div>
-                </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted" style="text-align: center; color: #64748b; padding: 1rem;">No KPI data available.</p>
+                }
             </div>
         </div>
 
@@ -176,31 +132,31 @@
             </div>
 
             <div class="manager-meta">
-                <div class="reviewer-avatar">RK</div>
+                <div class="reviewer-avatar">@(Model?.ReviewerInitials ?? "RM")</div>
                 <div class="reviewer-info">
-                    <strong>Rahul Kapoor</strong>
-                    <span>Engineering Director • Evaluated on 15 Jul 2026</span>
+                    <strong>@(Model?.ReviewerName ?? "N/A")</strong>
+                    <span>@(Model?.ReviewerDesignation ?? "N/A") • Evaluated on @(Model?.EvaluationDate ?? "N/A")</span>
                 </div>
             </div>
 
             <div class="feedback-blocks">
                 <div class="feedback-box">
                     <label class="text-green">Key Strengths</label>
-                    <p>Exceptional work on modernizing front-end components and delivering responsive layouts on tight schedules. Great ownership of code quality.</p>
+                    <p>@(Model?.KeyStrengths ?? "No feedback provided.")</p>
                 </div>
 
                 <div class="feedback-box">
                     <label class="text-amber">Areas of Growth</label>
-                    <p>Focus more on cross-team documentation and active participation in architectural review discussions for upcoming quarterly sprints.</p>
+                    <p>@(Model?.AreasOfGrowth ?? "No feedback provided.")</p>
                 </div>
             </div>
 
             <div class="appraisal-summary-footer">
                 <div class="appraisal-val">
                     <span>Recommended Grade</span>
-                    <strong>A+ (Top Performer)</strong>
+                    <strong>@(Model?.RecommendedGrade ?? "N/A")</strong>
                 </div>
-                <button class="btn-sm-outline">View Complete History</button>
+                <button class="btn-sm-outline" onclick="location.href='@Url.Action("CompleteHistory", "Performance")'">View Complete History</button>
             </div>
         </div>
 
@@ -216,26 +172,20 @@
             </div>
 
             <div class="skills-chips">
-                <div class="skill-pill">
-                    <span>React / Razor Views</span>
-                    <strong class="text-purple">95%</strong>
-                </div>
-                <div class="skill-pill">
-                    <span>Responsive UI Architecture</span>
-                    <strong class="text-green">98%</strong>
-                </div>
-                <div class="skill-pill">
-                    <span>System Design</span>
-                    <strong class="text-blue">82%</strong>
-                </div>
-                <div class="skill-pill">
-                    <span>Team Collaboration</span>
-                    <strong class="text-amber">90%</strong>
-                </div>
-                <div class="skill-pill">
-                    <span>Agile / Sprint Planning</span>
-                    <strong class="text-purple">88%</strong>
-                </div>
+                @if (Model?.SkillsList != null)
+                {
+                    foreach (var skill in Model.SkillsList)
+                    {
+                        <div class="skill-pill">
+                            <span>@skill.Name</span>
+                            <strong class="@skill.ColorClass">@skill.Score</strong>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted" style="color: #64748b;">No skills data available.</p>
+                }
             </div>
         </div>
 
@@ -243,24 +193,27 @@
         <div class="glass-card">
             <div class="card-header">
                 <h3>Badges &amp; Appreciations</h3>
-                <span class="badge-tag">3 Badges</span>
+                <span class="badge-tag">@(Model?.BadgeCount ?? "0") Badges</span>
             </div>
 
             <div class="badge-list">
-                <div class="badge-item">
-                    <div class="badge-icon">🏆</div>
-                    <div class="badge-details">
-                        <strong>Star Performer Q1</strong>
-                        <span>Awarded for delivering high-impact UI components.</span>
-                    </div>
-                </div>
-                <div class="badge-item">
-                    <div class="badge-icon">⚡</div>
-                    <div class="badge-details">
-                        <strong>Speed Demon</strong>
-                        <span>Fastest turn-around time on bug resolution.</span>
-                    </div>
-                </div>
+                @if (Model?.BadgesList != null)
+                {
+                    foreach (var badge in Model.BadgesList)
+                    {
+                        <div class="badge-item">
+                            <div class="badge-icon">@badge.IconSymbol</div>
+                            <div class="badge-details">
+                                <strong>@badge.Title</strong>
+                                <span>@badge.Description</span>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted" style="color: #64748b;">No badges found.</p>
+                }
             </div>
         </div>
     </div>

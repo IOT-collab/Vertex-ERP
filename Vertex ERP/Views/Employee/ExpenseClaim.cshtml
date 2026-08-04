@@ -1,6 +1,10 @@
-﻿@{
+﻿@model dynamic
+
+@{
     ViewData["Title"] = "Expense Claims";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
+
 <link href="~/css/expenseclaim.css" rel="stylesheet" />
 
 <div class="exp-container">
@@ -30,52 +34,52 @@
             <div class="exp-stat-top">
                 <div>
                     <span class="exp-stat-label">Total Claimed</span>
-                    <h3 class="exp-stat-value">₹45,850</h3>
+                    <h3 class="exp-stat-value">@(Model?.TotalClaimedAmount ?? "₹0")</h3>
                 </div>
                 <div class="exp-icon-box icon-blue">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>
                 </div>
             </div>
-            <span class="exp-stat-sub text-emerald">12 Claims Submitted</span>
+            <span class="exp-stat-sub text-emerald">@(Model?.TotalClaimsCount ?? "0") Claims Submitted</span>
         </div>
 
         <div class="exp-stat-card">
             <div class="exp-stat-top">
                 <div>
                     <span class="exp-stat-label">Pending Approval</span>
-                    <h3 class="exp-stat-value">₹12,400</h3>
+                    <h3 class="exp-stat-value">@(Model?.PendingAmount ?? "₹0")</h3>
                 </div>
                 <div class="exp-icon-box icon-amber">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
                 </div>
             </div>
-            <span class="exp-stat-sub text-amber">3 Claims Under Review</span>
+            <span class="exp-stat-sub text-amber">@(Model?.PendingClaimsCount ?? "0") Claims Under Review</span>
         </div>
 
         <div class="exp-stat-card">
             <div class="exp-stat-top">
                 <div>
                     <span class="exp-stat-label">Approved Amount</span>
-                    <h3 class="exp-stat-value">₹28,450</h3>
+                    <h3 class="exp-stat-value">@(Model?.ApprovedAmount ?? "₹0")</h3>
                 </div>
                 <div class="exp-icon-box icon-green">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
                 </div>
             </div>
-            <span class="exp-stat-sub text-emerald">8 Claims Settled</span>
+            <span class="exp-stat-sub text-emerald">@(Model?.ApprovedClaimsCount ?? "0") Claims Settled</span>
         </div>
 
         <div class="exp-stat-card">
             <div class="exp-stat-top">
                 <div>
                     <span class="exp-stat-label">Rejected Claims</span>
-                    <h3 class="exp-stat-value">₹5,000</h3>
+                    <h3 class="exp-stat-value">@(Model?.RejectedAmount ?? "₹0")</h3>
                 </div>
                 <div class="exp-icon-box icon-purple">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
                 </div>
             </div>
-            <span class="exp-stat-sub text-red">1 Claim Rejected</span>
+            <span class="exp-stat-sub text-red">@(Model?.RejectedClaimsCount ?? "0") Claim Rejected</span>
         </div>
     </div>
 
@@ -111,56 +115,34 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>
-                            <div class="exp-claim-info">
-                                <span class="claim-title">Client Meeting Stay (Delhi)</span>
-                                <span class="claim-emp">Emp: Rahul Verma</span>
-                            </div>
-                        </td>
-                        <td><span class="badge badge-hotel">Hotel</span></td>
-                        <td>22 Apr 2026</td>
-                        <td class="exp-amount">₹14,500</td>
-                        <td><a href="#" class="exp-link">Hotel_Bill.pdf</a></td>
-                        <td><span class="status-badge status-pending">Pending</span></td>
-                        <td style="text-align: right;">
-                            <button class="exp-btn-view">View</button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <div class="exp-claim-info">
-                                <span class="claim-title">Airport to Hotel Cab</span>
-                                <span class="claim-emp">Emp: Rahul Verma</span>
-                            </div>
-                        </td>
-                        <td><span class="badge badge-cab">Cab / Travel</span></td>
-                        <td>21 Apr 2026</td>
-                        <td class="exp-amount">₹1,850</td>
-                        <td><a href="#" class="exp-link">Uber_Receipt.png</a></td>
-                        <td><span class="status-badge status-approved">Approved</span></td>
-                        <td style="text-align: right;">
-                            <button class="exp-btn-view">View</button>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <div class="exp-claim-info">
-                                <span class="claim-title">Client Dinner Expense</span>
-                                <span class="claim-emp">Emp: Priya Sharma</span>
-                            </div>
-                        </td>
-                        <td><span class="badge badge-food">Food & Meals</span></td>
-                        <td>18 Apr 2026</td>
-                        <td class="exp-amount">₹3,400</td>
-                        <td><a href="#" class="exp-link">Restaurant_Bill.jpg</a></td>
-                        <td><span class="status-badge status-approved">Approved</span></td>
-                        <td style="text-align: right;">
-                            <button class="exp-btn-view">View</button>
-                        </td>
-                    </tr>
+                    @if (Model?.ClaimsList != null && Model.ClaimsList.Count > 0)
+                    {
+                        foreach (var claim in Model.ClaimsList)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="exp-claim-info">
+                                        <span class="claim-title">@claim.Title</span>
+                                        <span class="claim-emp">Emp: @claim.EmployeeName</span>
+                                    </div>
+                                </td>
+                                <td><span class="badge @claim.CategoryBadgeClass">@claim.Category</span></td>
+                                <td>@claim.Date</td>
+                                <td class="exp-amount">@claim.Amount</td>
+                                <td><a href="@claim.ReceiptUrl" target="_blank" class="exp-link">@claim.ReceiptName</a></td>
+                                <td><span class="status-badge @claim.StatusBadgeClass">@claim.Status</span></td>
+                                <td style="text-align: right;">
+                                    <button class="exp-btn-view" onclick="viewClaimDetails('@claim.Id')">View</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #64748b; padding: 2rem;">No expense claims found.</td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
@@ -174,11 +156,11 @@
             <h2>Submit Expense Claim</h2>
             <button class="exp-modal-close" onclick="closeClaimModal()">&times;</button>
         </div>
-        <form id="expForm" onsubmit="event.preventDefault(); closeClaimModal();">
+        <form id="expForm" method="post" action="@Url.Action("SubmitClaim", "Expense")" enctype="multipart/form-data">
             <div class="exp-modal-body">
                 <div class="exp-form-group">
                     <label>Claim Category</label>
-                    <select class="exp-input" required>
+                    <select class="exp-input" name="Category" required>
                         <option value="">Select Category</option>
                         <option value="Hotel">Hotel & Accommodation</option>
                         <option value="Cab">Cab / Taxi / Travel</option>
@@ -190,34 +172,34 @@
 
                 <div class="exp-form-group">
                     <label>Expense Title / Purpose</label>
-                    <input type="text" class="exp-input" placeholder="e.g. Hotel stay for Mumbai client visit" required />
+                    <input type="text" class="exp-input" name="Title" placeholder="e.g. Hotel stay for Mumbai client visit" required />
                 </div>
 
                 <div class="exp-form-row">
                     <div class="exp-form-group">
                         <label>Date of Expense</label>
-                        <input type="date" class="exp-input" required />
+                        <input type="date" class="exp-input" name="Date" required />
                     </div>
                     <div class="exp-form-group">
                         <label>Amount (₹)</label>
-                        <input type="number" class="exp-input" placeholder="0.00" min="1" required />
+                        <input type="number" class="exp-input" name="Amount" placeholder="0.00" min="1" required />
                     </div>
                 </div>
 
                 <div class="exp-form-group">
                     <label>Attach Bill / Receipt</label>
                     <div class="exp-file-upload">
-                        <input type="file" id="billFile" hidden required />
+                        <input type="file" id="billFile" name="ReceiptFile" hidden required onchange="updateFileName(this)" />
                         <label for="billFile" class="exp-file-label">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-                            <span>Click to upload Invoice or Receipt (PDF, JPG, PNG)</span>
+                            <span id="fileLabelText">Click to upload Invoice or Receipt (PDF, JPG, PNG)</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="exp-form-group">
                     <label>Remarks / Description</label>
-                    <textarea class="exp-input exp-textarea" rows="3" placeholder="Add additional details about the expense..."></textarea>
+                    <textarea class="exp-input exp-textarea" name="Remarks" rows="3" placeholder="Add additional details about the expense..."></textarea>
                 </div>
             </div>
 
@@ -238,16 +220,36 @@
         document.getElementById("claimModal").style.display = "none";
     }
 
+    function updateFileName(input) {
+        const textElement = document.getElementById("fileLabelText");
+        if (input.files && input.files[0]) {
+            textElement.textContent = "Selected: " + input.files[0].name;
+        }
+    }
+
+    function viewClaimDetails(id) {
+        // Handle view action logic or redirect
+        location.href = '@Url.Action("Details", "Expense")?id=' + id;
+    }
+
     function filterClaims() {
         const input = document.getElementById("expSearchInput").value.toUpperCase();
+        const categoryFilter = document.getElementById("typeFilter").value.toUpperCase();
         const table = document.getElementById("claimsTable");
         const tr = table.getElementsByTagName("tr");
 
         for (let i = 1; i < tr.length; i++) {
-            const td = tr[i].getElementsByTagName("td")[0];
-            if (td) {
-                const txtValue = td.textContent || td.innerText;
-                if (txtValue.toUpperCase().indexOf(input) > -1) {
+            const tdTitle = tr[i].getElementsByTagName("td")[0];
+            const tdCategory = tr[i].getElementsByTagName("td")[1];
+
+            if (tdTitle && tdCategory) {
+                const titleText = tdTitle.textContent || tdTitle.innerText;
+                const categoryText = tdCategory.textContent || tdCategory.innerText;
+
+                const matchesSearch = titleText.toUpperCase().indexOf(input) > -1;
+                const matchesCategory = categoryFilter === "ALL" || categoryText.toUpperCase().indexOf(categoryFilter) > -1;
+
+                if (matchesSearch && matchesCategory) {
                     tr[i].style.display = "";
                 } else {
                     tr[i].style.display = "none";
