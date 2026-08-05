@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using Shiva_Gautam.Data;
-using Shiva_Gautam.Models;
-using Shiva_Gautam.Services;
+using VertexERP.Data;
+using VertexERP.Models;
+using VertexERP.Services;
 
-namespace Shiva_Gautam.Controllers
+namespace VertexERP.Controllers
 {
     public class GuestController : Controller
     {
@@ -43,10 +43,10 @@ namespace Shiva_Gautam.Controllers
 
         public IActionResult UserSettings()
         {
-            ViewBag.Users = _dbContext.AppUsers
-                .OrderBy(user => user.Role)
-                .ThenBy(user => user.Username)
-                .ToList();
+            //ViewBag.Users = _dbContext.AppUsers
+            //    .OrderBy(user => user.Role)
+            //    .ThenBy(user => user.Username)
+            //    .ToList();
 
             return View();
         }
@@ -135,7 +135,7 @@ namespace Shiva_Gautam.Controllers
                 message.Contains("aaj") ||
                 message.Contains("batao"))
             {
-                reply = "Today's dashboard summary shows 128 employees present, 6 late entries, 8 employees on leave, and 5 absent employees. " +
+                reply = "Live attendance and company reporting data is not available yet. " +
                     $"The system currently has {totalUsers} active login users configured: {admins} admin, {supervisors} supervisor, and {employees} employee users.";
             }
             else if (message.Contains("user") ||

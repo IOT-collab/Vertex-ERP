@@ -6,6 +6,7 @@
     <title>@ViewBag.Title - Vertex ERP</title>
     <link href="~/css/style.css" rel="stylesheet" />
     <link href="~/css/site.css" rel="stylesheet" />
+    <link href="~/css/common-back-button.css" rel="stylesheet" asp-append-version="true" />
 </head>
 <body>
     @{
@@ -101,7 +102,9 @@
 
             <!-- Embedded Nested Page Target Body Canvas Wrapper -->
             <div class="page-content">
+                <partial name="_BackButton" />
                 @RenderBody()
+                <link href="~/css/common-ui.css" rel="stylesheet" asp-append-version="true" />
             </div>
 
         </main>

@@ -1,0 +1,61 @@
+.common-back-nav {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 0 0 16px;
+}
+
+.common-back-nav > .common-back-button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 40px !important;
+    padding: 9px 16px !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+    background: #0f172a !important;
+    color: #e2e8f0 !important;
+    font: inherit !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22) !important;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease !important;
+}
+
+.common-back-nav > .common-back-button:hover {
+    border-color: #3b82f6 !important;
+    background: #172554 !important;
+    color: #bfdbfe !important;
+    transform: translateX(-2px) !important;
+}
+
+.common-back-nav > .common-back-button:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.3) !important;
+    outline-offset: 2px !important;
+}
+
+.common-back-icon {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+@media (max-width: 576px) {
+    .common-back-nav {
+        margin-bottom: 12px;
+    }
+
+    .common-back-nav > .common-back-button {
+        min-height: 38px !important;
+        padding: 8px 13px !important;
+    }
+}

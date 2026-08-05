@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Shiva_Gautam.Models
+namespace VertexERP.Models
 {
     public class AppUser
     {

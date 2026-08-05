@@ -6,6 +6,7 @@
     <title>@ViewData["Title"] - Vertex_ERP</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/common-back-button.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Vertex_ERP.styles.css" asp-append-version="true" />
 </head>
 <body>
@@ -14,7 +15,9 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            <partial name="_BackButton" />
             @RenderBody()
+            <link rel="stylesheet" href="~/css/common-ui.css" asp-append-version="true" />
         </main>
     </div>
 

@@ -1,7 +1,7 @@
-using Shiva_Gautam.Models;
-using Shiva_Gautam.Services;
+using VertexERP.Models;
+using VertexERP.Services;
 
-namespace Shiva_Gautam.Data
+namespace VertexERP.Data
 {
     public static class DatabaseInitializer
     {

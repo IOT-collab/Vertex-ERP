@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Shiva_Gautam.Models;
+using VertexERP.Models;
 
-namespace Shiva_Gautam.Data
+namespace VertexERP.Data
 {
     public class ApplicationDbContext : DbContext
     {

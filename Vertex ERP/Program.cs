@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Shiva_Gautam.Data;
+using VertexERP.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace Shiva_Gautam.Services
+namespace VertexERP.Services
 {
     public static class PasswordHashService
     {

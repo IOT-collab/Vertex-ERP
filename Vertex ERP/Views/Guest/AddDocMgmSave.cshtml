@@ -18,13 +18,6 @@
         </div>
 
         <div class="header-actions">
-            <a href="@Url.Action("DocumentMgm", "Guest")" class="btn-secondary">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-                Back to Dashboard
-            </a>
             <button type="button" class="btn-primary" onclick="confirmVaultSave()">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
@@ -54,15 +47,15 @@
                 <div class="summary-pills-grid">
                     <div class="pill-item">
                         <span class="pill-label">Total Modules</span>
-                        <span class="pill-value">06 Categories</span>
+                        <span class="pill-value">—</span>
                     </div>
                     <div class="pill-item status-active">
                         <span class="pill-label">New Files Attached</span>
-                        <span class="pill-value">04 Documents</span>
+                        <span class="pill-value">—</span>
                     </div>
                     <div class="pill-item status-warning">
                         <span class="pill-label">Pending Verifications</span>
-                        <span class="pill-value">01 File</span>
+                        <span class="pill-value">—</span>
                     </div>
                 </div>
 
@@ -79,34 +72,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td><strong>01. Company Docs</strong></td>
-                                <td>MOA_Certificate_2026.pdf</td>
-                                <td>2.4 MB</td>
-                                <td><span class="badge badge-success">Ready</span></td>
-                                <td><button type="button" class="btn-text-danger">Remove</button></td>
-                            </tr>
-                            <tr>
-                                <td><strong>02. User Roles</strong></td>
-                                <td>KYC_Master_Schema.xlsx</td>
-                                <td>1.1 MB</td>
-                                <td><span class="badge badge-success">Ready</span></td>
-                                <td><button type="button" class="btn-text-danger">Remove</button></td>
-                            </tr>
-                            <tr>
-                                <td><strong>03. Security</strong></td>
-                                <td>2FA_Recovery_Specs.pdf</td>
-                                <td>850 KB</td>
-                                <td><span class="badge badge-warning">Needs Tag</span></td>
-                                <td><button type="button" class="btn-text-danger">Remove</button></td>
-                            </tr>
-                            <tr>
-                                <td><strong>05. Inventory</strong></td>
-                                <td>Warehouse_Rack_v2.dwg</td>
-                                <td>14.8 MB</td>
-                                <td><span class="badge badge-success">Ready</span></td>
-                                <td><button type="button" class="btn-text-danger">Remove</button></td>
-                            </tr>
+                            <tr><td colspan="5" class="erp-empty-state">No pending document changes.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -122,7 +88,7 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="vaultVersion">Vault Release Version</label>
-                        <input type="text" id="vaultVersion" class="form-control" value="v2.4.10" readonly />
+                        <input type="text" id="vaultVersion" class="form-control" value="" readonly />
                     </div>
 
                     <div class="form-group">

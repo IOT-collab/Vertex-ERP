@@ -32,7 +32,7 @@
         <div class="metric-card">
             <div class="metric-info">
                 <span class="label">Total Workforce</span>
-                <span class="value">42</span>
+                <span class="value">—</span>
             </div>
             <div class="metric-icon icon-blue">
                 <i class="fas fa-users"></i>
@@ -42,7 +42,7 @@
         <div class="metric-card">
             <div class="metric-info">
                 <span class="label">Allocated Resources</span>
-                <span class="value">34 <small>/ 42</small></span>
+                <span class="value">—</span>
             </div>
             <div class="metric-icon icon-emerald">
                 <i class="fas fa-user-check"></i>
@@ -52,7 +52,7 @@
         <div class="metric-card">
             <div class="metric-info">
                 <span class="label">Bench / Available</span>
-                <span class="value">8 Members</span>
+                <span class="value">—</span>
             </div>
             <div class="metric-icon icon-amber">
                 <i class="fas fa-user-clock"></i>
@@ -62,7 +62,7 @@
         <div class="metric-card">
             <div class="metric-info">
                 <span class="label">Avg Utilization</span>
-                <span class="value">82%</span>
+                <span class="value">—</span>
             </div>
             <div class="metric-icon icon-purple">
                 <i class="fas fa-chart-pie"></i>
@@ -99,101 +99,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Member 1 -->
-                            <tr>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="avatar avatar-blue">RS</div>
-                                        <div>
-                                            <span class="user-name">Rahul Sharma</span>
-                                            <span class="user-email">rahul@example.com</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="badge-role">Sr. Frontend Dev</span></td>
-                                <td>
-                                    <span class="project-pill">🚀 E-Commerce Redesign</span>
-                                </td>
-                                <td>
-                                    <div class="capacity-cell">
-                                        <span>100% (Full-Time)</span>
-                                        <div class="mini-progress">
-                                            <div class="fill fill-emerald" style="width: 100%;"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="status-badge status-optimal">Optimal</span></td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="icon-btn" title="Edit Allocation"><i class="fas fa-pen"></i></button>
-                                        <button class="icon-btn text-danger" title="Unassign"><i class="fas fa-user-minus"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- Member 2 -->
-                            <tr>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="avatar avatar-purple">PP</div>
-                                        <div>
-                                            <span class="user-name">Priya Patel</span>
-                                            <span class="user-email">priya@example.com</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="badge-role">UI/UX Designer</span></td>
-                                <td>
-                                    <span class="project-pill">📱 Banking App v3.2</span>
-                                </td>
-                                <td>
-                                    <div class="capacity-cell">
-                                        <span>120% (Overloaded)</span>
-                                        <div class="mini-progress">
-                                            <div class="fill fill-danger" style="width: 100%;"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="status-badge status-overload">Overloaded</span></td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="icon-btn" title="Edit Allocation"><i class="fas fa-pen"></i></button>
-                                        <button class="icon-btn text-danger" title="Unassign"><i class="fas fa-user-minus"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-
-                            <!-- Member 3 -->
-                            <tr>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="avatar avatar-emerald">AK</div>
-                                        <div>
-                                            <span class="user-name">Amit Kumar</span>
-                                            <span class="user-email">amit@example.com</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="badge-role">Backend Engineer</span></td>
-                                <td>
-                                    <span class="project-pill">☁️ Cloud Migration</span>
-                                </td>
-                                <td>
-                                    <div class="capacity-cell">
-                                        <span>50% (Part-Time)</span>
-                                        <div class="mini-progress">
-                                            <div class="fill fill-amber" style="width: 50%;"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="status-badge status-underload">Available</span></td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="icon-btn" title="Edit Allocation"><i class="fas fa-pen"></i></button>
-                                        <button class="icon-btn text-danger" title="Unassign"><i class="fas fa-user-minus"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
+                            <tr><td colspan="6" class="erp-empty-state">No resource allocation data available.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -203,44 +109,11 @@
         <!-- Right Side: Unassigned / Bench Panel -->
         <div class="glass-card bench-panel">
             <div class="card-header">
-                <h2>Available Bench (8)</h2>
+                <h2>Available Bench</h2>
                 <p class="subtitle">Resources ready to be assigned</p>
             </div>
             <div class="card-body">
-                <div class="bench-list">
-                    <div class="bench-item">
-                        <div class="user-cell">
-                            <div class="avatar avatar-gray">SK</div>
-                            <div>
-                                <span class="user-name">Sanjay Kumar</span>
-                                <span class="user-email">DevOps Specialist</span>
-                            </div>
-                        </div>
-                        <button class="btn-xs btn-primary">Assign</button>
-                    </div>
-
-                    <div class="bench-item">
-                        <div class="user-cell">
-                            <div class="avatar avatar-gray">NS</div>
-                            <div>
-                                <span class="user-name">Neha Sharma</span>
-                                <span class="user-email">QA Tester</span>
-                            </div>
-                        </div>
-                        <button class="btn-xs btn-primary">Assign</button>
-                    </div>
-
-                    <div class="bench-item">
-                        <div class="user-cell">
-                            <div class="avatar avatar-gray">VR</div>
-                            <div>
-                                <span class="user-name">Vikram Rao</span>
-                                <span class="user-email">React Developer</span>
-                            </div>
-                        </div>
-                        <button class="btn-xs btn-primary">Assign</button>
-                    </div>
-                </div>
+                <div class="bench-list erp-empty-state">No available resources.</div>
             </div>
         </div>
     </main>

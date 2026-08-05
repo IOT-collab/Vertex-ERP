@@ -1,4 +1,4 @@
-namespace Shiva_Gautam.Models
+namespace VertexERP.Models
 {
     public class AssistantRequest
     {
