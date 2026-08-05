@@ -1,9 +1,10 @@
 @{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
     var action = ViewContext.RouteData.Values["action"]?.ToString();
-    var topLevelGuestPages = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    var topLevelMainPages = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "Dashboard",
+        "EmployeeHome",
         "Employees",
         "Attendence",
         "LeaveManagement",
@@ -16,9 +17,9 @@
         "Reports",
         "Settings"
     };
-    var showBackButton = !string.Equals(controller, "Guest", StringComparison.OrdinalIgnoreCase)
+    var showBackButton = !string.Equals(controller, "Main", StringComparison.OrdinalIgnoreCase)
         || string.IsNullOrWhiteSpace(action)
-        || !topLevelGuestPages.Contains(action);
+        || !topLevelMainPages.Contains(action);
 }
 
 @if (showBackButton)

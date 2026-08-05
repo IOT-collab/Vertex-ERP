@@ -5,6 +5,77 @@ namespace VertexERP.Data
 {
     public static class DatabaseInitializer
     {
+        public static void SeedDevelopmentUsers(ApplicationDbContext context, string password)
+        {
+            UpsertDevelopmentUser(context, "employee", password, "Employee", "Employee");
+            UpsertDevelopmentUser(context, "admin", password, "Admin", "Admin");
+            UpsertDevelopmentUser(context, "hr", password, "HR", "HR");
+            context.SaveChanges();
+        }
+
+        private static void UpsertDevelopmentUser(
+            ApplicationDbContext context,
+            string username,
+            string password,
+            string role,
+            string fullName)
+        {
+            var normalizedUsername = NormalizeUsername(username);
+            var user = context.AppUsers.SingleOrDefault(
+                existingUser => existingUser.NormalizedUsername == normalizedUsername);
+
+            if (user == null)
+            {
+                context.AppUsers.Add(new AppUser
+                {
+                    Username = username,
+                    NormalizedUsername = normalizedUsername,
+                    PasswordHash = PasswordHashService.HashPassword(password),
+                    Role = role,
+                    FullName = fullName,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                });
+                return;
+            }
+
+            user.Username = username;
+            user.Role = role;
+            user.FullName = fullName;
+            user.IsActive = true;
+
+            if (!PasswordHashService.VerifyPassword(password, user.PasswordHash))
+            {
+                user.PasswordHash = PasswordHashService.HashPassword(password);
+            }
+        }
+
+        public static void SeedAdminUser(
+            ApplicationDbContext context,
+            string username,
+            string password,
+            string fullName)
+        {
+            var normalizedUsername = NormalizeUsername(username);
+            if (context.AppUsers.Any(user => user.NormalizedUsername == normalizedUsername))
+            {
+                return;
+            }
+
+            context.AppUsers.Add(new AppUser
+            {
+                Username = username.Trim(),
+                NormalizedUsername = normalizedUsername,
+                PasswordHash = PasswordHashService.HashPassword(password),
+                Role = "Admin",
+                FullName = fullName.Trim(),
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            context.SaveChanges();
+        }
+
         public static void SeedDefaultUsers(ApplicationDbContext context)
         {
             context.Database.EnsureCreated();

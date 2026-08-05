@@ -1,28 +1,44 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var appDataPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data");
-Directory.CreateDirectory(appDataPath);
-
-var databaseFilePath = Path.Combine(appDataPath, "VertexErpAuth.mdf");
-var authConnectionString = builder.Configuration
-    .GetConnectionString("DefaultConnection")?
-    .Replace("{DatabaseFile}", databaseFilePath);
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Main/Login";
+        options.AccessDeniedPath = "/Main/AccessDenied";
+        options.Cookie.Name = "VertexERP.Auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+    });
+builder.Services.AddAuthorization();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(authConnectionString));
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+        npgsqlOptions.EnableRetryOnFailure()));
 
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    //var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    //DatabaseInitializer.SeedDefaultUsers(dbContext);
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
+
+    var developmentUserPassword = builder.Configuration["SeedUsers:Password"];
+    if (app.Environment.IsDevelopment() && !string.IsNullOrWhiteSpace(developmentUserPassword))
+    {
+        DatabaseInitializer.SeedDevelopmentUsers(dbContext, developmentUserPassword);
+    }
 }
 
 // Configure the HTTP request pipeline.
@@ -40,10 +56,11 @@ app.UseRouting();
 
 app.UseSession();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-   pattern: "{controller=Guest}/{action=Dashboard}/{id?}");
+   pattern: "{controller=Main}/{action=Start}/{id?}");
 
 app.Run();

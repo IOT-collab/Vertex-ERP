@@ -20,7 +20,7 @@ namespace VertexERP.Data
             {
                 entity.ToTable("Users");
                 entity.HasIndex(user => user.NormalizedUsername).IsUnique();
-                entity.Property(user => user.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(user => user.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
         }
     }

@@ -1,3 +1,7 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VertexERP.Data;
 using VertexERP.Models;
@@ -5,22 +9,39 @@ using VertexERP.Services;
 
 namespace VertexERP.Controllers
 {
-    public class GuestController : Controller
+    [Authorize]
+    public class MainController : Controller
     {
         private readonly ApplicationDbContext _dbContext;
 
-        public GuestController(ApplicationDbContext dbContext)
+        public MainController(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
+        [AllowAnonymous]
+        public async Task<IActionResult> Start()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login");
+        }
+
+        [AllowAnonymous]
         public IActionResult Login()
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToRoleHome();
+            }
+
             return View();
         }
 
         [HttpPost]
-        public IActionResult Login(string email, string password)
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(string email, string password, bool rememberMe = false)
         {
             var normalizedUsername = DatabaseInitializer.NormalizeUsername(email);
             var user = _dbContext.AppUsers
@@ -30,17 +51,36 @@ namespace VertexERP.Controllers
 
             if (user != null && PasswordHashService.VerifyPassword(password, user.PasswordHash))
             {
+                var claims = new List<Claim>
+                {
+                    new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new(ClaimTypes.Name, user.FullName),
+                    new(ClaimTypes.Role, user.Role),
+                    new("username", user.Username)
+                };
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(identity),
+                    new AuthenticationProperties
+                    {
+                        IsPersistent = rememberMe,
+                        ExpiresUtc = rememberMe ? DateTimeOffset.UtcNow.AddDays(14) : null
+                    });
+
                 HttpContext.Session.SetString("email", user.Username);
                 HttpContext.Session.SetString("username", user.Username);
                 HttpContext.Session.SetString("role", user.Role);
                 HttpContext.Session.SetString("fullName", user.FullName);
-                return RedirectToAction("Dashboard");
+                return RedirectToRoleHome(user.Role);
             }
 
             ViewBag.ErrorMessage = "Invalid username or password";
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult UserSettings()
         {
             //ViewBag.Users = _dbContext.AppUsers
@@ -51,13 +91,15 @@ namespace VertexERP.Controllers
             return View();
         }
 
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult CreateUser(string username, string fullName, string password, string role)
         {
             var normalizedUsername = DatabaseInitializer.NormalizeUsername(username);
@@ -85,6 +127,7 @@ namespace VertexERP.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult UpdateUser(int id, string fullName, string role, bool isActive)
         {
             var user = _dbContext.AppUsers.FirstOrDefault(appUser => appUser.Id == id);
@@ -101,7 +144,7 @@ namespace VertexERP.Controllers
                 return RedirectToAction("UserSettings");
             }
 
-            var allowedRoles = new[] { "User", "Supervisor", "Admin" };
+            var allowedRoles = new[] { "Employee", "HR", "Admin", "User", "Supervisor" };
             user.FullName = fullName.Trim();
             user.Role = allowedRoles.Contains(role) ? role : "User";
             user.IsActive = isActive;
@@ -111,12 +154,20 @@ namespace VertexERP.Controllers
             return RedirectToAction("UserSettings");
         }
 
+        [Authorize(Roles = "Employee,Admin,HR")]
         public IActionResult Dashboard()
         {
             return View();
         }
 
+        [Authorize(Roles = "Employee")]
+        public IActionResult EmployeeHome()
+        {
+            return View();
+        }
+
         [HttpPost]
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult AskAssistant([FromBody] AssistantRequest request)
         {
             var message = (request?.Message ?? string.Empty).Trim().ToLowerInvariant();
@@ -161,89 +212,121 @@ namespace VertexERP.Controllers
             return Json(new { reply });
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult Employees()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult EmpAddRequirement()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult Attendence()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult AddAttendance()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult Reports()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult Hrms()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult AddEmpHrm()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult TaskMgm()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult ProjectMgm()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult AddProjectMgm()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult DocumentMgm()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult AddDocMgmSave()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult AdminPanel()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult AddAdminPanel()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult Settings()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult DepartmentManagement()
         {
             return View();
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public IActionResult LeaveManagement()
         {
             return View();
+        }
+
+        public IActionResult AccessDenied()
+        {
+            return User.IsInRole("Employee")
+                ? RedirectToAction("Dashboard", "Main")
+                : Forbid();
+        }
+
+        private IActionResult RedirectToRoleHome(string? role = null)
+        {
+            var effectiveRole = role ?? User.FindFirstValue(ClaimTypes.Role);
+            return string.Equals(effectiveRole, "Employee", StringComparison.OrdinalIgnoreCase)
+                ? RedirectToAction("Dashboard", "Main")
+                : RedirectToAction("Dashboard", "Main");
         }
     }
 }

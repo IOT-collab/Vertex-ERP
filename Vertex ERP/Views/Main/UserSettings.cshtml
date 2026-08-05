@@ -48,7 +48,7 @@
                 <p>Use this when a new employee joins and needs system credentials.</p>
             </div>
 
-            <form asp-action="CreateUser" asp-controller="Guest" method="post" autocomplete="off" class="create-user-form">
+            <form asp-action="CreateUser" asp-controller="Main" method="post" autocomplete="off" class="create-user-form">
                 <div class="form-group">
                     <label for="username">Employee ID / Username</label>
                     <input id="username" name="username" type="text" placeholder="e.g. VAS0180" required />
@@ -137,7 +137,7 @@
                         };
 
                         <tr class="user-row">
-                            <form asp-action="UpdateUser" asp-controller="Guest" method="post">
+                            <form asp-action="UpdateUser" asp-controller="Main" method="post">
                                 <input type="hidden" name="id" value="@user.Id" />
 
                             <td>

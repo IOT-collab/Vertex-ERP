@@ -2,7 +2,8 @@
 
 namespace Vertex_ERP.Controllers
 {
-    public class EmployeeController : Controller
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin,HR")]
+    public class HrController : Controller
     {
         public IActionResult EmployeeDashboard()
         {

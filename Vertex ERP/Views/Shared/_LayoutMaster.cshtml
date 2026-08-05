@@ -12,8 +12,10 @@
 </head>
 <body>
     @{
-        var currentRole = Context.Session.GetString("role") ?? "User";
-        var currentName = Context.Session.GetString("fullName") ?? Context.Session.GetString("username") ?? currentRole;
+        var currentRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "User";
+        var currentName = User.Identity?.Name ?? currentRole;
+        var isEmployee = User.IsInRole("Employee");
+        var homeUrl = "/Main/Dashboard";
     }
 
     <!-- Pure CSS Sidebar Drawer Controller Toggle -->
@@ -27,7 +29,7 @@
         <!-- Sidebar Navigation Drawer -->
         <aside class="sidebar">
             <div class="logo">
-                <a class="erp-logo-link" href="/Guest/Dashboard" aria-label="Go to Dashboard">
+                <a class="erp-logo-link" href="@homeUrl" aria-label="Go to Dashboard">
                     <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
                     <span>Vertex ERP</span>
                 </a>
@@ -35,53 +37,24 @@
             </div>
 
             <ul class="sidebar-menu">
-                <li>
-                    <a href="/Guest/Dashboard"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Dashboard</span></a>
-                </li>
-                <li>
-                    <a href="/Guest/Employees"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Employees</span></a>
-                </li>
-                <li>
-                    <a href="/Guest/Attendence"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Attendance</span></a>
-                </li>
-
-                <li>
-                    <a href="/Guest/LeaveManagement"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a>
-                </li>
-
-                <li>
-                    <a href="/Guest/DepartmentManagement"><i class="fa-solid fa-building" aria-hidden="true"></i><span>Department</span></a>
-                </li>
-                
-               
-                <li>
-                    <a href="/Guest/Hrms"><i class="fa-solid fa-user-tie" aria-hidden="true"></i><span>HR Management</span></a>
-                </li>
-
-                <li>
-                    <a href="/Guest/TaskMgm"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Task Management</span></a>
-                </li>
-
-                <li>
-                    <a href="/Guest/ProjectMgm"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Project Management</span></a>
-                </li>
-               @*  <li>
-                    <a href="/Guest/DocumentMgm">📁 Document Management</a>
-                </li> *@
-                <li>
-                    <a href="/Guest/AdminPanel"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Admin Panel</span></a>
-                </li>
-                <li>
-                    <a href="/Guest/UserSettings"><i class="fa-solid fa-user-gear" aria-hidden="true"></i><span>User Setting</span></a>
-                </li>
-
-                <li>
-                    <a href="/Guest/Reports"><i class="fa-solid fa-chart-column" aria-hidden="true"></i><span>Reports</span></a>
-                </li>
-
-                <li>
-                    <a href="/Guest/Settings"><i class="fa-solid fa-gear" aria-hidden="true"></i><span>Settings</span></a>
-                </li>
+                @if (isEmployee)
+                {
+                }
+                else
+                {
+                    <li><a href="/Main/Dashboard"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Dashboard</span></a></li>
+                    <li><a href="/Main/Employees"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Employees</span></a></li>
+                    <li><a href="/Main/Attendence"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
+                    <li><a href="/Main/LeaveManagement"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
+                    <li><a href="/Main/DepartmentManagement"><i class="fa-solid fa-building" aria-hidden="true"></i><span>Department</span></a></li>
+                    <li><a href="/Main/Hrms"><i class="fa-solid fa-user-tie" aria-hidden="true"></i><span>HR Management</span></a></li>
+                    <li><a href="/Main/TaskMgm"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Task Management</span></a></li>
+                    <li><a href="/Main/ProjectMgm"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Project Management</span></a></li>
+                    <li><a href="/Main/AdminPanel"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Admin Panel</span></a></li>
+                    <li><a href="/Main/UserSettings"><i class="fa-solid fa-user-gear" aria-hidden="true"></i><span>User Setting</span></a></li>
+                    <li><a href="/Main/Reports"><i class="fa-solid fa-chart-column" aria-hidden="true"></i><span>Reports</span></a></li>
+                    <li><a href="/Main/Settings"><i class="fa-solid fa-gear" aria-hidden="true"></i><span>Settings</span></a></li>
+                }
             </ul>
         </aside>
 
@@ -96,15 +69,15 @@
                         <span></span>
                         <span></span>
                     </label>
-                    <a class="topbar-brand" href="/Guest/Dashboard" aria-label="Go to Dashboard">
+                    <a class="topbar-brand" href="@homeUrl" aria-label="Go to Dashboard">
                         <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
                         <span>Vertex ERP</span>
                     </a>
                 </div>
 
                 <div class="profile">
-                    <span class="profile-text">Welcome, @currentName (@currentRole)</span>
-                    <a class="logout-btn" href="/Guest/Logout" title="Logout">Logout</a>
+                    <span class="profile-text" title="Signed in as @currentName">Welcome @currentRole</span>
+                    <a class="logout-btn" href="/Main/Logout" title="Logout">Logout</a>
                 </div>
             </header>
 

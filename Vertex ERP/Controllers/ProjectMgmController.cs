@@ -2,6 +2,7 @@
 
 namespace Vertex_ERP.Controllers
 {
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin,HR")]
     public class ProjectMgmController : Controller
     {
 
