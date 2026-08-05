@@ -34,6 +34,21 @@ textarea {
     font-family: var(--erp-font) !important;
 }
 
+.page-content *,
+body > .container * {
+    box-sizing: border-box;
+}
+
+.page-content > * ,
+.page-content [class*="grid"] > *,
+.page-content [class*="row"] > *,
+.page-content [class*="flex"] > *,
+body > .container [class*="grid"] > *,
+body > .container [class*="row"] > *,
+body > .container [class*="flex"] > * {
+    min-width: 0;
+}
+
 .page-content,
 body > .container {
     width: 100% !important;
@@ -307,6 +322,32 @@ body > .container a:not([class*="btn"]),
 body > .container img,
 body > .container svg {
     max-width: 100%;
+    height: auto;
+}
+
+.page-content canvas,
+.page-content video,
+.page-content iframe,
+body > .container canvas,
+body > .container video,
+body > .container iframe {
+    max-width: 100% !important;
+}
+
+.page-content [class*="modal"],
+.page-content [class*="dialog"],
+body > .container [class*="modal"],
+body > .container [class*="dialog"] {
+    max-width: min(94vw, 760px) !important;
+    max-height: 90dvh !important;
+}
+
+.page-content [class*="modal-body"],
+.page-content [class*="dialog-body"],
+body > .container [class*="modal-body"],
+body > .container [class*="dialog-body"] {
+    max-height: calc(90dvh - 120px) !important;
+    overflow-y: auto !important;
 }
 
 /* Overrides legacy high-specificity light styles on the attendance form. */
@@ -403,6 +444,88 @@ body > .container svg {
     }
 }
 
+@media (max-width: 768px) {
+    .page-content,
+    body > .container {
+        padding: 16px !important;
+    }
+
+    .page-content [class*="grid"],
+    .page-content [class*="card-row"],
+    .page-content [class*="form-row"],
+    body > .container [class*="grid"],
+    body > .container [class*="card-row"],
+    body > .container [class*="form-row"] {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .page-content .page-header,
+    .page-content [class$="-header"],
+    .page-content [class*="header-card"],
+    body > .container .page-header,
+    body > .container [class$="-header"],
+    body > .container [class*="header-card"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 14px !important;
+    }
+
+    .page-content [class*="header-actions"],
+    .page-content [class*="form-actions"],
+    .page-content [class*="filter"],
+    body > .container [class*="header-actions"],
+    body > .container [class*="form-actions"],
+    body > .container [class*="filter"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex-wrap: wrap !important;
+    }
+
+    .page-content [class*="search"] input,
+    .page-content [class*="filter"] input,
+    .page-content [class*="filter"] select,
+    body > .container [class*="search"] input,
+    body > .container [class*="filter"] input,
+    body > .container [class*="filter"] select {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .page-content table,
+    body > .container table {
+        display: block;
+        width: 100% !important;
+        min-width: 0;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .page-content table th,
+    .page-content table td,
+    body > .container table th,
+    body > .container table td {
+        white-space: nowrap;
+    }
+
+    .page-content h1,
+    .page-content h2,
+    .page-content h3,
+    .page-content h4,
+    .page-content p,
+    .page-content button,
+    .page-content a,
+    body > .container h1,
+    body > .container h2,
+    body > .container h3,
+    body > .container h4,
+    body > .container p,
+    body > .container button,
+    body > .container a {
+        overflow-wrap: anywhere;
+    }
+}
+
 @media (max-width: 576px) {
     body {
         font-size: 13px !important;
@@ -451,6 +574,62 @@ body > .container svg {
     body > .container [class*="form-actions"] {
         width: 100% !important;
         flex-wrap: wrap !important;
+    }
+
+    .page-content [class*="header-actions"] > *,
+    .page-content [class*="form-actions"] > *,
+    body > .container [class*="header-actions"] > *,
+    body > .container [class*="form-actions"] > * {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .page-content [class*="modal"],
+    .page-content [class*="dialog"],
+    body > .container [class*="modal"],
+    body > .container [class*="dialog"] {
+        width: calc(100vw - 24px) !important;
+        max-width: calc(100vw - 24px) !important;
+        margin: 12px !important;
+    }
+
+    .login-shell {
+        padding: 14px !important;
+    }
+
+    .login-shell .login-card {
+        width: 100% !important;
+        max-width: 440px !important;
+        padding: 22px 18px !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .page-content,
+    body > .container {
+        padding: 10px !important;
+    }
+
+    .page-content h1,
+    body > .container h1 {
+        font-size: 20px !important;
+    }
+
+    .page-content h2,
+    body > .container h2 {
+        font-size: 18px !important;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .page-content button,
+    .page-content .btn,
+    .page-content [class*="btn-"],
+    body > .container button,
+    body > .container .btn,
+    body > .container [class*="btn-"] {
+        min-height: 44px;
     }
 }
 

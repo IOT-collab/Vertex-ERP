@@ -186,89 +186,89 @@
     }
 
 /* Premium Custom Smooth Accent Palette Mappings */
-.icon-company {
-    background: #eff6ff;
-    color: #2563eb;
+.page-content .settings-page .card-icon {
+    border: 1px solid color-mix(in srgb, currentColor 32%, transparent) !important;
+    background: color-mix(in srgb, currentColor 16%, #0f172a) !important;
+    box-shadow: 0 8px 20px color-mix(in srgb, currentColor 13%, transparent) !important;
+    color: var(--settings-icon-color, #60a5fa) !important;
 }
 
-.icon-users {
-    background: #ecfdf5;
-    color: #10b981;
+.page-content .settings-page .card-icon svg {
+    color: inherit !important;
+    stroke: currentColor !important;
+    filter: drop-shadow(0 0 7px color-mix(in srgb, currentColor 45%, transparent));
 }
 
-.icon-security {
-    background: #fff1f2;
-    color: #f43f5e;
+.page-content .settings-page .setting-card:hover .card-icon {
+    box-shadow: 0 10px 26px color-mix(in srgb, currentColor 25%, transparent) !important;
 }
 
-.icon-email {
-    background: #f5f3ff;
-    color: #8b5cf6;
+.page-content .settings-page .icon-company {
+    --settings-icon-color: #60a5fa;
 }
 
-.icon-sms {
-    background: #fff7ed;
-    color: #f97316;
+.page-content .settings-page .icon-users {
+    --settings-icon-color: #34d399;
 }
 
-.icon-language {
-    background: #f0fdfa;
-    color: #0d9488;
+.page-content .settings-page .icon-security {
+    --settings-icon-color: #fb7185;
 }
 
-.icon-finance {
-    background: #f0fdf4;
-    color: #16a34a;
+.page-content .settings-page .icon-email {
+    --settings-icon-color: #a78bfa;
 }
 
-.icon-attendance {
-    background: #fef2f2;
-    color: #ef4444;
+.page-content .settings-page .icon-sms {
+    --settings-icon-color: #fb923c;
 }
 
-.icon-shift {
-    background: #fffbeb;
-    color: #d97706;
+.page-content .settings-page .icon-language {
+    --settings-icon-color: #2dd4bf;
 }
 
-.icon-inventory {
-    background: #faf5ff;
-    color: #9333ea;
+.page-content .settings-page .icon-finance {
+    --settings-icon-color: #4ade80;
 }
 
-.icon-print {
-    background: #f8fafc;
-    color: #475569;
+.page-content .settings-page .icon-attendance {
+    --settings-icon-color: #f87171;
 }
 
-.icon-bell {
-    background: #fffbeb;
-    color: #eab308;
+.page-content .settings-page .icon-shift {
+    --settings-icon-color: #fbbf24;
 }
 
-.icon-backup {
-    background: #ecfeff;
-    color: #0891b2;
+.page-content .settings-page .icon-inventory {
+    --settings-icon-color: #c084fc;
 }
 
-.icon-api {
-    background: #fdf2f8;
-    color: #db2777;
+.page-content .settings-page .icon-print {
+    --settings-icon-color: #94a3b8;
 }
 
-.icon-appearance {
-    background: #f1f5f9;
-    color: #6366f1;
+.page-content .settings-page .icon-bell {
+    --settings-icon-color: #facc15;
 }
 
-.icon-audit {
-    background: #f0fdf4;
-    color: #059669;
+.page-content .settings-page .icon-backup {
+    --settings-icon-color: #22d3ee;
 }
 
-.icon-maintenance {
-    background: #fff5f5;
-    color: #dc2626;
+.page-content .settings-page .icon-api {
+    --settings-icon-color: #f472b6;
+}
+
+.page-content .settings-page .icon-appearance {
+    --settings-icon-color: #818cf8;
+}
+
+.page-content .settings-page .icon-audit {
+    --settings-icon-color: #6ee7b7;
+}
+
+.page-content .settings-page .icon-maintenance {
+    --settings-icon-color: #f87171;
 }
 
 /* Responsive Breakpoints & Multi-Device Adaptations */

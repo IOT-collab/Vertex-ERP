@@ -379,6 +379,13 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 12px 24px rgba(0, 0, 0, .18) !important;
 }
 
+.dashboard .section-icon {
+    width: 20px !important;
+    margin-right: 7px !important;
+    color: #60a5fa !important;
+    text-align: center !important;
+}
+
 .dashboard .blue-icon {
     background: linear-gradient(135deg, rgba(59, 130, 246, .98), rgba(37, 99, 235, .55)) !important;
 }
@@ -1505,8 +1512,103 @@
         font-size: 25px !important;
     }
 
-    .dashboard .date-box {
-        width: calc(100% - 116px) !important;
+    .dashboard .header-actions {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) repeat(3, 40px) !important;
+        align-items: center !important;
+        gap: 9px !important;
+    }
+
+    .dashboard .header-actions > .search-bar {
+        grid-column: 1 / -1 !important;
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .dashboard .header-actions > .date-box {
+        grid-column: 1 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        padding: 7px 11px !important;
+        overflow: hidden !important;
+    }
+
+    .dashboard .date-box div {
+        min-width: 0 !important;
+    }
+
+    .dashboard .date-box strong,
+    .dashboard .date-box span {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+
+    .dashboard .header-actions > .btn-ai-mic,
+    .dashboard .header-actions > .btn-icon-bell,
+    .dashboard .header-actions > .user-avatar {
+        flex: 0 0 40px !important;
+        width: 40px !important;
+        min-width: 40px !important;
+        max-width: 40px !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        padding: 0 !important;
+        aspect-ratio: 1 / 1 !important;
+        border-radius: 50% !important;
+    }
+
+    .dashboard .header-actions > .btn-ai-mic {
+        grid-column: 2 !important;
+    }
+
+    .dashboard .header-actions > .btn-icon-bell {
+        grid-column: 3 !important;
+    }
+
+    .dashboard .header-actions > .user-avatar {
+        grid-column: 4 !important;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+        box-shadow: 0 8px 22px rgba(99, 102, 241, .32), inset 0 1px 0 rgba(255, 255, 255, .28) !important;
+    }
+
+    .dashboard .radial-chart {
+        min-height: 0 !important;
+        gap: 14px !important;
+        padding-top: 2px !important;
+    }
+
+    .dashboard .radial-ring {
+        --ring-size: clamp(104px, 34vw, 124px);
+        max-width: 100% !important;
+        aspect-ratio: 1 / 1 !important;
+    }
+
+    .dashboard .radial-ring span {
+        font-size: clamp(21px, 7vw, 26px) !important;
+    }
+
+    .dashboard .line-chart,
+    .dashboard .line-chart svg {
+        min-height: 180px !important;
+        height: 180px !important;
+        overflow: hidden !important;
+    }
+
+    .dashboard .bar-chart {
+        grid-template-columns: repeat(5, minmax(24px, 1fr)) !important;
+        gap: 7px !important;
+        min-height: 190px !important;
+        padding-inline: 0 !important;
+    }
+
+    .dashboard .dashboard-card::after {
+        width: 96px !important;
+        height: 96px !important;
+        right: -34px !important;
+        top: -34px !important;
     }
 
     .dashboard .radial-details {
@@ -1523,6 +1625,14 @@
         bottom: 16px !important;
     }
 
+    .dashboard .ai-toggle {
+        width: 54px !important;
+        height: 54px !important;
+        min-width: 54px !important;
+        min-height: 54px !important;
+        aspect-ratio: 1 / 1 !important;
+    }
+
     .dashboard .ai-panel {
         right: -2px !important;
         width: calc(100vw - 28px) !important;
@@ -1534,5 +1644,34 @@
 
     .dashboard .ai-send {
         grid-column: 1 / -1 !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .dashboard .header-actions > .date-box {
+        width: 100% !important;
+    }
+
+    .dashboard .header-actions {
+        grid-template-columns: minmax(0, 1fr) repeat(3, 38px) !important;
+        gap: 7px !important;
+    }
+
+    .dashboard .header-actions > .btn-ai-mic,
+    .dashboard .header-actions > .btn-icon-bell,
+    .dashboard .header-actions > .user-avatar {
+        width: 38px !important;
+        min-width: 38px !important;
+        max-width: 38px !important;
+        height: 38px !important;
+        min-height: 38px !important;
+    }
+
+    .dashboard .radial-details {
+        gap: 7px !important;
+    }
+
+    .dashboard .radial-details div {
+        padding: 9px 6px !important;
     }
 }

@@ -4,8 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewBag.Title - Vertex ERP</title>
-    <link href="~/css/style.css" rel="stylesheet" />
-    <link href="~/css/site.css" rel="stylesheet" />
+    <link href="~/css/style.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/site.css" rel="stylesheet" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="~/css/common-ui.css" rel="stylesheet" asp-append-version="true" />
     <link href="~/css/common-back-button.css" rel="stylesheet" asp-append-version="true" />
 </head>
 <body>
@@ -25,57 +27,60 @@
         <!-- Sidebar Navigation Drawer -->
         <aside class="sidebar">
             <div class="logo">
-                <h2>Vertex ERP</h2>
+                <a class="erp-logo-link" href="/Guest/Dashboard" aria-label="Go to Dashboard">
+                    <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                    <span>Vertex ERP</span>
+                </a>
                     <label for="sidebar-toggle" class="sidebar-close-btn">&times;</label>
             </div>
 
             <ul class="sidebar-menu">
                 <li>
-                    <a href="/Guest/Dashboard">🏠 Dashboard</a>
+                    <a href="/Guest/Dashboard"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Dashboard</span></a>
                 </li>
                 <li>
-                    <a href="/Guest/Employees">👨‍💼 Employees</a>
+                    <a href="/Guest/Employees"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Employees</span></a>
                 </li>
                 <li>
-                    <a href="/Guest/Attendence">🕒 Attendance</a>
-                </li>
-
-                <li>
-                    <a href="/Guest/LeaveManagement">🏖 Leave Management</a>
+                    <a href="/Guest/Attendence"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Attendance</span></a>
                 </li>
 
                 <li>
-                    <a href="/Guest/DepartmentManagement">🏢 Department</a>
+                    <a href="/Guest/LeaveManagement"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a>
+                </li>
+
+                <li>
+                    <a href="/Guest/DepartmentManagement"><i class="fa-solid fa-building" aria-hidden="true"></i><span>Department</span></a>
                 </li>
                 
                
                 <li>
-                    <a href="/Guest/Hrms">👨‍💼 HR Management</a>
+                    <a href="/Guest/Hrms"><i class="fa-solid fa-user-tie" aria-hidden="true"></i><span>HR Management</span></a>
                 </li>
 
                 <li>
-                    <a href="/Guest/TaskMgm">📝 Task Management</a>
+                    <a href="/Guest/TaskMgm"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Task Management</span></a>
                 </li>
 
                 <li>
-                    <a href="/Guest/ProjectMgm">📁 Project Management</a>
+                    <a href="/Guest/ProjectMgm"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Project Management</span></a>
                 </li>
                @*  <li>
                     <a href="/Guest/DocumentMgm">📁 Document Management</a>
                 </li> *@
                 <li>
-                    <a href="/Guest/AdminPanel">🛡️ Admin Panel</a>
+                    <a href="/Guest/AdminPanel"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Admin Panel</span></a>
                 </li>
                 <li>
-                    <a href="/Guest/UserSettings">👤 User Setting</a>
-                </li>
-
-                <li>
-                    <a href="/Guest/Reports">📊 Reports</a>
+                    <a href="/Guest/UserSettings"><i class="fa-solid fa-user-gear" aria-hidden="true"></i><span>User Setting</span></a>
                 </li>
 
                 <li>
-                    <a href="/Guest/Settings">⚙ Settings</a>
+                    <a href="/Guest/Reports"><i class="fa-solid fa-chart-column" aria-hidden="true"></i><span>Reports</span></a>
+                </li>
+
+                <li>
+                    <a href="/Guest/Settings"><i class="fa-solid fa-gear" aria-hidden="true"></i><span>Settings</span></a>
                 </li>
             </ul>
         </aside>
@@ -91,7 +96,10 @@
                         <span></span>
                         <span></span>
                     </label>
-                    <h3 class="topbar-brand">Vertex ERP</h3>
+                    <a class="topbar-brand" href="/Guest/Dashboard" aria-label="Go to Dashboard">
+                        <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                        <span>Vertex ERP</span>
+                    </a>
                 </div>
 
                 <div class="profile">
@@ -104,7 +112,6 @@
             <div class="page-content">
                 <partial name="_BackButton" />
                 @RenderBody()
-                <link href="~/css/common-ui.css" rel="stylesheet" asp-append-version="true" />
             </div>
 
         </main>
