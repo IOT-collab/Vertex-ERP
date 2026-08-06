@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VertexERP.Data;
@@ -11,9 +12,11 @@ using VertexERP.Data;
 namespace Vertex_ERP.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260806102801_RepairEmployeeSchema")]
+    partial class RepairEmployeeSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,8 +24,6 @@ namespace Vertex_ERP.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.HasSequence("EmployeeCodeSequence");
 
             modelBuilder.Entity("VertexERP.Models.AppUser", b =>
                 {
@@ -72,55 +73,6 @@ namespace Vertex_ERP.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("VertexERP.Models.Department", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("DepartmentCode")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("DepartmentName")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("character varying(80)");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<int?>("ManagerId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DepartmentCode")
-                        .IsUnique();
-
-                    b.HasIndex("DepartmentName")
-                        .IsUnique();
-
-                    b.HasIndex("ManagerId");
-
-                    b.ToTable("Departments", (string)null);
-                });
-
             modelBuilder.Entity("VertexERP.Models.Employee", b =>
                 {
                     b.Property<int>("Id")
@@ -149,9 +101,6 @@ namespace Vertex_ERP.Migrations
                         .IsRequired()
                         .HasMaxLength(80)
                         .HasColumnType("character varying(80)");
-
-                    b.Property<int?>("DepartmentId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Designation")
                         .IsRequired()
@@ -239,15 +188,10 @@ namespace Vertex_ERP.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DepartmentId");
-
                     b.HasIndex("Email")
                         .IsUnique();
 
                     b.HasIndex("EmployeeCode")
-                        .IsUnique();
-
-                    b.HasIndex("PhoneNumber")
                         .IsUnique();
 
                     b.HasIndex("ReportingManagerId");
@@ -255,36 +199,14 @@ namespace Vertex_ERP.Migrations
                     b.ToTable("Employees", (string)null);
                 });
 
-            modelBuilder.Entity("VertexERP.Models.Department", b =>
-                {
-                    b.HasOne("VertexERP.Models.Employee", "Manager")
-                        .WithMany()
-                        .HasForeignKey("ManagerId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Manager");
-                });
-
             modelBuilder.Entity("VertexERP.Models.Employee", b =>
                 {
-                    b.HasOne("VertexERP.Models.Department", "DepartmentEntity")
-                        .WithMany("Employees")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("VertexERP.Models.Employee", "ReportingManager")
                         .WithMany("DirectReports")
                         .HasForeignKey("ReportingManagerId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("DepartmentEntity");
-
                     b.Navigation("ReportingManager");
-                });
-
-            modelBuilder.Entity("VertexERP.Models.Department", b =>
-                {
-                    b.Navigation("Employees");
                 });
 
             modelBuilder.Entity("VertexERP.Models.Employee", b =>

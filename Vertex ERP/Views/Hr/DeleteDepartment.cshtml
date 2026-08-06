@@ -1,0 +1,19 @@
+@model VertexERP.Models.Department
+@{
+    ViewData["Title"] = "Delete Department";
+    ViewData["BackController"] = "Hr";
+    ViewData["BackAction"] = "Department";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/AddDepartment.css" rel="stylesheet" />
+<div class="add-department-page">
+    <div class="department-form-card department-confirm-card">
+        <div class="department-form-header"><h1>Delete Department</h1><p>@Model.DepartmentName — @Model.DepartmentCode</p></div>
+        <h2>Are you sure you want to delete this department?</h2>
+        <p class="department-confirm-note">Employees will never be deleted. Assigned employees will be safely unassigned from this department.</p>
+        <form asp-controller="Hr" asp-action="DeleteDepartment" asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+            <div class="department-form-actions"><a asp-action="Department" class="department-cancel">Cancel</a><button type="submit" class="department-delete-confirm">Delete</button></div>
+        </form>
+    </div>
+</div>

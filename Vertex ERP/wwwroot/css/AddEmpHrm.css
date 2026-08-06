@@ -255,6 +255,24 @@
     transition: background-color 0.15s ease;
 }
 
+.field-validation,
+.validation-summary {
+    color: #dc2626;
+    font-size: 12px;
+}
+
+.validation-summary:empty {
+    display: none;
+}
+
+.validation-summary {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 12px 14px;
+}
+
 .btn-cancel {
     background: #fff;
     color: #64748b;

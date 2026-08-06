@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VertexERP.Data;
@@ -11,9 +12,11 @@ using VertexERP.Data;
 namespace Vertex_ERP.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260806105732_AddDepartmentManagement")]
+    partial class AddDepartmentManagement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,8 +24,6 @@ namespace Vertex_ERP.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.HasSequence("EmployeeCodeSequence");
 
             modelBuilder.Entity("VertexERP.Models.AppUser", b =>
                 {
@@ -87,8 +88,8 @@ namespace Vertex_ERP.Migrations
 
                     b.Property<string>("DepartmentCode")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("DepartmentName")
                         .IsRequired()
@@ -102,9 +103,6 @@ namespace Vertex_ERP.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
-                    b.Property<int?>("ManagerId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -115,8 +113,6 @@ namespace Vertex_ERP.Migrations
 
                     b.HasIndex("DepartmentName")
                         .IsUnique();
-
-                    b.HasIndex("ManagerId");
 
                     b.ToTable("Departments", (string)null);
                 });
@@ -247,22 +243,9 @@ namespace Vertex_ERP.Migrations
                     b.HasIndex("EmployeeCode")
                         .IsUnique();
 
-                    b.HasIndex("PhoneNumber")
-                        .IsUnique();
-
                     b.HasIndex("ReportingManagerId");
 
                     b.ToTable("Employees", (string)null);
-                });
-
-            modelBuilder.Entity("VertexERP.Models.Department", b =>
-                {
-                    b.HasOne("VertexERP.Models.Employee", "Manager")
-                        .WithMany()
-                        .HasForeignKey("ManagerId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Manager");
                 });
 
             modelBuilder.Entity("VertexERP.Models.Employee", b =>

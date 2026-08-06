@@ -1,0 +1,1069 @@
+﻿
+/* =========================================================
+   HR ADD EMPLOYEE
+   FULLY RESPONSIVE CSS
+   Desktop | Laptop | Tablet | Mobile
+========================================================= */
+/* =========================================================
+   GLOBAL
+========================================================= */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+
+/* =========================================================
+   MAIN PAGE
+========================================================= */
+
+.add-employee-page {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.page-header {
+    width: 100%;
+    margin-bottom: 22px;
+}
+
+.header-content {
+    width: 100%;
+    min-width: 0;
+}
+
+    .header-content h2 {
+        margin: 0;
+        font-size: clamp(22px, 2vw, 28px);
+        line-height: 1.3;
+        font-weight: 700;
+        color: #1f2937;
+        word-break: break-word;
+    }
+
+    .header-content p {
+        margin: 6px 0 0;
+        font-size: 14px;
+        line-height: 1.6;
+        color: #6b7280;
+    }
+
+
+/* =========================================================
+   EMPLOYEE FORM
+========================================================= */
+
+.employee-form {
+    width: 100%;
+    min-width: 0;
+}
+
+
+/* =========================================================
+   EMPLOYEE PHOTO CARD
+========================================================= */
+
+.employee-photo-card {
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 20px;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+
+/* =========================================================
+   PHOTO WRAPPER
+========================================================= */
+
+.employee-photo-wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    gap: 24px;
+}
+
+
+/* =========================================================
+   PROFILE PHOTO PREVIEW
+========================================================= */
+
+.employee-photo-preview {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    min-width: 120px;
+    flex: 0 0 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 3px solid #e5e7eb;
+    border-radius: 50%;
+    background: #f3f4f6;
+}
+
+
+    /* Profile Image */
+
+    .employee-photo-preview img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        border-radius: 50%;
+    }
+
+
+/* =========================================================
+   PHOTO CONTENT
+========================================================= */
+
+.employee-photo-content {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+}
+
+    .employee-photo-content h3 {
+        margin: 0 0 6px;
+        font-size: 17px;
+        line-height: 1.4;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .employee-photo-content p {
+        width: 100%;
+        max-width: 650px;
+        margin: 0 0 15px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #6b7280;
+    }
+
+
+/* =========================================================
+   PHOTO ACTIONS
+========================================================= */
+
+.photo-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+
+/* =========================================================
+   UPLOAD PHOTO BUTTON
+========================================================= */
+
+.photo-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 7px;
+    background: #2563eb;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .photo-upload-btn:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+    }
+
+    .photo-upload-btn:active {
+        transform: translateY(0);
+    }
+
+
+/* =========================================================
+   REMOVE PHOTO BUTTON
+========================================================= */
+
+.photo-remove-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 10px 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #374151;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+    .photo-remove-btn:hover {
+        background: #f3f4f6;
+        border-color: #cbd5e1;
+        color: #111827;
+    }
+
+
+/* =========================================================
+   PHOTO HELP TEXT
+========================================================= */
+
+.photo-help-text {
+    display: block;
+    width: 100%;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #9ca3af;
+}
+
+
+/* =========================================================
+   FORM CARDS
+========================================================= */
+
+.form-card {
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 20px;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+
+/* =========================================================
+   CARD HEADER
+========================================================= */
+
+.card-header {
+    width: 100%;
+    margin-bottom: 22px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+    .card-header h3 {
+        margin: 0;
+        font-size: 17px;
+        line-height: 1.4;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .card-header p {
+        margin: 5px 0 0;
+        font-size: 13px;
+        line-height: 1.5;
+        color: #6b7280;
+    }
+
+
+/* =========================================================
+   FORM GRID
+========================================================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    min-width: 0;
+    gap: 20px;
+}
+
+
+/* =========================================================
+   FORM GROUP
+========================================================= */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+}
+
+    .form-group label {
+        display: block;
+        margin-bottom: 7px;
+        font-size: 13px;
+        line-height: 1.4;
+        font-weight: 600;
+        color: #374151;
+    }
+
+        .form-group label span {
+            color: #ef4444;
+        }
+
+
+    /* =========================================================
+   INPUTS / SELECT / TEXTAREA
+========================================================= */
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        padding: 11px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 7px;
+        background: #ffffff;
+        color: #1f2937;
+        font-family: inherit;
+        font-size: 14px;
+        line-height: 1.4;
+        outline: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+
+        /* Date Inputs */
+
+        .form-group input[type="date"] {
+            min-height: 42px;
+        }
+
+
+    /* Select */
+
+    .form-group select {
+        cursor: pointer;
+    }
+
+
+    /* Placeholder */
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+        color: #9ca3af;
+        opacity: 1;
+    }
+
+
+    /* =========================================================
+   INPUT FOCUS
+========================================================= */
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+    }
+
+
+    /* =========================================================
+   TEXTAREA
+========================================================= */
+
+    .form-group textarea {
+        min-height: 90px;
+        max-width: 100%;
+        resize: vertical;
+    }
+
+
+/* =========================================================
+   FULL WIDTH FIELD
+========================================================= */
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+
+/* =========================================================
+   FORM ACTIONS
+========================================================= */
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 12px;
+    padding: 10px 0 30px;
+}
+
+
+/* =========================================================
+   CANCEL BUTTON
+========================================================= */
+
+.btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 11px 22px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #374151;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+    .btn-cancel:hover {
+        background: #f3f4f6;
+        border-color: #cbd5e1;
+        color: #111827;
+    }
+
+
+/* =========================================================
+   SAVE BUTTON
+========================================================= */
+
+.btn-save {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 11px 24px;
+    border: none;
+    border-radius: 7px;
+    background: #2563eb;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+    .btn-save:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+    }
+
+
+    /* =========================================================
+   ACCESSIBILITY
+========================================================= */
+
+    .form-group input:focus-visible,
+    .form-group select:focus-visible,
+    .form-group textarea:focus-visible,
+    .photo-upload-btn:focus-visible,
+    .photo-remove-btn:focus-visible,
+    .btn-cancel:focus-visible,
+    .btn-save:focus-visible {
+        outline: 2px solid #2563eb;
+        outline-offset: 2px;
+    }
+
+
+/* =========================================================
+   LARGE DESKTOP
+   1400px+
+========================================================= */
+
+@media (min-width: 1401px) {
+
+    .add-employee-page {
+        padding-left: 28px;
+        padding-right: 28px;
+    }
+}
+
+
+/* =========================================================
+   LAPTOP
+   1200px AND BELOW
+========================================================= */
+
+@media (max-width: 1200px) {
+
+    .add-employee-page {
+        padding: 22px;
+    }
+
+    .form-grid {
+        gap: 18px;
+    }
+
+    .employee-photo-card,
+    .form-card {
+        padding: 22px;
+    }
+
+    .employee-photo-wrapper {
+        gap: 22px;
+    }
+}
+
+
+/* =========================================================
+   SMALL LAPTOP / TABLET LANDSCAPE
+   1024px AND BELOW
+========================================================= */
+
+@media (max-width: 1024px) {
+
+    .add-employee-page {
+        padding: 20px;
+    }
+
+
+    /* 3 columns -> 2 columns */
+
+    .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+
+    .employee-photo-preview {
+        width: 110px;
+        height: 110px;
+        min-width: 110px;
+        flex-basis: 110px;
+    }
+
+
+    .employee-photo-wrapper {
+        gap: 20px;
+    }
+}
+
+
+/* =========================================================
+   TABLET
+   768px AND BELOW
+========================================================= */
+
+@media (max-width: 768px) {
+
+    .add-employee-page {
+        padding: 16px;
+    }
+
+
+    /* Header */
+
+    .page-header {
+        margin-bottom: 18px;
+    }
+
+    .header-content h2 {
+        font-size: 23px;
+    }
+
+    .header-content p {
+        font-size: 13px;
+    }
+
+
+    /* Cards */
+
+    .employee-photo-card,
+    .form-card {
+        padding: 18px;
+        margin-bottom: 16px;
+        border-radius: 10px;
+    }
+
+
+    /* Photo */
+
+    .employee-photo-wrapper {
+        gap: 18px;
+    }
+
+    .employee-photo-preview {
+        width: 100px;
+        height: 100px;
+        min-width: 100px;
+        flex-basis: 100px;
+    }
+
+    .employee-photo-content h3 {
+        font-size: 16px;
+    }
+
+    .employee-photo-content p {
+        margin-bottom: 12px;
+        font-size: 13px;
+    }
+
+    .photo-upload-btn,
+    .photo-remove-btn {
+        min-height: 40px;
+        padding: 9px 15px;
+        font-size: 12px;
+    }
+
+
+    /* Card Headers */
+
+    .card-header {
+        margin-bottom: 18px;
+        padding-bottom: 13px;
+    }
+
+
+    /* Form */
+
+    .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   600px AND BELOW
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .add-employee-page {
+        padding: 14px;
+    }
+
+
+    /* ================================
+       HEADER
+    ================================= */
+
+    .page-header {
+        margin-bottom: 16px;
+    }
+
+    .header-content h2 {
+        font-size: 21px;
+    }
+
+    .header-content p {
+        margin-top: 4px;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+
+    /* ================================
+       CARDS
+    ================================= */
+
+    .employee-photo-card,
+    .form-card {
+        padding: 16px;
+        margin-bottom: 16px;
+        border-radius: 9px;
+    }
+
+
+    /* ================================
+       PHOTO SECTION
+    ================================= */
+
+    .employee-photo-wrapper {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        text-align: center;
+    }
+
+
+    .employee-photo-preview {
+        width: 110px;
+        height: 110px;
+        min-width: 110px;
+        flex-basis: 110px;
+    }
+
+
+    .employee-photo-content {
+        width: 100%;
+    }
+
+
+        .employee-photo-content h3 {
+            font-size: 16px;
+        }
+
+
+        .employee-photo-content p {
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 14px;
+            font-size: 12px;
+        }
+
+
+    .photo-actions {
+        justify-content: center;
+        gap: 10px;
+    }
+
+
+    .photo-help-text {
+        text-align: center;
+    }
+
+
+    /* ================================
+       CARD HEADER
+    ================================= */
+
+    .card-header {
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+    }
+
+        .card-header h3 {
+            font-size: 16px;
+        }
+
+        .card-header p {
+            font-size: 12px;
+        }
+
+
+    /* ================================
+       FORM
+    ================================= */
+
+    .form-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 15px;
+    }
+
+
+    .full-width {
+        grid-column: auto;
+    }
+
+
+    /* ================================
+       FORM BUTTONS
+    ================================= */
+
+    .form-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+        gap: 10px;
+        padding: 5px 0 20px;
+    }
+
+
+    .btn-cancel,
+    .btn-save {
+        width: 100%;
+        min-height: 44px;
+    }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   400px AND BELOW
+========================================================= */
+
+@media (max-width: 400px) {
+
+    .add-employee-page {
+        padding: 10px;
+    }
+
+
+    /* ================================
+       HEADER
+    ================================= */
+
+    .page-header {
+        margin-bottom: 15px;
+    }
+
+    .header-content h2 {
+        font-size: 20px;
+    }
+
+    .header-content p {
+        font-size: 12px;
+    }
+
+
+    /* ================================
+       CARDS
+    ================================= */
+
+    .employee-photo-card,
+    .form-card {
+        padding: 14px;
+        margin-bottom: 14px;
+        border-radius: 8px;
+    }
+
+
+    /* ================================
+       PHOTO
+    ================================= */
+
+    .employee-photo-wrapper {
+        gap: 13px;
+    }
+
+
+    .employee-photo-preview {
+        width: 95px;
+        height: 95px;
+        min-width: 95px;
+        flex-basis: 95px;
+        border-width: 2px;
+    }
+
+
+    .employee-photo-content h3 {
+        font-size: 15px;
+    }
+
+
+    .employee-photo-content p {
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+
+    /* Upload buttons full width */
+
+    .photo-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+    }
+
+
+    .photo-upload-btn,
+    .photo-remove-btn {
+        width: 100%;
+        min-height: 42px;
+        padding: 10px 14px;
+    }
+
+
+    .photo-help-text {
+        font-size: 11px;
+    }
+
+
+    /* ================================
+       CARD HEADER
+    ================================= */
+
+    .card-header {
+        margin-bottom: 14px;
+        padding-bottom: 12px;
+    }
+
+        .card-header h3 {
+            font-size: 15px;
+        }
+
+        .card-header p {
+            font-size: 12px;
+        }
+
+
+    /* ================================
+       FORM
+    ================================= */
+
+    .form-grid {
+        gap: 13px;
+    }
+
+
+    .form-group label {
+        margin-bottom: 6px;
+        font-size: 12px;
+    }
+
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+
+        .form-group input[type="date"] {
+            min-height: 40px;
+        }
+
+
+    /* ================================
+       BUTTONS
+    ================================= */
+
+    .btn-cancel,
+    .btn-save {
+        min-height: 42px;
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+   320px AND BELOW
+========================================================= */
+
+@media (max-width: 320px) {
+
+    .add-employee-page {
+        padding: 8px;
+    }
+
+
+    .employee-photo-card,
+    .form-card {
+        padding: 12px;
+    }
+
+
+    /* Header */
+
+    .header-content h2 {
+        font-size: 18px;
+    }
+
+    .header-content p {
+        font-size: 11px;
+    }
+
+
+    /* Photo */
+
+    .employee-photo-preview {
+        width: 85px;
+        height: 85px;
+        min-width: 85px;
+        flex-basis: 85px;
+    }
+
+
+    .employee-photo-content h3 {
+        font-size: 14px;
+    }
+
+
+    .employee-photo-content p {
+        font-size: 11px;
+    }
+
+
+    .photo-upload-btn,
+    .photo-remove-btn {
+        min-height: 40px;
+        padding: 9px 12px;
+        font-size: 12px;
+    }
+
+
+    /* Inputs */
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 9px;
+    }
+}
+
+
+/* =========================================================
+   TOUCH DEVICES
+========================================================= */
+
+@media (hover: none) {
+
+    .photo-upload-btn:hover,
+    .btn-save:hover {
+        transform: none;
+    }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea,
+    .photo-upload-btn,
+    .photo-remove-btn,
+    .btn-cancel,
+    .btn-save {
+        transition: none;
+    }
+}
+
+/* Server-side validation for the Add Employee form */
+.field-validation,
+.validation-summary {
+    color: #dc2626;
+    font-size: 12px;
+}
+
+.validation-summary:empty {
+    display: none;
+}
+
+.validation-summary {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    padding: 12px 14px;
+}

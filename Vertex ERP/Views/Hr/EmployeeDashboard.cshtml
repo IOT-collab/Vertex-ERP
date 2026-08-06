@@ -1,147 +1,81 @@
-﻿
+@model VertexERP.Models.EmployeeDirectoryViewModel
 @{
     ViewData["Title"] = "Employee Dashboard";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
 <link href="~/css/employeedashboard.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <div class="employee-dashboard-wrapper">
-
-    <!-- Page Header Section with Add Button on Right -->
     <div class="dashboard-header-card">
-        <div class="header-left">
-            <div>
-                <h2>Employee Management</h2>
-                <p>Manage employees, departments and system users efficiently.</p>
-            </div>
-        </div>
+        <div class="header-left"><div><h2>Employee Management</h2><p>Manage employees, departments and system users efficiently.</p></div></div>
         <div class="header-right">
-            <button type="button" class="btn-primary-glow" id="addEmployeeBtn">
-                <i class="fa-solid fa-user-plus"></i> Add Employee
-            </button>
+            <a asp-controller="Employee" asp-action="Create" class="btn-primary-glow" id="addEmployeeBtn"><i class="fa-solid fa-user-plus"></i> Add Employee</a>
         </div>
     </div>
 
-    <!-- Statistics Grid Section -->
     <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon total-icon">
-                <i class="fa-solid fa-users"></i>
-            </div>
-            <div class="stat-details">
-                <span class="stat-value">@(Model?.TotalEmployees ?? 0)</span>
-                <span class="stat-label">Total Employees</span>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon active-icon">
-                <i class="fa-solid fa-user-check"></i>
-            </div>
-            <div class="stat-details">
-                <span class="stat-value">@(Model?.ActiveEmployees ?? 0)</span>
-                <span class="stat-label">Active</span>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon inactive-icon">
-                <i class="fa-solid fa-user-xmark"></i>
-            </div>
-            <div class="stat-details">
-                <span class="stat-value">@(Model?.InactiveEmployees ?? 0)</span>
-                <span class="stat-label">Inactive</span>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon dept-icon">
-                <i class="fa-solid fa-briefcase"></i>
-            </div>
-            <div class="stat-details">
-                <span class="stat-value">@(Model?.TotalDepartments ?? 0)</span>
-                <span class="stat-label">Departments</span>
-            </div>
-        </div>
+        <div class="stat-card"><div class="stat-icon total-icon"><i class="fa-solid fa-users"></i></div><div class="stat-details"><span class="stat-value">@Model.TotalEmployees</span><span class="stat-label">Total Employees</span></div></div>
+        <div class="stat-card"><div class="stat-icon active-icon"><i class="fa-solid fa-user-check"></i></div><div class="stat-details"><span class="stat-value">@Model.ActiveEmployees</span><span class="stat-label">Active</span></div></div>
+        <div class="stat-card"><div class="stat-icon inactive-icon"><i class="fa-solid fa-user-xmark"></i></div><div class="stat-details"><span class="stat-value">@Model.InactiveEmployees</span><span class="stat-label">Inactive</span></div></div>
+        <div class="stat-card"><div class="stat-icon dept-icon"><i class="fa-solid fa-briefcase"></i></div><div class="stat-details"><span class="stat-value">@Model.TotalDepartments</span><span class="stat-label">Departments</span></div></div>
     </div>
 
-    <!-- Single Clean Search Toolbar -->
-    <div class="toolbar-card">
-        <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="searchEmployeeInput" placeholder="Search by name, employee code or department..." />
-        </div>
-        <button type="button" class="btn-secondary" id="searchBtn">
-            <i class="fa-solid fa-filter"></i> Filter
-        </button>
-    </div>
+    @if (TempData["EmployeeMessage"] is string message)
+    {
+        <div class="employee-message"><i class="fa-solid fa-circle-check"></i> @message</div>
+    }
+    @if (TempData["EmployeeError"] is string error)
+    {
+        <div class="employee-message employee-error"><i class="fa-solid fa-circle-exclamation"></i> @error</div>
+    }
 
-    <!-- Employee Directory Table Section -->
+    <form asp-controller="Employee" asp-action="Index" method="get" class="toolbar-card">
+        <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" name="search" value="@Model.Search" placeholder="Search by name, employee code, email or department..." /></div>
+        <select name="department" class="employee-filter" aria-label="Filter by department">
+            <option value="">All departments</option>
+            @foreach (var item in Model.Departments) { <option value="@item" selected="@(Model.Department == item)">@item</option> }
+        </select>
+        <select name="status" class="employee-filter" aria-label="Filter by status">
+            <option value="">All statuses</option>
+            <option value="active" selected="@(Model.Status == "active")">Active</option>
+            <option value="inactive" selected="@(Model.Status == "inactive")">Inactive</option>
+        </select>
+        <button type="submit" class="btn-secondary"><i class="fa-solid fa-filter"></i> Filter</button>
+    </form>
+
     <div class="glass-card table-section">
-        <div class="card-header">
-            <div class="card-title-group">
-                <h3>Employee Directory</h3>
-                <span class="badge-accent">Live Records</span>
-            </div>
-        </div>
-
+        <div class="card-header"><div class="card-title-group"><h3>Employee Directory</h3><span class="badge-accent">Live Records</span></div></div>
         <div class="table-responsive">
             <table class="modern-table">
-                <thead>
-                    <tr>
-                        <th>Photo</th>
-                        <th>Employee Code</th>
-                        <th>Name</th>
-                        <th>Department</th>
-                        <th>Designation</th>
-                        <th>Status</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Employee Code</th><th>Name</th><th>Email</th><th>Department</th><th>Designation</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
                 <tbody>
-                    @if (Model?.Employees != null && Model.Employees.Count > 0)
-                    {
-                        @foreach (var emp in Model.Employees)
-                        {
-                            <tr>
-                                <td>
-                                    <img src="@(string.IsNullOrEmpty(emp.PhotoUrl) ? "/images/default-user.png" : emp.PhotoUrl)" alt="@emp.Name" class="emp-avatar" />
-                                </td>
-                                <td><span class="code-text">@emp.EmployeeCode</span></td>
-                                <td class="fw-semibold">@emp.Name</td>
-                                <td>@emp.Department</td>
-                                <td>@emp.Designation</td>
-                                <td>
-                                    <span class="status-badge @emp.StatusBadgeClass">@emp.Status</span>
-                                </td>
-                                <td class="text-end">
-                                    <div class="action-buttons">
-                                        <button type="button" class="action-btn edit-action" title="Edit" data-id="@emp.Id">
-                                            <i class="fa-solid fa-pen-to-square"></i>
-                                        </button>
-                                        <button type="button" class="action-btn delete-action" title="Delete" data-id="@emp.Id">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
+                @if (Model.Employees.Count > 0)
+                {
+                    @foreach (var employee in Model.Employees)
                     {
                         <tr>
-                            <td colspan="7" class="text-center-muted">
-                                <div class="empty-state">
-                                    <i class="fa-solid fa-folder-open"></i>
-                                    <p>No employee records found.</p>
+                            <td><span class="code-text">@employee.EmployeeCode</span></td>
+                            <td class="fw-semibold">@employee.FullName</td>
+                            <td>@employee.Email</td>
+                            <td>@employee.Department</td>
+                            <td>@employee.Designation</td>
+                            <td><span class="status-badge @(employee.IsActive ? "badge-active" : "badge-inactive")">@employee.EmployeeStatus</span></td>
+                            <td class="text-end">
+                                <div class="action-buttons">
+                                    <a asp-controller="Employee" asp-action="Details" asp-route-id="@employee.Id" class="action-btn" title="View employee"><i class="fa-solid fa-eye"></i></a>
+                                    <a asp-controller="Employee" asp-action="Edit" asp-route-id="@employee.Id" class="action-btn edit-action" title="Edit employee"><i class="fa-solid fa-pen-to-square"></i></a>
+                                    <a asp-controller="Employee" asp-action="Delete" asp-route-id="@employee.Id" class="action-btn delete-action" title="Delete employee"><i class="fa-solid fa-user-slash"></i></a>
                                 </div>
                             </td>
                         </tr>
                     }
+                }
+                else
+                {
+                    <tr><td colspan="7" class="text-center-muted"><div class="empty-state"><i class="fa-solid fa-folder-open"></i><p>No employee records found.</p></div></td></tr>
+                }
                 </tbody>
             </table>
         </div>
     </div>
-
 </div>

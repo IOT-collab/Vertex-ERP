@@ -20,11 +20,39 @@
     var showBackButton = !string.Equals(controller, "Main", StringComparison.OrdinalIgnoreCase)
         || string.IsNullOrWhiteSpace(action)
         || !topLevelMainPages.Contains(action);
+    var isDepartmentPage = string.Equals(controller, "Hr", StringComparison.OrdinalIgnoreCase)
+        && action is "Department" or "AddDepartment" or "EditDepartment" or "DeleteDepartment" or "DepartmentDetails";
+    var isEmployeePage = string.Equals(controller, "Employee", StringComparison.OrdinalIgnoreCase);
+    var backController = isDepartmentPage
+        ? (string.Equals(action, "Department", StringComparison.OrdinalIgnoreCase) ? "Main" : "Hr")
+        : isEmployeePage ? "Employee"
+        : ViewData["BackController"]?.ToString();
+    var backAction = isDepartmentPage
+        ? (string.Equals(action, "Department", StringComparison.OrdinalIgnoreCase) ? "Hrms" : "Department")
+        : isEmployeePage ? "Index"
+        : ViewData["BackAction"]?.ToString();
+    var hasExplicitBackRoute = !string.IsNullOrWhiteSpace(backController) && !string.IsNullOrWhiteSpace(backAction);
 }
 
 @if (showBackButton)
 {
     <nav class="common-back-nav" aria-label="Page navigation">
+        @if (hasExplicitBackRoute)
+        {
+        <a
+                class="common-back-button"
+                asp-controller="@backController"
+                asp-action="@backAction"
+                title="Go Back"
+                aria-label="Go Back">
+            <svg class="common-back-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            <span>Back</span>
+        </a>
+        }
+        else
+        {
         <button type="button"
                 class="common-back-button"
                 onclick="window.history.back()"
@@ -35,5 +63,6 @@
             </svg>
             <span>Back</span>
         </button>
+        }
     </nav>
 }

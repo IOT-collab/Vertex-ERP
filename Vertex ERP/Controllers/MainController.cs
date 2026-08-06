@@ -251,7 +251,7 @@ namespace VertexERP.Controllers
         [Authorize(Roles = "Admin,HR")]
         public IActionResult AddEmpHrm()
         {
-            return View();
+            return RedirectToAction("Create", "Employee");
         }
 
         [Authorize(Roles = "Admin,HR")]

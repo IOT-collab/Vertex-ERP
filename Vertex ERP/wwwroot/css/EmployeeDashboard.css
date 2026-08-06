@@ -116,6 +116,29 @@
     white-space: nowrap;
 }
 
+.employee-filter {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    color: #f8fafc;
+    padding: 11px 14px;
+    outline: none;
+}
+
+.employee-message {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 12px;
+    color: #6ee7b7;
+    padding: 13px 16px;
+}
+
+.employee-error {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+}
+
     .btn-secondary:hover {
         background: rgba(51, 65, 85, 0.8);
         border-color: rgba(255, 255, 255, 0.15);
@@ -445,6 +468,10 @@
     .toolbar-card {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .employee-filter {
+        width: 100%;
     }
 
     .btn-secondary {

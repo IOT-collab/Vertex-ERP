@@ -1,0 +1,725 @@
+﻿@{
+    ViewData["Title"] = "Add Employee";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+@model VertexERP.Models.HrAddEmployeeViewModel
+
+<link href="~/css/hraddemp.css" rel="stylesheet" />
+
+
+<div class="add-employee-page">
+
+    <!-- ================================
+         PAGE HEADER
+    ================================= -->
+    <div class="page-header">
+
+        <div class="header-content">
+            <h2>Add Employee</h2>
+            <p>Create a new employee profile and add employment details.</p>
+        </div>
+
+    </div>
+
+
+    <!-- ================================
+         EMPLOYEE FORM
+    ================================= -->
+    <form class="employee-form"
+          asp-controller="Hr"
+          asp-action="HrAddEmp"
+          method="post"
+          enctype="multipart/form-data">
+
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+
+        <!-- ================================
+             EMPLOYEE PHOTO
+        ================================= -->
+        <div class="employee-photo-card">
+
+            <div class="employee-photo-wrapper">
+
+                <!-- Photo Preview -->
+                <div class="employee-photo-preview">
+
+                    <img id="employeeImagePreview"
+                         src="~/images/default-user.png"
+                         alt="Employee Profile Photo" />
+
+                </div>
+
+
+                <!-- Photo Information -->
+                <div class="employee-photo-content">
+
+                    <h3>Employee Photo</h3>
+
+                    <p>
+                        Upload a clear profile photo of the employee.
+                        JPG, JPEG or PNG files are supported.
+                    </p>
+
+
+                    <div class="photo-actions">
+
+                        <!-- Upload Button -->
+                        <label for="employeePhoto"
+                               class="photo-upload-btn">
+
+                            Upload Photo
+
+                        </label>
+
+
+                        <!-- Hidden File Input -->
+                        <input asp-for="EmployeePhoto"
+                               type="file"
+                               id="employeePhoto"
+                               accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                               hidden />
+                        <span asp-validation-for="EmployeePhoto" class="field-validation"></span>
+
+
+                        <!-- Remove Photo -->
+                        <button type="button"
+                                id="removeEmployeePhoto"
+                                class="photo-remove-btn">
+
+                            Remove
+
+                        </button>
+
+                    </div>
+
+
+                    <span class="photo-help-text">
+                        Recommended size: 500 × 500 px • Maximum size: 5 MB
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================
+             BASIC INFORMATION
+        ================================= -->
+        <div class="form-card">
+
+            <div class="card-header">
+
+                <h3>Basic Information</h3>
+
+                <p>
+                    Enter the employee's personal information.
+                </p>
+
+            </div>
+
+
+            <div class="form-grid">
+
+
+                <!-- Employee ID -->
+                <div class="form-group">
+
+                    <label>
+                        Employee ID
+                        <span>*</span>
+                    </label>
+
+                    <input asp-for="EmployeeId"
+                           type="text"
+                           readonly
+                           aria-readonly="true"
+                           required />
+                    <span asp-validation-for="EmployeeId" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- First Name -->
+                <div class="form-group">
+
+                    <label>
+                        First Name
+                        <span>*</span>
+                    </label>
+
+                    <input asp-for="FirstName"
+                           type="text"
+                           placeholder="Enter first name"
+                           required />
+                    <span asp-validation-for="FirstName" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Last Name -->
+                <div class="form-group">
+
+                    <label>
+                        Last Name
+                    </label>
+
+                    <input asp-for="LastName"
+                           type="text"
+                           placeholder="Enter last name" />
+                    <span asp-validation-for="LastName" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Date Of Birth -->
+                <div class="form-group">
+
+                    <label>
+                        Date of Birth
+                    </label>
+
+                    <input asp-for="DateOfBirthText" type="text" inputmode="numeric" maxlength="10" placeholder="DD/MM/YYYY" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" />
+                    <span asp-validation-for="DateOfBirthText" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Gender -->
+                <div class="form-group">
+
+                    <label>
+                        Gender
+                    </label>
+
+                    <select asp-for="Gender">
+
+                        <option value="">
+                            Select gender
+                        </option>
+
+                        <option value="Male">
+                            Male
+                        </option>
+
+                        <option value="Female">
+                            Female
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Marital Status -->
+                <div class="form-group">
+
+                    <label>
+                        Marital Status
+                    </label>
+
+                    <select asp-for="MaritalStatus">
+
+                        <option value="">
+                            Select status
+                        </option>
+
+                        <option value="Single">
+                            Single
+                        </option>
+
+                        <option value="Married">
+                            Married
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================
+             CONTACT INFORMATION
+        ================================= -->
+        <div class="form-card">
+
+            <div class="card-header">
+
+                <h3>Contact Information</h3>
+
+                <p>
+                    Add employee contact details.
+                </p>
+
+            </div>
+
+
+            <div class="form-grid">
+
+
+                <!-- Email -->
+                <div class="form-group">
+
+                    <label>
+                        Email Address
+                        <span>*</span>
+                    </label>
+
+                    <input asp-for="Email"
+                           type="email"
+                           placeholder="employee@company.com"
+                           required />
+                    <span asp-validation-for="Email" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Phone -->
+                <div class="form-group">
+
+                    <label>
+                        Phone Number
+                        <span>*</span>
+                    </label>
+
+                    <input asp-for="Phone"
+                           type="tel"
+                           inputmode="numeric"
+                           maxlength="10"
+                           pattern="[0-9]{10}"
+                           oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                           placeholder="Enter phone number"
+                           required />
+                    <span asp-validation-for="Phone" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Emergency Contact -->
+                <div class="form-group">
+
+                    <label>
+                        Emergency Contact
+                    </label>
+
+                    <input asp-for="EmergencyContact"
+                           type="tel"
+                           placeholder="Emergency contact number" />
+                    <span asp-validation-for="EmergencyContact" class="field-validation"></span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================
+             EMPLOYMENT DETAILS
+        ================================= -->
+        <div class="form-card">
+
+            <div class="card-header">
+
+                <h3>Employment Details</h3>
+
+                <p>
+                    Configure employee job and organization details.
+                </p>
+
+            </div>
+
+
+            <div class="form-grid">
+
+
+                <!-- Department -->
+                <div class="form-group">
+
+                    <label>
+                        Department
+                        <span>*</span>
+                    </label>
+
+                    <select asp-for="DepartmentId"
+                            required>
+
+                        <option value="">
+                            Select department
+                        </option>
+
+                        @foreach (var department in Model.Departments)
+                        {
+                            <option value="@department.Id">@department.DepartmentName</option>
+                        }
+
+                    </select>
+                    <span asp-validation-for="DepartmentId" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Designation -->
+                <div class="form-group">
+
+                    <label>
+                        Designation
+                        <span>*</span>
+                    </label>
+
+                    <input asp-for="Designation"
+                           type="text"
+                           placeholder="Enter designation"
+                           required />
+                    <span asp-validation-for="Designation" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Joining Date -->
+                <div class="form-group">
+
+                    <label>
+                        Joining Date
+                        <span>*</span>
+                    </label>
+
+                    <input asp-for="JoiningDate"
+                           type="date"
+                           required />
+                    <span asp-validation-for="JoiningDate" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Employment Type -->
+                <div class="form-group">
+
+                    <label>
+                        Employment Type
+                    </label>
+
+                    <select asp-for="EmploymentType">
+
+                        <option value="">
+                            Select employment type
+                        </option>
+
+                        <option value="Permanent">
+                            Permanent
+                        </option>
+
+                        <option value="Contract">
+                            Contract
+                        </option>
+
+                        <option value="Intern">
+                            Intern
+                        </option>
+
+                        <option value="Part Time">
+                            Part Time
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Reporting Manager -->
+                <div class="form-group">
+
+                    <label>
+                        Reporting Manager
+                    </label>
+
+                    <select asp-for="ReportingManagerId">
+                        <option value="">Select reporting manager</option>
+                        @foreach (var manager in Model.Managers)
+                        {
+                            <option value="@manager.Id">@manager.FullName (@manager.EmployeeCode)</option>
+                        }
+                    </select>
+
+                </div>
+
+
+                <!-- Work Location -->
+                <div class="form-group">
+
+                    <label>
+                        Work Location
+                    </label>
+
+                    <input asp-for="WorkLocation"
+                           type="text"
+                           placeholder="Enter work location" />
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================
+             ADDRESS DETAILS
+        ================================= -->
+        <div class="form-card">
+
+            <div class="card-header">
+
+                <h3>Address Details</h3>
+
+                <p>
+                    Enter the employee's current address.
+                </p>
+
+            </div>
+
+
+            <div class="form-grid">
+
+
+                <!-- Address -->
+                <div class="form-group full-width">
+
+                    <label>
+                        Address
+                    </label>
+
+                    <textarea asp-for="Address"
+                              rows="3"
+                              placeholder="Enter complete address"></textarea>
+
+                </div>
+
+
+                <!-- City -->
+                <div class="form-group">
+
+                    <label>
+                        City
+                    </label>
+
+                    <input asp-for="City"
+                           type="text"
+                           placeholder="Enter city" />
+
+                </div>
+
+
+                <!-- State -->
+                <div class="form-group">
+
+                    <label>
+                        State
+                    </label>
+
+                    <input asp-for="State"
+                           type="text"
+                           placeholder="Enter state" />
+
+                </div>
+
+
+                <!-- PIN Code -->
+                <div class="form-group">
+
+                    <label>
+                        PIN Code
+                    </label>
+
+                    <input asp-for="PinCode"
+                           type="text"
+                           placeholder="Enter PIN code"
+                           maxlength="6"
+                           inputmode="numeric" />
+                    <span asp-validation-for="PinCode" class="field-validation"></span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================
+             FORM ACTIONS
+        ================================= -->
+        <div class="form-actions">
+
+            <a asp-controller="Employee" asp-action="Index" class="btn-cancel">Cancel</a>
+
+
+            <button type="submit"
+                    class="btn-save">
+
+                Add Employee
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+
+<!-- ================================
+     EMPLOYEE PHOTO SCRIPT
+================================= -->
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const employeePhoto =
+            document.getElementById("employeePhoto");
+
+        const employeeImagePreview =
+            document.getElementById("employeeImagePreview");
+
+        const removeEmployeePhoto =
+            document.getElementById("removeEmployeePhoto");
+
+
+        /*
+        =====================================
+        DEFAULT PROFILE IMAGE
+        =====================================
+        */
+
+        const defaultEmployeeImage =
+            employeeImagePreview.src;
+
+
+        /*
+        =====================================
+        IMAGE UPLOAD
+        =====================================
+        */
+
+        employeePhoto.addEventListener("change", function () {
+
+            const file = this.files[0];
+
+
+            if (!file) {
+                return;
+            }
+
+
+            /*
+            =====================================
+            ALLOWED FILE TYPES
+            =====================================
+            */
+
+            const allowedTypes = [
+                "image/jpeg",
+                "image/png"
+            ];
+
+
+            if (!allowedTypes.includes(file.type)) {
+
+                alert(
+                    "Please select a JPG, JPEG or PNG image."
+                );
+
+                employeePhoto.value = "";
+
+                return;
+            }
+
+
+            /*
+            =====================================
+            MAXIMUM FILE SIZE
+            5 MB
+            =====================================
+            */
+
+            const maxFileSize =
+                5 * 1024 * 1024;
+
+
+            if (file.size > maxFileSize) {
+
+                alert(
+                    "Image size must be less than 5 MB."
+                );
+
+                employeePhoto.value = "";
+
+                return;
+            }
+
+
+            /*
+            =====================================
+            SHOW IMAGE PREVIEW
+            =====================================
+            */
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload = function (event) {
+
+                employeeImagePreview.src =
+                    event.target.result;
+
+            };
+
+
+            reader.readAsDataURL(file);
+
+        });
+
+
+
+        /*
+        =====================================
+        REMOVE IMAGE
+        =====================================
+        */
+
+        removeEmployeePhoto.addEventListener(
+            "click",
+            function () {
+
+                employeePhoto.value = "";
+
+                employeeImagePreview.src =
+                    defaultEmployeeImage;
+
+            }
+        );
+
+    });
+
+</script>
+```
