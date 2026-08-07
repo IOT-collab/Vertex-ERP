@@ -48,28 +48,6 @@ body {
     gap: 12px;
 }
 
-.btn-back-arrow {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    font-size: 15px;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-    .btn-back-arrow:hover {
-        background: var(--border-hover);
-        color: var(--accent-blue);
-        border-color: var(--accent-blue);
-    }
-
 .breadcrumb-text {
     font-size: 13px;
     color: var(--text-muted);

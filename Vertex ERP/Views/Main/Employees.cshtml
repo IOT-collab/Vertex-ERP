@@ -31,7 +31,7 @@
 
 <div class="emp-dash-container">
 
-    <!-- NAVIGATION BAR WITH BACK ARROW ICON -->
+    <!-- NAVIGATION BAR -->
     <div class="emp-nav-header">
         <div class="breadcrumb-text">Dashboard / <strong>Employee Self-Service</strong></div>
     </div>
@@ -54,11 +54,24 @@
                     Shift: <strong>@shiftTiming</strong>
                 </div>
             }
+
+            <button type="button" class="btn btn-secondary" id="locationBtn" onclick="captureLocation()">
+                <i class="fa-solid fa-location-dot"></i> Location
+            </button>
+
+            <button type="button" class="btn btn-primary" id="punchBtn" onclick="togglePunch()">
+                <i class="fa-solid fa-fingerprint"></i> Punch In
+            </button>
+
             <button type="button" class="btn btn-secondary" onclick="openModal('profileDetailsModal')">
                 <i class="fa-solid fa-user"></i> View Profile
             </button>
             <button type="button" class="btn btn-primary" onclick="openModal('applyLeaveModal')">
                 <i class="fa-solid fa-calendar-plus"></i> Apply Leave
+            </button>
+            <!-- RAISE QUERY BUTTON ADDED HERE -->
+            <button type="button" class="btn btn-secondary" onclick="openModal('raiseQueryModal')">
+                <i class="fa-solid fa-circle-question"></i> Raise Query
             </button>
         </div>
     </div>
@@ -283,6 +296,44 @@
     </div>
 </div>
 
+<!-- RAISE QUERY MODAL ADDED HERE -->
+<div id="raiseQueryModal" class="report-modal-overlay">
+    <div class="report-modal">
+        <div class="report-modal-header">
+            <h3 style="font-size: 16px;"><i class="fa-solid fa-circle-question text-amber"></i> Raise a Support Query</h3>
+            <button type="button" class="close-btn" onclick="closeModal('raiseQueryModal')">&times;</button>
+        </div>
+        @using (Html.BeginForm("SubmitQuery", "Employee", FormMethod.Post))
+        {
+            <div class="report-modal-body">
+                <div class="form-group">
+                    <label class="form-label">Query Category</label>
+                    <select name="QueryCategory" class="form-control" required>
+                        <option value="">-- Select Category --</option>
+                        <option value="Payroll">Payroll & Salary</option>
+                        <option value="HR">HR & Policies</option>
+                        <option value="Attendance">Attendance & Punch</option>
+                        <option value="Technical">Technical Support</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Subject</label>
+                    <input type="text" name="Subject" class="form-control" placeholder="Brief subject line..." required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description / Details</label>
+                    <textarea name="Description" class="form-control" rows="4" placeholder="Explain your query in detail..." required></textarea>
+                </div>
+            </div>
+            <div class="report-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('raiseQueryModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit Query</button>
+            </div>
+        }
+    </div>
+</div>
+
 <!-- PENDING TASK REASON & IMAGE UPLOAD MODAL -->
 <div id="taskReasonModal" class="report-modal-overlay">
     <div class="report-modal">
@@ -344,5 +395,37 @@
     function submitTaskReason() {
         alert('Task reason and image uploaded successfully!');
         closeModal('taskReasonModal');
+    }
+
+    // --- PUNCH IN / OUT TOGGLE SCRIPT ---
+    let isPunchedIn = false;
+    function togglePunch() {
+        isPunchedIn = !isPunchedIn;
+        let punchBtn = document.getElementById('punchBtn');
+        if (isPunchedIn) {
+            punchBtn.innerHTML = '<i class="fa-solid fa-fingerprint"></i> Punch Out';
+            punchBtn.style.background = 'var(--accent-red)';
+        } else {
+            punchBtn.innerHTML = '<i class="fa-solid fa-fingerprint"></i> Punch In';
+            punchBtn.style.background = 'var(--accent-blue)';
+        }
+    }
+
+    // --- GEOLOCATION SCRIPT ---
+    function captureLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    alert(`Location Captured Successfully!\nLatitude: ${lat.toFixed(4)}\nLongitude: ${lon.toFixed(4)}`);
+                },
+                (error) => {
+                    alert("Unable to retrieve your location. Please check browser permissions.");
+                }
+            );
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
     }
 </script>

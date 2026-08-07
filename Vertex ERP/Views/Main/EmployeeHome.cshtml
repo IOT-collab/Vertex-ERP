@@ -1,3 +1,61 @@
 @{
-    ViewData["Title"] = "Employee";
+    ViewData["Title"] = "Employee Self-Service";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var employeeName = User.Identity?.Name ?? "Employee";
 }
+
+<link href="~/css/EmployeeHome.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="employee-home" data-employee="@employeeName">
+    <div class="page-kicker">Dashboard / <strong>Employee Self-Service</strong></div>
+
+    <section class="profile-hero">
+        <div class="profile-identity">
+            <div class="avatar">@employeeName.Substring(0, 1).ToUpperInvariant()</div>
+            <div>
+                <div class="profile-title-row"><h1>@employeeName</h1><span class="active-badge">Active</span></div>
+                <p>Employee · Your attendance and workday overview</p>
+            </div>
+        </div>
+        <div class="profile-actions">
+            <button class="btn secondary" type="button">View Profile</button>
+            <button class="btn primary" type="button">Apply Leave</button>
+        </div>
+    </section>
+
+    <section class="attendance-card">
+        <div class="attendance-copy">
+            <span class="eyebrow">TODAY'S ATTENDANCE</span>
+            <h2 id="attendanceTitle">Ready to start your workday?</h2>
+            <p id="attendanceHelp">Punch in will request your location permission. Tracking stays active until you punch out.</p>
+            <div class="location-status" id="locationStatus"><span class="status-dot"></span><span>Location is not being tracked</span></div>
+        </div>
+        <div class="attendance-time">
+            <span id="liveDate"></span>
+            <strong id="liveClock">--:--:--</strong>
+        </div>
+        <div class="punch-actions">
+            <button id="punchInButton" class="punch-button in" type="button"><i class="fa-solid fa-location-crosshairs"></i><span>Punch In</span></button>
+            <button id="punchOutButton" class="punch-button out" type="button" disabled><i class="fa-solid fa-arrow-right-from-bracket"></i><span>Punch Out</span></button>
+        </div>
+    </section>
+
+    <div id="permissionNotice" class="permission-notice" hidden>
+        <i class="fa-solid fa-shield-halved"></i>
+        <div><strong>Location permission is required</strong><span>Please allow precise location in your browser to punch in and enable work-hour tracking.</span></div>
+        <button type="button" id="retryLocation">Try Again</button>
+    </div>
+
+    <section class="metrics-grid">
+        <article><span class="metric-icon green"><i class="fa-regular fa-clock"></i></span><div><small>Working Time</small><strong id="workingTime">00h 00m</strong></div></article>
+        <article><span class="metric-icon purple"><i class="fa-solid fa-location-dot"></i></span><div><small>Last Location</small><strong id="lastLocation">Not available</strong></div></article>
+        <article><span class="metric-icon blue"><i class="fa-solid fa-route"></i></span><div><small>Tracked Points</small><strong id="trackedPoints">0 locations</strong></div></article>
+    </section>
+
+    <section class="activity-panel">
+        <div class="section-heading"><div><span class="eyebrow">ACTIVITY</span><h2>Today's attendance timeline</h2></div><span class="privacy-chip"><i class="fa-solid fa-lock"></i> Only tracked during work hours</span></div>
+        <div id="timeline" class="timeline-empty"><i class="fa-regular fa-clock"></i><strong>No attendance activity yet</strong><span>Your punch and location activity will appear here.</span></div>
+    </section>
+</div>
+
+<script src="~/js/employee-location.js" asp-append-version="true"></script>

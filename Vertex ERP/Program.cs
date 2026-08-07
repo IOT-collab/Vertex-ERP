@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
+using VertexERP.Repositories;
+using VertexERP.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.Configure<AttendanceOptions>(builder.Configuration.GetSection(AttendanceOptions.SectionName));
+builder.Services.AddScoped<IBiometricRepository, BiometricRepository>();
+builder.Services.AddScoped<IBiometricDeviceService, BiometricDeviceService>();
+builder.Services.AddScoped<IAttendanceSyncService, AttendanceSyncService>();
+builder.Services.AddScoped<IAttendanceProcessingService, AttendanceProcessingService>();
 builder.Services.AddSession();
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -49,7 +56,11 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// K40 Pro ADMS firmware posts to HTTP when HTTPS is disabled on the device.
+// Keep HTTPS redirection for the ERP UI and exempt only the isolated ADMS receiver.
+app.UseWhen(
+    context => !context.Request.Path.StartsWithSegments("/iclock"),
+    branch => branch.UseHttpsRedirection());
 app.UseStaticFiles();
 
 app.UseRouting();

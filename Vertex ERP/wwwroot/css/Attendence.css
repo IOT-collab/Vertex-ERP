@@ -288,6 +288,11 @@
         color: #2563eb;
     }
 
+    .attendance-panel-container .unmapped-status {
+        background: #fff7d6;
+        color: #9a6700;
+    }
+
     .attendance-panel-container .txt-total {
         color: #64748b;
         font-weight: 700;

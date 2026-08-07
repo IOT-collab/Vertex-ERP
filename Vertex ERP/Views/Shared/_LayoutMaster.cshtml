@@ -14,8 +14,8 @@
     @{
         var currentRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "User";
         var currentName = User.Identity?.Name ?? currentRole;
-        var isEmployee = User.IsInRole("Employee");
-        var homeUrl = "/Main/Dashboard";
+        var isEmployee = User.IsInRole("Employee") || User.IsInRole("User");
+        var homeUrl = isEmployee ? "/Main/EmployeeHome" : "/Main/Dashboard";
     }
 
     <!-- Pure CSS Sidebar Drawer Controller Toggle -->
@@ -39,12 +39,14 @@
             <ul class="sidebar-menu">
                 @if (isEmployee)
                 {
+                    <li><a href="/Main/EmployeeHome"><i class="fa-solid fa-house" aria-hidden="true"></i><span>My Dashboard</span></a></li>
                 }
                 else
                 {
                     <li><a href="/Main/Dashboard"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Dashboard</span></a></li>
                     <li><a href="/Main/Employees"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Employees</span></a></li>
                     <li><a href="/Main/Attendence"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
+                    <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Location Tracking</span></a></li>
                     <li><a href="/Main/LeaveManagement"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
                     <li><a href="/Main/DepartmentManagement"><i class="fa-solid fa-building" aria-hidden="true"></i><span>Department</span></a></li>
                     <li><a href="/Main/Hrms"><i class="fa-solid fa-user-tie" aria-hidden="true"></i><span>HR Management</span></a></li>

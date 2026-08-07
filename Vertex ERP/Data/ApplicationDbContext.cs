@@ -13,6 +13,9 @@ namespace VertexERP.Data
         public DbSet<AppUser> AppUsers => Set<AppUser>();
         public DbSet<Employee> Employees => Set<Employee>();
         public DbSet<Department> Departments => Set<Department>();
+        public DbSet<BiometricDevice> BiometricDevices => Set<BiometricDevice>();
+        public DbSet<AttendanceLog> AttendanceLogs => Set<AttendanceLog>();
+        public DbSet<EmployeeDeviceMapping> EmployeeDeviceMappings => Set<EmployeeDeviceMapping>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,6 +55,46 @@ namespace VertexERP.Data
                 entity.HasOne(department => department.Manager)
                     .WithMany()
                     .HasForeignKey(department => department.ManagerId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<BiometricDevice>(entity =>
+            {
+                entity.ToTable("BiometricDevices");
+                entity.HasIndex(device => device.SerialNumber).IsUnique();
+                entity.Property(device => device.CreatedAtUtc).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
+            modelBuilder.Entity<EmployeeDeviceMapping>(entity =>
+            {
+                entity.ToTable("EmployeeDeviceMapping");
+                entity.HasIndex(mapping => new { mapping.BiometricDeviceId, mapping.DeviceUserId }).IsUnique();
+                entity.HasIndex(mapping => new { mapping.BiometricDeviceId, mapping.EmployeeId }).IsUnique();
+                entity.HasOne(mapping => mapping.BiometricDevice)
+                    .WithMany(device => device.EmployeeMappings)
+                    .HasForeignKey(mapping => mapping.BiometricDeviceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(mapping => mapping.Employee)
+                    .WithMany()
+                    .HasForeignKey(mapping => mapping.EmployeeId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<AttendanceLog>(entity =>
+            {
+                entity.ToTable("AttendanceLogs");
+                entity.HasIndex(log => log.UniqueHash).IsUnique();
+                entity.HasIndex(log => new { log.BiometricDeviceId, log.DeviceUserId, log.PunchTime });
+                entity.HasIndex(log => new { log.EmployeeId, log.PunchTime });
+                entity.Property(log => log.PunchTime).HasColumnType("timestamp without time zone");
+                entity.Property(log => log.ReceivedAtUtc).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.HasOne(log => log.BiometricDevice)
+                    .WithMany(device => device.AttendanceLogs)
+                    .HasForeignKey(log => log.BiometricDeviceId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(log => log.Employee)
+                    .WithMany()
+                    .HasForeignKey(log => log.EmployeeId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
         }

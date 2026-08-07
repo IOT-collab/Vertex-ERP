@@ -13,10 +13,12 @@ namespace VertexERP.Controllers
     public class MainController : Controller
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly IAttendanceProcessingService _attendanceProcessingService;
 
-        public MainController(ApplicationDbContext dbContext)
+        public MainController(ApplicationDbContext dbContext, IAttendanceProcessingService attendanceProcessingService)
         {
             _dbContext = dbContext;
+            _attendanceProcessingService = attendanceProcessingService;
         }
 
         [AllowAnonymous]
@@ -160,8 +162,14 @@ namespace VertexERP.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Employee")]
+        [Authorize(Roles = "Employee,User")]
         public IActionResult EmployeeHome()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Admin,HR")]
+        public IActionResult LocationTracking()
         {
             return View();
         }
@@ -225,9 +233,10 @@ namespace VertexERP.Controllers
         }
 
         [Authorize(Roles = "Admin,HR")]
-        public IActionResult Attendence()
+        public async Task<IActionResult> Attendence(string? searchQuery, string? department, DateOnly? filterDate, string? status, CancellationToken cancellationToken)
         {
-            return View();
+            var date = filterDate ?? DateOnly.FromDateTime(DateTime.Today);
+            return View(await _attendanceProcessingService.GetDailyAttendanceAsync(date, searchQuery, department, status, cancellationToken));
         }
 
         [Authorize(Roles = "Admin,HR")]
@@ -316,16 +325,17 @@ namespace VertexERP.Controllers
 
         public IActionResult AccessDenied()
         {
-            return User.IsInRole("Employee")
-                ? RedirectToAction("Dashboard", "Main")
+            return User.IsInRole("Employee") || User.IsInRole("User")
+                ? RedirectToAction("EmployeeHome", "Main")
                 : Forbid();
         }
 
         private IActionResult RedirectToRoleHome(string? role = null)
         {
             var effectiveRole = role ?? User.FindFirstValue(ClaimTypes.Role);
-            return string.Equals(effectiveRole, "Employee", StringComparison.OrdinalIgnoreCase)
-                ? RedirectToAction("Dashboard", "Main")
+            return string.Equals(effectiveRole, "Employee", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(effectiveRole, "User", StringComparison.OrdinalIgnoreCase)
+                ? RedirectToAction("EmployeeHome", "Main")
                 : RedirectToAction("Dashboard", "Main");
         }
     }

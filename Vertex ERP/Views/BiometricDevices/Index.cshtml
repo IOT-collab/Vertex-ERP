@@ -1,0 +1,14 @@
+@model IReadOnlyList<VertexERP.Models.BiometricDeviceListItemViewModel>
+@{ ViewData["Title"] = "Biometric Devices"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
+<link href="~/css/BiometricDevices.css" rel="stylesheet" asp-append-version="true" />
+<div class="bio-page">
+    <div class="bio-header"><div><span class="bio-kicker">ATTENDANCE INTEGRATION</span><h1>Biometric Devices</h1><p>Manage ADMS devices, connectivity, employee mapping and sync status.</p></div><a asp-action="Create" class="bio-primary"><i class="fa-solid fa-plus"></i> Add Device</a></div>
+    @if (TempData["BiometricMessage"] is string message) { <div class="bio-alert success">@message</div> }
+    @if (TempData["BiometricError"] is string error) { <div class="bio-alert error">@error</div> }
+    <div class="bio-summary"><article><small>Total devices</small><strong>@Model.Count</strong></article><article><small>Online now</small><strong>@Model.Count(x => x.IsOnline)</strong></article><article><small>Active mappings</small><strong>@Model.Sum(x => x.MappingCount)</strong></article></div>
+    <div class="bio-table-wrap"><table><thead><tr><th>Device</th><th>Serial / Branch</th><th>ADMS Endpoint</th><th>Status</th><th>Last Sync</th><th>Mappings</th><th>Actions</th></tr></thead><tbody>
+    @if (Model.Count == 0) { <tr><td colspan="7" class="bio-empty">No biometric devices configured.</td></tr> }
+    @foreach (var device in Model) { <tr><td><strong>@device.Name</strong><span>@device.Model</span></td><td><strong>@device.SerialNumber</strong><span>@device.BranchCode</span></td><td>@device.Endpoint</td><td><span class="bio-status @(device.IsOnline ? "online" : "offline")"><i></i>@(device.IsOnline ? "Online" : device.IsActive ? "Offline" : "Inactive")</span><small>@(device.LastSeenUtc?.ToString("dd MMM, HH:mm 'UTC'") ?? "Never seen")</small></td><td>@(device.LastSyncUtc?.ToString("dd MMM yyyy HH:mm 'UTC'") ?? "Never")</td><td><a asp-action="Mappings" asp-route-id="@device.Id" class="bio-link">@device.MappingCount mapped</a></td><td><div class="bio-actions"><form asp-action="TestConnection" asp-route-id="@device.Id" method="post"><button title="Test connection"><i class="fa-solid fa-signal"></i></button></form><a asp-action="Edit" asp-route-id="@device.Id" title="Edit"><i class="fa-solid fa-pen"></i></a><form asp-action="Delete" asp-route-id="@device.Id" method="post" onsubmit="return confirm('Delete this device?');"><button class="danger" title="Delete"><i class="fa-solid fa-trash"></i></button></form></div></td></tr> }
+    </tbody></table></div>
+    <div class="bio-endpoint"><i class="fa-solid fa-code"></i><div><strong>ADMS receiver endpoint</strong><span>@($"{Context.Request.Scheme}://{Context.Request.Host}/iclock/cdata")</span></div></div>
+</div>
