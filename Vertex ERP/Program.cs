@@ -31,14 +31,21 @@ builder.Services
     });
 builder.Services.AddAuthorization();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(authConnectionString));
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+        npgsqlOptions.EnableRetryOnFailure()));
 
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    DatabaseInitializer.SeedDefaultUsers(dbContext);
+    dbContext.Database.Migrate();
+
+    var developmentUserPassword = builder.Configuration["SeedUsers:Password"];
+    if (app.Environment.IsDevelopment() && !string.IsNullOrWhiteSpace(developmentUserPassword))
+    {
+        DatabaseInitializer.SeedDevelopmentUsers(dbContext, developmentUserPassword);
+    }
 }
 
 // Configure the HTTP request pipeline.
@@ -49,40 +56,18 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// K40 Pro ADMS firmware posts to HTTP when HTTPS is disabled on the device.
-// Keep HTTPS redirection for the ERP UI and exempt only the isolated ADMS receiver.
-app.UseWhen(
-    context => !context.Request.Path.StartsWithSegments("/iclock"),
-    branch => branch.UseHttpsRedirection());
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
 app.UseSession();
 
-// Every ERP page requires an authenticated session.  The login endpoint stays
-// anonymous so a user can always reach it, including after an expired session.
-app.Use(async (context, next) =>
-{
-    var controller = context.Request.RouteValues["controller"]?.ToString();
-    var action = context.Request.RouteValues["action"]?.ToString();
-    var isLoginRequest = string.Equals(controller, "Guest", StringComparison.OrdinalIgnoreCase)
-        && string.Equals(action, "Login", StringComparison.OrdinalIgnoreCase);
-
-    if (!isLoginRequest && string.IsNullOrWhiteSpace(context.Session.GetString("username")))
-    {
-        var returnUrl = context.Request.PathBase + context.Request.Path + context.Request.QueryString;
-        context.Response.Redirect($"/Guest/Login?returnUrl={Uri.EscapeDataString(returnUrl)}");
-        return;
-    }
-
-    await next();
-});
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-   pattern: "{controller=Guest}/{action=Login}/{id?}");
+   pattern: "{controller=Main}/{action=Start}/{id?}");
 
 app.Run();
