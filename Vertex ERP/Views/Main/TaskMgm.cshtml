@@ -196,6 +196,7 @@
         </div>
         <div class="modal-body">
             <form id="assignTaskForm">
+                @Html.AntiForgeryToken()
                 <div class="form-group">
                     <label>Task Title <span class="text-red">*</span></label>
                     <input type="text" id="taskTitle" class="form-control" placeholder="Enter task title" required />
@@ -256,6 +257,69 @@
 
     let ganttChart = null;
     let taskDataset = [];
+    let peopleDataset = { managers: [], employees: [] };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const [peopleResponse, tasksResponse] = await Promise.all([
+                fetch('/api/task-management/people'),
+                fetch('/api/task-management/tasks')
+            ]);
+            if (!peopleResponse.ok || !tasksResponse.ok) throw new Error('Unable to load task management data.');
+            peopleDataset = await peopleResponse.json();
+            populatePeople();
+            renderTaskData(await tasksResponse.json());
+        } catch (error) {
+            showTaskError(error.message);
+        }
+    });
+
+    function populatePeople() {
+        fillPeopleSelect('modalManagerSelect', peopleDataset.managers, 'Select Manager');
+        fillPeopleSelect('modalEmployeeSelect', peopleDataset.employees, 'Select Employee');
+        fillPeopleSelect('filterManager', peopleDataset.managers, 'All Managers');
+        fillPeopleSelect('filterAssignee', peopleDataset.employees, 'All Assignees');
+        document.getElementById('metricManagersCount').textContent = peopleDataset.managers.length;
+        document.getElementById('metricEmployeesCount').textContent = peopleDataset.employees.length;
+    }
+
+    function fillPeopleSelect(id, people, placeholder) {
+        const select = document.getElementById(id);
+        select.innerHTML = `<option value="">${placeholder}</option>` + people.map(person =>
+            `<option value="${person.id}">${escapeHtml(person.fullName)} (${escapeHtml(person.employeeCode)})</option>`
+        ).join('');
+    }
+
+    function renderTaskData(data) {
+        taskDataset = data.tasks || [];
+        document.getElementById('metricTotalTasksCount').textContent = data.metrics.totalTasks;
+        document.getElementById('metricOverdueTasksCount').textContent = data.metrics.overdue;
+        filterTasks();
+    }
+
+    function renderTasks(tasks) {
+        const body = document.getElementById('assignmentTableBody');
+        body.innerHTML = tasks.map(task => `<tr>
+            <td><strong>${escapeHtml(task.taskCode)}</strong><br>${escapeHtml(task.title)}</td>
+            <td>${escapeHtml(task.managerName)}<br><small>${escapeHtml(task.managerCode)}</small></td>
+            <td>${escapeHtml(task.assigneeName)}<br><small>${escapeHtml(task.assigneeCode)}</small></td>
+            <td>${escapeHtml(task.priority)}</td><td>${escapeHtml(task.status)}</td><td>${formatDate(task.dueDate)}</td>
+        </tr>`).join('');
+        document.getElementById('tableEmptyState').style.display = tasks.length ? 'none' : 'flex';
+
+        const columns = { 'To Do': 'colToDo', 'In Progress': 'colInProgress', 'In Review': 'colInReview', 'Completed': 'colCompleted' };
+        Object.values(columns).forEach(id => document.getElementById(id).innerHTML = '');
+        tasks.forEach(task => {
+            const column = document.getElementById(columns[task.status] || columns['To Do']);
+            column.insertAdjacentHTML('beforeend', `<div class="task-card">
+                <strong>${escapeHtml(task.title)}</strong><p>${escapeHtml(task.assigneeName)}</p>
+                <small>${escapeHtml(task.priority)} · Due ${formatDate(task.dueDate)}</small></div>`);
+        });
+        document.getElementById('countToDo').textContent = tasks.filter(task => task.status === 'To Do').length;
+        document.getElementById('countInProgress').textContent = tasks.filter(task => task.status === 'In Progress').length;
+        document.getElementById('countInReview').textContent = tasks.filter(task => task.status === 'In Review').length;
+        document.getElementById('countCompleted').textContent = tasks.filter(task => task.status === 'Completed').length;
+    }
 
     function initGantt() {
         const svgElement = document.getElementById("gantt");
@@ -314,11 +378,59 @@
     }
 
     function filterTasks() {
-        // Custom search & filter engine execution logic
+        const term = document.getElementById('taskSearchInput').value.trim().toLowerCase();
+        const managerId = document.getElementById('filterManager').value;
+        const assigneeId = document.getElementById('filterAssignee').value;
+        const priority = document.getElementById('filterPriority').value;
+        renderTasks(taskDataset.filter(task =>
+            (!term || task.title.toLowerCase().includes(term) || task.taskCode.toLowerCase().includes(term)) &&
+            (!managerId || String(task.managerId) === managerId) &&
+            (!assigneeId || String(task.assigneeId) === assigneeId) &&
+            (!priority || task.priority === priority)));
     }
 
-    function submitTaskAssignment() {
-        // Form post/API submit payload standard execution logic
-        closeAssignTaskModal();
+    async function submitTaskAssignment() {
+        const form = document.getElementById('assignTaskForm');
+        if (!form.reportValidity()) return;
+        const button = document.querySelector('.btn-submit');
+        button.disabled = true;
+        try {
+            const response = await fetch('/api/task-management/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': form.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({
+                    title: document.getElementById('taskTitle').value,
+                    managerId: Number(document.getElementById('modalManagerSelect').value),
+                    assigneeId: Number(document.getElementById('modalEmployeeSelect').value),
+                    priority: document.getElementById('taskPriority').value,
+                    dueDate: document.getElementById('taskDueDate').value,
+                    description: document.getElementById('taskDescription').value
+                })
+            });
+            if (!response.ok) {
+                const problem = await response.json();
+                throw new Error(Object.values(problem.errors || {}).flat().join(' ') || 'Task could not be assigned.');
+            }
+            form.reset();
+            document.getElementById('taskPriority').value = 'Medium';
+            closeAssignTaskModal();
+            const tasksResponse = await fetch('/api/task-management/tasks');
+            renderTaskData(await tasksResponse.json());
+        } catch (error) {
+            showTaskError(error.message);
+        } finally {
+            button.disabled = false;
+        }
     }
+
+    function formatDate(value) { return new Date(`${value}T00:00:00`).toLocaleDateString(); }
+    function escapeHtml(value) {
+        const element = document.createElement('div');
+        element.textContent = value || '';
+        return element.innerHTML;
+    }
+    function showTaskError(message) { window.alert(message); }
 </script>

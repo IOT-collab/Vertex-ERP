@@ -16,6 +16,7 @@ namespace VertexERP.Data
         public DbSet<BiometricDevice> BiometricDevices => Set<BiometricDevice>();
         public DbSet<AttendanceLog> AttendanceLogs => Set<AttendanceLog>();
         public DbSet<EmployeeDeviceMapping> EmployeeDeviceMappings => Set<EmployeeDeviceMapping>();
+        public DbSet<WorkTask> WorkTasks => Set<WorkTask>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -96,6 +97,20 @@ namespace VertexERP.Data
                     .WithMany()
                     .HasForeignKey(log => log.EmployeeId)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<WorkTask>(entity =>
+            {
+                entity.ToTable("Tasks");
+                entity.HasIndex(task => task.ManagerId);
+                entity.HasIndex(task => task.AssigneeId);
+                entity.HasIndex(task => new { task.Status, task.DueDate });
+                entity.Property(task => task.CreatedAtUtc).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(task => task.DueDate).HasColumnType("date");
+                entity.HasOne(task => task.Manager).WithMany()
+                    .HasForeignKey(task => task.ManagerId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(task => task.Assignee).WithMany()
+                    .HasForeignKey(task => task.AssigneeId).OnDelete(DeleteBehavior.Restrict);
             });
         }
     }
