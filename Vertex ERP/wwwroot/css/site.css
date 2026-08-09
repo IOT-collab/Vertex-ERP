@@ -520,3 +520,24 @@ hr,
         border-radius: 18px !important;
     }
 }
+/* Employee accounts only see their self-service workspace. */
+body.employee-self-service-only .sidebar,
+body.employee-self-service-only .topbar,
+body.employee-self-service-only .sidebar-toggle-check,
+body.employee-self-service-only .sidebar-overlay {
+    display: none !important;
+}
+
+body.employee-self-service-only .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    min-height: 100vh;
+}
+
+body.employee-self-service-only .page-content {
+    padding-top: 0 !important;
+}
+
+body.employee-self-service-only .common-back-nav {
+    display: none !important;
+}

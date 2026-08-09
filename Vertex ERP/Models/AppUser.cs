@@ -27,6 +27,10 @@ namespace VertexERP.Models
 
         public bool IsActive { get; set; } = true;
 
+        public int? EmployeeId { get; set; }
+        public Employee? Employee { get; set; }
+        public bool MustChangePassword { get; set; } = true;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

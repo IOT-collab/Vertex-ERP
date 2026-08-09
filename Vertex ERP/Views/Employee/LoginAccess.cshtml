@@ -1,0 +1,36 @@
+@model VertexERP.Models.EmployeeLoginAccessViewModel
+@{
+    ViewData["Title"] = "Employee Login Access";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/AddEmpHrm.css" rel="stylesheet" />
+
+<div class="hrms-page">
+    <div class="page-header">
+        <div class="header-text">
+            <h2>@(Model.HasExistingAccount ? "Reset Employee Login" : "Create Employee Login")</h2>
+            <p>@Model.EmployeeName · @Model.EmployeeCode</p>
+        </div>
+    </div>
+    <div class="form-container-wrapper">
+        <form asp-action="LoginAccess" method="post" class="employee-onboarding-form">
+            @Html.AntiForgeryToken()
+            <input asp-for="EmployeeId" type="hidden" />
+            <input asp-for="EmployeeCode" type="hidden" />
+            <input asp-for="EmployeeName" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+            <div class="form-main-section">
+                <div class="section-divider"><span>Login &amp; Account Access</span></div>
+                <div class="form-row">
+                    <div class="form-group"><label asp-for="Username"></label><input asp-for="Username" autocomplete="off" /><span asp-validation-for="Username" class="field-validation"></span></div>
+                    <div class="form-group"><label asp-for="TemporaryPassword"></label><input asp-for="TemporaryPassword" type="text" autocomplete="new-password" /><span asp-validation-for="TemporaryPassword" class="field-validation"></span></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label asp-for="ConfirmPassword"></label><input asp-for="ConfirmPassword" type="password" autocomplete="new-password" /><span asp-validation-for="ConfirmPassword" class="field-validation"></span></div>
+                    <div class="form-group"><label><input asp-for="MustChangePassword" type="checkbox" /> Employee must change password on first login</label></div>
+                </div>
+            </div>
+            <div class="form-actions-footer"><a asp-action="Index" class="btn-cancel">Cancel</a><button type="submit" class="btn-submit">Save Login Credentials</button></div>
+        </form>
+    </div>
+</div>

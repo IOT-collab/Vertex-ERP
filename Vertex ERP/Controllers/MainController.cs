@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
 using VertexERP.Models;
 using VertexERP.Services;
@@ -165,7 +166,7 @@ namespace VertexERP.Controllers
         [Authorize(Roles = "Employee,User")]
         public IActionResult EmployeeHome()
         {
-            return View();
+            return RedirectToAction(nameof(Employees));
         }
 
         [Authorize(Roles = "Admin,HR")]
@@ -220,10 +221,42 @@ namespace VertexERP.Controllers
             return Json(new { reply });
         }
 
-        [Authorize(Roles = "Admin,HR")]
-        public IActionResult Employees()
+        [Authorize(Roles = "Employee,User,Admin,HR")]
+        public async Task<IActionResult> Employees(int? id)
         {
-            return View();
+            Employee? employee;
+            if (User.IsInRole("Employee") || User.IsInRole("User"))
+            {
+                var userIdText = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var linkedEmployeeId = int.TryParse(userIdText, out var userId)
+                    ? await _dbContext.AppUsers.AsNoTracking()
+                        .Where(user => user.Id == userId)
+                        .Select(user => user.EmployeeId)
+                        .FirstOrDefaultAsync()
+                    : null;
+                var username = (User.FindFirstValue("username") ?? User.Identity?.Name ?? string.Empty).Trim().ToLowerInvariant();
+                var fullName = (User.FindFirstValue(ClaimTypes.Name) ?? string.Empty).Trim().ToLowerInvariant();
+                employee = await _dbContext.Employees.AsNoTracking()
+                    .Include(item => item.ReportingManager)
+                    .FirstOrDefaultAsync(item =>
+                        (linkedEmployeeId.HasValue && item.Id == linkedEmployeeId.Value) ||
+                        item.Email.ToLower() == username ||
+                        item.EmployeeCode.ToLower() == username ||
+                        item.FullName.ToLower() == fullName);
+            }
+            else
+            {
+                employee = id.HasValue
+                    ? await _dbContext.Employees.AsNoTracking()
+                        .Include(item => item.ReportingManager)
+                        .FirstOrDefaultAsync(item => item.Id == id.Value)
+                    : await _dbContext.Employees.AsNoTracking()
+                        .Include(item => item.ReportingManager)
+                        .OrderByDescending(item => item.UpdatedDate ?? item.CreatedDate)
+                        .FirstOrDefaultAsync();
+            }
+
+            return View(employee == null ? new EmployeeSelfServiceViewModel() : EmployeeSelfServiceViewModel.FromEmployee(employee));
         }
 
         [Authorize(Roles = "Admin,HR")]
@@ -260,7 +293,7 @@ namespace VertexERP.Controllers
         [Authorize(Roles = "Admin,HR")]
         public IActionResult AddEmpHrm()
         {
-            return RedirectToAction("Create", "Employee");
+            return RedirectToAction("HrAddEmp", "Hr");
         }
 
         [Authorize(Roles = "Admin,HR")]

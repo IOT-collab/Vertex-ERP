@@ -10,7 +10,7 @@
     <link href="~/css/common-ui.css" rel="stylesheet" asp-append-version="true" />
     <link href="~/css/common-back-button.css" rel="stylesheet" asp-append-version="true" />
 </head>
-<body>
+<body class="@((User.IsInRole("Employee") || User.IsInRole("User")) ? "employee-self-service-only" : "")">
     @{
         var currentRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "User";
         var currentName = User.Identity?.Name ?? currentRole;

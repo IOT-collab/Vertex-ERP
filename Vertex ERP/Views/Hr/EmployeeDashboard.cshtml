@@ -9,7 +9,7 @@
     <div class="dashboard-header-card">
         <div class="header-left"><div><h2>Employee Management</h2><p>Manage employees, departments and system users efficiently.</p></div></div>
         <div class="header-right">
-            <a asp-controller="Employee" asp-action="Create" class="btn-primary-glow" id="addEmployeeBtn"><i class="fa-solid fa-user-plus"></i> Add Employee</a>
+            <a asp-controller="Hr" asp-action="HrAddEmp" class="btn-primary-glow" id="addEmployeeBtn"><i class="fa-solid fa-user-plus"></i> Add Employee</a>
         </div>
     </div>
 
@@ -63,6 +63,8 @@
                             <td class="text-end">
                                 <div class="action-buttons">
                                     <a asp-controller="Employee" asp-action="Details" asp-route-id="@employee.Id" class="action-btn" title="View employee"><i class="fa-solid fa-eye"></i></a>
+                                    <a asp-controller="Main" asp-action="Employees" asp-route-id="@employee.Id" class="action-btn" title="Open employee self-service profile"><i class="fa-solid fa-id-card"></i></a>
+                                    <a asp-controller="Employee" asp-action="LoginAccess" asp-route-id="@employee.Id" class="action-btn" title="Create or reset employee login"><i class="fa-solid fa-key"></i></a>
                                     <a asp-controller="Employee" asp-action="Edit" asp-route-id="@employee.Id" class="action-btn edit-action" title="Edit employee"><i class="fa-solid fa-pen-to-square"></i></a>
                                     <a asp-controller="Employee" asp-action="Delete" asp-route-id="@employee.Id" class="action-btn delete-action" title="Delete employee"><i class="fa-solid fa-user-slash"></i></a>
                                 </div>

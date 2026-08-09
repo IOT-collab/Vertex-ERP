@@ -16,6 +16,76 @@ public class EmployeeDirectoryViewModel
     public IReadOnlyList<string> Departments { get; init; } = Array.Empty<string>();
 }
 
+public class EmployeeSelfServiceViewModel
+{
+    public int Id { get; init; }
+    public string FullName { get; init; } = string.Empty;
+    public string Designation { get; init; } = string.Empty;
+    public string Department { get; init; } = string.Empty;
+    public string Initials { get; init; } = string.Empty;
+    public string Status { get; init; } = "Active";
+    public string ShiftTime { get; init; } = string.Empty;
+    public string LeaveBalanceDays { get; init; } = string.Empty;
+    public string LoggedHoursThisMonth { get; init; } = string.Empty;
+    public string EmploymentType { get; init; } = string.Empty;
+    public string EmployeeId { get; init; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
+    public string Phone { get; init; } = string.Empty;
+    public string JoiningDate { get; init; } = string.Empty;
+    public string ManagerName { get; init; } = string.Empty;
+    public string CasualLeaveCount { get; init; } = string.Empty;
+    public string SickLeaveCount { get; init; } = string.Empty;
+    public string EarnedLeaveCount { get; init; } = string.Empty;
+    public string BankName { get; init; } = string.Empty;
+    public string AccountNumber { get; init; } = string.Empty;
+    public string RoutingCode { get; init; } = string.Empty;
+    public string PhotoPath { get; init; } = string.Empty;
+
+    public static EmployeeSelfServiceViewModel FromEmployee(Employee employee)
+    {
+        var firstInitial = employee.FirstName.FirstOrDefault();
+        var lastInitial = employee.LastName?.FirstOrDefault() ?? '\0';
+        return new EmployeeSelfServiceViewModel
+        {
+            Id = employee.Id,
+            FullName = employee.FullName,
+            Designation = employee.Designation,
+            Department = employee.Department,
+            Initials = lastInitial == '\0' ? firstInitial.ToString().ToUpperInvariant() : $"{firstInitial}{lastInitial}".ToUpperInvariant(),
+            Status = employee.EmployeeStatus,
+            EmploymentType = employee.EmploymentType,
+            EmployeeId = employee.EmployeeCode,
+            Email = employee.Email,
+            Phone = employee.PhoneNumber,
+            JoiningDate = employee.JoiningDate.ToString("dd MMM yyyy"),
+            ManagerName = employee.ReportingManager?.FullName ?? "Not assigned",
+            PhotoPath = employee.PhotoPath ?? string.Empty
+        };
+    }
+}
+
+public class EmployeeLoginAccessViewModel
+{
+    public int EmployeeId { get; set; }
+    public string EmployeeCode { get; set; } = string.Empty;
+    public string EmployeeName { get; set; } = string.Empty;
+
+    [Required, StringLength(50, MinimumLength = 3)]
+    [RegularExpression(@"^[A-Za-z0-9._-]+$", ErrorMessage = "Username can contain letters, numbers, dot, underscore and hyphen only.")]
+    public string Username { get; set; } = string.Empty;
+
+    [Required, StringLength(100, MinimumLength = 8)]
+    [Display(Name = "Temporary Password")]
+    public string TemporaryPassword { get; set; } = string.Empty;
+
+    [Required, Compare(nameof(TemporaryPassword), ErrorMessage = "Password and confirmation do not match.")]
+    [Display(Name = "Confirm Password")]
+    public string ConfirmPassword { get; set; } = string.Empty;
+
+    public bool MustChangePassword { get; set; } = true;
+    public bool HasExistingAccount { get; set; }
+}
+
 public class EmployeeFormViewModel : IValidatableObject
 {
     public int Id { get; set; }
@@ -95,7 +165,7 @@ public class EmployeeFormViewModel : IValidatableObject
             DateOfBirth = null;
         }
         if (DateOfBirth.HasValue && DateOfBirth.Value >= today)
-            yield return new ValidationResult("Date of Birth must be in the past.", new[] { nameof(DateOfBirthText) });
+            yield return new ValidationResult("Date of Birth must be in the past.", new[] { nameof(DateOfBirth) });
         if (JoiningDate > today)
             yield return new ValidationResult("Joining date cannot be in the future.", new[] { nameof(JoiningDate) });
         if (DateOfBirth.HasValue && JoiningDate <= DateOfBirth.Value)
@@ -166,25 +236,30 @@ public class HrAddEmployeeViewModel : IValidatableObject
     [Display(Name = "Employee Photo")]
     public IFormFile? EmployeePhoto { get; set; }
 
+    [Required, StringLength(50, MinimumLength = 3)]
+    [RegularExpression(@"^[A-Za-z0-9._-]+$", ErrorMessage = "Username can contain letters, numbers, dot, underscore and hyphen only.")]
+    [Display(Name = "Login Username")]
+    public string LoginUsername { get; set; } = string.Empty;
+
+    [Required, StringLength(100, MinimumLength = 8)]
+    [Display(Name = "Temporary Password")]
+    public string TemporaryPassword { get; set; } = string.Empty;
+
+    [Required, Compare(nameof(TemporaryPassword), ErrorMessage = "Password and confirmation do not match.")]
+    [Display(Name = "Confirm Password")]
+    public string ConfirmPassword { get; set; } = string.Empty;
+
+    [Display(Name = "Employee must change password on first login")]
+    public bool MustChangePassword { get; set; } = true;
+
     public IReadOnlyList<Employee> Managers { get; set; } = Array.Empty<Employee>();
     public IReadOnlyList<Department> Departments { get; set; } = Array.Empty<Department>();
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         var today = DateOnly.FromDateTime(DateTime.Today);
-        if (!string.IsNullOrWhiteSpace(DateOfBirthText))
-        {
-            if (!DateOnly.TryParseExact(DateOfBirthText.Trim(), "dd/MM/yyyy", out var parsedDate))
-                yield return new ValidationResult("Date of Birth must be a valid date in DD/MM/YYYY format.", new[] { nameof(DateOfBirthText) });
-            else
-                DateOfBirth = parsedDate;
-        }
-        else
-        {
-            DateOfBirth = null;
-        }
         if (DateOfBirth.HasValue && DateOfBirth.Value >= today)
-            yield return new ValidationResult("Date of Birth must be in the past.", new[] { nameof(DateOfBirthText) });
+            yield return new ValidationResult("Date of Birth must be in the past.", new[] { nameof(DateOfBirth) });
         if (JoiningDate > today)
             yield return new ValidationResult("Joining date cannot be in the future.", new[] { nameof(JoiningDate) });
         if (DateOfBirth.HasValue && JoiningDate <= DateOfBirth.Value)

@@ -1050,6 +1050,46 @@ body {
 }
 
 /* Server-side validation for the Add Employee form */
+.credential-input-row {
+    display: flex;
+    gap: 10px;
+}
+
+.credential-input-row input {
+    flex: 1;
+    min-width: 0;
+}
+
+.credential-generate-btn {
+    border: 1px solid #3b82f6;
+    border-radius: 8px;
+    background: rgba(59, 130, 246, .14);
+    color: #93c5fd;
+    padding: 0 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.account-option-group {
+    justify-content: center;
+}
+
+.account-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.account-checkbox input {
+    width: 18px;
+    height: 18px;
+}
+
+.account-option-group small {
+    color: #94a3b8;
+}
+
 .field-validation,
 .validation-summary {
     color: #dc2626;

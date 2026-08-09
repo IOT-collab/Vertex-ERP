@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
 using VertexERP.Models;
+using VertexERP.Services;
 
 namespace VertexERP.Controllers;
 
@@ -75,10 +76,61 @@ public class EmployeeController : Controller
     [HttpGet]
     public IActionResult Create()
     {
-        return View("~/Views/Main/AddEmpHrm.cshtml", PopulateManagers(new EmployeeFormViewModel
+        return RedirectToAction("HrAddEmp", "Hr");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> LoginAccess(int id)
+    {
+        var employee = await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(item => item.Id == id);
+        if (employee == null) return NotFound();
+        var account = await _dbContext.AppUsers.AsNoTracking().FirstOrDefaultAsync(user => user.EmployeeId == id);
+        return View(new EmployeeLoginAccessViewModel
         {
-            EmployeeCode = GenerateEmployeeCode()
-        }));
+            EmployeeId = employee.Id,
+            EmployeeCode = employee.EmployeeCode,
+            EmployeeName = employee.FullName,
+            Username = account?.Username ?? employee.EmployeeCode.ToLowerInvariant(),
+            MustChangePassword = account?.MustChangePassword ?? true,
+            HasExistingAccount = account != null
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> LoginAccess(EmployeeLoginAccessViewModel model)
+    {
+        var employee = await _dbContext.Employees.FirstOrDefaultAsync(item => item.Id == model.EmployeeId);
+        if (employee == null) return NotFound();
+        var normalizedUsername = DatabaseInitializer.NormalizeUsername(model.Username);
+        if (await _dbContext.AppUsers.AnyAsync(user => user.EmployeeId != model.EmployeeId && user.NormalizedUsername == normalizedUsername))
+            ModelState.AddModelError(nameof(model.Username), "Login username already exists.");
+
+        if (!ModelState.IsValid)
+        {
+            model.EmployeeCode = employee.EmployeeCode;
+            model.EmployeeName = employee.FullName;
+            model.HasExistingAccount = await _dbContext.AppUsers.AnyAsync(user => user.EmployeeId == model.EmployeeId);
+            return View(model);
+        }
+
+        var account = await _dbContext.AppUsers.FirstOrDefaultAsync(user => user.EmployeeId == model.EmployeeId);
+        if (account == null)
+        {
+            account = new AppUser { EmployeeId = employee.Id, CreatedAt = DateTime.UtcNow };
+            _dbContext.AppUsers.Add(account);
+        }
+        account.Username = model.Username.Trim();
+        account.NormalizedUsername = normalizedUsername;
+        account.PasswordHash = PasswordHashService.HashPassword(model.TemporaryPassword);
+        account.Role = "Employee";
+        account.FullName = employee.FullName;
+        account.IsActive = true;
+        account.MustChangePassword = model.MustChangePassword;
+        await _dbContext.SaveChangesAsync();
+
+        TempData["EmployeeMessage"] = $"Login credentials for {employee.EmployeeCode} saved successfully.";
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpPost]

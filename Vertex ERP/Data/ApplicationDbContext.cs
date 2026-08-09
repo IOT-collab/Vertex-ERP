@@ -27,7 +27,12 @@ namespace VertexERP.Data
             {
                 entity.ToTable("Users");
                 entity.HasIndex(user => user.NormalizedUsername).IsUnique();
+                entity.HasIndex(user => user.EmployeeId).IsUnique();
                 entity.Property(user => user.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.HasOne(user => user.Employee)
+                    .WithOne()
+                    .HasForeignKey<AppUser>(user => user.EmployeeId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<Employee>(entity =>

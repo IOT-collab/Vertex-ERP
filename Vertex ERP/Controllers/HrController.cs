@@ -3,6 +3,7 @@
 using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
 using VertexERP.Models;
+using VertexERP.Services;
 
 namespace Vertex_ERP.Controllers
 {
@@ -253,11 +254,20 @@ namespace Vertex_ERP.Controllers
         {
             var employeeCode = model.EmployeeId.Trim().ToUpperInvariant();
             var email = model.Email.Trim().ToLowerInvariant();
+            var loginUsername = model.LoginUsername.Trim();
+            var normalizedUsername = DatabaseInitializer.NormalizeUsername(loginUsername);
 
             if (await _dbContext.Employees.AnyAsync(employee => employee.EmployeeCode == employeeCode))
                 ModelState.AddModelError(nameof(model.EmployeeId), "Employee ID already exists.");
             if (await _dbContext.Employees.AnyAsync(employee => employee.Email == email))
                 ModelState.AddModelError(nameof(model.Email), "Email address already exists.");
+            if (await _dbContext.Employees.AnyAsync(employee => employee.PhoneNumber == model.Phone.Trim()))
+                ModelState.AddModelError(nameof(model.Phone), "Mobile Number already exists.");
+            if (await _dbContext.AppUsers.AnyAsync(user => user.NormalizedUsername == normalizedUsername))
+                ModelState.AddModelError(nameof(model.LoginUsername), "Login username already exists.");
+            if (model.ReportingManagerId.HasValue &&
+                !await _dbContext.Employees.AnyAsync(employee => employee.Id == model.ReportingManagerId.Value && employee.IsActive))
+                ModelState.AddModelError(nameof(model.ReportingManagerId), "Please select an active reporting manager.");
 
             var selectedDepartment = model.DepartmentId.HasValue
                 ? await _dbContext.Departments.AsNoTracking().FirstOrDefaultAsync(department => department.Id == model.DepartmentId.Value && department.IsActive)
@@ -307,8 +317,20 @@ namespace Vertex_ERP.Controllers
                 };
 
                 _dbContext.Employees.Add(employee);
+                _dbContext.AppUsers.Add(new AppUser
+                {
+                    Username = loginUsername,
+                    NormalizedUsername = normalizedUsername,
+                    PasswordHash = PasswordHashService.HashPassword(model.TemporaryPassword),
+                    Role = "Employee",
+                    FullName = employee.FullName,
+                    IsActive = true,
+                    Employee = employee,
+                    MustChangePassword = model.MustChangePassword,
+                    CreatedAt = DateTime.UtcNow
+                });
                 await _dbContext.SaveChangesAsync();
-                TempData["EmployeeMessage"] = "Employee added successfully.";
+                TempData["EmployeeMessage"] = $"Employee and login account '{loginUsername}' added successfully.";
                 return RedirectToAction("Index", "Employee");
             }
             catch (DbUpdateException exception)
@@ -406,6 +428,7 @@ namespace Vertex_ERP.Controllers
         }
 
         private static string? Clean(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
 
     }
 }
