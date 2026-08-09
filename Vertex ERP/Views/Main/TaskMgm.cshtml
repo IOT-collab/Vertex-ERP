@@ -69,7 +69,7 @@
         </div>
     </div>
 
-    <!-- MANAGER TO EMPLOYEE ASSIGNMENTS TABLE -->
+        <!-- MANAGER TO EMPLOYEE ASSIGNMENTS TABLE -->
     <div class="assignment-overview-panel">
         <div class="panel-header">
             <h3><i class="fas fa-sitemap text-accent"></i> Manager to Employee Task Mapping</h3>
@@ -85,6 +85,7 @@
                         <th>Priority</th>
                         <th>Status</th>
                         <th>Due Date</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="assignmentTableBody">
@@ -253,7 +254,7 @@
     }
 
     function openAssignTaskModal() { document.getElementById('assignTaskModal').classList.add('active'); }
-    function closeAssignTaskModal() { document.getElementById('assignTaskModal').classList.remove('active'); }
+    function closeAssignTaskModal() { document.getElementById('assignTaskModal').classList.remove('active'); resetModalToCreate(); }
 
     let ganttChart = null;
     let taskDataset = [];
@@ -304,6 +305,10 @@
             <td>${escapeHtml(task.managerName)}<br><small>${escapeHtml(task.managerCode)}</small></td>
             <td>${escapeHtml(task.assigneeName)}<br><small>${escapeHtml(task.assigneeCode)}</small></td>
             <td>${escapeHtml(task.priority)}</td><td>${escapeHtml(task.status)}</td><td>${formatDate(task.dueDate)}</td>
+            <td>
+                <button type="button" class="btn-action-update" title="Edit Task" onclick="openUpdateTaskModal(${task.id})"><i class="fas fa-edit"></i> Update</button>
+                <button type="button" class="btn-action-delete" title="Delete Task" onclick="deleteTask(${task.id})"><i class="fas fa-trash"></i> Delete</button>
+            </td>
         </tr>`).join('');
         document.getElementById('tableEmptyState').style.display = tasks.length ? 'none' : 'flex';
 
@@ -433,4 +438,97 @@
         return element.innerHTML;
     }
     function showTaskError(message) { window.alert(message); }
+
+    let currentEditingTaskId = null;
+
+    async function openUpdateTaskModal(taskId) {
+        const task = taskDataset.find(t => t.id === taskId);
+        if (!task) {
+            showTaskError('Task not found.');
+            return;
+        }
+
+        currentEditingTaskId = taskId;
+        document.getElementById('taskTitle').value = task.title;
+        document.getElementById('modalManagerSelect').value = task.managerId;
+        document.getElementById('modalEmployeeSelect').value = task.assigneeId;
+        document.getElementById('taskPriority').value = task.priority;
+        document.getElementById('taskDueDate').value = task.dueDate;
+        document.getElementById('taskDescription').value = task.description || '';
+
+        // Change modal title and button text for update
+        document.querySelector('.modal-header h3').innerHTML = '<i class="fas fa-edit text-accent"></i> Edit Task';
+        document.querySelector('.btn-submit').textContent = 'Update Task';
+        document.querySelector('.btn-submit').onclick = submitTaskUpdate;
+
+        openAssignTaskModal();
+    }
+
+    async function submitTaskUpdate() {
+        const form = document.getElementById('assignTaskForm');
+        if (!form.reportValidity()) return;
+        const button = document.querySelector('.btn-submit');
+        button.disabled = true;
+        try {
+            const response = await fetch(`/api/task-management/tasks/${currentEditingTaskId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': form.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({
+                    id: currentEditingTaskId,
+                    title: document.getElementById('taskTitle').value,
+                    managerId: Number(document.getElementById('modalManagerSelect').value),
+                    assigneeId: Number(document.getElementById('modalEmployeeSelect').value),
+                    priority: document.getElementById('taskPriority').value,
+                    dueDate: document.getElementById('taskDueDate').value,
+                    description: document.getElementById('taskDescription').value
+                })
+            });
+            if (!response.ok) {
+                const problem = await response.json();
+                throw new Error(Object.values(problem.errors || {}).flat().join(' ') || 'Task could not be updated.');
+            }
+            form.reset();
+            document.getElementById('taskPriority').value = 'Medium';
+            closeAssignTaskModal();
+            resetModalToCreate();
+            const tasksResponse = await fetch('/api/task-management/tasks');
+            renderTaskData(await tasksResponse.json());
+        } catch (error) {
+            showTaskError(error.message);
+        } finally {
+            button.disabled = false;
+            currentEditingTaskId = null;
+        }
+    }
+
+    async function deleteTask(taskId) {
+        if (!confirm('Are you sure you want to delete this task?')) return;
+        try {
+            const form = document.getElementById('assignTaskForm');
+            const response = await fetch(`/api/task-management/tasks/${taskId}`, {
+                method: 'DELETE',
+                headers: {
+                    'RequestVerificationToken': form.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            });
+            if (!response.ok) {
+                const problem = await response.json();
+                throw new Error(problem.message || 'Task could not be deleted.');
+            }
+            const tasksResponse = await fetch('/api/task-management/tasks');
+            renderTaskData(await tasksResponse.json());
+        } catch (error) {
+            showTaskError(error.message);
+        }
+    }
+
+    function resetModalToCreate() {
+        document.querySelector('.modal-header h3').innerHTML = '<i class="fas fa-plus-circle text-accent"></i> Assign New Task';
+        document.querySelector('.btn-submit').textContent = 'Assign Task';
+        document.querySelector('.btn-submit').onclick = submitTaskAssignment;
+        currentEditingTaskId = null;
+    }
 </script>

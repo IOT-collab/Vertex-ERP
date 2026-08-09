@@ -526,6 +526,47 @@
     cursor: pointer;
 }
 
+/* Action Buttons in Table */
+.btn-action-update,
+.btn-action-delete {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: 6px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-action-update {
+    background: rgba(37, 99, 235, 0.15);
+    color: var(--accent-blue);
+    border: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+    .btn-action-update:hover {
+        background: rgba(37, 99, 235, 0.25);
+        border-color: var(--accent-blue);
+        transform: translateY(-1px);
+    }
+
+.btn-action-delete {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--accent-red);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+    .btn-action-delete:hover {
+        background: rgba(239, 68, 68, 0.25);
+        border-color: var(--accent-red);
+        transform: translateY(-1px);
+    }
+
 .text-red {
     color: var(--accent-red);
 }

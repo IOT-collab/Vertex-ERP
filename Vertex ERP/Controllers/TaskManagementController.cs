@@ -127,4 +127,62 @@ public class TaskManagementController : ControllerBase
         await _db.SaveChangesAsync(cancellationToken);
         return CreatedAtAction(nameof(GetTasks), new { id = task.Id }, new { task.Id, message = "Task assigned successfully." });
     }
+
+    [HttpPut("tasks/{id}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateTask(int id, UpdateWorkTaskRequest request, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+        if (request.Id != id)
+            return BadRequest("Task ID mismatch.");
+        if (!Priorities.Contains(request.Priority, StringComparer.OrdinalIgnoreCase))
+            ModelState.AddModelError(nameof(request.Priority), "Priority must be Low, Medium, or High.");
+        if (request.DueDate < DateOnly.FromDateTime(DateTime.Today))
+            ModelState.AddModelError(nameof(request.DueDate), "Due date cannot be in the past.");
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
+        var task = await _db.WorkTasks.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+        if (task == null)
+            return NotFound("Task not found.");
+
+        var managerId = request.ManagerId!.Value;
+        var assigneeId = request.AssigneeId!.Value;
+        var people = await _db.Employees
+            .Where(employee => employee.IsActive && (employee.Id == managerId || employee.Id == assigneeId))
+            .Select(employee => new { employee.Id })
+            .ToListAsync(cancellationToken);
+
+        if (people.All(employee => employee.Id != managerId))
+            ModelState.AddModelError(nameof(request.ManagerId), "The selected manager is not an active employee.");
+        if (people.All(employee => employee.Id != assigneeId))
+            ModelState.AddModelError(nameof(request.AssigneeId), "The selected employee is not active.");
+        if (managerId == assigneeId)
+            ModelState.AddModelError(nameof(request.AssigneeId), "Manager and assignee must be different employees.");
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
+
+        task.Title = request.Title.Trim();
+        task.Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim();
+        task.ManagerId = managerId;
+        task.AssigneeId = assigneeId;
+        task.Priority = Priorities.First(priority => priority.Equals(request.Priority, StringComparison.OrdinalIgnoreCase));
+        task.DueDate = request.DueDate!.Value;
+        task.UpdatedAtUtc = DateTime.UtcNow;
+
+        _db.WorkTasks.Update(task);
+        await _db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "Task updated successfully." });
+    }
+
+    [HttpDelete("tasks/{id}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteTask(int id, CancellationToken cancellationToken)
+    {
+        var task = await _db.WorkTasks.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+        if (task == null)
+            return NotFound("Task not found.");
+
+        _db.WorkTasks.Remove(task);
+        await _db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "Task deleted successfully." });
+    }
 }
