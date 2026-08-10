@@ -200,23 +200,33 @@ namespace Vertex_ERP.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteDepartmentConfirmed(int id)
         {
-            var department = await _dbContext.Departments.FirstOrDefaultAsync(item => item.Id == id);
-            if (department == null) return NotFound();
-            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
-            var assignedEmployees = await _dbContext.Employees
-                .Where(employee => employee.DepartmentId == id)
-                .ToListAsync();
-            foreach (var employee in assignedEmployees)
-            {
-                employee.DepartmentId = null;
-                employee.Department = "Unassigned";
-                employee.UpdatedDate = DateTime.UtcNow;
-            }
+            var departmentFound = false;
+            var executionStrategy = _dbContext.Database.CreateExecutionStrategy();
 
-            await _dbContext.SaveChangesAsync();
-            _dbContext.Departments.Remove(department);
-            await _dbContext.SaveChangesAsync();
-            await transaction.CommitAsync();
+            await executionStrategy.ExecuteAsync(async () =>
+            {
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+                var department = await _dbContext.Departments.FirstOrDefaultAsync(item => item.Id == id);
+                if (department == null) return;
+
+                departmentFound = true;
+                var assignedEmployees = await _dbContext.Employees
+                    .Where(employee => employee.DepartmentId == id)
+                    .ToListAsync();
+                foreach (var employee in assignedEmployees)
+                {
+                    employee.DepartmentId = null;
+                    employee.Department = "Unassigned";
+                    employee.UpdatedDate = DateTime.UtcNow;
+                }
+
+                await _dbContext.SaveChangesAsync();
+                _dbContext.Departments.Remove(department);
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+            });
+
+            if (!departmentFound) return NotFound();
             TempData["DepartmentMessage"] = "Department deleted successfully.";
             return RedirectToAction(nameof(Department));
         }
@@ -252,12 +262,12 @@ namespace Vertex_ERP.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
         {
-            var employeeCode = model.EmployeeId.Trim().ToUpperInvariant();
+            var employeeCode = model.EmployeeId.Trim();
             var email = model.Email.Trim().ToLowerInvariant();
             var loginUsername = model.LoginUsername.Trim();
             var normalizedUsername = DatabaseInitializer.NormalizeUsername(loginUsername);
 
-            if (await _dbContext.Employees.AnyAsync(employee => employee.EmployeeCode == employeeCode))
+            if (await _dbContext.Employees.AnyAsync(employee => employee.EmployeeCode.ToLower() == employeeCode.ToLower()))
                 ModelState.AddModelError(nameof(model.EmployeeId), "Employee ID already exists.");
             if (await _dbContext.Employees.AnyAsync(employee => employee.Email == email))
                 ModelState.AddModelError(nameof(model.Email), "Email address already exists.");

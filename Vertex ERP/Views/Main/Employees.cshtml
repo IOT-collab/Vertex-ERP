@@ -29,16 +29,19 @@
     var accountNumber = Model?.AccountNumber ?? "";
     var routingCode = Model?.RoutingCode ?? "";
 }
-<link href="~/css/employee11.css" rel="stylesheet" />
+<link href="~/css/employee11.css" rel="stylesheet" asp-append-version="true" />
 
 <div class="emp-dash-container">
 
-    <nav class="common-back-nav" aria-label="Page navigation">
-        <button type="button" class="common-back-button" onclick="window.history.back()" aria-label="Go Back">
-            <svg class="common-back-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
-            <span>Back</span>
-        </button>
-    </nav>
+    @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+    {
+        <nav class="common-back-nav" aria-label="Page navigation">
+            <button type="button" class="common-back-button" onclick="window.history.back()" aria-label="Go Back">
+                <svg class="common-back-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                <span>Back</span>
+            </button>
+        </nav>
+    }
 
     <!-- NAVIGATION BAR -->
     <div class="emp-nav-header">
@@ -89,6 +92,12 @@
             <button type="button" class="btn btn-secondary" onclick="openModal('raiseQueryModal')">
                 <i class="fa-solid fa-circle-question"></i> Raise Query
             </button>
+            @if (User.IsInRole("Employee"))
+            {
+                <a asp-controller="Main" asp-action="Logout" class="btn employee-dashboard-logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            }
         </div>
     </div>
 
@@ -433,16 +442,22 @@
 
     // --- PUNCH IN / OUT TOGGLE SCRIPT ---
     let isPunchedIn = false;
+    let punchInTime = null;
     function togglePunch() {
-        isPunchedIn = !isPunchedIn;
         let punchBtn = document.getElementById('punchBtn');
-        if (isPunchedIn) {
+        if (!isPunchedIn) {
+            isPunchedIn = true;
+            punchInTime = new Date();
             punchBtn.innerHTML = '<i class="fa-solid fa-fingerprint"></i> Punch Out';
             punchBtn.style.background = 'var(--accent-red)';
             setAttendance(true);
         } else {
+            if (!window.confirm('Are you sure you want to punch out?')) return;
+            isPunchedIn = false;
+            const punchOutTime = new Date();
             punchBtn.innerHTML = '<i class="fa-solid fa-fingerprint"></i> Punch In';
             punchBtn.style.background = 'var(--accent-blue)';
+            completeAttendance(punchOutTime);
         }
     }
 
@@ -452,10 +467,17 @@
         const icon = document.getElementById('attendanceIcon');
         const card = document.getElementById('attendanceCard');
         value.textContent = isPresent ? 'Present' : 'Absent';
-        hint.textContent = isPresent ? `Punched in at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Not punched in today';
+        hint.textContent = isPresent ? `Punched in at ${punchInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Not punched in today';
         icon.className = `stat-icon ${isPresent ? 'icon-green' : 'icon-red'}`;
         icon.innerHTML = `<i class="fa-solid ${isPresent ? 'fa-user-check' : 'fa-user-clock'}"></i>`;
         card.classList.toggle('is-present', isPresent);
+    }
+
+    function completeAttendance(punchOutTime) {
+        const value = document.getElementById('todayAttendance');
+        const hint = document.getElementById('attendanceHint');
+        value.textContent = 'Present';
+        hint.textContent = `Punch in: ${punchInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Punch out: ${punchOutTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
     }
 
     // --- GEOLOCATION SCRIPT ---

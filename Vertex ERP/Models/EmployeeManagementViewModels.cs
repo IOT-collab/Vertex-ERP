@@ -90,8 +90,8 @@ public class EmployeeFormViewModel : IValidatableObject
 {
     public int Id { get; set; }
 
-    [Required, StringLength(30), RegularExpression(@"^Vertex-[0-9]{2,}$", ErrorMessage = "Employee Code is invalid.")]
-    [Display(Name = "Employee Code")]
+    [Required(ErrorMessage = "Employee ID is required."), StringLength(30, ErrorMessage = "Employee ID cannot exceed 30 characters.")]
+    [Display(Name = "Employee ID")]
     public string EmployeeCode { get; set; } = string.Empty;
 
     [Required, StringLength(60)]
@@ -117,6 +117,12 @@ public class EmployeeFormViewModel : IValidatableObject
 
     public string? Gender { get; set; }
 
+    [StringLength(20), Display(Name = "Marital Status")]
+    public string? MaritalStatus { get; set; }
+
+    [Phone, StringLength(20), Display(Name = "Emergency Contact")]
+    public string? EmergencyContact { get; set; }
+
     [StringLength(300)]
     public string? Address { get; set; }
 
@@ -125,6 +131,18 @@ public class EmployeeFormViewModel : IValidatableObject
 
     [StringLength(80)]
     public string? State { get; set; }
+
+    [RegularExpression(@"^[0-9]{6}$", ErrorMessage = "PIN must contain exactly 6 digits.")]
+    [Display(Name = "PIN")]
+    public string? PinCode { get; set; }
+
+    [StringLength(120), Display(Name = "Work Location")]
+    public string? WorkLocation { get; set; }
+
+    public string? PhotoPath { get; set; }
+
+    [Display(Name = "Employee Photo")]
+    public IFormFile? EmployeePhoto { get; set; }
 
     [Required, DataType(DataType.Date)]
     [Display(Name = "Joining Date")]
@@ -177,7 +195,7 @@ public class EmployeeFormViewModel : IValidatableObject
 
 public class HrAddEmployeeViewModel : IValidatableObject
 {
-    [Required, StringLength(30), RegularExpression(@"^Vertex-[0-9]{2,}$", ErrorMessage = "Employee Code is invalid.")]
+    [Required(ErrorMessage = "Employee ID is required."), StringLength(30, ErrorMessage = "Employee ID cannot exceed 30 characters.")]
     [Display(Name = "Employee ID")]
     public string EmployeeId { get; set; } = string.Empty;
 

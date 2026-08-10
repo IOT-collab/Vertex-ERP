@@ -355,6 +355,23 @@ body {
     color: rgba(168, 179, 207, .76);
 }
 
+.password-visibility {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #93c5fd;
+    cursor: pointer;
+}
+
+.password-visibility:hover,
+.password-visibility:focus-visible {
+    background: rgba(59, 130, 246, .18);
+    outline: none;
+}
+
 .input-shell input:-webkit-autofill,
 .input-shell input:-webkit-autofill:hover,
 .input-shell input:-webkit-autofill:focus,

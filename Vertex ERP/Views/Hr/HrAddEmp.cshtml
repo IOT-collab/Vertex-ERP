@@ -578,7 +578,7 @@
                     <span asp-validation-for="LoginUsername" class="field-validation"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="TemporaryPassword">Temporary Password <span>*</span></label>
+                    <label asp-for="TemporaryPassword">Password <span>*</span></label>
                     <div class="credential-input-row">
                         <input asp-for="TemporaryPassword" type="text" autocomplete="new-password" placeholder="Minimum 8 characters" required />
                         <button type="button" class="credential-generate-btn" onclick="generateTemporaryPassword()">Generate</button>
@@ -771,10 +771,9 @@
         const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
         const lower = 'abcdefghijkmnopqrstuvwxyz';
         const numbers = '23456789';
-        const symbols = String.fromCharCode(64) + '#$!';
-        const all = upper + lower + numbers + symbols;
+        const all = upper + lower + numbers;
         const random = values => values[crypto.getRandomValues(new Uint32Array(1))[0] % values.length];
-        const chars = [random(upper), random(lower), random(numbers), random(symbols)];
+        const chars = [random(upper), random(lower), random(numbers)];
         while (chars.length < 12) chars.push(random(all));
         for (let i = chars.length - 1; i > 0; i--) {
             const j = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);

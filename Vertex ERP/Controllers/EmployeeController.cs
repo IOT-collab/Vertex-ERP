@@ -162,23 +162,35 @@ public class EmployeeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Edit(int id, EmployeeFormViewModel model)
+    public async Task<IActionResult> Edit(int id, EmployeeFormViewModel model)
     {
         if (id != model.Id) return BadRequest();
         var employee = _dbContext.Employees.Find(id);
         if (employee == null) return NotFound();
 
-        model.EmployeeCode = employee.EmployeeCode;
-        ModelState.Remove(nameof(model.EmployeeCode));
         ValidateUniqueFields(model);
+        var photoExtension = await ValidatePhotoAsync(model.EmployeePhoto);
         if (!ModelState.IsValid)
             return View("~/Views/Main/AddEmpHrm.cshtml", PopulateManagers(model));
 
-        ApplyForm(employee, model, preserveEmployeeCode: true);
+        var previousPhotoPath = employee.PhotoPath;
+        string? newPhotoPath = null;
+        if (model.EmployeePhoto != null && photoExtension != null)
+        {
+            newPhotoPath = await SavePhotoAsync(model.EmployeePhoto, photoExtension);
+            employee.PhotoPath = newPhotoPath;
+        }
+        ApplyForm(employee, model, preserveEmployeeCode: false);
         employee.UpdatedDate = DateTime.UtcNow;
 
         if (!TrySave("The employee could not be updated because the data conflicts with an existing record."))
+        {
+            DeletePhotoIfPresent(newPhotoPath);
+            employee.PhotoPath = previousPhotoPath;
             return View("~/Views/Main/AddEmpHrm.cshtml", PopulateManagers(model));
+        }
+
+        if (newPhotoPath != null) DeletePhotoIfPresent(previousPhotoPath);
 
         TempData["EmployeeMessage"] = "Employee updated successfully.";
         return RedirectToAction(nameof(Index));
@@ -225,6 +237,26 @@ public class EmployeeController : Controller
                 department.UpdatedDate = DateTime.UtcNow;
             }
 
+            // Remove every employee-owned record before deleting the employee.
+            // Several of these relationships intentionally use RESTRICT in the database.
+            var loginAccounts = await _dbContext.AppUsers
+                .Where(user => user.EmployeeId == id)
+                .ToListAsync();
+            var deviceMappings = await _dbContext.EmployeeDeviceMappings
+                .Where(mapping => mapping.EmployeeId == id)
+                .ToListAsync();
+            var attendanceLogs = await _dbContext.AttendanceLogs
+                .Where(log => log.EmployeeId == id)
+                .ToListAsync();
+            var employeeTasks = await _dbContext.WorkTasks
+                .Where(task => task.ManagerId == id || task.AssigneeId == id)
+                .ToListAsync();
+
+            _dbContext.AppUsers.RemoveRange(loginAccounts);
+            _dbContext.EmployeeDeviceMappings.RemoveRange(deviceMappings);
+            _dbContext.AttendanceLogs.RemoveRange(attendanceLogs);
+            _dbContext.WorkTasks.RemoveRange(employeeTasks);
+
             await _dbContext.SaveChangesAsync();
             _dbContext.Employees.Remove(employee);
             await _dbContext.SaveChangesAsync();
@@ -239,11 +271,11 @@ public class EmployeeController : Controller
 
     private void ValidateUniqueFields(EmployeeFormViewModel model)
     {
-        var code = model.EmployeeCode.Trim().ToUpperInvariant();
+        var code = model.EmployeeCode.Trim();
         var email = model.Email.Trim().ToLowerInvariant();
         var phoneNumber = model.PhoneNumber.Trim();
-        if (_dbContext.Employees.Any(employee => employee.Id != model.Id && employee.EmployeeCode == code))
-            ModelState.AddModelError(nameof(model.EmployeeCode), "Employee code already exists.");
+        if (_dbContext.Employees.Any(employee => employee.Id != model.Id && employee.EmployeeCode.ToLower() == code.ToLower()))
+            ModelState.AddModelError(nameof(model.EmployeeCode), "Employee ID already exists.");
         if (_dbContext.Employees.Any(employee => employee.Id != model.Id && employee.Email == email))
             ModelState.AddModelError(nameof(model.Email), "Email address already exists.");
         if (_dbContext.Employees.Any(employee => employee.Id != model.Id && employee.PhoneNumber == phoneNumber))
@@ -301,9 +333,13 @@ public class EmployeeController : Controller
         employee.PhoneNumber = model.PhoneNumber.Trim();
         employee.DateOfBirth = model.DateOfBirth;
         employee.Gender = Clean(model.Gender);
+        employee.MaritalStatus = Clean(model.MaritalStatus);
+        employee.EmergencyContact = Clean(model.EmergencyContact);
         employee.Address = Clean(model.Address);
         employee.City = Clean(model.City);
         employee.State = Clean(model.State);
+        employee.PinCode = Clean(model.PinCode);
+        employee.WorkLocation = Clean(model.WorkLocation);
         employee.JoiningDate = model.JoiningDate;
         employee.Department = model.Department.Trim();
         employee.Designation = model.Designation.Trim();
@@ -324,9 +360,14 @@ public class EmployeeController : Controller
         DateOfBirth = employee.DateOfBirth,
         DateOfBirthText = employee.DateOfBirth?.ToString("dd/MM/yyyy"),
         Gender = employee.Gender,
+        MaritalStatus = employee.MaritalStatus,
+        EmergencyContact = employee.EmergencyContact,
         Address = employee.Address,
         City = employee.City,
         State = employee.State,
+        PinCode = employee.PinCode,
+        WorkLocation = employee.WorkLocation,
+        PhotoPath = employee.PhotoPath,
         JoiningDate = employee.JoiningDate,
         Department = employee.Department,
         Designation = employee.Designation,
@@ -349,6 +390,35 @@ public class EmployeeController : Controller
         if (string.IsNullOrWhiteSpace(relativePath)) return;
         var physicalPath = Path.Combine(_environment.WebRootPath, relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
         if (System.IO.File.Exists(physicalPath)) System.IO.File.Delete(physicalPath);
+    }
+
+    private async Task<string?> ValidatePhotoAsync(IFormFile? photo)
+    {
+        if (photo == null) return null;
+        if (photo.Length == 0 || photo.Length > 5 * 1024 * 1024)
+        {
+            ModelState.AddModelError(nameof(EmployeeFormViewModel.EmployeePhoto), "Photo must be smaller than 5 MB.");
+            return null;
+        }
+        var header = new byte[8];
+        await using var stream = photo.OpenReadStream();
+        var count = await stream.ReadAsync(header.AsMemory(0, header.Length));
+        var jpeg = count >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF;
+        var png = count >= 8 && header.SequenceEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A });
+        if (jpeg) return ".jpg";
+        if (png) return ".png";
+        ModelState.AddModelError(nameof(EmployeeFormViewModel.EmployeePhoto), "Please select a valid JPG or PNG image.");
+        return null;
+    }
+
+    private async Task<string> SavePhotoAsync(IFormFile photo, string extension)
+    {
+        var directory = Path.Combine(_environment.WebRootPath, "uploads", "employees");
+        Directory.CreateDirectory(directory);
+        var fileName = $"{Guid.NewGuid():N}{extension}";
+        await using var target = new FileStream(Path.Combine(directory, fileName), FileMode.CreateNew);
+        await photo.CopyToAsync(target);
+        return $"/uploads/employees/{fileName}";
     }
 
     private static string? Clean(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();

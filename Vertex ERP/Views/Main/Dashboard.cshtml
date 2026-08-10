@@ -2,6 +2,7 @@
     ASP.NET Core MVC ERP Master Dashboard View
 *@
 
+@model VertexERP.Models.DashboardViewModel
 @{
     ViewData["Title"] = "ERP Master Dashboard";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
@@ -33,8 +34,8 @@
             <div class="search-bar">
                 <span class="search-icon"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
 
-                <input type="text"
-                       placeholder="Search Employees, Items..." />
+                <input type="text" id="dashboardEmployeeSearch"
+                       placeholder="Search employees..." />
 
                 <span class="search-shortcut">⌘</span>
             </div>
@@ -112,13 +113,13 @@
             <div class="card-body-metrics">
 
                 <!-- Dynamic Value -->
-                <h2></h2>
+                <h2>@Model.TotalWorkforce</h2>
 
-                <span class="trend up"></span>
+                <span class="trend up">@Model.ActiveWorkforce active</span>
 
             </div>
 
-            <div class="card-footer-info"></div>
+            <div class="card-footer-info">Saved employee records</div>
 
         </div>
 
@@ -139,13 +140,13 @@
             <div class="card-body-metrics">
 
                 <!-- Dynamic Value -->
-                <h2></h2>
+                <h2>@Model.PresentToday</h2>
 
-                <span class="trend neutral"></span>
+                <span class="trend neutral">Today</span>
 
             </div>
 
-            <div class="card-footer-info"></div>
+            <div class="card-footer-info">@Model.AbsentToday currently absent</div>
 
         </div>
 
@@ -155,7 +156,7 @@
 
             <div class="card-meta">
 
-                <span>Pending Approvals</span>
+                <span>Open Tasks</span>
 
                 <div class="card-icon orange-icon">
                     <i class="fa-solid fa-hourglass-half" aria-hidden="true"></i>
@@ -166,13 +167,13 @@
             <div class="card-body-metrics">
 
                 <!-- Dynamic Value -->
-                <h2></h2>
+                <h2>@Model.OpenTasks</h2>
 
-                <span class="trend warning"></span>
+                <span class="trend warning">@Model.OverdueTasks overdue</span>
 
             </div>
 
-            <div class="card-footer-info"></div>
+            <div class="card-footer-info">@Model.CompletedTasks completed</div>
 
         </div>
 
@@ -182,7 +183,7 @@
 
             <div class="card-meta">
 
-                <span>Inventory Items</span>
+                <span>Departments</span>
 
                 <div class="card-icon purple-icon">
                     <i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i>
@@ -193,13 +194,13 @@
             <div class="card-body-metrics">
 
                 <!-- Dynamic Value -->
-                <h2></h2>
+                <h2>@Model.Departments.Count</h2>
 
-                <span class="trend down"></span>
+                <span class="trend neutral">Active teams</span>
 
             </div>
 
-            <div class="card-footer-info"></div>
+            <div class="card-footer-info">Workforce distribution</div>
 
         </div>
 
@@ -238,10 +239,13 @@
             <div class="line-chart"
                  aria-label="Weekly attendance trend graph">
 
-                <!--
-                    Dynamic workforce / attendance
-                    graph will be displayed here.
-                -->
+                <div class="dashboard-week-grid">
+                    @foreach (var day in Model.WeeklyAttendance)
+                    {
+                        var height = Model.TotalWorkforce == 0 ? 4 : Math.Max(4, day.Count * 100 / Model.TotalWorkforce);
+                        <div class="dashboard-week-item"><strong>@day.Count</strong><span style="height:@height%"></span><small>@day.Label</small></div>
+                    }
+                </div>
 
                 <div class="chart-labels">
 
@@ -279,10 +283,11 @@
             <div class="bar-chart"
                  aria-label="Department workload bar chart">
 
-                <!--
-                    Department workload
-                    will come from database.
-                -->
+                @foreach (var department in Model.Departments)
+                {
+                    var height = Model.TotalWorkforce == 0 ? 4 : Math.Max(4, department.Count * 100 / Model.TotalWorkforce);
+                    <div class="bar-item" style="--bar-color:#3b82f6;--bar-height:@height%"><span class="bar-value">@department.Count</span><span class="bar-fill"></span><small title="@department.Name">@department.Name</small></div>
+                }
 
             </div>
 
@@ -296,10 +301,10 @@
 
                 <div>
 
-                    <h3><i class="fa-solid fa-chart-pie section-icon" aria-hidden="true"></i> Approval Health</h3>
+                    <h3><i class="fa-solid fa-chart-pie section-icon" aria-hidden="true"></i> Task Health</h3>
 
                     <p class="sub-text">
-                        SLA clearance progress
+                        Current task completion
                     </p>
 
                 </div>
@@ -309,10 +314,9 @@
 
             <div class="radial-chart">
 
-                <!-- Dynamic chart -->
-
-                <div class="radial-ring">
-                    <span></span>
+                @{ var taskTotal = Model.OpenTasks + Model.CompletedTasks; var completion = taskTotal == 0 ? 0 : Model.CompletedTasks * 100 / taskTotal; }
+                <div class="radial-ring" style="--progress:@completion">
+                    <span>@completion%</span>
                 </div>
 
 
@@ -320,7 +324,7 @@
 
                     <div>
 
-                        <strong></strong>
+                        <strong>@Model.CompletedTasks</strong>
 
                         <span>
                             Closed
@@ -331,10 +335,10 @@
 
                     <div>
 
-                        <strong></strong>
+                        <strong>@Model.OpenTasks</strong>
 
                         <span>
-                            Queued
+                            Open
                         </span>
 
                     </div>
@@ -342,10 +346,10 @@
 
                     <div>
 
-                        <strong></strong>
+                        <strong>@Model.OverdueTasks</strong>
 
                         <span>
-                            Escalated
+                            Overdue
                         </span>
 
                     </div>
@@ -392,16 +396,20 @@
 
                     <div class="table-controls">
 
-                        <select class="select-filter">
+                        <select class="select-filter" id="dashboardDepartmentFilter">
 
                             <option value="">
                                 All Departments
                             </option>
+                            @foreach (var department in Model.Departments)
+                            {
+                                <option value="@department.Name">@department.Name</option>
+                            }
 
                         </select>
 
 
-                        <span class="badge-count"></span>
+                        <span class="badge-count">@Model.RecentEmployees.Count records</span>
 
                     </div>
 
@@ -418,7 +426,7 @@
                             <tr>
 
                                 <th>
-                                    Emp ID
+                                    Employee ID
                                 </th>
 
                                 <th>
@@ -448,10 +456,17 @@
 
                         <tbody>
 
-                            <!--
-                                Employee records will
-                                come from database.
-                            -->
+                            @foreach (var employee in Model.RecentEmployees)
+                            {
+                                <tr class="dashboard-employee-row" data-search="@employee.EmployeeId.ToLower() @employee.FullName.ToLower() @employee.Email.ToLower()" data-department="@employee.Department">
+                                    <td class="id-col">@employee.EmployeeId</td>
+                                    <td><div class="user-meta"><span class="avatar-placeholder">@employee.FullName.Substring(0, 1).ToUpper()</span><div><strong>@employee.FullName</strong><small>@employee.Email</small></div></div></td>
+                                    <td><span class="dept-tag">@employee.Department</span></td>
+                                    <td>@employee.Designation</td>
+                                    <td><span class="status @(employee.IsActive ? "status-active" : "status-absent")">@(employee.IsActive ? "Active" : "Inactive")</span></td>
+                                    <td><a asp-controller="Main" asp-action="Employees" asp-route-id="@employee.Id" class="btn-action">View</a></td>
+                                </tr>
+                            }
 
                         </tbody>
 
@@ -492,10 +507,12 @@
                 <!-- Attendance Progress -->
                 <div class="progress-stacked">
 
-                    <!--
-                        Dynamic attendance
-                        percentages will come here.
-                    -->
+                    @if (Model.TotalWorkforce > 0)
+                    {
+                        <span class="progress-bar bg-green" style="width:@(Model.PresentToday * 100 / Model.TotalWorkforce)%"></span>
+                        <span class="progress-bar bg-blue" style="width:@(Model.LateToday * 100 / Model.TotalWorkforce)%"></span>
+                        <span class="progress-bar bg-red" style="width:@(Model.AbsentToday * 100 / Model.TotalWorkforce)%"></span>
+                    }
 
                 </div>
 
@@ -514,7 +531,7 @@
 
                         </span>
 
-                        <strong class="metric-val"></strong>
+                        <strong class="metric-val">@Model.PresentToday</strong>
 
                     </div>
 
@@ -530,7 +547,7 @@
 
                         </span>
 
-                        <strong class="metric-val"></strong>
+                        <strong class="metric-val">@Model.LateToday</strong>
 
                     </div>
 
@@ -546,7 +563,7 @@
 
                         </span>
 
-                        <strong class="metric-val"></strong>
+                        <strong class="metric-val">0</strong>
 
                     </div>
 
@@ -562,7 +579,7 @@
 
                         </span>
 
-                        <strong class="metric-val"></strong>
+                        <strong class="metric-val">@Model.AbsentToday</strong>
 
                     </div>
 
@@ -585,10 +602,9 @@
 
                 <div class="alert-list">
 
-                    <!--
-                        Dynamic system alerts
-                        will come from database.
-                    -->
+                    @if (Model.OverdueTasks > 0) { <div class="alert-item"><strong>@Model.OverdueTasks overdue task(s)</strong><p class="sub-text">Require manager attention.</p></div> }
+                    @if (Model.AbsentToday > 0) { <div class="alert-item"><strong>@Model.AbsentToday absent employee(s)</strong><p class="sub-text">No attendance recorded today.</p></div> }
+                    @if (Model.OverdueTasks == 0 && Model.AbsentToday == 0) { <div class="alert-item"><strong>No priority alerts</strong><p class="sub-text">Everything looks on track.</p></div> }
 
                 </div>
 
@@ -631,10 +647,10 @@
 
             <div class="timeline-container">
 
-                <!--
-                    Dynamic audit logs
-                    will come from database.
-                -->
+                @foreach (var item in Model.RecentActivity)
+                {
+                    <div class="alert-item"><strong>@item.Title</strong><p class="sub-text">@item.Detail · @item.OccurredAt.ToString("dd MMM, hh:mm tt")</p></div>
+                }
 
             </div>
 
@@ -1377,4 +1393,18 @@
 
     })();
 
+</script>
+<script>
+    (() => {
+        const search = document.getElementById('dashboardEmployeeSearch');
+        const department = document.getElementById('dashboardDepartmentFilter');
+        const rows = [...document.querySelectorAll('.dashboard-employee-row')];
+        const filterRows = () => {
+            const term = (search?.value || '').trim().toLowerCase();
+            const selected = department?.value || '';
+            rows.forEach(row => row.hidden = !((!term || row.dataset.search.includes(term)) && (!selected || row.dataset.department === selected)));
+        };
+        search?.addEventListener('input', filterRows);
+        department?.addEventListener('change', filterRows);
+    })();
 </script>

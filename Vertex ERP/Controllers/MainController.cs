@@ -47,10 +47,14 @@ namespace VertexERP.Controllers
         public async Task<IActionResult> Login(string email, string password, bool rememberMe = false)
         {
             var normalizedUsername = DatabaseInitializer.NormalizeUsername(email);
-            var user = _dbContext.AppUsers
-                .FirstOrDefault(appUser =>
-                    appUser.NormalizedUsername == normalizedUsername &&
-                    appUser.IsActive);
+            var normalizedLogin = email.Trim().ToLowerInvariant();
+            var user = await _dbContext.AppUsers
+                .Include(appUser => appUser.Employee)
+                .FirstOrDefaultAsync(appUser =>
+                    appUser.IsActive &&
+                    (appUser.NormalizedUsername == normalizedUsername ||
+                     (appUser.Employee != null && appUser.Employee.EmployeeCode.ToLower() == normalizedLogin) ||
+                     (appUser.Employee != null && appUser.Employee.Email.ToLower() == normalizedLogin)));
 
             if (user != null && PasswordHashService.VerifyPassword(password, user.PasswordHash))
             {
@@ -158,9 +162,56 @@ namespace VertexERP.Controllers
         }
 
         [Authorize(Roles = "Employee,Admin,HR")]
-        public IActionResult Dashboard()
+        public async Task<IActionResult> Dashboard()
         {
-            return View();
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+            var weekStart = today.AddDays(-(((int)today.DayOfWeek + 6) % 7));
+            var employees = await _dbContext.Employees.AsNoTracking().ToListAsync();
+            var departments = await _dbContext.Departments.AsNoTracking()
+                .Where(department => department.IsActive)
+                .OrderBy(department => department.DepartmentName)
+                .ToListAsync();
+            var todayLogs = await _dbContext.AttendanceLogs.AsNoTracking()
+                .Where(log => log.EmployeeId != null && log.PunchTime >= today && log.PunchTime < tomorrow)
+                .ToListAsync();
+            var weekLogs = await _dbContext.AttendanceLogs.AsNoTracking()
+                .Where(log => log.EmployeeId != null && log.PunchTime >= weekStart && log.PunchTime < tomorrow)
+                .ToListAsync();
+            var tasks = await _dbContext.WorkTasks.AsNoTracking().ToListAsync();
+            var presentIds = todayLogs.Where(log => log.EmployeeId.HasValue).Select(log => log.EmployeeId!.Value).Distinct().ToHashSet();
+            var lateCount = todayLogs.Where(log => log.EmployeeId.HasValue)
+                .GroupBy(log => log.EmployeeId!.Value)
+                .Count(group => group.Min(log => log.PunchTime).TimeOfDay > new TimeSpan(10, 0, 0));
+            var closedStatuses = new[] { "Completed", "Done" };
+            var openTasks = tasks.Where(task => !closedStatuses.Contains(task.Status, StringComparer.OrdinalIgnoreCase)).ToList();
+
+            var activity = employees.OrderByDescending(employee => employee.CreatedDate).Take(4)
+                .Select(employee => new DashboardActivityItem("Employee added", $"{employee.FullName} · {employee.Department}", employee.CreatedDate))
+                .Concat(todayLogs.OrderByDescending(log => log.PunchTime).Take(4)
+                    .Select(log => new DashboardActivityItem("Attendance recorded", $"Employee #{log.EmployeeId} · {log.PunchState ?? "Punch"}", log.PunchTime)))
+                .OrderByDescending(item => item.OccurredAt).Take(6).ToList();
+
+            var model = new DashboardViewModel
+            {
+                TotalWorkforce = employees.Count,
+                ActiveWorkforce = employees.Count(employee => employee.IsActive),
+                PresentToday = presentIds.Count,
+                LateToday = lateCount,
+                AbsentToday = Math.Max(0, employees.Count(employee => employee.IsActive) - presentIds.Count),
+                OpenTasks = openTasks.Count,
+                OverdueTasks = openTasks.Count(task => task.DueDate < DateOnly.FromDateTime(today)),
+                CompletedTasks = tasks.Count(task => closedStatuses.Contains(task.Status, StringComparer.OrdinalIgnoreCase)),
+                RecentEmployees = employees.OrderByDescending(employee => employee.CreatedDate).Take(8)
+                    .Select(employee => new DashboardEmployeeRow(employee.Id, employee.EmployeeCode, employee.FullName, employee.Email, employee.Department, employee.Designation, employee.IsActive, employee.PhotoPath)).ToList(),
+                Departments = departments.Select(department => new DashboardDepartmentMetric(
+                    department.DepartmentName,
+                    employees.Count(employee => employee.DepartmentId == department.Id))).ToList(),
+                WeeklyAttendance = Enumerable.Range(0, 5).Select(offset => weekStart.AddDays(offset))
+                    .Select(day => new DashboardDayMetric(day.ToString("ddd"), weekLogs.Where(log => log.PunchTime.Date == day.Date).Select(log => log.EmployeeId).Distinct().Count())).ToList(),
+                RecentActivity = activity
+            };
+            return View(model);
         }
 
         [Authorize(Roles = "Employee,User")]

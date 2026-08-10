@@ -44,10 +44,8 @@ namespace VertexERP.Data
             user.FullName = fullName;
             user.IsActive = true;
 
-            if (!PasswordHashService.VerifyPassword(password, user.PasswordHash))
-            {
-                user.PasswordHash = PasswordHashService.HashPassword(password);
-            }
+            // Never overwrite an existing password during application startup.
+            // HR/admin password changes must remain exactly as saved by the user-management flow.
         }
 
         public static void SeedAdminUser(

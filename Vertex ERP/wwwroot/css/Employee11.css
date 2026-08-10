@@ -167,6 +167,30 @@ body {
         background: var(--border-hover);
     }
 
+.emp-actions .employee-dashboard-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border: 1px solid rgba(239, 68, 68, .55);
+    border-radius: 8px;
+    border-color: rgba(239, 68, 68, .45);
+    background: rgba(239, 68, 68, .12);
+    color: #fca5a5 !important;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none !important;
+    white-space: nowrap;
+}
+
+    .emp-actions .employee-dashboard-logout:hover {
+        border-color: rgba(239, 68, 68, .75);
+        background: rgba(239, 68, 68, .24);
+        color: #fff !important;
+    }
+
 .btn-sm {
     padding: 5px 10px;
     font-size: 11px;

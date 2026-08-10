@@ -29,13 +29,13 @@
         <div class="employee-message employee-error"><i class="fa-solid fa-circle-exclamation"></i> @error</div>
     }
 
-    <form asp-controller="Employee" asp-action="Index" method="get" class="toolbar-card">
-        <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" name="search" value="@Model.Search" placeholder="Search by name, employee code, email or department..." /></div>
-        <select name="department" class="employee-filter" aria-label="Filter by department">
+    <form asp-controller="Employee" asp-action="Index" method="get" class="toolbar-card" id="employeeFilterForm">
+        <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="text" name="search" value="@Model.Search" placeholder="Search by employee ID, name, email or department..." /></div>
+        <select name="department" class="employee-filter" aria-label="Filter by department" onchange="this.form.submit()">
             <option value="">All departments</option>
             @foreach (var item in Model.Departments) { <option value="@item" selected="@(Model.Department == item)">@item</option> }
         </select>
-        <select name="status" class="employee-filter" aria-label="Filter by status">
+        <select name="status" class="employee-filter" aria-label="Filter by status" onchange="this.form.submit()">
             <option value="">All statuses</option>
             <option value="active" selected="@(Model.Status == "active")">Active</option>
             <option value="inactive" selected="@(Model.Status == "inactive")">Inactive</option>
@@ -47,7 +47,7 @@
         <div class="card-header"><div class="card-title-group"><h3>Employee Directory</h3><span class="badge-accent">Live Records</span></div></div>
         <div class="table-responsive">
             <table class="modern-table">
-                <thead><tr><th>Employee Code</th><th>Name</th><th>Email</th><th>Department</th><th>Designation</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                <thead><tr><th>Employee ID</th><th>Name</th><th>Email</th><th>Department</th><th>Designation</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
                 <tbody>
                 @if (Model.Employees.Count > 0)
                 {
@@ -64,7 +64,7 @@
                                 <div class="action-buttons">
                                     <a asp-controller="Employee" asp-action="Details" asp-route-id="@employee.Id" class="action-btn" title="View employee"><i class="fa-solid fa-eye"></i></a>
                                     <a asp-controller="Main" asp-action="Employees" asp-route-id="@employee.Id" class="action-btn" title="Open employee self-service profile"><i class="fa-solid fa-id-card"></i></a>
-                                    <a asp-controller="Employee" asp-action="LoginAccess" asp-route-id="@employee.Id" class="action-btn" title="Create or reset employee login"><i class="fa-solid fa-key"></i></a>
+                                    <a asp-controller="Employee" asp-action="LoginAccess" asp-route-id="@employee.Id" class="action-btn" title="Update username or reset password"><i class="fa-solid fa-key"></i></a>
                                     <a asp-controller="Employee" asp-action="Edit" asp-route-id="@employee.Id" class="action-btn edit-action" title="Edit employee"><i class="fa-solid fa-pen-to-square"></i></a>
                                     <a asp-controller="Employee" asp-action="Delete" asp-route-id="@employee.Id" class="action-btn delete-action" title="Delete employee"><i class="fa-solid fa-user-slash"></i></a>
                                 </div>
