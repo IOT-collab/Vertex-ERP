@@ -6,7 +6,7 @@ using VertexERP.Models;
 
 namespace VertexERP.Controllers;
 
-[Authorize(Roles = "Admin,HR")]
+[Authorize(Roles = "Admin,HR,Manager")]
 [Route("api/task-management")]
 [ApiController]
 public class TaskManagementController : ControllerBase
@@ -29,23 +29,31 @@ public class TaskManagementController : ControllerBase
                 employee.FullName,
                 employee.Email,
                 employee.Department,
+                employee.DepartmentId,
                 employee.Designation,
                 employee.ReportingManagerId
             })
             .ToListAsync(cancellationToken);
 
-        var departmentManagerIds = await _db.Departments.AsNoTracking()
-            .Where(department => department.ManagerId != null)
-            .Select(department => department.ManagerId!.Value)
-            .ToListAsync(cancellationToken);
-        var reportingManagerIds = employees.Where(employee => employee.ReportingManagerId != null)
-            .Select(employee => employee.ReportingManagerId!.Value);
-        var managerIds = departmentManagerIds.Concat(reportingManagerIds).ToHashSet();
+        var managerIds = (await _db.AppUsers.AsNoTracking()
+            .Where(user => user.IsActive && user.Role == "Manager" && user.EmployeeId.HasValue)
+            .Select(user => user.EmployeeId!.Value).ToListAsync(cancellationToken)).ToHashSet();
+        var employeeIds = employees.Select(employee => employee.Id).Where(id => !managerIds.Contains(id)).ToHashSet();
+        if (User.IsInRole("Manager"))
+        {
+            var currentManagerId = await GetCurrentEmployeeIdAsync(cancellationToken);
+            var managerDepartmentId = employees.Where(employee => employee.Id == currentManagerId).Select(employee => employee.DepartmentId).FirstOrDefault();
+            managerIds.Clear();
+            if (currentManagerId.HasValue) managerIds.Add(currentManagerId.Value);
+            employeeIds.IntersectWith(managerDepartmentId.HasValue
+                ? employees.Where(employee => employee.Id != currentManagerId && employee.DepartmentId == managerDepartmentId).Select(employee => employee.Id)
+                : Array.Empty<int>());
+        }
 
         return Ok(new
         {
             managers = employees.Where(employee => managerIds.Contains(employee.Id)),
-            employees
+            employees = employees.Where(employee => employeeIds.Contains(employee.Id))
         });
     }
 
@@ -53,7 +61,9 @@ public class TaskManagementController : ControllerBase
     public async Task<IActionResult> GetTasks(CancellationToken cancellationToken)
     {
         var today = DateOnly.FromDateTime(DateTime.Today);
+        var currentManagerId = User.IsInRole("Manager") ? await GetCurrentEmployeeIdAsync(cancellationToken) : null;
         var tasks = await _db.WorkTasks.AsNoTracking()
+            .Where(task => !currentManagerId.HasValue || task.ManagerId == currentManagerId.Value)
             .OrderByDescending(task => task.CreatedAtUtc)
             .Select(task => new
             {
@@ -101,6 +111,13 @@ public class TaskManagementController : ControllerBase
 
         var managerId = request.ManagerId!.Value;
         var assigneeId = request.AssigneeId!.Value;
+        if (User.IsInRole("Manager"))
+        {
+            var currentManagerId = await GetCurrentEmployeeIdAsync(cancellationToken);
+            var managerDepartmentId = await _db.Employees.Where(employee => employee.Id == currentManagerId).Select(employee => employee.DepartmentId).FirstOrDefaultAsync(cancellationToken);
+            if (managerId != currentManagerId || !await _db.Employees.AnyAsync(employee => employee.Id == assigneeId && employee.IsActive && employee.DepartmentId == managerDepartmentId && !_db.AppUsers.Any(user => user.EmployeeId == employee.Id && user.IsActive && user.Role == "Manager"), cancellationToken))
+                return Forbid();
+        }
         var people = await _db.Employees
             .Where(employee => employee.IsActive && (employee.Id == managerId || employee.Id == assigneeId))
             .Select(employee => new { employee.Id, employee.ReportingManagerId })
@@ -147,6 +164,13 @@ public class TaskManagementController : ControllerBase
 
         var managerId = request.ManagerId!.Value;
         var assigneeId = request.AssigneeId!.Value;
+        if (User.IsInRole("Manager"))
+        {
+            var currentManagerId = await GetCurrentEmployeeIdAsync(cancellationToken);
+            var managerDepartmentId = await _db.Employees.Where(employee => employee.Id == currentManagerId).Select(employee => employee.DepartmentId).FirstOrDefaultAsync(cancellationToken);
+            if (task.ManagerId != currentManagerId || managerId != currentManagerId || !await _db.Employees.AnyAsync(employee => employee.Id == assigneeId && employee.IsActive && employee.DepartmentId == managerDepartmentId && !_db.AppUsers.Any(user => user.EmployeeId == employee.Id && user.IsActive && user.Role == "Manager"), cancellationToken))
+                return Forbid();
+        }
         var people = await _db.Employees
             .Where(employee => employee.IsActive && (employee.Id == managerId || employee.Id == assigneeId))
             .Select(employee => new { employee.Id })
@@ -180,9 +204,19 @@ public class TaskManagementController : ControllerBase
         var task = await _db.WorkTasks.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
         if (task == null)
             return NotFound("Task not found.");
+        if (User.IsInRole("Manager") && task.ManagerId != await GetCurrentEmployeeIdAsync(cancellationToken))
+            return Forbid();
 
         _db.WorkTasks.Remove(task);
         await _db.SaveChangesAsync(cancellationToken);
         return Ok(new { message = "Task deleted successfully." });
+    }
+
+    private async Task<int?> GetCurrentEmployeeIdAsync(CancellationToken cancellationToken)
+    {
+        var userIdText = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        return int.TryParse(userIdText, out var userId)
+            ? await _db.AppUsers.AsNoTracking().Where(user => user.Id == userId).Select(user => user.EmployeeId).FirstOrDefaultAsync(cancellationToken)
+            : null;
     }
 }

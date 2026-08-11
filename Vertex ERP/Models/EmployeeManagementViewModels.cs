@@ -225,11 +225,17 @@ public class HrAddEmployeeViewModel : IValidatableObject
     [Display(Name = "Phone Number")]
     public string Phone { get; set; } = string.Empty;
 
-    [Phone, StringLength(20), Display(Name = "Emergency Contact")]
-    public string? EmergencyContact { get; set; }
+    [Required(ErrorMessage = "Emergency Contact is required.")]
+    [RegularExpression(@"^[0-9]{10}$", ErrorMessage = "Emergency Contact must contain exactly 10 digits.")]
+    [Display(Name = "Emergency Contact")]
+    public string EmergencyContact { get; set; } = string.Empty;
 
     [Required, Display(Name = "Department")] public int? DepartmentId { get; set; }
     [Required, StringLength(80)] public string Designation { get; set; } = string.Empty;
+
+    [Required, RegularExpression("^(Employee|Manager)$", ErrorMessage = "Please select Employee or Manager.")]
+    [Display(Name = "Position")]
+    public string Position { get; set; } = "Employee";
 
     [Required, DataType(DataType.Date), Display(Name = "Joining Date")]
     public DateOnly JoiningDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);

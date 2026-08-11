@@ -1,0 +1,30 @@
+@model VertexERP.Models.EmployeePortalViewModel
+@{ ViewData["Title"]="Employee Dashboard"; Layout="~/Views/Shared/_LayoutMaster.cshtml"; var employee=Model.Employee; }
+<link href="~/css/RoleEmployeeDashboard.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/ProfileEnhancements.css" rel="stylesheet" asp-append-version="true" />
+@if(employee==null){<div class="employee-portal"><div class="portal-empty">Employee profile is not linked with this login.</div></div>}else{
+<section class="employee-portal">
+ <header class="portal-title"><div><h1>Employee Dashboard</h1><p>Your profile, assigned tasks, attendance and leave requests</p></div></header>
+ <article class="employee-hero portal-card"><div class="portal-avatar">@if(!string.IsNullOrWhiteSpace(employee.PhotoPath)){<img src="@employee.PhotoPath" alt="@employee.FullName"/>}else{<span><i class="fa-solid fa-user"></i></span>}</div><div class="hero-main"><h2>@employee.FullName</h2><b>@employee.EmployeeCode</b><p><i class="fa-regular fa-user"></i> @employee.Designation</p><p><i class="fa-regular fa-building"></i> @employee.Department</p></div><div class="hero-detail"><i class="fa-solid fa-user-tie"></i><span><small>Reporting Manager</small><strong>@(employee.ReportingManager?.FullName ?? "Not assigned")</strong></span></div><div class="hero-detail"><i class="fa-regular fa-calendar"></i><span><small>Joining Date</small><strong>@employee.JoiningDate.ToString("dd MMM yyyy")</strong></span></div><div class="hero-contact"><p><i class="fa-regular fa-envelope"></i><span><small>Email</small><strong>@employee.Email</strong></span></p><p><i class="fa-solid fa-phone"></i><span><small>Phone</small><strong>@employee.PhoneNumber</strong></span></p></div></article>
+ <div class="portal-stats"><div class="portal-card"><i class="fa-solid fa-clipboard-list purple"></i><span><small>Total Tasks</small><strong>@Model.Tasks.Count</strong><p>All assigned tasks</p></span></div><div class="portal-card"><i class="fa-regular fa-circle blue"></i><span><small>Pending</small><strong>@Model.Pending</strong><p>Tasks remaining</p></span></div><div class="portal-card"><i class="fa-regular fa-hourglass-half orange"></i><span><small>In Progress</small><strong>@Model.InProgress</strong><p>Active tasks</p></span></div><div class="portal-card"><i class="fa-solid fa-check green"></i><span><small>Completed</small><strong>@Model.Completed</strong><p>Tasks completed</p></span></div><div class="portal-card"><i class="fa-regular fa-clock red"></i><span><small>Overdue</small><strong>@Model.Overdue</strong><p>Past due date</p></span></div></div>
+ <div class="portal-grid"><article class="portal-card task-card"><div class="portal-card-title"><h3>My Tasks</h3></div>@if(Model.Tasks.Count==0){<div class="portal-empty">No tasks assigned.</div>}else{<div class="portal-table-wrap"><table><thead><tr><th>Task</th><th>Manager</th><th>Priority</th><th>Due Date</th><th>Status</th></tr></thead><tbody>@foreach(var task in Model.Tasks){<tr><td><b>@task.Title</b><small>@task.Description</small></td><td>@task.Manager.FullName</td><td>@task.Priority</td><td>@task.DueDate.ToString("dd MMM yyyy")</td><td><em>@task.Status</em></td></tr>}</tbody></table></div>}</article>
+ <article class="portal-card attendance-card"><div class="portal-card-title"><h3>Today's Attendance</h3><span>@DateTime.Today.ToString("dd MMM yyyy")</span></div><div class="attendance-times"><div><i class="fa-solid fa-right-to-bracket green"></i><span><small>Check In</small><strong>@(Model.CheckIn?.ToString("hh:mm tt") ?? "--")</strong></span></div><div><i class="fa-solid fa-right-from-bracket red"></i><span><small>Check Out</small><strong>@(Model.CheckOut?.ToString("hh:mm tt") ?? "--")</strong></span></div></div><div class="attendance-status"><span>Status</span><strong class="@(Model.CheckIn.HasValue?"present":"absent")">@(Model.CheckIn.HasValue?"Present":"Absent")</strong></div></article>
+ <article class="portal-card leave-card"><div class="portal-card-title"><h3>Leave Requests</h3><button type="button" onclick="document.getElementById('leaveForm').showModal()">Apply Leave</button></div>@if(Model.LeaveRequests.Count==0){<div class="portal-empty small">No leave requests.</div>}else{<div class="portal-table-wrap"><table><thead><tr><th>Type</th><th>Dates</th><th>Status</th></tr></thead><tbody>@foreach(var leave in Model.LeaveRequests.Take(5)){<tr><td>@leave.LeaveType</td><td>@leave.FromDate.ToString("dd MMM") - @leave.ToDate.ToString("dd MMM")</td><td><em>@leave.Status</em></td></tr>}</tbody></table></div>}</article></div>
+</section>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('#leaveForm form');
+    const submit = form?.querySelector('.submit-leave');
+    if (!form || !submit || form.querySelector('.leave-cancel')) return;
+    const actions = document.createElement('div');
+    actions.className = 'dialog-actions';
+    const cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.className = 'leave-cancel';
+    cancel.textContent = 'Cancel';
+    cancel.addEventListener('click', () => document.getElementById('leaveForm').close());
+    submit.before(actions);
+    actions.append(cancel, submit);
+});
+</script>
+<dialog id="leaveForm" class="leave-dialog"><form asp-controller="Main" asp-action="ApplyLeave" method="post"><div class="dialog-title"><h3>Apply Leave</h3><button type="button" onclick="leaveForm.close()">×</button></div><label>Leave Type<select name="leaveType" required><option value="">Select</option><option>Casual Leave</option><option>Sick Leave</option><option>Earned Leave</option><option>Unpaid Leave</option></select></label><div class="date-fields"><label>From<input type="date" name="fromDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" required/></label><label>To<input type="date" name="toDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" required/></label></div><label>Reason<textarea name="reason" rows="3" required></textarea></label><button class="submit-leave" type="submit">Submit Leave Request</button></form></dialog>}

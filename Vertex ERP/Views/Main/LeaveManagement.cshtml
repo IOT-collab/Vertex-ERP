@@ -6,6 +6,8 @@
 <link href="~/css/leavemgm.css" rel="stylesheet" />
 
 <div class="leave-page">
+    @if (TempData["LeaveMessage"] != null) { <div class="alert alert-success">@TempData["LeaveMessage"]</div> }
+    @if (TempData["LeaveError"] != null) { <div class="alert alert-danger">@TempData["LeaveError"]</div> }
 
     <!-- ================= HEADER ================= -->
     <div class="page-header">
@@ -57,7 +59,7 @@
 
     <!-- ================= APPLY LEAVE ================= -->
 
-    <div class="card">
+    <form class="card" asp-controller="Main" asp-action="ApplyLeave" method="post">
 
         <div class="card-title">
             <h3>Apply Leave</h3>
@@ -68,21 +70,25 @@
             <div class="form-group">
                 <label>Leave Type</label>
 
-                <select>
+                <select name="leaveType" required>
                     <option value="">Select Leave Type</option>
+                    <option value="Casual Leave">Casual Leave</option>
+                    <option value="Sick Leave">Sick Leave</option>
+                    <option value="Earned Leave">Earned Leave</option>
+                    <option value="Unpaid Leave">Unpaid Leave</option>
                 </select>
             </div>
 
 
             <div class="form-group">
                 <label>From Date</label>
-                <input type="date" />
+                <input type="date" name="fromDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
             </div>
 
 
             <div class="form-group">
                 <label>To Date</label>
-                <input type="date" />
+                <input type="date" name="toDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
             </div>
 
 
@@ -101,7 +107,7 @@
 
             <label>Reason</label>
 
-            <textarea rows="4"
+            <textarea rows="4" name="reason" required
                       placeholder="Enter reason for leave"></textarea>
 
         </div>
@@ -109,13 +115,13 @@
 
         <div class="form-actions">
 
-            <button type="button" class="btn-primary">
+            <button type="submit" class="btn-primary">
                 Submit Leave
             </button>
 
         </div>
 
-    </div>
+    </form>
 
 
     <!-- ================= LEAVE REQUESTS ================= -->

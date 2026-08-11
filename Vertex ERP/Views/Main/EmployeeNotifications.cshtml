@@ -1,0 +1,4 @@
+@model VertexERP.Models.EmployeeNotificationsViewModel
+@{ ViewData["Title"]="Notifications"; Layout="~/Views/Shared/_LayoutMaster.cshtml"; }
+<link href="~/css/EmployeeSections.css" rel="stylesheet" asp-append-version="true" />
+<section class="employee-section"><header><div><h1>Notifications</h1><p>Task assignments and leave updates for @Model.Employee.FullName</p></div></header><div class="employee-panel">@if(Model.Items.Count==0){<div class="employee-empty">No notifications available.</div>}else{<div class="notification-list">@foreach(var item in Model.Items){<article class="notification-item"><i class="fa-solid @(item.Type=="Task"?"fa-list-check":"fa-plane-departure")"></i><div><strong>@item.Title</strong><small>@item.Detail</small></div><time>@item.CreatedAt.ToLocalTime().ToString("dd MMM, hh:mm tt")</time></article>}</div>}</div></section>

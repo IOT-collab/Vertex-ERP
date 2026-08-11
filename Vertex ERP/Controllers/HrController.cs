@@ -265,7 +265,11 @@ namespace Vertex_ERP.Controllers
             var employeeCode = model.EmployeeId.Trim();
             var email = model.Email.Trim().ToLowerInvariant();
             var loginUsername = model.LoginUsername.Trim();
+            var loginPassword = model.TemporaryPassword.Trim();
             var normalizedUsername = DatabaseInitializer.NormalizeUsername(loginUsername);
+            var accountRole = string.Equals(model.Position, "Manager", StringComparison.OrdinalIgnoreCase)
+                ? AccountRoleService.Manager
+                : AccountRoleService.Employee;
 
             if (await _dbContext.Employees.AnyAsync(employee => employee.EmployeeCode.ToLower() == employeeCode.ToLower()))
                 ModelState.AddModelError(nameof(model.EmployeeId), "Employee ID already exists.");
@@ -308,7 +312,7 @@ namespace Vertex_ERP.Controllers
                     DateOfBirth = model.DateOfBirth,
                     Gender = Clean(model.Gender),
                     MaritalStatus = Clean(model.MaritalStatus),
-                    EmergencyContact = Clean(model.EmergencyContact),
+                    EmergencyContact = model.EmergencyContact.Trim(),
                     Department = selectedDepartment!.DepartmentName,
                     DepartmentId = selectedDepartment.Id,
                     Designation = model.Designation.Trim(),
@@ -327,12 +331,13 @@ namespace Vertex_ERP.Controllers
                 };
 
                 _dbContext.Employees.Add(employee);
+
                 _dbContext.AppUsers.Add(new AppUser
                 {
                     Username = loginUsername,
                     NormalizedUsername = normalizedUsername,
-                    PasswordHash = PasswordHashService.HashPassword(model.TemporaryPassword),
-                    Role = "Employee",
+                    PasswordHash = CreateVerifiedPasswordHash(loginPassword),
+                    Role = accountRole,
                     FullName = employee.FullName,
                     IsActive = true,
                     Employee = employee,
@@ -340,7 +345,7 @@ namespace Vertex_ERP.Controllers
                     CreatedAt = DateTime.UtcNow
                 });
                 await _dbContext.SaveChangesAsync();
-                TempData["EmployeeMessage"] = $"Employee and login account '{loginUsername}' added successfully.";
+                TempData["EmployeeMessage"] = $"{accountRole} and login account '{loginUsername}' added successfully.";
                 return RedirectToAction("Index", "Employee");
             }
             catch (DbUpdateException exception)
@@ -368,7 +373,8 @@ namespace Vertex_ERP.Controllers
         private async Task<HrAddEmployeeViewModel> PopulateManagersAsync(HrAddEmployeeViewModel model)
         {
             model.Managers = await _dbContext.Employees.AsNoTracking()
-                .Where(employee => employee.IsActive)
+                .Where(employee => employee.IsActive && _dbContext.AppUsers
+                    .Any(user => user.EmployeeId == employee.Id && user.IsActive && user.Role == "Manager"))
                 .OrderBy(employee => employee.FirstName)
                 .ThenBy(employee => employee.LastName)
                 .ToListAsync();
@@ -377,6 +383,14 @@ namespace Vertex_ERP.Controllers
                 .OrderBy(department => department.DepartmentName)
                 .ToListAsync();
             return model;
+        }
+
+        private static string CreateVerifiedPasswordHash(string password)
+        {
+            var passwordHash = PasswordHashService.HashPassword(password);
+            if (!PasswordHashService.VerifyPassword(password, passwordHash))
+                throw new InvalidOperationException("Unable to create a valid employee login password.");
+            return passwordHash;
         }
 
         private async Task<AddDepartmentViewModel> PopulateDepartmentManagersAsync(AddDepartmentViewModel model)

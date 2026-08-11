@@ -17,6 +17,7 @@ namespace VertexERP.Data
         public DbSet<AttendanceLog> AttendanceLogs => Set<AttendanceLog>();
         public DbSet<EmployeeDeviceMapping> EmployeeDeviceMappings => Set<EmployeeDeviceMapping>();
         public DbSet<WorkTask> WorkTasks => Set<WorkTask>();
+        public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,6 +46,15 @@ namespace VertexERP.Data
                 entity.HasOne(employee => employee.ReportingManager)
                     .WithMany(manager => manager.DirectReports)
                     .HasForeignKey(employee => employee.ReportingManagerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<LeaveRequest>(entity =>
+            {
+                entity.ToTable("LeaveRequests");
+                entity.Property(request => request.AppliedAtUtc).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.HasOne(request => request.Employee).WithMany()
+                    .HasForeignKey(request => request.EmployeeId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
 

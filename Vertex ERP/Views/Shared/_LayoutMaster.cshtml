@@ -15,7 +15,8 @@
         var currentRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "User";
         var currentName = User.Identity?.Name ?? currentRole;
         var isEmployee = User.IsInRole("Employee") || User.IsInRole("User");
-        var homeUrl = isEmployee ? "/Main/EmployeeHome" : "/Main/Dashboard";
+        var isManager = User.IsInRole("Manager");
+        var homeUrl = isEmployee ? "/Main/EmployeeHome" : isManager ? "/Main/Manager" : "/Main/Dashboard";
     }
 
     <!-- Pure CSS Sidebar Drawer Controller Toggle -->
@@ -39,7 +40,21 @@
             <ul class="sidebar-menu">
                 @if (isEmployee)
                 {
-                    <li><a href="/Main/EmployeeHome"><i class="fa-solid fa-house" aria-hidden="true"></i><span>My Dashboard</span></a></li>
+                    <li><a href="/Main/Employees"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i><span>Dashboard</span></a></li>
+                    <li><a href="/Main/EmployeeTasks"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>My Tasks</span></a></li>
+                    <li><a href="/Main/EmployeeAttendance"><i class="fa-regular fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
+                    <li><a href="/Main/EmployeeLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
+                    <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user" aria-hidden="true"></i><span>My Profile</span></a></li>
+                    <li><a href="/Main/EmployeeNotifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Notifications</span></a></li>
+                }
+                else if (isManager)
+                {
+                    <li><a href="/Main/Manager"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Manager Dashboard</span></a></li>
+                    <li><a href="/Main/Employees"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Employees</span></a></li>
+                    <li><a href="/Main/ManagerAttendance"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
+                    <li><a href="/Main/ManagerLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
+                    <li><a href="/Main/TaskMgm"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Task Management</span></a></li>
+                    <li><a href="/Main/ManagerProjects"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Project Management</span></a></li>
                 }
                 else
                 {
@@ -50,6 +65,7 @@
                     <li><a href="/Main/LeaveManagement"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
 @*                     <li><a href="/Main/DepartmentManagement"><i class="fa-solid fa-building" aria-hidden="true"></i><span>Department</span></a></li>
  *@                    <li><a href="/Main/Hrms"><i class="fa-solid fa-user-tie" aria-hidden="true"></i><span>HR Management</span></a></li>
+                    <li><a href="/Main/Manager"><i class="fa-solid fa-people-roof" aria-hidden="true"></i><span>Manager</span></a></li>
                     <li><a href="/Main/TaskMgm"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Task Management</span></a></li>
                     <li><a href="/Main/ProjectMgm"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Project Management</span></a></li>
                     <li><a href="/Main/AdminPanel"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Admin Panel</span></a></li>
@@ -78,7 +94,7 @@
                 </div>
 
                 <div class="profile">
-                    <span class="profile-text" title="Signed in as @currentName">Welcome @currentRole</span>
+                    <span class="profile-text" title="Signed in as @currentName">Welcome @currentName</span>
                     <a class="logout-btn" href="/Main/Logout" title="Logout">Logout</a>
                 </div>
             </header>

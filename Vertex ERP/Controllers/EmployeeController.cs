@@ -122,8 +122,20 @@ public class EmployeeController : Controller
         }
         account.Username = model.Username.Trim();
         account.NormalizedUsername = normalizedUsername;
-        account.PasswordHash = PasswordHashService.HashPassword(model.TemporaryPassword);
-        account.Role = "Employee";
+        var password = model.TemporaryPassword.Trim();
+        var passwordHash = PasswordHashService.HashPassword(password);
+        if (!PasswordHashService.VerifyPassword(password, passwordHash))
+        {
+            ModelState.AddModelError(nameof(model.TemporaryPassword), "Unable to create a valid login password. Please try again.");
+            model.EmployeeCode = employee.EmployeeCode;
+            model.EmployeeName = employee.FullName;
+            model.HasExistingAccount = account.Id > 0;
+            return View(model);
+        }
+        account.PasswordHash = passwordHash;
+        account.Role = AccountRoleService.Normalize(account.Role) == AccountRoleService.Manager
+            ? AccountRoleService.Manager
+            : AccountRoleService.Employee;
         account.FullName = employee.FullName;
         account.IsActive = true;
         account.MustChangePassword = model.MustChangePassword;
