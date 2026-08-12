@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
 using VertexERP.Models;
 using VertexERP.Services;
+using System.Text.Json;
 
 namespace Vertex_ERP.Controllers
 {
@@ -14,12 +15,14 @@ namespace Vertex_ERP.Controllers
         private readonly ApplicationDbContext _dbContext;
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<HrController> _logger;
+        private readonly BankAccountProtectionService _bankProtection;
 
-        public HrController(ApplicationDbContext dbContext, IWebHostEnvironment environment, ILogger<HrController> logger)
+        public HrController(ApplicationDbContext dbContext, IWebHostEnvironment environment, ILogger<HrController> logger, BankAccountProtectionService bankProtection)
         {
             _dbContext = dbContext;
             _environment = environment;
             _logger = logger;
+            _bankProtection = bankProtection;
         }
 
         public IActionResult EmployeeDashboard()
@@ -119,6 +122,7 @@ namespace Vertex_ERP.Controllers
             try
             {
                 await _dbContext.SaveChangesAsync();
+
                 TempData["DepartmentMessage"] = "Department added successfully.";
                 return RedirectToAction(nameof(Department));
             }
@@ -230,7 +234,6 @@ namespace Vertex_ERP.Controllers
             TempData["DepartmentMessage"] = "Department deleted successfully.";
             return RedirectToAction(nameof(Department));
         }
-
         public IActionResult ExpenseClaim()
         {
             return View();
@@ -255,30 +258,67 @@ namespace Vertex_ERP.Controllers
         [HttpGet]
         public async Task<IActionResult> HrAddEmp()
         {
-            return View(await PopulateManagersAsync(new HrAddEmployeeViewModel()));
+            var model = new HrAddEmployeeViewModel();
+            ApplyEmployeeExtraDrafts(model);
+            return View(await PopulateManagersAsync(model));
+        }
+
+        [HttpGet]
+        public IActionResult AddEmployeeBankDetails()
+        {
+            return View(ReadDraft<EmployeeBankDraft>("AddEmployeeBankDraft") ?? new EmployeeBankDraft());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddEmployeeBankDetails(EmployeeBankDraft model)
+        {
+            if (!ModelState.IsValid) return View(model);
+            HttpContext.Session.SetString("AddEmployeeBankDraft", JsonSerializer.Serialize(model));
+            TempData["EmployeeExtraMessage"] = "Bank details added to the new employee draft.";
+            return RedirectToAction(nameof(HrAddEmp));
+        }
+
+        [HttpGet]
+        public IActionResult AddEmployeeSalaryDetails()
+        {
+            return View(ReadDraft<EmployeeSalaryDraft>("AddEmployeeSalaryDraft") ?? new EmployeeSalaryDraft());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddEmployeeSalaryDetails(EmployeeSalaryDraft model)
+        {
+            if (!ModelState.IsValid) return View(model);
+            HttpContext.Session.SetString("AddEmployeeSalaryDraft", JsonSerializer.Serialize(model));
+            TempData["EmployeeExtraMessage"] = "Salary details added to the new employee draft.";
+            return RedirectToAction(nameof(HrAddEmp));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
         {
+            ApplyEmployeeExtraDrafts(model);
             var employeeCode = model.EmployeeId.Trim();
             var email = model.Email.Trim().ToLowerInvariant();
             var loginUsername = model.LoginUsername.Trim();
-            var loginPassword = model.TemporaryPassword.Trim();
+            // Passwords are exact, case-sensitive credentials. Never transform them after
+            // HR has generated/entered the value shown on screen.
+            var loginPassword = model.TemporaryPassword;
             var normalizedUsername = DatabaseInitializer.NormalizeUsername(loginUsername);
             var accountRole = string.Equals(model.Position, "Manager", StringComparison.OrdinalIgnoreCase)
                 ? AccountRoleService.Manager
                 : AccountRoleService.Employee;
 
+            if (await _dbContext.AppUsers.AnyAsync(user => user.NormalizedUsername == normalizedUsername))
+                ModelState.AddModelError(nameof(model.LoginUsername), "Login username already exists.");
             if (await _dbContext.Employees.AnyAsync(employee => employee.EmployeeCode.ToLower() == employeeCode.ToLower()))
                 ModelState.AddModelError(nameof(model.EmployeeId), "Employee ID already exists.");
             if (await _dbContext.Employees.AnyAsync(employee => employee.Email == email))
                 ModelState.AddModelError(nameof(model.Email), "Email address already exists.");
             if (await _dbContext.Employees.AnyAsync(employee => employee.PhoneNumber == model.Phone.Trim()))
                 ModelState.AddModelError(nameof(model.Phone), "Mobile Number already exists.");
-            if (await _dbContext.AppUsers.AnyAsync(user => user.NormalizedUsername == normalizedUsername))
-                ModelState.AddModelError(nameof(model.LoginUsername), "Login username already exists.");
             if (model.ReportingManagerId.HasValue &&
                 !await _dbContext.Employees.AnyAsync(employee => employee.Id == model.ReportingManagerId.Value && employee.IsActive))
                 ModelState.AddModelError(nameof(model.ReportingManagerId), "Please select an active reporting manager.");
@@ -331,8 +371,9 @@ namespace Vertex_ERP.Controllers
                 };
 
                 _dbContext.Employees.Add(employee);
+                await _dbContext.SaveChangesAsync();
 
-                _dbContext.AppUsers.Add(new AppUser
+                var loginAccount = new AppUser
                 {
                     Username = loginUsername,
                     NormalizedUsername = normalizedUsername,
@@ -340,12 +381,35 @@ namespace Vertex_ERP.Controllers
                     Role = accountRole,
                     FullName = employee.FullName,
                     IsActive = true,
-                    Employee = employee,
+                    EmployeeId = employee.Id,
                     MustChangePassword = model.MustChangePassword,
                     CreatedAt = DateTime.UtcNow
-                });
+                };
+                _dbContext.AppUsers.Add(loginAccount);
                 await _dbContext.SaveChangesAsync();
+                var savedHash = await _dbContext.AppUsers.AsNoTracking()
+                    .Where(user => user.Id == loginAccount.Id)
+                    .Select(user => user.PasswordHash)
+                    .SingleAsync();
+                if (!PasswordHashService.VerifyPassword(loginPassword, savedHash))
+                    throw new InvalidOperationException("The employee login password could not be verified after saving.");
+                if (!string.IsNullOrWhiteSpace(model.BankAccountNumber) && !string.IsNullOrWhiteSpace(model.BankName) && !string.IsNullOrWhiteSpace(model.BankAccountHolderName) && !string.IsNullOrWhiteSpace(model.BankIfscCode))
+                {
+                    var account = model.BankAccountNumber.Trim();
+                    _dbContext.EmployeeBankDetails.Add(new EmployeeBankDetail { EmployeeId = employee.Id, AccountHolderName = model.BankAccountHolderName.Trim(), BankName = model.BankName.Trim(), ProtectedAccountNumber = _bankProtection.Protect(account), AccountLastFour = account[^4..], IfscCode = model.BankIfscCode.Trim().ToUpperInvariant(), BranchName = Clean(model.BankBranchName), AccountType = Clean(model.BankAccountType) ?? "Savings", PanNumber = Clean(model.PanNumber)?.ToUpperInvariant(), UanNumber = Clean(model.UanNumber), EsicNumber = Clean(model.EsicNumber), UpiId = Clean(model.UpiId), IsVerified = true, VerifiedAtUtc = DateTime.UtcNow });
+                    await _dbContext.SaveChangesAsync();
+                }
+                if (model.BasicSalary > 0 || model.HouseRentAllowance > 0 || model.ConveyanceAllowance > 0 || model.SpecialAllowance > 0)
+                {
+                    _dbContext.EmployeeSalaryDetails.Add(new EmployeeSalaryDetail { EmployeeId = employee.Id, BasicSalary = model.BasicSalary, HouseRentAllowance = model.HouseRentAllowance, ConveyanceAllowance = model.ConveyanceAllowance, SpecialAllowance = model.SpecialAllowance, ProvidentFund = model.ProvidentFund, ProfessionalTax = model.ProfessionalTax, Tds = model.Tds, OtherDeductions = model.OtherDeductions, PfNumber = Clean(model.PfNumber), PfUan = Clean(model.PfUan), EffectiveFrom = model.SalaryEffectiveFrom, IsActive = true, UpdatedAtUtc = DateTime.UtcNow });
+                    await _dbContext.SaveChangesAsync();
+                }
                 TempData["EmployeeMessage"] = $"{accountRole} and login account '{loginUsername}' added successfully.";
+                TempData["CreatedLoginUsername"] = loginUsername;
+                TempData["CreatedLoginPassword"] = loginPassword;
+                TempData["CreatedLoginRole"] = accountRole;
+                HttpContext.Session.Remove("AddEmployeeBankDraft");
+                HttpContext.Session.Remove("AddEmployeeSalaryDraft");
                 return RedirectToAction("Index", "Employee");
             }
             catch (DbUpdateException exception)
@@ -368,6 +432,26 @@ namespace Vertex_ERP.Controllers
             }
 
             return View(await PopulateManagersAsync(model));
+        }
+
+        private T? ReadDraft<T>(string key)
+        {
+            var json = HttpContext.Session.GetString(key);
+            return string.IsNullOrWhiteSpace(json) ? default : JsonSerializer.Deserialize<T>(json);
+        }
+
+        private void ApplyEmployeeExtraDrafts(HrAddEmployeeViewModel model)
+        {
+            var bank = ReadDraft<EmployeeBankDraft>("AddEmployeeBankDraft");
+            if (bank != null)
+            {
+                model.BankAccountHolderName = bank.BankAccountHolderName; model.BankName = bank.BankName; model.BankAccountNumber = bank.BankAccountNumber; model.ConfirmBankAccountNumber = bank.ConfirmBankAccountNumber; model.BankIfscCode = bank.BankIfscCode; model.BankBranchName = bank.BankBranchName; model.BankAccountType = bank.BankAccountType; model.PanNumber = bank.PanNumber; model.UanNumber = bank.UanNumber; model.EsicNumber = bank.EsicNumber; model.UpiId = bank.UpiId;
+            }
+            var salary = ReadDraft<EmployeeSalaryDraft>("AddEmployeeSalaryDraft");
+            if (salary != null)
+            {
+                model.BasicSalary = salary.BasicSalary; model.HouseRentAllowance = salary.HouseRentAllowance; model.ConveyanceAllowance = salary.ConveyanceAllowance; model.SpecialAllowance = salary.SpecialAllowance; model.ProvidentFund = salary.ProvidentFund; model.ProfessionalTax = salary.ProfessionalTax; model.Tds = salary.Tds; model.OtherDeductions = salary.OtherDeductions; model.PfNumber = salary.PfNumber; model.PfUan = salary.PfUan; model.SalaryEffectiveFrom = salary.SalaryEffectiveFrom;
+            }
         }
 
         private async Task<HrAddEmployeeViewModel> PopulateManagersAsync(HrAddEmployeeViewModel model)

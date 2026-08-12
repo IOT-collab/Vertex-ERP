@@ -1,4 +1,5 @@
 ﻿<!DOCTYPE html>
+@inject VertexERP.Data.ApplicationDbContext LayoutDb
 <!html>
 <head>
     <meta charset="utf-8" />
@@ -16,6 +17,8 @@
         var currentName = User.Identity?.Name ?? currentRole;
         var isEmployee = User.IsInRole("Employee") || User.IsInRole("User");
         var isManager = User.IsInRole("Manager");
+        var isHr = User.IsInRole("HR");
+        var pendingBankRequestCount = isHr ? LayoutDb.BankDetailUpdateRequests.Count(request => request.Status == "Pending") : 0;
         var homeUrl = isEmployee ? "/Main/EmployeeHome" : isManager ? "/Main/Manager" : "/Main/Dashboard";
     }
 
@@ -46,15 +49,25 @@
                     <li><a href="/Main/EmployeeLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
                     <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user" aria-hidden="true"></i><span>My Profile</span></a></li>
                     <li><a href="/Main/EmployeeNotifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Notifications</span></a></li>
+                    <li><a href="/Main/EmployeeQueries"><i class="fa-regular fa-circle-question" aria-hidden="true"></i><span>Raise Query</span></a></li>
+                    <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Salary Slip</span></a></li>
+                    <li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns" aria-hidden="true"></i><span>My Bank Details</span></a></li>
                 }
                 else if (isManager)
                 {
                     <li><a href="/Main/Manager"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Manager Dashboard</span></a></li>
                     <li><a href="/Main/Employees"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Employees</span></a></li>
-                    <li><a href="/Main/ManagerAttendance"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
-                    <li><a href="/Main/ManagerLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
+                    <li><a href="/Main/ManagerAttendance"><i class="fa-solid fa-users-viewfinder" aria-hidden="true"></i><span>Team Attendance</span></a></li>
+                    <li><a href="/Main/ManagerLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Team Leave</span></a></li>
+                    <li><a href="/Main/ManagerQueries"><i class="fa-regular fa-circle-question" aria-hidden="true"></i><span>Queries</span></a></li>
                     <li><a href="/Main/TaskMgm"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Task Management</span></a></li>
                     <li><a href="/Main/ManagerProjects"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Project Management</span></a></li>
+                    <li class="manager-self-label"><span>MY SELF SERVICE</span></li>
+                    <li><a href="/Main/EmployeeAttendance"><i class="fa-regular fa-clock" aria-hidden="true"></i><span>My Attendance</span></a></li>
+                    <li><a href="/Main/EmployeeLeaves"><i class="fa-regular fa-calendar-check" aria-hidden="true"></i><span>My Leave</span></a></li>
+                    <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user" aria-hidden="true"></i><span>My Profile</span></a></li>
+                    <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Salary Slip</span></a></li>
+                    <li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns" aria-hidden="true"></i><span>My Bank Details</span></a></li>
                 }
                 else
                 {
@@ -63,6 +76,7 @@
                     <li><a href="/Main/Attendence"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
                     <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Location Tracking</span></a></li>
                     <li><a href="/Main/LeaveManagement"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
+                    <li><a href="/Main/WorkflowManagement"><i class="fa-solid fa-code-pull-request" aria-hidden="true"></i><span>Leave & Queries</span></a></li>
 @*                     <li><a href="/Main/DepartmentManagement"><i class="fa-solid fa-building" aria-hidden="true"></i><span>Department</span></a></li>
  *@                    <li><a href="/Main/Hrms"><i class="fa-solid fa-user-tie" aria-hidden="true"></i><span>HR Management</span></a></li>
                     <li><a href="/Main/Manager"><i class="fa-solid fa-people-roof" aria-hidden="true"></i><span>Manager</span></a></li>
@@ -72,6 +86,16 @@
                     <li><a href="/Main/UserSettings"><i class="fa-solid fa-user-gear" aria-hidden="true"></i><span>User Setting</span></a></li>
                     <li><a href="/Main/Reports"><i class="fa-solid fa-chart-column" aria-hidden="true"></i><span>Reports</span></a></li>
                     <li><a href="/Main/Settings"><i class="fa-solid fa-gear" aria-hidden="true"></i><span>Settings</span></a></li>
+                    @if (isHr)
+                    {
+                        <li class="manager-self-label"><span>MY SELF SERVICE</span></li>
+                        <li><a href="/Main/EmployeeAttendance"><i class="fa-regular fa-clock"></i><span>My Attendance</span></a></li>
+                        <li><a href="/Main/EmployeeLeaves"><i class="fa-regular fa-calendar-check"></i><span>My Leave</span></a></li>
+                        <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user"></i><span>My Profile</span></a></li>
+                        <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar"></i><span>Salary Slip</span></a></li>
+                        <li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns"></i><span>My Bank Details</span></a></li>
+                        <li><a href="/Main/BankUpdateRequests"><i class="fa-solid fa-building-circle-check"></i><span>Bank Update Requests</span>@if(pendingBankRequestCount>0){<b style="margin-left:auto;background:#ef4444;color:#fff;border-radius:999px;padding:3px 7px;font-size:11px">@pendingBankRequestCount</b>}</a></li>
+                    }
                 }
             </ul>
         </aside>
@@ -109,4 +133,5 @@
 
     </div>
 
+    @await RenderSectionAsync("Scripts", required: false)
 </body>

@@ -18,6 +18,10 @@ namespace VertexERP.Data
         public DbSet<EmployeeDeviceMapping> EmployeeDeviceMappings => Set<EmployeeDeviceMapping>();
         public DbSet<WorkTask> WorkTasks => Set<WorkTask>();
         public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
+        public DbSet<QueryTicket> QueryTickets => Set<QueryTicket>();
+        public DbSet<EmployeeBankDetail> EmployeeBankDetails => Set<EmployeeBankDetail>();
+        public DbSet<BankDetailUpdateRequest> BankDetailUpdateRequests => Set<BankDetailUpdateRequest>();
+        public DbSet<EmployeeSalaryDetail> EmployeeSalaryDetails => Set<EmployeeSalaryDetail>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -56,7 +60,25 @@ namespace VertexERP.Data
                 entity.HasOne(request => request.Employee).WithMany()
                     .HasForeignKey(request => request.EmployeeId)
                     .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(request => request.AssignedApproverEmployee).WithMany()
+                    .HasForeignKey(request => request.AssignedApproverEmployeeId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(request => request.DecidedByUser).WithMany()
+                    .HasForeignKey(request => request.DecidedByUserId).OnDelete(DeleteBehavior.SetNull);
             });
+
+            modelBuilder.Entity<QueryTicket>(entity =>
+            {
+                entity.ToTable("QueryTickets");
+                entity.HasIndex(ticket => new { ticket.EmployeeId, ticket.CreatedAtUtc });
+                entity.HasIndex(ticket => new { ticket.ReportingManagerId, ticket.Status });
+                entity.Property(ticket => ticket.CreatedAtUtc).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.HasOne(ticket => ticket.Employee).WithMany().HasForeignKey(ticket => ticket.EmployeeId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(ticket => ticket.ReportingManager).WithMany().HasForeignKey(ticket => ticket.ReportingManagerId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(ticket => ticket.ResolvedByUser).WithMany().HasForeignKey(ticket => ticket.ResolvedByUserId).OnDelete(DeleteBehavior.SetNull);
+            });
+            modelBuilder.Entity<EmployeeBankDetail>(entity => { entity.ToTable("EmployeeBankDetails"); entity.HasIndex(x => x.EmployeeId).IsUnique(); entity.HasOne(x => x.Employee).WithOne().HasForeignKey<EmployeeBankDetail>(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade); });
+            modelBuilder.Entity<BankDetailUpdateRequest>(entity => { entity.ToTable("BankDetailUpdateRequests"); entity.HasIndex(x => new { x.EmployeeId, x.Status }); entity.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade); });
+            modelBuilder.Entity<EmployeeSalaryDetail>(entity => { entity.ToTable("EmployeeSalaryDetails"); entity.HasIndex(x => x.EmployeeId).IsUnique(); entity.Property(x => x.BasicSalary).HasPrecision(18,2); entity.Property(x => x.HouseRentAllowance).HasPrecision(18,2); entity.Property(x => x.ConveyanceAllowance).HasPrecision(18,2); entity.Property(x => x.SpecialAllowance).HasPrecision(18,2); entity.Property(x => x.ProvidentFund).HasPrecision(18,2); entity.Property(x => x.ProfessionalTax).HasPrecision(18,2); entity.Property(x => x.Tds).HasPrecision(18,2); entity.Property(x => x.OtherDeductions).HasPrecision(18,2); entity.HasOne(x => x.Employee).WithOne().HasForeignKey<EmployeeSalaryDetail>(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade); });
 
             modelBuilder.Entity<Department>(entity =>
             {

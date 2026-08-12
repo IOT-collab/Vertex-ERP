@@ -15,11 +15,13 @@ namespace VertexERP.Controllers
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IAttendanceProcessingService _attendanceProcessingService;
+        private readonly BankAccountProtectionService _bankProtection;
 
-        public MainController(ApplicationDbContext dbContext, IAttendanceProcessingService attendanceProcessingService)
+        public MainController(ApplicationDbContext dbContext, IAttendanceProcessingService attendanceProcessingService, BankAccountProtectionService bankProtection)
         {
             _dbContext = dbContext;
             _attendanceProcessingService = attendanceProcessingService;
+            _bankProtection = bankProtection;
         }
 
         [AllowAnonymous]
@@ -54,7 +56,9 @@ namespace VertexERP.Controllers
 
             var normalizedUsername = DatabaseInitializer.NormalizeUsername(email);
             var normalizedLogin = email.Trim().ToLowerInvariant();
-            var normalizedPassword = password.Trim();
+            // Password comparison must use the exact value created by HR. Trimming here can
+            // silently change an otherwise valid credential.
+            var normalizedPassword = password;
 
             // Always prefer the login username that HR saved for the employee. Looking up
             // username, employee ID and email in one query can select a different account
@@ -62,6 +66,11 @@ namespace VertexERP.Controllers
             var user = await _dbContext.AppUsers
                 .Include(appUser => appUser.Employee)
                 .FirstOrDefaultAsync(appUser => appUser.IsActive && appUser.NormalizedUsername == normalizedUsername);
+
+            // Also check by Username (case-insensitive) in case of normalization issues
+            user ??= await _dbContext.AppUsers
+                .Include(appUser => appUser.Employee)
+                .FirstOrDefaultAsync(appUser => appUser.IsActive && appUser.Username.ToUpper() == normalizedUsername);
 
             // Employee ID and corporate email remain supported as fallbacks, but only when
             // no account exists with the exact username entered on the login form.
@@ -72,41 +81,47 @@ namespace VertexERP.Controllers
                     (appUser.Employee.EmployeeCode.ToLower() == normalizedLogin ||
                      appUser.Employee.Email.ToLower() == normalizedLogin));
 
-            if (user != null && PasswordHashService.VerifyPassword(normalizedPassword, user.PasswordHash))
+            if (user == null)
             {
-                var role = AccountRoleService.Normalize(user.Role);
-                if (role == null || ((role == AccountRoleService.Manager || role == AccountRoleService.Employee) && !user.EmployeeId.HasValue))
-                {
-                    ViewBag.ErrorMessage = "This login account is not correctly linked to an employee role. Please contact HR.";
-                    return View();
-                }
-                var claims = new List<Claim>
-                {
-                    new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new(ClaimTypes.Name, user.FullName),
-                    new(ClaimTypes.Role, role),
-                    new("username", user.Username)
-                };
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(identity),
-                    new AuthenticationProperties
-                    {
-                        IsPersistent = rememberMe,
-                        ExpiresUtc = rememberMe ? DateTimeOffset.UtcNow.AddDays(14) : null
-                    });
-
-                HttpContext.Session.SetString("email", user.Username);
-                HttpContext.Session.SetString("username", user.Username);
-                HttpContext.Session.SetString("role", role);
-                HttpContext.Session.SetString("fullName", user.FullName);
-                return RedirectToRoleHome(role);
+                ViewBag.ErrorMessage = "Invalid username or password";
+                return View();
             }
 
-            ViewBag.ErrorMessage = "Invalid username or password";
-            return View();
+            if (!PasswordHashService.VerifyPassword(normalizedPassword, user.PasswordHash))
+            {
+                ViewBag.ErrorMessage = "Invalid username or password";
+                return View();
+            }
+
+            var role = AccountRoleService.Normalize(user.Role);
+            if (role == null || ((role == AccountRoleService.Manager || role == AccountRoleService.Employee) && !user.EmployeeId.HasValue))
+            {
+                ViewBag.ErrorMessage = "This login account is not correctly linked to an employee role. Please contact HR.";
+                return View();
+            }
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new(ClaimTypes.Name, user.FullName),
+                new(ClaimTypes.Role, role),
+                new("username", user.Username)
+            };
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(identity),
+                new AuthenticationProperties
+                {
+                    IsPersistent = rememberMe,
+                    ExpiresUtc = rememberMe ? DateTimeOffset.UtcNow.AddDays(14) : null
+                });
+
+            HttpContext.Session.SetString("email", user.Username);
+            HttpContext.Session.SetString("username", user.Username);
+            HttpContext.Session.SetString("role", role);
+            HttpContext.Session.SetString("fullName", user.FullName);
+            return RedirectToRoleHome(role);
         }
 
         [Authorize(Roles = "Admin,HR")]
@@ -143,9 +158,9 @@ namespace VertexERP.Controllers
             {
                 Username = username.Trim(),
                 NormalizedUsername = normalizedUsername,
-                FullName = fullName.Trim(),
-                Role = string.IsNullOrWhiteSpace(role) ? "User" : role.Trim(),
                 PasswordHash = PasswordHashService.HashPassword(password),
+                Role = string.IsNullOrWhiteSpace(role) ? "User" : role.Trim(),
+                FullName = fullName.Trim(),
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             });
@@ -252,7 +267,7 @@ namespace VertexERP.Controllers
             return View(new EmployeeTasksViewModel { Employee = employee, Tasks = tasks });
         }
 
-        [Authorize(Roles = "Employee,User")]
+        [Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> EmployeeAttendance(int? month, int? year)
         {
             var employee = await LoadLoggedInEmployeeAsync();
@@ -280,7 +295,7 @@ namespace VertexERP.Controllers
             return View(new EmployeeAttendanceViewModel { Employee = employee, Month = DateOnly.FromDateTime(start), Days = days.OrderByDescending(day => day.Date).ToList() });
         }
 
-        [Authorize(Roles = "Employee,User")]
+        [Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> EmployeeLeaves()
         {
             var employee = await LoadLoggedInEmployeeAsync();
@@ -289,15 +304,17 @@ namespace VertexERP.Controllers
             return View(new EmployeeLeaveViewModel { Employee = employee, Requests = requests });
         }
 
-        [Authorize(Roles = "Employee,User")]
+        [Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> EmployeeProfile()
         {
             var employee = await LoadLoggedInEmployeeAsync();
-            return employee == null ? RedirectToAction(nameof(AccessDenied)) : View(employee);
+            if (employee == null) return RedirectToAction(nameof(AccessDenied));
+            ViewBag.BankDetail = await _dbContext.EmployeeBankDetails.AsNoTracking().FirstOrDefaultAsync(item => item.EmployeeId == employee.Id);
+            return View(employee);
         }
 
         [HttpGet]
-        [Authorize(Roles = "Employee,User")]
+        [Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> EditEmployeeProfile()
         {
             var employee = await LoadLoggedInEmployeeAsync();
@@ -313,7 +330,7 @@ namespace VertexERP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Employee,User")]
+        [Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> EditEmployeeProfile(EmployeeProfileEditViewModel model)
         {
             var employeeId = await GetLoggedInEmployeeIdAsync();
@@ -364,7 +381,34 @@ namespace VertexERP.Controllers
             var ownLeaves = await _dbContext.LeaveRequests.AsNoTracking().Where(request => request.EmployeeId == employee.Id).ToListAsync();
             var taskItems = assignedTasks.Select(task => new EmployeeNotificationItem("Task assigned: " + task.Title, "Status: " + task.Status + " · Due " + task.DueDate.ToString("dd MMM yyyy"), task.CreatedAtUtc, "Task"));
             var leaveItems = ownLeaves.Select(request => new EmployeeNotificationItem("Leave request " + request.Status, request.LeaveType + " · " + request.FromDate.ToString("dd MMM") + " - " + request.ToDate.ToString("dd MMM yyyy"), request.AppliedAtUtc, "Leave"));
-            return View(new EmployeeNotificationsViewModel { Employee = employee, Items = taskItems.Concat(leaveItems).OrderByDescending(item => item.CreatedAt).ToList() });
+            var ownTickets = await _dbContext.QueryTickets.AsNoTracking().Where(ticket => ticket.EmployeeId == employee.Id).ToListAsync();
+            var ticketItems = ownTickets.Select(ticket => new EmployeeNotificationItem("Query: " + ticket.Subject, "Status: " + ticket.Status + (string.IsNullOrWhiteSpace(ticket.Resolution) ? string.Empty : " · " + ticket.Resolution), ticket.UpdatedAtUtc ?? ticket.CreatedAtUtc, "Query"));
+            return View(new EmployeeNotificationsViewModel { Employee = employee, Items = taskItems.Concat(leaveItems).Concat(ticketItems).OrderByDescending(item => item.CreatedAt).ToList() });
+        }
+
+        [Authorize(Roles = "Employee,User")]
+        public async Task<IActionResult> EmployeeQueries()
+        {
+            var employee = await LoadLoggedInEmployeeAsync();
+            if (employee == null) return RedirectToAction(nameof(AccessDenied));
+            var tickets = await _dbContext.QueryTickets.AsNoTracking().Where(ticket => ticket.EmployeeId == employee.Id).OrderByDescending(ticket => ticket.CreatedAtUtc).ToListAsync();
+            return View(new EmployeeQueryViewModel { Employee = employee, Tickets = tickets });
+        }
+
+        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Employee,User")]
+        public async Task<IActionResult> RaiseQuery(string subject, string category, string description)
+        {
+            var employee = await LoadLoggedInEmployeeAsync();
+            if (employee == null) return RedirectToAction(nameof(AccessDenied));
+            if (string.IsNullOrWhiteSpace(subject) || string.IsNullOrWhiteSpace(description))
+            {
+                TempData["QueryError"] = "Subject and query details are required.";
+                return RedirectToAction(nameof(EmployeeQueries));
+            }
+            _dbContext.QueryTickets.Add(new QueryTicket { EmployeeId = employee.Id, ReportingManagerId = employee.ReportingManagerId, Subject = subject.Trim(), Category = string.IsNullOrWhiteSpace(category) ? "General" : category.Trim(), Description = description.Trim() });
+            await _dbContext.SaveChangesAsync();
+            TempData["QueryMessage"] = "Your query was sent to your reporting manager and HR.";
+            return RedirectToAction(nameof(EmployeeQueries));
         }
 
         [Authorize(Roles = "Admin,HR")]
@@ -546,13 +590,16 @@ namespace VertexERP.Controllers
                 .Include(request => request.Employee)
                 .Where(request => teamMemberIds.Contains(request.EmployeeId))
                 .OrderByDescending(request => request.AppliedAtUtc).ToListAsync();
+            var queryTickets = await _dbContext.QueryTickets.AsNoTracking().Include(ticket => ticket.Employee)
+                .Where(ticket => managerIds.Contains(ticket.ReportingManagerId ?? 0)).OrderByDescending(ticket => ticket.CreatedAtUtc).ToListAsync();
 
             return View(new ManagerDashboardViewModel
             {
                 Managers = managers,
                 TeamMembers = teamMembers,
                 Tasks = tasks,
-                LeaveRequests = leaveRequests
+                LeaveRequests = leaveRequests,
+                QueryTickets = queryTickets
             });
         }
 
@@ -646,6 +693,91 @@ namespace VertexERP.Controllers
         }
 
         [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> ManagerQueries()
+        {
+            var managerId = await GetLoggedInEmployeeIdAsync();
+            var tickets = await _dbContext.QueryTickets.AsNoTracking().Include(ticket => ticket.Employee)
+                .Where(ticket => ticket.ReportingManagerId == managerId).OrderByDescending(ticket => ticket.CreatedAtUtc).ToListAsync();
+            return View(new ManagerSectionViewModel { QueryTickets = tickets });
+        }
+
+        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Manager")]
+        public async Task<IActionResult> DecideTeamLeave(int id, string decision, string? note)
+        {
+            var managerId = await GetLoggedInEmployeeIdAsync();
+            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsed) ? parsed : 0;
+            var request = await _dbContext.LeaveRequests.Include(item => item.Employee).FirstOrDefaultAsync(item => item.Id == id && item.AssignedApproverEmployeeId == managerId && item.Status == "Pending");
+            if (request == null) return NotFound();
+            request.Status = decision.Equals("Approved", StringComparison.OrdinalIgnoreCase) ? "Approved" : "Rejected";
+            request.DecidedByUserId = userId; request.DecidedAtUtc = DateTime.UtcNow; request.DecisionNote = CleanProfileValue(note);
+            await _dbContext.SaveChangesAsync();
+            TempData["WorkflowMessage"] = $"Leave request {request.Status.ToLowerInvariant()}. HR can now see the updated status.";
+            return RedirectToAction(nameof(ManagerLeaves));
+        }
+
+        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Manager,HR,Admin")]
+        public async Task<IActionResult> UpdateQueryTicket(int id, string status, string? resolution)
+        {
+            var ticket = await _dbContext.QueryTickets.FirstOrDefaultAsync(item => item.Id == id);
+            if (ticket == null) return NotFound();
+            var managerId = await GetLoggedInEmployeeIdAsync();
+            if (User.IsInRole("Manager") && ticket.ReportingManagerId != managerId) return Forbid();
+            ticket.Status = status is "Resolved" or "Closed" ? status : "In Progress";
+            ticket.Resolution = CleanProfileValue(resolution); ticket.UpdatedAtUtc = DateTime.UtcNow;
+            ticket.ResolvedByUserId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId) ? userId : null;
+            await _dbContext.SaveChangesAsync();
+            return RedirectToAction(User.IsInRole("Manager") ? nameof(ManagerQueries) : nameof(WorkflowManagement));
+        }
+
+        [Authorize(Roles = "Employee,User,Manager,HR")]
+        public async Task<IActionResult> SalarySlips()
+        {
+            var employee = await LoadLoggedInEmployeeAsync();
+            if (employee == null) return RedirectToAction(nameof(AccessDenied));
+            var salary = await _dbContext.EmployeeSalaryDetails.AsNoTracking().FirstOrDefaultAsync(item => item.EmployeeId == employee.Id && item.IsActive);
+            var today = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var months = Enumerable.Range(0, 12).Select(offset => today.AddMonths(-offset))
+                .Where(date => DateOnly.FromDateTime(date) >= new DateOnly(employee.JoiningDate.Year, employee.JoiningDate.Month, 1))
+                .Select(date => new SalarySlipMonth(date.Year, date.Month, date.ToString("MMMM yyyy"), salary != null && date >= new DateTime(salary.EffectiveFrom.Year, salary.EffectiveFrom.Month, 1))).ToList();
+            return View(new SalarySlipPageViewModel { Employee = employee, Months = months });
+        }
+
+        [Authorize(Roles = "Employee,User,Manager,HR")]
+        public async Task<IActionResult> DownloadSalarySlip(int year, int month)
+        {
+            var employee = await LoadLoggedInEmployeeAsync();
+            if (employee == null) return RedirectToAction(nameof(AccessDenied));
+            if (month is < 1 or > 12 || year < employee.JoiningDate.Year || new DateTime(year, month, 1) > new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1))
+                return BadRequest("Invalid salary slip month.");
+            var salary = await _dbContext.EmployeeSalaryDetails.AsNoTracking().FirstOrDefaultAsync(item => item.EmployeeId == employee.Id && item.IsActive);
+            if (salary == null) return BadRequest("Salary details have not been added by HR.");
+            if (new DateOnly(year, month, 1) < new DateOnly(salary.EffectiveFrom.Year, salary.EffectiveFrom.Month, 1)) return BadRequest("Salary details are not effective for this month.");
+            var bank = await _dbContext.EmployeeBankDetails.AsNoTracking().FirstOrDefaultAsync(item => item.EmployeeId == employee.Id);
+            var pdf = SalarySlipPdfService.Create(employee, salary, bank, year, month);
+            return File(pdf, "application/pdf", $"Salary-Slip-{employee.EmployeeCode}-{year}-{month:00}.pdf");
+        }
+
+        [Authorize(Roles = "HR,Admin")]
+        public async Task<IActionResult> WorkflowManagement()
+        {
+            var leaves = await _dbContext.LeaveRequests.AsNoTracking().Include(item => item.Employee).Include(item => item.AssignedApproverEmployee).OrderByDescending(item => item.AppliedAtUtc).ToListAsync();
+            var tickets = await _dbContext.QueryTickets.AsNoTracking().Include(item => item.Employee).Include(item => item.ReportingManager).OrderByDescending(item => item.CreatedAtUtc).ToListAsync();
+            return View(new WorkflowManagementViewModel { LeaveRequests = leaves, QueryTickets = tickets });
+        }
+
+        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "HR,Admin")]
+        public async Task<IActionResult> DecideManagerLeave(int id, string decision, string? note)
+        {
+            var request = await _dbContext.LeaveRequests.Include(item => item.Employee).FirstOrDefaultAsync(item => item.Id == id && item.ApprovalLevel == "HR/Admin" && item.Status == "Pending");
+            if (request == null) return NotFound();
+            request.Status = decision.Equals("Approved", StringComparison.OrdinalIgnoreCase) ? "Approved" : "Rejected";
+            request.DecidedByUserId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId) ? userId : null;
+            request.DecidedAtUtc = DateTime.UtcNow; request.DecisionNote = CleanProfileValue(note);
+            await _dbContext.SaveChangesAsync();
+            return RedirectToAction(nameof(WorkflowManagement));
+        }
+
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> ManagerProjects()
         {
             var managerId = await GetLoggedInEmployeeIdAsync();
@@ -655,7 +787,7 @@ namespace VertexERP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Employee,User")]
+        [Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> ApplyLeave(string leaveType, DateOnly fromDate, DateOnly toDate, string reason)
         {
             var userIdText = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -672,7 +804,9 @@ namespace VertexERP.Controllers
                 TempData["LeaveError"] = "Please enter a valid leave type, date range and reason.";
                 return RedirectToAction(nameof(EmployeeLeaves));
             }
-            _dbContext.LeaveRequests.Add(new LeaveRequest { EmployeeId = employeeId.Value, LeaveType = leaveType.Trim(), FromDate = fromDate, ToDate = toDate, Reason = reason.Trim() });
+            var employee = await _dbContext.Employees.AsNoTracking().FirstAsync(item => item.Id == employeeId.Value);
+            var seniorApplicant = User.IsInRole("Manager") || User.IsInRole("HR");
+            _dbContext.LeaveRequests.Add(new LeaveRequest { EmployeeId = employee.Id, LeaveType = leaveType.Trim(), FromDate = fromDate, ToDate = toDate, Reason = reason.Trim(), ApprovalLevel = seniorApplicant ? "HR/Admin" : "Manager", AssignedApproverEmployeeId = seniorApplicant ? null : employee.ReportingManagerId });
             await _dbContext.SaveChangesAsync();
             TempData["LeaveMessage"] = "Leave request submitted to your manager.";
             return RedirectToAction(nameof(EmployeeLeaves));
@@ -703,16 +837,122 @@ namespace VertexERP.Controllers
         {
             var userIdText = User.FindFirstValue(ClaimTypes.NameIdentifier);
             return int.TryParse(userIdText, out var userId)
-                ? await _dbContext.AppUsers.AsNoTracking().Where(user => user.Id == userId).Select(user => user.EmployeeId).FirstOrDefaultAsync()
+                ? await _dbContext.AppUsers.AsNoTracking().Where(user => user.Id == userId && user.IsActive).Select(user => user.EmployeeId).FirstOrDefaultAsync()
                 : null;
         }
 
         private async Task<Employee?> LoadLoggedInEmployeeAsync()
         {
             var employeeId = await GetLoggedInEmployeeIdAsync();
+            if (!employeeId.HasValue && AccountRoleService.Normalize(User.FindFirstValue(ClaimTypes.Role)) == AccountRoleService.HR)
+            {
+                employeeId = await EnsureHrSelfServiceProfileAsync();
+            }
             return employeeId.HasValue
-                ? await _dbContext.Employees.AsNoTracking().Include(employee => employee.ReportingManager).Include(employee => employee.DepartmentEntity).FirstOrDefaultAsync(employee => employee.Id == employeeId.Value)
+                ? await _dbContext.Employees.AsNoTracking().Include(employee => employee.ReportingManager).Include(employee => employee.DepartmentEntity).FirstOrDefaultAsync(employee => employee.Id == employeeId.Value && employee.IsActive)
                 : null;
+        }
+
+        private async Task<int?> EnsureHrSelfServiceProfileAsync()
+        {
+            var userIdText = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdText, out var userId)) return null;
+
+            var user = await _dbContext.AppUsers.FirstOrDefaultAsync(item => item.Id == userId && item.IsActive);
+            if (user == null || AccountRoleService.Normalize(user.Role) != AccountRoleService.HR) return null;
+            if (user.EmployeeId.HasValue) return user.EmployeeId;
+
+            var normalizedName = user.FullName.Trim().ToLower();
+            var normalizedUsername = user.Username.Trim().ToLower();
+            var existingEmployee = await _dbContext.Employees.FirstOrDefaultAsync(employee =>
+                employee.IsActive &&
+                (employee.FullName.ToLower() == normalizedName || employee.Email.ToLower() == normalizedUsername));
+
+            if (existingEmployee == null)
+            {
+                var baseCode = $"HR-{user.Id:0000}";
+                var employeeCode = baseCode;
+                var suffix = 1;
+                while (await _dbContext.Employees.AnyAsync(employee => employee.EmployeeCode == employeeCode))
+                {
+                    employeeCode = $"{baseCode}-{suffix++}";
+                }
+
+                var email = user.Username.Contains('@') ? user.Username.Trim() : $"{user.Username.Trim()}@vertex.local";
+                existingEmployee = new Employee
+                {
+                    EmployeeCode = employeeCode,
+                    FirstName = string.IsNullOrWhiteSpace(user.FullName) ? "HR" : user.FullName.Trim(),
+                    FullName = string.IsNullOrWhiteSpace(user.FullName) ? "HR" : user.FullName.Trim(),
+                    Email = email,
+                    PhoneNumber = "Not provided",
+                    EmergencyContact = "Not provided",
+                    JoiningDate = DateOnly.FromDateTime(DateTime.Today),
+                    Department = "Human Resources",
+                    Designation = "HR Executive",
+                    EmploymentType = "Full Time",
+                    EmployeeStatus = "Active",
+                    IsActive = true,
+                    CreatedDate = DateTime.UtcNow
+                };
+                _dbContext.Employees.Add(existingEmployee);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            user.EmployeeId = existingEmployee.Id;
+            await _dbContext.SaveChangesAsync();
+            return existingEmployee.Id;
+        }
+
+        [Authorize(Roles = "Employee,User,Manager,HR")]
+        public async Task<IActionResult> MyBankDetails()
+        {
+            var employee = await LoadLoggedInEmployeeAsync();
+            if (employee == null) return RedirectToAction(nameof(AccessDenied));
+            var detail = await _dbContext.EmployeeBankDetails.AsNoTracking().FirstOrDefaultAsync(x => x.EmployeeId == employee.Id);
+            var requests = await _dbContext.BankDetailUpdateRequests.AsNoTracking().Where(x => x.EmployeeId == employee.Id).OrderByDescending(x => x.RequestedAtUtc).ToListAsync();
+            return View(new MyBankDetailsViewModel { Employee = employee, BankDetail = detail, Requests = requests, UpdateRequest = new BankDetailRequestViewModel { AccountHolderName = detail?.AccountHolderName ?? employee.FullName, BankName = detail?.BankName ?? string.Empty, IfscCode = detail?.IfscCode ?? string.Empty, BranchName = detail?.BranchName, AccountType = detail?.AccountType ?? "Savings", PanNumber = detail?.PanNumber, UanNumber = detail?.UanNumber, EsicNumber = detail?.EsicNumber, UpiId = detail?.UpiId } });
+        }
+
+        [HttpGet, Authorize(Roles = "Employee,User,Manager,HR")]
+        public async Task<IActionResult> RequestBankUpdate()
+        {
+            return await LoadLoggedInEmployeeAsync() == null ? RedirectToAction(nameof(AccessDenied)) : View(new BankDetailRequestViewModel());
+        }
+
+        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Employee,User,Manager,HR")]
+        public async Task<IActionResult> RequestBankUpdate(BankDetailRequestViewModel model)
+        {
+            var employee = await LoadLoggedInEmployeeAsync();
+            if (employee == null) return RedirectToAction(nameof(AccessDenied));
+            if (!ModelState.IsValid) return View(model);
+            if (await _dbContext.BankDetailUpdateRequests.AnyAsync(x => x.EmployeeId == employee.Id && x.Status == "Pending"))
+            { ModelState.AddModelError(string.Empty, "A bank update request is already pending with HR."); return View(model); }
+            var account = model.AccountNumber.Trim();
+            _dbContext.BankDetailUpdateRequests.Add(new BankDetailUpdateRequest { EmployeeId = employee.Id, AccountHolderName = model.AccountHolderName.Trim(), BankName = model.BankName.Trim(), ProtectedAccountNumber = _bankProtection.Protect(account), AccountLastFour = account[^4..], IfscCode = model.IfscCode.Trim().ToUpperInvariant(), BranchName = CleanProfileValue(model.BranchName), AccountType = model.AccountType, PanNumber = CleanProfileValue(model.PanNumber)?.ToUpperInvariant(), UanNumber = CleanProfileValue(model.UanNumber), EsicNumber = CleanProfileValue(model.EsicNumber), UpiId = CleanProfileValue(model.UpiId) });
+            await _dbContext.SaveChangesAsync(); TempData["BankMessage"] = "Bank detail request submitted to HR for verification."; return RedirectToAction(nameof(MyBankDetails));
+        }
+
+        [Authorize(Roles = "HR")]
+        public async Task<IActionResult> BankUpdateRequests()
+        {
+            var requests = await _dbContext.BankDetailUpdateRequests.AsNoTracking().Include(x => x.Employee).OrderByDescending(x => x.RequestedAtUtc).ToListAsync();
+            return View(new BankApprovalViewModel { Requests = requests });
+        }
+
+        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "HR")]
+        public async Task<IActionResult> ReviewBankUpdate(int id, string decision, string? note)
+        {
+            var request = await _dbContext.BankDetailUpdateRequests.FirstOrDefaultAsync(x => x.Id == id && x.Status == "Pending");
+            if (request == null) return NotFound();
+            request.Status = decision == "Approved" ? "Approved" : "Rejected"; request.HrNote = CleanProfileValue(note); request.ReviewedAtUtc = DateTime.UtcNow; request.ReviewedByUserId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : null;
+            if (request.Status == "Approved")
+            {
+                var detail = await _dbContext.EmployeeBankDetails.FirstOrDefaultAsync(x => x.EmployeeId == request.EmployeeId) ?? new EmployeeBankDetail { EmployeeId = request.EmployeeId };
+                detail.AccountHolderName = request.AccountHolderName; detail.BankName = request.BankName; detail.ProtectedAccountNumber = request.ProtectedAccountNumber; detail.AccountLastFour = request.AccountLastFour; detail.IfscCode = request.IfscCode; detail.BranchName = request.BranchName; detail.AccountType = request.AccountType; detail.PanNumber = request.PanNumber; detail.UanNumber = request.UanNumber; detail.EsicNumber = request.EsicNumber; detail.UpiId = request.UpiId; detail.IsVerified = true; detail.VerifiedByUserId = request.ReviewedByUserId; detail.VerifiedAtUtc = DateTime.UtcNow; detail.UpdatedAtUtc = DateTime.UtcNow;
+                if (detail.Id == 0) _dbContext.EmployeeBankDetails.Add(detail);
+            }
+            await _dbContext.SaveChangesAsync(); return RedirectToAction(nameof(BankUpdateRequests));
         }
 
         private async Task<EmployeeProfileEditViewModel> PopulateEmployeeProfileOptionsAsync(EmployeeProfileEditViewModel model, int employeeId)
@@ -725,6 +965,8 @@ namespace VertexERP.Controllers
         private static string? CleanProfileValue(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 }
+
+
 
 
 

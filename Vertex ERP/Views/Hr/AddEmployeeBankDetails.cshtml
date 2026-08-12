@@ -1,0 +1,20 @@
+@model VertexERP.Models.EmployeeBankDraft
+@{ ViewData["Title"] = "Add Bank Details"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
+<link href="~/css/hraddemp.css" rel="stylesheet" />
+<div class="add-employee-page">
+    <div class="page-header"><div class="header-content"><h2>Add Bank Details</h2><p>Add verified bank and payroll information for the new employee.</p></div></div>
+    <form class="employee-form" asp-action="AddEmployeeBankDetails" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="field-validation"></div>
+        <div class="form-card"><div class="card-header"><h3>Bank &amp; Payroll Details</h3><p>These details will be attached when the employee is created.</p></div>
+            <div class="form-grid">
+                <div class="form-group"><label>Account Holder Name</label><input asp-for="BankAccountHolderName" /></div><div class="form-group"><label>Bank Name</label><input asp-for="BankName" /></div>
+                <div class="form-group"><label>Account Number</label><input asp-for="BankAccountNumber" type="text" inputmode="numeric" /><span asp-validation-for="BankAccountNumber" class="field-validation"></span></div><div class="form-group"><label>Confirm Account Number</label><input asp-for="ConfirmBankAccountNumber" type="text" inputmode="numeric" /><span asp-validation-for="ConfirmBankAccountNumber" class="field-validation"></span></div>
+                <div class="form-group"><label>IFSC Code</label><input asp-for="BankIfscCode" /><span asp-validation-for="BankIfscCode" class="field-validation"></span></div><div class="form-group"><label>Branch Name</label><input asp-for="BankBranchName" /></div>
+                <div class="form-group"><label>Account Type</label><select asp-for="BankAccountType"><option value="">Select</option><option>Savings</option><option>Current</option><option>Salary</option></select></div><div class="form-group"><label>PAN Number</label><input asp-for="PanNumber" /></div>
+                <div class="form-group"><label>UAN / PF Number</label><input asp-for="UanNumber" /></div><div class="form-group"><label>ESIC Number</label><input asp-for="EsicNumber" /></div><div class="form-group"><label>UPI ID</label><input asp-for="UpiId" /></div>
+            </div>
+        </div>
+        <div class="form-actions"><a asp-action="HrAddEmp" class="btn-cancel">Cancel</a><button type="submit" class="btn-save">Save Bank Details</button></div>
+    </form>
+</div>

@@ -14,4 +14,5 @@ public sealed class ManagerSectionViewModel
 {
     public IReadOnlyList<LeaveRequest> LeaveRequests { get; init; } = Array.Empty<LeaveRequest>();
     public IReadOnlyList<WorkTask> Tasks { get; init; } = Array.Empty<WorkTask>();
+    public IReadOnlyList<QueryTicket> QueryTickets { get; init; } = Array.Empty<QueryTicket>();
 }

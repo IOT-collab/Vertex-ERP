@@ -24,6 +24,25 @@
     {
         <div class="employee-message"><i class="fa-solid fa-circle-check"></i> @message</div>
     }
+    @if (TempData["CreatedLoginUsername"] is string createdUsername && TempData["CreatedLoginPassword"] is string createdPassword)
+    {
+        <section class="created-login-card" aria-label="New employee login credentials">
+            <div><span class="created-login-kicker">LOGIN READY</span><h3>New account credentials</h3><p>Copy these exact, case-sensitive credentials and share them securely with the employee.</p></div>
+            <div class="created-login-values">
+                <label>Username <span id="createdLoginUsername">@createdUsername</span><button type="button" onclick="copyCreatedCredential('createdLoginUsername', this)">Copy</button></label>
+                <label>Password <span id="createdLoginPassword">@createdPassword</span><button type="button" onclick="copyCreatedCredential('createdLoginPassword', this)">Copy</button></label>
+                <label>Role <span>@TempData["CreatedLoginRole"]</span></label>
+            </div>
+            <small>This password is shown only once on this screen.</small>
+        </section>
+        <script>
+            async function copyCreatedCredential(id, button) {
+                await navigator.clipboard.writeText(document.getElementById(id).textContent.trim());
+                const oldText = button.textContent; button.textContent = 'Copied';
+                setTimeout(() => button.textContent = oldText, 1400);
+            }
+        </script>
+    }
     @if (TempData["EmployeeError"] is string error)
     {
         <div class="employee-message employee-error"><i class="fa-solid fa-circle-exclamation"></i> @error</div>

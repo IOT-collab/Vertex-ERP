@@ -148,6 +148,19 @@ body {
     margin-bottom: 5px;
 }
 
+.sidebar-menu .manager-self-label {
+    margin: 17px 14px 7px;
+    padding-top: 13px;
+    border-top: 1px solid rgba(255, 255, 255, .09);
+}
+
+.sidebar-menu .manager-self-label span {
+    color: #7182a2;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.25px;
+}
+
 .sidebar-menu li a {
     display: flex;
     align-items: center;

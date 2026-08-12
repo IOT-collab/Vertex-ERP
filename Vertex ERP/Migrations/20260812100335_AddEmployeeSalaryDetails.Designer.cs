@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VertexERP.Data;
@@ -11,9 +12,11 @@ using VertexERP.Data;
 namespace Vertex_ERP.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260812100335_AddEmployeeSalaryDetails")]
+    partial class AddEmployeeSalaryDetails
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -607,74 +610,6 @@ namespace Vertex_ERP.Migrations
                     b.ToTable("EmployeeDeviceMapping", (string)null);
                 });
 
-            modelBuilder.Entity("VertexERP.Models.EmployeeSalaryDetail", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("BasicSalary")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<decimal>("ConveyanceAllowance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<DateOnly>("EffectiveFrom")
-                        .HasColumnType("date");
-
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("HouseRentAllowance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<decimal>("OtherDeductions")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<string>("PfNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("PfUan")
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
-
-                    b.Property<decimal>("ProfessionalTax")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<decimal>("ProvidentFund")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<decimal>("SpecialAllowance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<decimal>("Tds")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<DateTime>("UpdatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId")
-                        .IsUnique();
-
-                    b.ToTable("EmployeeSalaryDetails", (string)null);
-                });
-
             modelBuilder.Entity("VertexERP.Models.LeaveRequest", b =>
                 {
                     b.Property<int>("Id")
@@ -948,17 +883,6 @@ namespace Vertex_ERP.Migrations
                         .IsRequired();
 
                     b.Navigation("BiometricDevice");
-
-                    b.Navigation("Employee");
-                });
-
-            modelBuilder.Entity("VertexERP.Models.EmployeeSalaryDetail", b =>
-                {
-                    b.HasOne("VertexERP.Models.Employee", "Employee")
-                        .WithOne()
-                        .HasForeignKey("VertexERP.Models.EmployeeSalaryDetail", "EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("Employee");
                 });

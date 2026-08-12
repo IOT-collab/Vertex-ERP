@@ -67,6 +67,18 @@ public sealed class EmployeeNotificationsViewModel
     public IReadOnlyList<EmployeeNotificationItem> Items { get; init; } = Array.Empty<EmployeeNotificationItem>();
 }
 
+public sealed class EmployeeQueryViewModel
+{
+    public Employee Employee { get; init; } = null!;
+    public IReadOnlyList<QueryTicket> Tickets { get; init; } = Array.Empty<QueryTicket>();
+}
+
+public sealed class WorkflowManagementViewModel
+{
+    public IReadOnlyList<LeaveRequest> LeaveRequests { get; init; } = Array.Empty<LeaveRequest>();
+    public IReadOnlyList<QueryTicket> QueryTickets { get; init; } = Array.Empty<QueryTicket>();
+}
+
 public sealed class EmployeeProfileEditViewModel
 {
     public string EmployeeCode { get; set; } = string.Empty;

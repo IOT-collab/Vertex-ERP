@@ -67,5 +67,12 @@
             <span>Back</span>
         </button>
         }
+        @if (string.Equals(controller, "Hr", StringComparison.OrdinalIgnoreCase) && string.Equals(action, "HrAddEmp", StringComparison.OrdinalIgnoreCase))
+        {
+            <div class="employee-extra-actions">
+                <a asp-controller="Hr" asp-action="AddEmployeeBankDetails"><i class="fa-solid fa-building-columns"></i><span>Add Bank Details</span></a>
+                <a asp-controller="Hr" asp-action="AddEmployeeSalaryDetails"><i class="fa-solid fa-indian-rupee-sign"></i><span>Add Salary Details</span></a>
+            </div>
+        }
     </nav>
 }

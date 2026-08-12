@@ -12,11 +12,13 @@ public class EmployeeController : Controller
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly IWebHostEnvironment _environment;
+    private readonly BankAccountProtectionService _bankProtection;
 
-    public EmployeeController(ApplicationDbContext dbContext, IWebHostEnvironment environment)
+    public EmployeeController(ApplicationDbContext dbContext, IWebHostEnvironment environment, BankAccountProtectionService bankProtection)
     {
         _dbContext = dbContext;
         _environment = environment;
+        _bankProtection = bankProtection;
     }
 
     [HttpGet]
@@ -169,7 +171,18 @@ public class EmployeeController : Controller
     {
         var employee = _dbContext.Employees.Find(id);
         if (employee == null) return NotFound();
-        return View("~/Views/Main/AddEmpHrm.cshtml", PopulateManagers(ToForm(employee)));
+        var model = ToForm(employee);
+        var bank = _dbContext.EmployeeBankDetails.AsNoTracking().FirstOrDefault(item => item.EmployeeId == id);
+        if (bank != null)
+        {
+            model.BankAccountHolderName = bank.AccountHolderName; model.BankName = bank.BankName; model.BankIfscCode = bank.IfscCode;
+            model.BankBranchName = bank.BranchName; model.BankAccountType = bank.AccountType; model.PanNumber = bank.PanNumber;
+            model.UanNumber = bank.UanNumber; model.EsicNumber = bank.EsicNumber; model.UpiId = bank.UpiId;
+            model.MaskedBankAccountNumber = $"XXXX XXXX {bank.AccountLastFour}";
+        }
+        var salary = _dbContext.EmployeeSalaryDetails.AsNoTracking().FirstOrDefault(item => item.EmployeeId == id);
+        if (salary != null) { model.BasicSalary=salary.BasicSalary; model.HouseRentAllowance=salary.HouseRentAllowance; model.ConveyanceAllowance=salary.ConveyanceAllowance; model.SpecialAllowance=salary.SpecialAllowance; model.ProvidentFund=salary.ProvidentFund; model.ProfessionalTax=salary.ProfessionalTax; model.Tds=salary.Tds; model.OtherDeductions=salary.OtherDeductions; model.PfNumber=salary.PfNumber; model.PfUan=salary.PfUan; model.SalaryEffectiveFrom=salary.EffectiveFrom; model.HasSalaryDetails=true; }
+        return View("~/Views/Main/AddEmpHrm.cshtml", PopulateManagers(model));
     }
 
     [HttpPost]
@@ -200,6 +213,31 @@ public class EmployeeController : Controller
             DeletePhotoIfPresent(newPhotoPath);
             employee.PhotoPath = previousPhotoPath;
             return View("~/Views/Main/AddEmpHrm.cshtml", PopulateManagers(model));
+        }
+
+        var existingBank = await _dbContext.EmployeeBankDetails.FirstOrDefaultAsync(item => item.EmployeeId == id);
+        if (!string.IsNullOrWhiteSpace(model.BankAccountNumber) || existingBank != null)
+        {
+            var bank = existingBank;
+            if (bank == null) { bank = new EmployeeBankDetail { EmployeeId = id }; _dbContext.EmployeeBankDetails.Add(bank); }
+            bank.AccountHolderName = model.BankAccountHolderName!.Trim(); bank.BankName = model.BankName!.Trim();
+            if (!string.IsNullOrWhiteSpace(model.BankAccountNumber))
+            {
+                var account = model.BankAccountNumber.Trim();
+                bank.ProtectedAccountNumber = _bankProtection.Protect(account); bank.AccountLastFour = account[^4..];
+            }
+            bank.IfscCode = model.BankIfscCode!.Trim().ToUpperInvariant(); bank.BranchName = Clean(model.BankBranchName);
+            bank.AccountType = Clean(model.BankAccountType) ?? "Savings"; bank.PanNumber = Clean(model.PanNumber)?.ToUpperInvariant();
+            bank.UanNumber = Clean(model.UanNumber); bank.EsicNumber = Clean(model.EsicNumber); bank.UpiId = Clean(model.UpiId);
+            bank.IsVerified = true; bank.VerifiedAtUtc = DateTime.UtcNow; bank.UpdatedAtUtc = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync();
+        }
+        if (model.BasicSalary > 0 || model.HouseRentAllowance > 0 || model.ConveyanceAllowance > 0 || model.SpecialAllowance > 0 || model.HasSalaryDetails)
+        {
+            var salary = await _dbContext.EmployeeSalaryDetails.FirstOrDefaultAsync(item => item.EmployeeId == id);
+            if (salary == null) { salary = new EmployeeSalaryDetail { EmployeeId = id }; _dbContext.EmployeeSalaryDetails.Add(salary); }
+            salary.BasicSalary=model.BasicSalary; salary.HouseRentAllowance=model.HouseRentAllowance; salary.ConveyanceAllowance=model.ConveyanceAllowance; salary.SpecialAllowance=model.SpecialAllowance; salary.ProvidentFund=model.ProvidentFund; salary.ProfessionalTax=model.ProfessionalTax; salary.Tds=model.Tds; salary.OtherDeductions=model.OtherDeductions; salary.PfNumber=Clean(model.PfNumber); salary.PfUan=Clean(model.PfUan); salary.EffectiveFrom=model.SalaryEffectiveFrom; salary.IsActive=true; salary.UpdatedAtUtc=DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync();
         }
 
         if (newPhotoPath != null) DeletePhotoIfPresent(previousPhotoPath);

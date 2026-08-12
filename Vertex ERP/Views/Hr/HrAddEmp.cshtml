@@ -816,8 +816,7 @@
         const confirmation = document.getElementById('ConfirmPassword');
 
         username.value = username.value.trim();
-        password.value = password.value.trim();
-        confirmation.value = confirmation.value.trim();
+        // Do not trim passwords: the exact displayed/generated credential is persisted.
     });
 </script>
 ```

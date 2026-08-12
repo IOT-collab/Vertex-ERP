@@ -1,10 +1,22 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
 using VertexERP.Repositories;
 using VertexERP.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
+// ZKTeco ADMS devices post punches over plain HTTP. Keep this receiver available
+// on the Ethernet interface independently of the browser HTTPS certificate.
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenLocalhost(7090);
+    options.ListenAnyIP(8082);
+});
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
@@ -16,6 +28,12 @@ builder.Services.AddScoped<IBiometricRepository, BiometricRepository>();
 builder.Services.AddScoped<IBiometricDeviceService, BiometricDeviceService>();
 builder.Services.AddScoped<IAttendanceSyncService, AttendanceSyncService>();
 builder.Services.AddScoped<IAttendanceProcessingService, AttendanceProcessingService>();
+var keyDirectory = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtectionKeys");
+Directory.CreateDirectory(keyDirectory);
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keyDirectory))
+    .SetApplicationName("VertexERP");
+builder.Services.AddScoped<BankAccountProtectionService>();
 builder.Services.AddSession();
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -56,7 +74,13 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Local biometric deployments use a direct Ethernet HTTP endpoint. Redirect only
+// when an HTTPS address is actually configured for the running environment.
+var configuredUrls = builder.Configuration["ASPNETCORE_URLS"] ?? string.Empty;
+if (configuredUrls.Contains("https://", StringComparison.OrdinalIgnoreCase))
+{
+    app.UseHttpsRedirection();
+}
 app.UseStaticFiles();
 
 app.UseRouting();

@@ -1107,3 +1107,15 @@ body {
     margin-bottom: 18px;
     padding: 12px 14px;
 }
+/* Bank and salary are separate popup forms opened from the top action buttons. */
+.employee-extra-modal[hidden] { display: none !important; }
+.employee-extra-modal { position: fixed; inset: 0; z-index: 2500; padding: 32px; background: rgba(2, 10, 24, .78); backdrop-filter: blur(5px); overflow-y: auto; }
+.employee-extra-dialog { width: min(1180px, 100%); margin: 30px auto; padding: 28px; border: 1px solid #30415d; border-radius: 18px; background: #172238; box-shadow: 0 24px 70px rgba(0,0,0,.45); }
+.employee-extra-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding-bottom: 20px; margin-bottom: 24px; border-bottom: 1px solid #30415d; }
+.employee-extra-heading h3 { margin: 0 0 6px; color: #f5f8ff; font-size: 24px; }
+.employee-extra-heading p { margin: 0; color: #aebbd0; }
+.employee-extra-close { border: 0; background: transparent; color: #cdd7e7; font-size: 32px; line-height: 1; cursor: pointer; }
+.employee-extra-footer { display: flex; justify-content: flex-end; padding-top: 24px; margin-top: 22px; border-top: 1px solid #30415d; }
+.employee-extra-footer button { min-width: 120px; padding: 12px 24px; border: 0; border-radius: 10px; background: #2868e8; color: #fff; font-weight: 700; cursor: pointer; }
+body.employee-extra-open { overflow: hidden; }
+@media (max-width: 700px) { .employee-extra-modal { padding: 12px; } .employee-extra-dialog { margin: 12px auto; padding: 18px; } }
