@@ -39,6 +39,13 @@ public class EmployeeDeviceMappingViewModel
     [Required, StringLength(50), Display(Name = "Device User ID")] public string DeviceUserId { get; set; } = string.Empty;
 }
 
+public sealed class UnmappedDeviceUserViewModel
+{
+    public string DeviceUserId { get; init; } = string.Empty;
+    public int PunchCount { get; init; }
+    public DateTime LastPunch { get; init; }
+}
+
 public class AttendancePageViewModel
 {
     public IReadOnlyList<DailyAttendanceViewModel> Records { get; init; } = Array.Empty<DailyAttendanceViewModel>();

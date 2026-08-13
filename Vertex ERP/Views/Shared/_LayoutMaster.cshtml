@@ -119,7 +119,9 @@
 
                 <div class="profile">
                     <span class="profile-text" title="Signed in as @currentName">Welcome @currentName</span>
-                    <a class="logout-btn" href="/Main/Logout" title="Logout">Logout</a>
+                    <form asp-controller="Main" asp-action="Logout" method="post" style="display:inline">
+                        <button class="logout-btn" type="submit" title="Logout">Logout</button>
+                    </form>
                 </div>
             </header>
 

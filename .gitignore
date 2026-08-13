@@ -2,6 +2,11 @@
 bin/
 obj/
 
+# Runtime data and secrets
+Vertex ERP/App_Data/
+Vertex ERP/wwwroot/uploads/
+Vertex ERP/appsettings.Production.json
+
 *.user
 *.suo
 *.userosscache

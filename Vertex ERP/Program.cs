@@ -10,12 +10,12 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-// ZKTeco ADMS devices post punches over plain HTTP. Keep this receiver available
-// on the Ethernet interface independently of the browser HTTPS certificate.
+// The browser application owns only its local UI port. The standalone
+// BiometricReceiver process owns LAN port 8082, so attendance stays available
+// even when Visual Studio restarts this application.
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenLocalhost(7090);
-    options.ListenAnyIP(8082);
 });
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -23,6 +23,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddAntiforgery(options => options.HeaderName = "X-CSRF-TOKEN");
 builder.Services.Configure<AttendanceOptions>(builder.Configuration.GetSection(AttendanceOptions.SectionName));
 builder.Services.AddScoped<IBiometricRepository, BiometricRepository>();
 builder.Services.AddScoped<IBiometricDeviceService, BiometricDeviceService>();
@@ -44,6 +45,9 @@ builder.Services
         options.Cookie.Name = "VertexERP.Auth";
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
     });

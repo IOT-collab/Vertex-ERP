@@ -2,12 +2,21 @@
 @{
     ViewData["Title"] = "Attendance";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var filterDateValue = Model.FilterDate.ToString("yyyy-MM-dd");
 }
 <link href="~/css/Attendence.css" rel="stylesheet" />
 <div class="attendance-panel-container">
     <div class="page-header">
         <div class="header-left"><div class="header-text"><h2>Attendance Management</h2><p>Track biometric checkpoints, daily attendance, late arrivals, and working hours.</p></div></div>
-        <div class="header-actions"><a asp-controller="Main" asp-action="AddAttendance" class="btn-add">+ Mark Attendance</a></div>
+        <div class="header-actions">
+            <a asp-controller="Main" asp-action="ExportAttendance"
+               asp-route-searchQuery="@Model.SearchQuery"
+               asp-route-department="@Model.Department"
+               asp-route-filterDate="@filterDateValue"
+               asp-route-status="@Model.Status"
+               class="btn-add btn-export">Download Excel</a>
+            <a asp-controller="Main" asp-action="AddAttendance" class="btn-add">+ Mark Attendance</a>
+        </div>
     </div>
     <div class="dashboard-cards">
         <div class="card present"><h3>@Model.PresentCount</h3><span>Present Today</span></div>
@@ -19,7 +28,7 @@
         <div class="filter-box">
             <div class="filter-field"><input type="text" name="searchQuery" value="@Model.SearchQuery" placeholder="Search Employee..."></div>
             <div class="filter-field"><select name="department"><option value="">All Departments</option>@foreach (var item in Model.Departments){<option value="@item" selected="@(item == Model.Department)">@item</option>}</select></div>
-            <div class="filter-field"><input type="date" name="filterDate" value="@Model.FilterDate.ToString("yyyy-MM-dd")"></div>
+            <div class="filter-field"><input type="date" name="filterDate" value="@filterDateValue"></div>
             <div class="filter-field"><select name="status"><option value="">All Statuses</option><option value="Present" selected="@(Model.Status == "Present")">Present</option><option value="Late" selected="@(Model.Status == "Late")">Late</option><option value="Unmapped" selected="@(Model.Status == "Unmapped")">Unmapped</option></select></div>
             <div class="filter-field action-field"><button type="submit" class="btn-search">Run Search</button></div>
         </div>

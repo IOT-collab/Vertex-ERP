@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
 using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
 using VertexERP.Models;
@@ -382,7 +381,9 @@ namespace Vertex_ERP.Controllers
                     FullName = employee.FullName,
                     IsActive = true,
                     EmployeeId = employee.Id,
-                    MustChangePassword = model.MustChangePassword,
+                    // HR-created credentials remain valid exactly as entered until HR or
+                    // the employee explicitly changes them through an authorized flow.
+                    MustChangePassword = false,
                     CreatedAt = DateTime.UtcNow
                 };
                 _dbContext.AppUsers.Add(loginAccount);

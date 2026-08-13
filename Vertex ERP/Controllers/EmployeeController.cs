@@ -124,7 +124,8 @@ public class EmployeeController : Controller
         }
         account.Username = model.Username.Trim();
         account.NormalizedUsername = normalizedUsername;
-        var password = model.TemporaryPassword.Trim();
+        // Passwords are case-sensitive and must be stored exactly as HR entered them.
+        var password = model.TemporaryPassword;
         var passwordHash = PasswordHashService.HashPassword(password);
         if (!PasswordHashService.VerifyPassword(password, passwordHash))
         {
@@ -140,7 +141,7 @@ public class EmployeeController : Controller
             : AccountRoleService.Employee;
         account.FullName = employee.FullName;
         account.IsActive = true;
-        account.MustChangePassword = model.MustChangePassword;
+        account.MustChangePassword = false;
         await _dbContext.SaveChangesAsync();
 
         TempData["EmployeeMessage"] = $"Login credentials for {employee.EmployeeCode} saved successfully.";

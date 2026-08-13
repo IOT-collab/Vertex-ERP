@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -124,17 +125,45 @@ namespace VertexERP.Controllers
             return RedirectToRoleHome(role);
         }
 
-        [Authorize(Roles = "Admin,HR")]
-        public IActionResult UserSettings()
-        {
-            //ViewBag.Users = _dbContext.AppUsers
-            //    .OrderBy(user => user.Role)
-            //    .ThenBy(user => user.Username)
-            //    .ToList();
+        [HttpGet]
+        public IActionResult ChangePassword() => View(new ChangePasswordViewModel());
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return Forbid();
+            var user = await _dbContext.AppUsers.FirstOrDefaultAsync(item => item.Id == userId && item.IsActive);
+            if (user == null) return Forbid();
+            if (!PasswordHashService.VerifyPassword(model.CurrentPassword, user.PasswordHash))
+            {
+                ModelState.AddModelError(nameof(model.CurrentPassword), "Current password is incorrect.");
+                return View(model);
+            }
+            if (PasswordHashService.VerifyPassword(model.NewPassword, user.PasswordHash))
+            {
+                ModelState.AddModelError(nameof(model.NewPassword), "New password must be different from the current password.");
+                return View(model);
+            }
+            user.PasswordHash = PasswordHashService.HashPassword(model.NewPassword);
+            user.MustChangePassword = false;
+            await _dbContext.SaveChangesAsync();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            HttpContext.Session.Clear();
+            TempData["LoginMessage"] = "Password changed successfully. Please sign in again.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        [Authorize(Roles = "Admin,HR")]
+        public async Task<IActionResult> UserSettings()
+        {
+            ViewBag.Users = await _dbContext.AppUsers.AsNoTracking().OrderBy(user => user.Role).ThenBy(user => user.Username).ToListAsync();
             return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -143,9 +172,12 @@ namespace VertexERP.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,HR")]
         public IActionResult CreateUser(string username, string fullName, string password, string role)
         {
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(password) || password.Length < 10)
+            { TempData["UserSettingError"] = "Username, name and a password of at least 10 characters are required."; return RedirectToAction("UserSettings"); }
             var normalizedUsername = DatabaseInitializer.NormalizeUsername(username);
 
             if (_dbContext.AppUsers.Any(user => user.NormalizedUsername == normalizedUsername))
@@ -159,9 +191,10 @@ namespace VertexERP.Controllers
                 Username = username.Trim(),
                 NormalizedUsername = normalizedUsername,
                 PasswordHash = PasswordHashService.HashPassword(password),
-                Role = string.IsNullOrWhiteSpace(role) ? "User" : role.Trim(),
+                Role = AccountRoleService.Normalize(role) ?? AccountRoleService.Employee,
                 FullName = fullName.Trim(),
                 IsActive = true,
+                MustChangePassword = false,
                 CreatedAt = DateTime.UtcNow
             });
 
@@ -171,6 +204,7 @@ namespace VertexERP.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,HR")]
         public IActionResult UpdateUser(int id, string fullName, string role, bool isActive)
         {
@@ -198,7 +232,7 @@ namespace VertexERP.Controllers
             return RedirectToAction("UserSettings");
         }
 
-        [Authorize(Roles = "Employee,Admin,HR")]
+        [Authorize(Roles = "Admin,HR")]
         public async Task<IActionResult> Dashboard()
         {
             var today = DateTime.Today;
@@ -337,11 +371,6 @@ namespace VertexERP.Controllers
             if (!employeeId.HasValue) return RedirectToAction(nameof(AccessDenied));
             var employee = await _dbContext.Employees.FirstOrDefaultAsync(item => item.Id == employeeId.Value);
             if (employee == null) return RedirectToAction(nameof(AccessDenied));
-            var department = model.DepartmentId.HasValue ? await _dbContext.Departments.AsNoTracking().FirstOrDefaultAsync(item => item.Id == model.DepartmentId && item.IsActive) : null;
-            if (department == null) ModelState.AddModelError(nameof(model.DepartmentId), "Please select an active department.");
-            if (model.ReportingManagerId == employee.Id) ModelState.AddModelError(nameof(model.ReportingManagerId), "You cannot report to yourself.");
-            if (model.ReportingManagerId.HasValue && !await _dbContext.AppUsers.AnyAsync(user => user.EmployeeId == model.ReportingManagerId && user.IsActive && user.Role == "Manager"))
-                ModelState.AddModelError(nameof(model.ReportingManagerId), "Please select an active manager.");
             if (!ModelState.IsValid)
             {
                 model.EmployeeCode = employee.EmployeeCode;
@@ -355,12 +384,6 @@ namespace VertexERP.Controllers
             employee.Gender = CleanProfileValue(model.Gender);
             employee.MaritalStatus = CleanProfileValue(model.MaritalStatus);
             employee.EmergencyContact = model.EmergencyContact.Trim();
-            employee.DepartmentId = department!.Id;
-            employee.Department = department.DepartmentName;
-            employee.Designation = model.Designation.Trim();
-            employee.ReportingManagerId = model.ReportingManagerId;
-            employee.JoiningDate = model.JoiningDate;
-            employee.EmploymentType = model.EmploymentType.Trim();
             employee.WorkLocation = CleanProfileValue(model.WorkLocation);
             employee.Address = CleanProfileValue(model.Address);
             employee.City = CleanProfileValue(model.City);
@@ -541,6 +564,35 @@ namespace VertexERP.Controllers
             var date = filterDate ?? DateOnly.FromDateTime(DateTime.Today);
             return View(await _attendanceProcessingService.GetDailyAttendanceAsync(date, searchQuery, department, status, cancellationToken));
         }
+
+        [Authorize(Roles = "Admin,HR")]
+        public async Task<IActionResult> ExportAttendance(string? searchQuery, string? department, DateOnly? filterDate, string? status, CancellationToken cancellationToken)
+        {
+            var date = filterDate ?? DateOnly.FromDateTime(DateTime.Today);
+            var attendance = await _attendanceProcessingService.GetDailyAttendanceAsync(date, searchQuery, department, status, cancellationToken);
+            var csv = new StringBuilder();
+            csv.AppendLine("Emp ID,Employee Name,Department,Date,Check In,Check Out,Working Hours,Punch Count,Status");
+            foreach (var item in attendance.Records)
+            {
+                csv.AppendLine(string.Join(',', new[]
+                {
+                    Csv(item.EmpId),
+                    Csv(item.EmployeeName),
+                    Csv(item.Department),
+                    Csv(item.Date.ToString("yyyy-MM-dd")),
+                    Csv(item.CheckIn?.ToString("hh:mm tt") ?? string.Empty),
+                    Csv(item.CheckOut?.ToString("hh:mm tt") ?? string.Empty),
+                    Csv(item.WorkingHours.ToString(@"hh\:mm")),
+                    item.PunchCount.ToString(),
+                    Csv(item.Status)
+                }));
+            }
+
+            var bytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true).GetBytes(csv.ToString());
+            return File(bytes, "text/csv; charset=utf-8", $"Attendance-{date:yyyy-MM-dd}.csv");
+        }
+
+        private static string Csv(string value) => $"\"{value.Replace("\"", "\"\"")}\"";
 
         [Authorize(Roles = "Admin,HR")]
         public IActionResult AddAttendance()

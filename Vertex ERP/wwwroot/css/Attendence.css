@@ -249,9 +249,22 @@
         white-space: nowrap;
     }
 
-    .attendance-panel-container tr:hover {
-        background: #f8fafc;
+    .attendance-panel-container tbody tr:hover {
+        background: rgba(59, 130, 246, 0.08) !important;
     }
+
+    .attendance-panel-container tbody tr:hover td {
+        background: transparent !important;
+        color: inherit !important;
+    }
+
+    .attendance-panel-container .btn-export {
+        background: #059669;
+    }
+
+        .attendance-panel-container .btn-export:hover {
+            background: #047857;
+        }
 
     /* Table Text Colors & Badges */
     .attendance-panel-container .action-buttons {

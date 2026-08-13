@@ -5,6 +5,8 @@ using VertexERP.Data;
 using VertexERP.Models;
 using VertexERP.Repositories;
 using VertexERP.Services;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 
 namespace VertexERP.Controllers;
 
@@ -19,6 +21,15 @@ public class BiometricDevicesController : Controller
     { _deviceService = deviceService; _repository = repository; _db = db; _logger = logger; }
 
     public async Task<IActionResult> Index(CancellationToken cancellationToken) => View(await _deviceService.GetAllAsync(cancellationToken));
+    public IActionResult Setup()
+    {
+        ViewBag.ServerAddresses = NetworkInterface.GetAllNetworkInterfaces()
+            .Where(network => network.OperationalStatus == OperationalStatus.Up)
+            .SelectMany(network => network.GetIPProperties().UnicastAddresses)
+            .Where(item => item.Address.AddressFamily == AddressFamily.InterNetwork && !System.Net.IPAddress.IsLoopback(item.Address))
+            .Select(item => item.Address.ToString()).Distinct().OrderBy(address => address).ToList();
+        return View();
+    }
     public IActionResult Create() => View("Form", new BiometricDeviceFormViewModel());
 
     [HttpPost, ValidateAntiForgeryToken]
@@ -61,6 +72,11 @@ public class BiometricDevicesController : Controller
     {
         var device = await _deviceService.GetAsync(id, cancellationToken); if (device is null) return NotFound();
         ViewBag.Device = device; ViewBag.Employees = await _db.Employees.AsNoTracking().Where(employee => employee.IsActive).OrderBy(employee => employee.FullName).ToListAsync(cancellationToken);
+        ViewBag.UnmappedUserIds = await _db.AttendanceLogs.AsNoTracking()
+            .Where(log => log.BiometricDeviceId == id && log.EmployeeId == null)
+            .GroupBy(log => log.DeviceUserId)
+            .Select(group => new UnmappedDeviceUserViewModel { DeviceUserId = group.Key, PunchCount = group.Count(), LastPunch = group.Max(log => log.PunchTime) })
+            .OrderByDescending(item => item.LastPunch).ToListAsync(cancellationToken);
         return View(await _repository.GetMappingsAsync(id, cancellationToken));
     }
 

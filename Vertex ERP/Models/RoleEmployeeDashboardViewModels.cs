@@ -89,11 +89,11 @@ public sealed class EmployeeProfileEditViewModel
     [StringLength(20)] public string? Gender { get; set; }
     [StringLength(20)] public string? MaritalStatus { get; set; }
     [Required, RegularExpression(@"^[0-9]{10}$", ErrorMessage = "Emergency Contact must contain exactly 10 digits.")] public string EmergencyContact { get; set; } = string.Empty;
-    [Required] public int? DepartmentId { get; set; }
-    [Required, StringLength(80)] public string Designation { get; set; } = string.Empty;
+    public int? DepartmentId { get; set; }
+    [StringLength(80)] public string Designation { get; set; } = string.Empty;
     public int? ReportingManagerId { get; set; }
     [Required, DataType(DataType.Date)] public DateOnly JoiningDate { get; set; }
-    [Required, StringLength(30)] public string EmploymentType { get; set; } = string.Empty;
+    [StringLength(30)] public string EmploymentType { get; set; } = string.Empty;
     [StringLength(120)] public string? WorkLocation { get; set; }
     [StringLength(300)] public string? Address { get; set; }
     [StringLength(80)] public string? City { get; set; }
@@ -101,4 +101,17 @@ public sealed class EmployeeProfileEditViewModel
     [RegularExpression(@"^[0-9]{6}$", ErrorMessage = "PIN code must contain exactly 6 digits.")] public string? PinCode { get; set; }
     public IReadOnlyList<Department> Departments { get; set; } = Array.Empty<Department>();
     public IReadOnlyList<Employee> Managers { get; set; } = Array.Empty<Employee>();
+}
+
+public sealed class ChangePasswordViewModel
+{
+    [Required, DataType(DataType.Password)]
+    public string CurrentPassword { get; set; } = string.Empty;
+
+    [Required, StringLength(100, MinimumLength = 10), DataType(DataType.Password)]
+    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$", ErrorMessage = "Use uppercase, lowercase, number and special character.")]
+    public string NewPassword { get; set; } = string.Empty;
+
+    [Required, Compare(nameof(NewPassword)), DataType(DataType.Password)]
+    public string ConfirmPassword { get; set; } = string.Empty;
 }

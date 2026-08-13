@@ -601,8 +601,7 @@
                 <div class="form-group">
                     <label asp-for="TemporaryPassword">Password <span>*</span></label>
                     <div class="credential-input-row">
-                        <input asp-for="TemporaryPassword" type="text" autocomplete="new-password" placeholder="Minimum 8 characters" required />
-                        <button type="button" class="credential-generate-btn" onclick="generateTemporaryPassword()">Generate</button>
+                        <input asp-for="TemporaryPassword" type="password" autocomplete="new-password" placeholder="Enter password exactly as it should be saved" required />
                     </div>
                     <span asp-validation-for="TemporaryPassword" class="field-validation"></span>
                 </div>
@@ -612,11 +611,7 @@
                     <span asp-validation-for="ConfirmPassword" class="field-validation"></span>
                 </div>
                 <div class="form-group account-option-group">
-                    <label class="account-checkbox">
-                        <input asp-for="MustChangePassword" type="checkbox" />
-                        <span>Employee must change password on first login</span>
-                    </label>
-                    <small>Login access will use the selected Employee or Manager position.</small>
+                    <small>The username and password saved by HR will remain the employee's login credentials.</small>
                 </div>
             </div>
         </div>
@@ -793,30 +788,19 @@
         usernameInput.value = [firstName, lastName].filter(Boolean).join('.');
     }
 
-    function generateTemporaryPassword() {
-        const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-        const lower = 'abcdefghijkmnopqrstuvwxyz';
-        const numbers = '23456789';
-        const all = upper + lower + numbers;
-        const random = values => values[crypto.getRandomValues(new Uint32Array(1))[0] % values.length];
-        const chars = [random(upper), random(lower), random(numbers)];
-        while (chars.length < 12) chars.push(random(all));
-        for (let i = chars.length - 1; i > 0; i--) {
-            const j = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
-            [chars[i], chars[j]] = [chars[j], chars[i]];
-        }
-        const password = chars.join('');
-        document.getElementById('TemporaryPassword').value = password;
-        document.getElementById('ConfirmPassword').value = password;
-    }
-
     document.querySelector('.employee-form').addEventListener('submit', function () {
         const username = document.getElementById('LoginUsername');
         const password = document.getElementById('TemporaryPassword');
         const confirmation = document.getElementById('ConfirmPassword');
 
         username.value = username.value.trim();
-        // Do not trim passwords: the exact displayed/generated credential is persisted.
+        // Password values are deliberately left untouched. The server stores and verifies
+        // the exact case-sensitive values entered by HR.
+        if (password.value !== confirmation.value) {
+            confirmation.setCustomValidity('Password and confirmation must be exactly the same.');
+        } else {
+            confirmation.setCustomValidity('');
+        }
     });
 </script>
 ```

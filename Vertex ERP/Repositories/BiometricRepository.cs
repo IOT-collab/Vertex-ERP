@@ -31,6 +31,8 @@ public sealed class BiometricRepository : IBiometricRepository
         else { existing.DeviceUserId = mapping.DeviceUserId; existing.EmployeeId = mapping.EmployeeId; existing.IsActive = true; }
     }
     public Task<bool> AttendanceHashExistsAsync(string hash, CancellationToken cancellationToken = default) => _db.AttendanceLogs.AnyAsync(log => log.UniqueHash == hash, cancellationToken);
+    public Task<bool> AttendancePunchExistsAsync(int deviceId, string deviceUserId, DateTime punchTime, CancellationToken cancellationToken = default) =>
+        _db.AttendanceLogs.AnyAsync(log => log.BiometricDeviceId == deviceId && log.DeviceUserId == deviceUserId && log.PunchTime == punchTime, cancellationToken);
     public async Task AddAttendanceLogsAsync(IEnumerable<AttendanceLog> logs, CancellationToken cancellationToken = default) => await _db.AttendanceLogs.AddRangeAsync(logs, cancellationToken);
     public async Task<IReadOnlyList<AttendanceLog>> GetAttendanceLogsAsync(DateTime from, DateTime to, CancellationToken cancellationToken = default) =>
         await _db.AttendanceLogs.AsNoTracking().Include(log => log.Employee).Where(log => log.PunchTime >= from && log.PunchTime < to).OrderBy(log => log.PunchTime).ToListAsync(cancellationToken);

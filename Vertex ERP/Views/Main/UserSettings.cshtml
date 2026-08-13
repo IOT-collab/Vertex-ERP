@@ -61,14 +61,15 @@
 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input id="password" name="password" type="text" placeholder="e.g. Krishna1234" required />
+                    <input id="password" name="password" type="password" minlength="10" autocomplete="new-password" placeholder="Minimum 10 characters" required />
                 </div>
 
                 <div class="form-group">
                     <label for="role">Assigned Role</label>
                     <select id="role" name="role">
-                        <option value="User">User</option>
-                        <option value="Supervisor">Supervisor</option>
+                        <option value="Employee">Employee</option>
+                        <option value="Manager">Manager</option>
+                        <option value="HR">HR</option>
                         <option value="Admin">Admin</option>
                     </select>
                 </div>
@@ -92,11 +93,11 @@
                 </div>
                 <div class="policy-item">
                     <span>Password Pattern</span>
-                    <strong>FirstName + 1234</strong>
+                    <strong>Unique temporary password</strong>
                 </div>
                 <div class="policy-item">
                     <span>Sample Passphrase</span>
-                    <code>Krishna1234</code>
+                    <code>10+ mixed characters</code>
                 </div>
             </div>
         </div>
@@ -119,7 +120,6 @@
                         <th>Employee ID</th>
                         <th>Employee Name</th>
                         <th>Role Access</th>
-                        <th>Initial Rule Pass</th>
                         <th>Account Status</th>
                         <th class="text-center">Action</th>
                     </tr>
@@ -127,15 +127,6 @@
                 <tbody>
                     @foreach (var user in users)
                     {
-                        var firstName = user.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? user.Username;
-                        var initialPassword = user.Username.ToLowerInvariant() switch
-                        {
-                            "admin" => "Vertex1234",
-                            "user" => "User1234",
-                            "supervisor" => "Supervisor1234",
-                            _ => $"{firstName.Replace("Mr.", "").Trim()}1234"
-                        };
-
                         <tr class="user-row">
                             <form asp-action="UpdateUser" asp-controller="Main" method="post">
                                 <input type="hidden" name="id" value="@user.Id" />
@@ -150,15 +141,13 @@
 
                             <td>
                                 <select class="table-select" name="role">
-                                    <option value="User" selected="@(user.Role == "User")">User</option>
-                                    <option value="Supervisor" selected="@(user.Role == "Supervisor")">Supervisor</option>
+                                    <option value="Employee" selected="@(user.Role == "Employee" || user.Role == "User")">Employee</option>
+                                    <option value="Manager" selected="@(user.Role == "Manager")">Manager</option>
+                                    <option value="HR" selected="@(user.Role == "HR")">HR</option>
                                     <option value="Admin" selected="@(user.Role == "Admin")">Admin</option>
                                 </select>
                             </td>
 
-                            <td>
-                                <code class="password-chip">@initialPassword</code>
-                            </td>
 
                             <td>
                                 <select class="table-select status-select @(user.IsActive ? "is-active" : "is-inactive")" name="isActive">

@@ -15,6 +15,7 @@ public interface IBiometricDeviceService
 public interface IAttendanceSyncService
 {
     Task<AttendanceSyncResult> ReceiveAsync(string serialNumber, string rawPayload, string? sourceIp, CancellationToken cancellationToken = default);
+    Task<AttendanceSyncResult> ReceiveNormalizedAsync(string serialNumber, IReadOnlyList<NormalizedBiometricPunch> punches, string? sourceIp, CancellationToken cancellationToken = default);
     Task<bool> RegisterHeartbeatAsync(string serialNumber, string? sourceIp, CancellationToken cancellationToken = default);
 }
 
@@ -24,6 +25,7 @@ public interface IAttendanceProcessingService
 }
 
 public sealed record AttendanceSyncResult(bool Accepted, int Received, int Saved, int Unmapped, string Message);
+public sealed record NormalizedBiometricPunch(string DeviceUserId, DateTime PunchTime, string? PunchState, string? VerificationMode, string? WorkCode, string? EventId);
 
 public sealed class AttendanceOptions
 {
