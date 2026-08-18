@@ -263,7 +263,7 @@
 
 
         <!-- Department Load -->
-        <div class="analytics-card">
+        <div class="analytics-card task-health-link" role="link" tabindex="0" onclick="window.location.href='@Url.Action("TaskMgm", "Main")'" onkeydown="if(event.key==='Enter'||event.key===' '){window.location.href='@Url.Action("TaskMgm", "Main")'}">
 
             <div class="box-header">
 
@@ -304,7 +304,7 @@
                     <h3><i class="fa-solid fa-chart-pie section-icon" aria-hidden="true"></i> Task Health</h3>
 
                     <p class="sub-text">
-                        Current task completion
+                        Average progress across all tasks
                     </p>
 
                 </div>
@@ -314,7 +314,7 @@
 
             <div class="radial-chart">
 
-                @{ var taskTotal = Model.OpenTasks + Model.CompletedTasks; var completion = taskTotal == 0 ? 0 : Model.CompletedTasks * 100 / taskTotal; }
+                @{ var completion = Model.TaskProgressPercentage; }
                 <div class="radial-ring" style="--progress:@completion">
                     <span>@completion%</span>
                 </div>
@@ -355,6 +355,8 @@
                     </div>
 
                 </div>
+
+                <div class="task-health-open">Open Task Management <i class="fa-solid fa-arrow-right"></i></div>
 
             </div>
 

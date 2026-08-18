@@ -25,12 +25,29 @@ public sealed class AttendanceProcessingService : IAttendanceProcessingService
             var late = TimeOnly.FromDateTime(first) > startTime;
             return new DailyAttendanceViewModel { EmployeeId = employee?.Id ?? 0, EmpId = employee?.EmployeeCode ?? $"BIO-{firstLog.DeviceUserId}", EmployeeName = employee?.FullName ?? $"Unmapped User {firstLog.DeviceUserId}", Department = employee?.Department ?? "Unmapped", Date = date, CheckIn = TimeOnly.FromDateTime(first), CheckOut = group.Count() > 1 ? TimeOnly.FromDateTime(last) : null, WorkingHours = group.Count() > 1 ? last - first : TimeSpan.Zero, PunchCount = group.Count(), Status = employee is null ? "Unmapped" : late ? "Late" : "Present" };
         }).ToList();
-        var presentCount = records.Count; var lateCount = records.Count(record => record.Status == "Late");
+        var punchedEmployeeIds = records.Where(record => record.EmployeeId > 0).Select(record => record.EmployeeId).ToHashSet();
+        records.AddRange(employees.Where(employee => !punchedEmployeeIds.Contains(employee.Id)).Select(employee =>
+            new DailyAttendanceViewModel
+            {
+                EmployeeId = employee.Id,
+                EmpId = employee.EmployeeCode,
+                EmployeeName = employee.FullName,
+                Department = employee.Department,
+                Date = date,
+                CheckIn = null,
+                CheckOut = null,
+                WorkingHours = TimeSpan.Zero,
+                PunchCount = 0,
+                Status = "Absent"
+            }));
+        var presentCount = records.Count(record => record.Status == "Present");
+        var lateCount = records.Count(record => record.Status == "Late");
+        var absentCount = records.Count(record => record.Status == "Absent");
         IEnumerable<DailyAttendanceViewModel> filtered = records;
         if (!string.IsNullOrWhiteSpace(search)) filtered = filtered.Where(record => record.EmployeeName.Contains(search, StringComparison.OrdinalIgnoreCase) || record.EmpId.Contains(search, StringComparison.OrdinalIgnoreCase));
         if (!string.IsNullOrWhiteSpace(department)) filtered = filtered.Where(record => string.Equals(record.Department, department, StringComparison.OrdinalIgnoreCase));
         if (!string.IsNullOrWhiteSpace(status)) filtered = filtered.Where(record => string.Equals(record.Status, status, StringComparison.OrdinalIgnoreCase));
         _logger.LogDebug("Built attendance for {Date}: {Punches} punches, {Employees} employees", date, logs.Count, records.Count);
-        return new AttendancePageViewModel { Records = filtered.OrderBy(record => record.EmployeeName).ToList(), Departments = employees.Select(employee => employee.Department).Where(value => !string.IsNullOrWhiteSpace(value)).Distinct(StringComparer.OrdinalIgnoreCase).Order().ToList(), PresentCount = presentCount, AbsentCount = Math.Max(0, employees.Count - presentCount), LeaveCount = 0, LateCount = lateCount, SearchQuery = search, Department = department, FilterDate = date, Status = status };
+        return new AttendancePageViewModel { Records = filtered.OrderBy(record => record.EmployeeName).ToList(), Departments = employees.Select(employee => employee.Department).Where(value => !string.IsNullOrWhiteSpace(value)).Distinct(StringComparer.OrdinalIgnoreCase).Order().ToList(), PresentCount = presentCount, AbsentCount = absentCount, LeaveCount = 0, LateCount = lateCount, SearchQuery = search, Department = department, FilterDate = date, Status = status };
     }
 }

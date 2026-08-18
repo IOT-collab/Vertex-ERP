@@ -1,0 +1,70 @@
+@model VertexERP.Models.FieldAttendanceViewModel
+@{ ViewData["Title"] = "Mark Attendance"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
+<style>
+.fa-card{max-width:850px;margin:30px auto;padding:32px;background:#111c31;border:1px solid #2b3d5d;border-radius:18px;color:#edf4ff}.fa-actions,.fa-info{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}.fa-btn{border:0;border-radius:12px;padding:22px;background:#2866dd;color:#fff;font:700 17px inherit;cursor:pointer}.fa-btn.out{background:#0f9f73}.fa-btn:disabled{opacity:.45;cursor:not-allowed}.fa-info div,.fa-ready{background:#172641;border-radius:10px;padding:15px}.fa-info small{display:block;color:#aabbd5}.fa-info b{display:block;margin-top:6px;font-size:18px}.fa-selfie{margin-top:22px;padding:16px;border:1px dashed #4b6b99;border-radius:12px}.fa-preview{display:none;width:120px;height:120px;object-fit:cover;border-radius:10px;margin-top:12px}.fa-ready{display:none;margin-top:18px}.fa-ready.open{display:block}.fa-ready p{margin:0 0 12px;color:#c6d7f0}.fa-submit{padding:12px 18px;font-size:15px}.fa-msg{min-height:22px;color:#bcd2f2}.fa-msg.error{color:#ffaaa9}.cam{display:none;position:fixed;inset:0;z-index:9999;background:#020817d9;place-items:center;padding:16px}.cam.open{display:grid}.cam-box{width:min(500px,100%);padding:18px;background:#111c31;border-radius:15px}.cam video{width:100%;max-height:55vh;object-fit:cover;background:#000;border-radius:10px}.cam button{margin:12px 8px 0 0;padding:10px 14px;border:0;border-radius:8px;font-weight:700;cursor:pointer}.take{background:#2866dd;color:white}@@media(max-width:560px){.fa-actions,.fa-info{grid-template-columns:1fr}.fa-card{margin:14px;padding:20px}}
+</style>
+<section class="fa-card">
+    <h1>Field Attendance</h1>
+    <p>Check in/out records your current GPS location and server time. A selfie is optional.</p>
+    <div class="fa-actions">
+        <button id="in" type="button" class="fa-btn" @(Model.HasCheckedIn ? "disabled" : "")>Check In</button>
+        <button id="out" type="button" class="fa-btn out" @(!Model.HasCheckedIn || Model.HasCheckedOut ? "disabled" : "")>Check Out</button>
+    </div>
+    <div class="fa-info"><div><small>Check In</small><b id="inTime">@(Model.CheckInTime?.ToString("hh:mm tt") ?? "Not recorded")</b></div><div><small>Check Out</small><b id="outTime">@(Model.CheckOutTime?.ToString("hh:mm tt") ?? "Not recorded")</b></div></div>
+    <div class="fa-selfie"><button id="openCam" type="button" class="fa-btn" style="padding:10px 14px;font-size:14px">Open Live Camera</button><span id="selfieNote"> Optional selfie for the selected action.</span><br><img id="preview" class="fa-preview" alt="Captured selfie"></div>
+    <div id="ready" class="fa-ready"><p id="readyText"></p><button id="submit" type="button" class="fa-btn fa-submit">Submit</button></div>
+    <p id="msg" class="fa-msg" role="status"></p>
+    @Html.AntiForgeryToken()
+</section>
+<div id="cam" class="cam"><div class="cam-box"><h2>Capture live selfie</h2><video id="video" autoplay playsinline muted></video><canvas id="canvas" hidden></canvas><button id="take" type="button" class="take">Capture photo</button><button id="cancel" type="button">Cancel</button></div></div>
+<script>
+(() => {
+    const msg = document.getElementById('msg'), cam = document.getElementById('cam'), video = document.getElementById('video'), canvas = document.getElementById('canvas'), preview = document.getElementById('preview'), ready = document.getElementById('ready'), submit = document.getElementById('submit');
+    let stream, selfie = null, pendingAction = null, pendingLocation = null;
+    const say = (text, error = false) => { msg.textContent = text; msg.className = error ? 'fa-msg error' : 'fa-msg'; };
+    const actionButton = action => document.getElementById(action === 'Check In' ? 'in' : 'out');
+    const stopCamera = () => { if (stream) stream.getTracks().forEach(track => track.stop()); stream = null; video.srcObject = null; cam.classList.remove('open'); };
+    const clearPending = () => { pendingAction = null; pendingLocation = null; ready.classList.remove('open'); };
+    const getLocation = () => new Promise((resolve, reject) => {
+        if (!navigator.geolocation) return reject(new Error('This device does not support location services.'));
+        navigator.geolocation.getCurrentPosition(resolve, error => reject(new Error(error.code === 1 ? 'Please allow location permission to mark attendance.' : 'Unable to get your current location. Turn on location and try again.')), { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 });
+    });
+    async function selectAction(action) {
+        clearPending(); selfie = null; preview.style.display = 'none'; document.getElementById('selfieNote').textContent = ' Optional selfie for the selected action.';
+        const button = actionButton(action); button.disabled = true; say('Getting your current GPS location...');
+        try {
+            const position = await getLocation();
+            pendingAction = action;
+            pendingLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude, accuracyMetres: position.coords.accuracy };
+            document.getElementById('readyText').textContent = `Location captured. You can add a selfie, then submit ${action}.`;
+            submit.textContent = `Submit ${action}`; ready.classList.add('open'); say('GPS location captured. Review and submit your attendance.');
+        } catch (error) { button.disabled = false; say(error.message, true); }
+    }
+    document.getElementById('openCam').onclick = async () => {
+        if (!pendingAction) { say('First select Check In or Check Out so the selfie is attached to that action.', true); return; }
+        try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false }); video.srcObject = stream; cam.classList.add('open'); }
+        catch { say('Camera permission is required to capture a selfie.', true); }
+    };
+    document.getElementById('cancel').onclick = stopCamera;
+    document.getElementById('take').onclick = () => {
+        if (!video.videoWidth) { say('Camera is still starting. Please try again.', true); return; }
+        canvas.width = video.videoWidth; canvas.height = video.videoHeight; canvas.getContext('2d').drawImage(video, 0, 0);
+        selfie = canvas.toDataURL('image/jpeg', .85); preview.src = selfie; preview.style.display = 'block'; document.getElementById('selfieNote').textContent = ' Selfie captured and ready to submit.'; stopCamera();
+        say(`Selfie captured. Click ${submit.textContent} to finish.`);
+    };
+    submit.onclick = async () => {
+        if (!pendingAction || !pendingLocation) { say('Select an attendance action and capture location first.', true); return; }
+        submit.disabled = true; say('Saving attendance...');
+        try {
+            const response = await fetch('@Url.Action("SubmitFieldAttendance", "Main")', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('input[name="__RequestVerificationToken"]').value }, body: JSON.stringify({ action: pendingAction, ...pendingLocation, selfieDataUrl: selfie }) });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.message || 'Could not save attendance.');
+            say(data.message); document.getElementById(pendingAction === 'Check In' ? 'inTime' : 'outTime').textContent = data.time;
+            actionButton(pendingAction).disabled = true;
+            if (pendingAction === 'Check In') document.getElementById('out').disabled = false;
+            clearPending(); selfie = null; preview.style.display = 'none'; document.getElementById('selfieNote').textContent = ' Optional selfie for the selected action.';
+        } catch (error) { submit.disabled = false; say(error.message, true); }
+    };
+    document.getElementById('in').onclick = () => selectAction('Check In'); document.getElementById('out').onclick = () => selectAction('Check Out'); window.addEventListener('beforeunload', stopCamera);
+})();
+</script>

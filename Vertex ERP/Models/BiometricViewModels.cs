@@ -73,3 +73,16 @@ public class DailyAttendanceViewModel
     public int PunchCount { get; init; }
     public string Status { get; init; } = string.Empty;
 }
+
+public sealed class ManualAttendanceViewModel
+{
+    public string? Department { get; set; }
+    public int? EmployeeId { get; set; }
+    public DateOnly AttendanceDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    public TimeOnly? CheckInTime { get; set; }
+    public TimeOnly? CheckOutTime { get; set; }
+    public string? Remarks { get; set; }
+    public IReadOnlyList<string> Departments { get; set; } = Array.Empty<string>();
+    public IReadOnlyList<Employee> Employees { get; set; } = Array.Empty<Employee>();
+    public bool IsManagerView { get; set; }
+}

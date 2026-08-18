@@ -35,6 +35,10 @@
         : isEmployeePage ? "Index"
         : ViewData["BackAction"]?.ToString();
     var hasExplicitBackRoute = !string.IsNullOrWhiteSpace(backController) && !string.IsNullOrWhiteSpace(backAction);
+    var isActiveIssuesPage = string.Equals(controller, "Main", StringComparison.OrdinalIgnoreCase)
+        && action is "WorkflowManagement" or "ManagerQueries";
+    var isClosedIssuesPage = string.Equals(controller, "Main", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(action, "ClosedIssues", StringComparison.OrdinalIgnoreCase);
 }
 
 @if (showBackButton)
@@ -66,6 +70,22 @@
             </svg>
             <span>Back</span>
         </button>
+        }
+        @if (isActiveIssuesPage)
+        {
+            <div class="workflow-nav-actions">
+                <a asp-controller="Main" asp-action="ClosedIssues"><i class="fa-solid fa-box-archive"></i><span>Resolved / Closed Issues</span></a>
+                @if (User.IsInRole("HR") || User.IsInRole("Admin"))
+                {
+                    <a asp-controller="Main" asp-action="LeaveStatus" class="leave-status-link"><i class="fa-solid fa-calendar-check"></i><span>See Leave Status</span></a>
+                }
+            </div>
+        }
+        else if (isClosedIssuesPage)
+        {
+            <div class="workflow-nav-actions">
+                <a asp-controller="Main" asp-action="@(User.IsInRole("Manager") ? "ManagerQueries" : "WorkflowManagement")"><i class="fa-solid fa-list-check"></i><span>Active Issues</span></a>
+            </div>
         }
         @if (string.Equals(controller, "Hr", StringComparison.OrdinalIgnoreCase) && string.Equals(action, "HrAddEmp", StringComparison.OrdinalIgnoreCase))
         {

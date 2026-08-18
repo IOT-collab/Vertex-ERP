@@ -1,4 +1,64 @@
 @model VertexERP.Models.WorkflowManagementViewModel
-@{ ViewData["Title"]="Leave & Query Workflow"; Layout="~/Views/Shared/_LayoutMaster.cshtml"; }
+@{
+    ViewData["Title"] = "Leave Approvals & Employee Issues";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var pendingLeaves = Model.LeaveRequests.Count(x => x.Status == "Pending");
+}
 <link href="~/css/EmployeeSections.css" rel="stylesheet" asp-append-version="true" />
-<section class="employee-section"><header><div><h1>Leave & Query Workflow</h1><p>Organization-wide leave status and employee query tickets</p></div></header><article class="employee-panel"><h3>Leave Requests</h3>@if(Model.LeaveRequests.Count==0){<div class="employee-empty">No leave requests.</div>}else{<table class="employee-table"><thead><tr><th>Applicant</th><th>Type / Dates</th><th>Approval Route</th><th>Status</th><th>Action</th></tr></thead><tbody>@foreach(var leave in Model.LeaveRequests){<tr><td><strong>@leave.Employee.FullName</strong><small>@leave.Employee.EmployeeCode · @leave.Employee.Designation</small></td><td>@leave.LeaveType<small>@leave.FromDate.ToString("dd MMM") - @leave.ToDate.ToString("dd MMM yyyy") (@(leave.ToDate.DayNumber-leave.FromDate.DayNumber+1) days)</small></td><td>@leave.ApprovalLevel<small>@(leave.AssignedApproverEmployee?.FullName??"HR / Admin")</small></td><td><span class="employee-badge @leave.Status.ToLowerInvariant()">@leave.Status</span></td><td>@if(leave.Status=="Pending"&&leave.ApprovalLevel=="HR/Admin"){<form asp-action="DecideManagerLeave" method="post"><input type="hidden" name="id" value="@leave.Id"/><button name="decision" value="Approved" class="btn btn-primary">Approve</button><button name="decision" value="Rejected" class="btn btn-secondary">Reject</button></form>}else{<small>@(leave.DecidedAtUtc?.ToLocalTime().ToString("dd MMM yyyy")??"Awaiting manager")</small>}</td></tr>}</tbody></table>}</article><article class="employee-panel" style="margin-top:16px"><h3>Employee Query Tickets</h3>@if(Model.QueryTickets.Count==0){<div class="employee-empty">No query tickets.</div>}else{<table class="employee-table"><thead><tr><th>Employee</th><th>Query</th><th>Manager</th><th>Status</th><th>Update</th></tr></thead><tbody>@foreach(var ticket in Model.QueryTickets){<tr><td><strong>@ticket.Employee.FullName</strong><small>@ticket.Employee.EmployeeCode</small></td><td><strong>#@ticket.Id · @ticket.Subject</strong><small>@ticket.Description</small></td><td>@(ticket.ReportingManager?.FullName??"Not assigned")</td><td><span class="employee-badge">@ticket.Status</span></td><td><form asp-action="UpdateQueryTicket" method="post"><input type="hidden" name="id" value="@ticket.Id"/><input name="resolution" value="@ticket.Resolution" placeholder="Response"/><select name="status"><option>In Progress</option><option>Resolved</option><option>Closed</option></select><button class="btn btn-primary">Save</button></form></td></tr>}</tbody></table>}</article></section>
+<link href="~/css/WorkflowManagementClear.css" rel="stylesheet" asp-append-version="true" />
+
+<section class="clear-workflow-page">
+    <header class="clear-page-header">
+        <div>
+            <span class="clear-kicker">HR WORKSPACE</span>
+            <h1>Leave Approvals & Employee Issues</h1>
+            <p>Review pending leave requests and respond to open employee issues.</p>
+        </div>
+        <div class="clear-summary">
+            <span><b>@pendingLeaves</b> Pending Leaves</span>
+            <span><b>@Model.QueryTickets.Count</b> Open Issues</span>
+        </div>
+    </header>
+
+    <article class="clear-section-card">
+        <div class="clear-section-title">
+            <div class="clear-icon leave-icon"><i class="fa-regular fa-calendar-check"></i></div>
+            <div><h2>Pending Employee Leave Requests</h2><p>Leave applications that are still waiting for a manager decision.</p></div>
+            <span class="count-pill">@Model.LeaveRequests.Count Requests</span>
+        </div>
+        @if (Model.LeaveRequests.Count == 0)
+        {
+            <div class="clear-empty"><i class="fa-regular fa-calendar-xmark"></i><h3>No pending leave requests</h3><p>Approved and rejected requests are available under See Leave Status.</p></div>
+        }
+        else
+        {
+            <div class="clear-table-wrap"><table class="employee-table"><thead><tr><th>Employee</th><th>Leave Details</th><th>Approval With</th><th>Status</th><th>Applied Date</th></tr></thead><tbody>
+            @foreach (var leave in Model.LeaveRequests)
+            {
+                <tr><td><strong>@leave.Employee.FullName</strong><small>@leave.Employee.EmployeeCode · @leave.Employee.Designation</small></td><td><strong>@leave.LeaveType</strong><small>@leave.FromDate.ToString("dd MMM") – @leave.ToDate.ToString("dd MMM yyyy") (@(leave.ToDate.DayNumber - leave.FromDate.DayNumber + 1) days)</small></td><td>@leave.ApprovalLevel<small>@(leave.AssignedApproverEmployee?.FullName ?? "HR / Admin")</small></td><td><span class="employee-badge @leave.Status.ToLowerInvariant()">@leave.Status</span></td><td><small>@leave.AppliedAtUtc.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small></td></tr>
+            }
+            </tbody></table></div>
+        }
+    </article>
+
+    <article class="clear-section-card">
+        <div class="clear-section-title">
+            <div class="clear-icon issue-icon"><i class="fa-regular fa-comments"></i></div>
+            <div><h2>Open Employee Issues</h2><p>Issues that still require a response or action.</p></div>
+            <span class="count-pill open">@Model.QueryTickets.Count Open</span>
+        </div>
+        @if (Model.QueryTickets.Count == 0)
+        {
+            <div class="clear-empty success-empty"><i class="fa-solid fa-circle-check"></i><h3>No open employee issues</h3><p>Resolved and closed issues are available under <b>Resolved / Closed Issues</b>.</p><a asp-action="ClosedIssues">View Closed Issues <i class="fa-solid fa-arrow-right"></i></a></div>
+        }
+        else
+        {
+            <div class="clear-table-wrap"><table class="employee-table"><thead><tr><th>Employee</th><th>Issue Details</th><th>Assigned Manager</th><th>Current Status</th><th>Response & Update</th></tr></thead><tbody>
+            @foreach (var ticket in Model.QueryTickets)
+            {
+                <tr><td><strong>@ticket.Employee.FullName</strong><small>@ticket.Employee.EmployeeCode · @ticket.Employee.Department</small></td><td><strong>#@ticket.Id · @ticket.Subject</strong><small>@ticket.Description</small></td><td>@(ticket.ReportingManager?.FullName ?? "Not assigned")</td><td><span class="employee-badge">@ticket.Status</span></td><td><form asp-action="UpdateQueryTicket" method="post" class="clear-response-form"><input type="hidden" name="id" value="@ticket.Id"/><input name="resolution" value="@ticket.Resolution" placeholder="Write a response..."/><select name="status"><option value="In Progress">In Progress</option><option value="Resolved">Resolved</option><option value="Closed">Closed</option></select><button>Save</button></form></td></tr>
+            }
+            </tbody></table></div>
+        }
+    </article>
+</section>

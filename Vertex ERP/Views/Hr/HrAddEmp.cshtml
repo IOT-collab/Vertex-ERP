@@ -602,6 +602,7 @@
                     <label asp-for="TemporaryPassword">Password <span>*</span></label>
                     <div class="credential-input-row">
                         <input asp-for="TemporaryPassword" type="password" autocomplete="new-password" placeholder="Enter password exactly as it should be saved" required />
+                        <button type="button" class="credential-generate-btn" id="togglePassword" aria-label="Show password"><i class="fa-solid fa-eye"></i></button>
                     </div>
                     <span asp-validation-for="TemporaryPassword" class="field-validation"></span>
                 </div>
@@ -787,6 +788,14 @@
 
         usernameInput.value = [firstName, lastName].filter(Boolean).join('.');
     }
+
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const password = document.getElementById('TemporaryPassword');
+        const showing = password.type === 'text';
+        password.type = showing ? 'password' : 'text';
+        this.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+        this.innerHTML = `<i class="fa-solid fa-eye${showing ? '' : '-slash'}"></i>`;
+    });
 
     document.querySelector('.employee-form').addEventListener('submit', function () {
         const username = document.getElementById('LoginUsername');

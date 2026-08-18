@@ -46,6 +46,8 @@
                     <li><a href="/Main/Employees"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i><span>Dashboard</span></a></li>
                     <li><a href="/Main/EmployeeTasks"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>My Tasks</span></a></li>
                     <li><a href="/Main/EmployeeAttendance"><i class="fa-regular fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
+                    <li><a href="/Main/FieldAttendance"><i class="fa-solid fa-location-dot" aria-hidden="true"></i><span>Mark Attendance</span></a></li>
+                    <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Site Employee Location</span></a></li>
                     <li><a href="/Main/EmployeeLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
                     <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user" aria-hidden="true"></i><span>My Profile</span></a></li>
                     <li><a href="/Main/EmployeeNotifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Notifications</span></a></li>
@@ -58,12 +60,14 @@
                     <li><a href="/Main/Manager"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Manager Dashboard</span></a></li>
                     <li><a href="/Main/Employees"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Employees</span></a></li>
                     <li><a href="/Main/ManagerAttendance"><i class="fa-solid fa-users-viewfinder" aria-hidden="true"></i><span>Team Attendance</span></a></li>
+                    <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Site Employee Location</span></a></li>
                     <li><a href="/Main/ManagerLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Team Leave</span></a></li>
                     <li><a href="/Main/ManagerQueries"><i class="fa-regular fa-circle-question" aria-hidden="true"></i><span>Queries</span></a></li>
                     <li><a href="/Main/TaskMgm"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Task Management</span></a></li>
                     <li><a href="/Main/ManagerProjects"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Project Management</span></a></li>
                     <li class="manager-self-label"><span>MY SELF SERVICE</span></li>
                     <li><a href="/Main/EmployeeAttendance"><i class="fa-regular fa-clock" aria-hidden="true"></i><span>My Attendance</span></a></li>
+                    <li><a href="/Main/FieldAttendance"><i class="fa-solid fa-location-dot" aria-hidden="true"></i><span>Mark Attendance</span></a></li>
                     <li><a href="/Main/EmployeeLeaves"><i class="fa-regular fa-calendar-check" aria-hidden="true"></i><span>My Leave</span></a></li>
                     <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user" aria-hidden="true"></i><span>My Profile</span></a></li>
                     <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Salary Slip</span></a></li>
@@ -74,7 +78,7 @@
                     <li><a href="/Main/Dashboard"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Dashboard</span></a></li>
                     <li><a href="/Main/Employees"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Employees</span></a></li>
                     <li><a href="/Main/Attendence"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
-                    <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Location Tracking</span></a></li>
+                    <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Site Employee Location</span></a></li>
                     <li><a href="/Main/LeaveManagement"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
                     <li><a href="/Main/WorkflowManagement"><i class="fa-solid fa-code-pull-request" aria-hidden="true"></i><span>Leave & Queries</span></a></li>
 @*                     <li><a href="/Main/DepartmentManagement"><i class="fa-solid fa-building" aria-hidden="true"></i><span>Department</span></a></li>
@@ -136,4 +140,34 @@
     </div>
 
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        (() => {
+            const attendanceSelectors = {
+                '/Main/Attendence': '.attendance-panel-container',
+                '/Main/EmployeeAttendance': '.employee-section',
+                '/Main/Hrms': '.hrms-page'
+            };
+            const selector = attendanceSelectors[window.location.pathname];
+            const target = document.querySelector('[data-attendance-auto-refresh]') || (selector ? document.querySelector(selector) : null);
+            if (!target) return;
+            let refreshing = false;
+            const refreshAttendanceInBackground = async () => {
+                if (refreshing || document.hidden || document.activeElement?.matches('input, select, textarea')) return;
+                refreshing = true;
+                try {
+                    const response = await fetch(window.location.href, { cache: 'no-store', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!response.ok) return;
+                    const nextDocument = new DOMParser().parseFromString(await response.text(), 'text/html');
+                    const nextTarget = nextDocument.querySelector('[data-attendance-auto-refresh]') || (selector ? nextDocument.querySelector(selector) : null);
+                    if (nextTarget) target.innerHTML = nextTarget.innerHTML;
+                } catch {
+                    // A temporary connection problem must not disturb the current screen.
+                } finally {
+                    refreshing = false;
+                }
+            };
+            window.setInterval(refreshAttendanceInBackground, 15000);
+            document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshAttendanceInBackground(); });
+        })();
+    </script>
 </body>

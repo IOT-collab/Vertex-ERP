@@ -31,7 +31,7 @@ namespace Vertex_ERP.Controllers
 
         public IActionResult AttendanceDashboard()
         {
-            return View();
+            return RedirectToAction("Attendence", "Main");
         }
 
         public IActionResult EmpLeaveManagement()

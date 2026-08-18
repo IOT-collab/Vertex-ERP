@@ -125,6 +125,9 @@ namespace VertexERP.Data
                 entity.HasIndex(log => new { log.BiometricDeviceId, log.DeviceUserId, log.PunchTime });
                 entity.HasIndex(log => new { log.EmployeeId, log.PunchTime });
                 entity.Property(log => log.PunchTime).HasColumnType("timestamp without time zone");
+                entity.Property(log => log.Latitude).HasPrecision(9, 6);
+                entity.Property(log => log.Longitude).HasPrecision(9, 6);
+                entity.Property(log => log.AccuracyMetres).HasPrecision(10, 2);
                 entity.Property(log => log.ReceivedAtUtc).HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.HasOne(log => log.BiometricDevice)
                     .WithMany(device => device.AttendanceLogs)

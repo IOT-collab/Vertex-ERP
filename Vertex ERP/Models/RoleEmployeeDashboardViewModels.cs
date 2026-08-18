@@ -79,6 +79,29 @@ public sealed class WorkflowManagementViewModel
     public IReadOnlyList<QueryTicket> QueryTickets { get; init; } = Array.Empty<QueryTicket>();
 }
 
+public sealed class ClosedIssuesViewModel
+{
+    public IReadOnlyList<QueryTicket> Tickets { get; init; } = Array.Empty<QueryTicket>();
+    public IReadOnlyList<string> Departments { get; init; } = Array.Empty<string>();
+    public string? Search { get; init; }
+    public string? Department { get; init; }
+    public string? Status { get; init; }
+    public bool IsManagerView { get; init; }
+    public int ResolvedCount => Tickets.Count(ticket => ticket.Status == "Resolved");
+    public int ClosedCount => Tickets.Count(ticket => ticket.Status == "Closed");
+}
+
+public sealed class LeaveStatusViewModel
+{
+    public IReadOnlyList<LeaveRequest> Requests { get; init; } = Array.Empty<LeaveRequest>();
+    public IReadOnlyList<string> Departments { get; init; } = Array.Empty<string>();
+    public string? Search { get; init; }
+    public string? Department { get; init; }
+    public string? Status { get; init; }
+    public int ApprovedCount => Requests.Count(request => request.Status == "Approved");
+    public int RejectedCount => Requests.Count(request => request.Status == "Rejected");
+}
+
 public sealed class EmployeeProfileEditViewModel
 {
     public string EmployeeCode { get; set; } = string.Empty;
@@ -114,4 +137,55 @@ public sealed class ChangePasswordViewModel
 
     [Required, Compare(nameof(NewPassword)), DataType(DataType.Password)]
     public string ConfirmPassword { get; set; } = string.Empty;
+}
+
+public sealed class FieldAttendanceViewModel
+{
+    public bool HasCheckedIn { get; init; }
+    public bool HasCheckedOut { get; init; }
+    public DateTime? CheckInTime { get; init; }
+    public DateTime? CheckOutTime { get; init; }
+}
+
+public sealed class FieldAttendanceRequest
+{
+    [Required]
+    public string Action { get; set; } = string.Empty;
+    [Required, Range(-90, 90)]
+    public decimal? Latitude { get; set; }
+    [Required, Range(-180, 180)]
+    public decimal? Longitude { get; set; }
+    [Required, Range(0, 100000)]
+    public decimal? AccuracyMetres { get; set; }
+    public string? SelfieDataUrl { get; set; }
+}
+
+public sealed class SiteEmployeeLocationViewModel
+{
+    public IReadOnlyList<SiteEmployeeLocationItem> Employees { get; init; } = Array.Empty<SiteEmployeeLocationItem>();
+    public SiteEmployeeLocationItem? SelectedEmployee { get; init; }
+    public bool IsManagerView { get; init; }
+}
+
+public sealed class SiteEmployeeLocationItem
+{
+    public int EmployeeId { get; init; }
+    public string EmployeeName { get; init; } = string.Empty;
+    public string EmployeeCode { get; init; } = string.Empty;
+    public string Department { get; init; } = string.Empty;
+    public string Designation { get; init; } = string.Empty;
+    public DateTime? CheckInTime { get; init; }
+    public decimal? CheckInLatitude { get; init; }
+    public decimal? CheckInLongitude { get; init; }
+    public decimal? CheckInAccuracyMetres { get; init; }
+    public string? CheckInSelfiePath { get; init; }
+    public DateTime? LastLocationTime { get; init; }
+    public decimal? LastLatitude { get; init; }
+    public decimal? LastLongitude { get; init; }
+    public DateTime? CheckOutTime { get; init; }
+    public decimal? CheckOutLatitude { get; init; }
+    public decimal? CheckOutLongitude { get; init; }
+    public decimal? CheckOutAccuracyMetres { get; init; }
+    public string? CheckOutSelfiePath { get; init; }
+    public bool IsCheckedOut => CheckOutTime.HasValue;
 }

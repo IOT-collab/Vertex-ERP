@@ -38,7 +38,7 @@
 
             <div class="summary-content">
                 <p>Total Employees</p>
-                <h2>--</h2>
+                <h2>@Model.TotalEmployees</h2>
             </div>
         </div>
 
@@ -48,7 +48,7 @@
 
             <div class="summary-content">
                 <p>Present Today</p>
-                <h2>--</h2>
+                <h2>@Model.PresentToday</h2>
             </div>
         </div>
 
@@ -58,17 +58,17 @@
 
             <div class="summary-content">
                 <p>On Leave</p>
-                <h2>--</h2>
+                <h2>@Model.OnLeaveToday</h2>
             </div>
         </div>
 
 
         <div class="summary-card">
-            <span class="summary-icon">💰</span>
+            <span class="summary-icon">🔴</span>
 
             <div class="summary-content">
-                <p>Monthly Payroll</p>
-                <h2>--</h2>
+                <p>Absent Today</p>
+                <h2>@Model.AbsentToday</h2>
             </div>
         </div>
 

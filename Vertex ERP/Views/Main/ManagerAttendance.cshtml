@@ -1,4 +1,46 @@
 @model VertexERP.Models.ManagerAttendanceViewModel
-@{ ViewData["Title"]="Team Attendance"; Layout="~/Views/Shared/_LayoutMaster.cshtml"; }
+@{ ViewData["Title"] = "Team Attendance"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
 <link href="~/css/ManagerSections.css" rel="stylesheet" asp-append-version="true" />
-<section class="manager-section"><header><h1>Team Attendance</h1><p>Today's attendance status for your reporting team</p></header><div class="section-stats"><div><i class="fa-solid fa-users"></i><span><small>Team Members</small><b>@Model.TeamMembers.Count</b></span></div><div><i class="fa-solid fa-user-check green"></i><span><small>Present</small><b>@Model.Present</b></span></div><div><i class="fa-solid fa-user-xmark red"></i><span><small>Absent</small><b>@Model.Absent</b></span></div><div><i class="fa-solid fa-plane orange"></i><span><small>On Leave</small><b>@Model.OnLeave</b></span></div></div><article class="section-card"><h3>Employee Attendance — @DateTime.Today.ToString("dd MMMM yyyy")</h3><div class="section-table"><table><thead><tr><th>Employee</th><th>ID</th><th>Department</th><th>Designation</th><th>Status</th></tr></thead><tbody>@foreach(var employee in Model.TeamMembers){var status=Model.OnLeaveIds.Contains(employee.Id)?"On Leave":Model.PresentIds.Contains(employee.Id)?"Present":"Absent";<tr><td><b>@employee.FullName</b><small>@employee.Email</small></td><td>@employee.EmployeeCode</td><td>@employee.Department</td><td>@employee.Designation</td><td><em class="@status.Replace(" ","").ToLowerInvariant()">@status</em></td></tr>}</tbody></table></div></article></section>
+<style>.manager-section>header{display:flex;align-items:center;justify-content:space-between;gap:20px}.manager-mark-attendance{display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border-radius:9px;background:#2563eb;color:#fff;font-size:13px;font-weight:750;text-decoration:none;white-space:nowrap}@@media(max-width:650px){.manager-section>header{align-items:flex-start;flex-direction:column}}</style>
+<section class="manager-section">
+    <header><div><h1>Team Attendance</h1><p>Today's attendance status for your department team</p></div><a asp-action="AddAttendance" class="manager-mark-attendance"><i class="fa-solid fa-user-check"></i> Mark Missing Attendance</a></header>
+    <div class="section-stats"><div><i class="fa-solid fa-users"></i><span><small>Team Members</small><b>@Model.TeamMembers.Count</b></span></div><div><i class="fa-solid fa-user-check green"></i><span><small>Present</small><b>@Model.Present</b></span></div><div><i class="fa-solid fa-user-xmark red"></i><span><small>Absent</small><b>@Model.Absent</b></span></div><div><i class="fa-solid fa-plane orange"></i><span><small>On Leave</small><b>@Model.OnLeave</b></span></div></div>
+    <article class="section-card"><h3>Employee Attendance — @DateTime.Today.ToString("dd MMMM yyyy")</h3><div class="section-table"><table><thead><tr><th>Employee</th><th>ID</th><th>Department</th><th>Designation</th><th>Status</th></tr></thead><tbody>@foreach(var employee in Model.TeamMembers){var status = Model.OnLeaveIds.Contains(employee.Id) ? "On Leave" : Model.PresentIds.Contains(employee.Id) ? "Present" : "Absent";<tr><td><b>@employee.FullName</b><small>@employee.Email</small></td><td>@employee.EmployeeCode</td><td>@employee.Department</td><td>@employee.Designation</td><td><em class="@status.Replace(" ", "").ToLowerInvariant()">@status</em></td></tr>}</tbody></table></div></article>
+</section>
+<script>
+    (() => {
+        const section = document.querySelector('.manager-section');
+        const statValues = section.querySelectorAll('.section-stats b');
+        const tableBody = section.querySelector('tbody');
+        const status = document.createElement('p');
+        status.className = 'attendance-live-status';
+        status.style.cssText = 'margin:8px 0 0;color:#94a3b8;font-size:12px';
+        section.querySelector('header > div').appendChild(status);
+
+        const escapeHtml = value => { const element = document.createElement('div'); element.textContent = value || ''; return element.innerHTML; };
+        const render = data => {
+            statValues[0].textContent = data.teamMembersCount;
+            statValues[1].textContent = data.present;
+            statValues[2].textContent = data.absent;
+            statValues[3].textContent = data.onLeave;
+            tableBody.innerHTML = data.teamMembers.map(employee => {
+                const statusClass = employee.status.replace(' ', '').toLowerCase();
+                const lastPunch = employee.lastPunch ? `<small style="display:block;margin-top:4px;color:#94a3b8">Last biometric punch: ${escapeHtml(employee.lastPunch)}</small>` : '';
+                return `<tr><td><b>${escapeHtml(employee.fullName)}</b><small>${escapeHtml(employee.email)}</small></td><td>${escapeHtml(employee.employeeCode)}</td><td>${escapeHtml(employee.department)}</td><td>${escapeHtml(employee.designation)}</td><td><em class="${statusClass}">${escapeHtml(employee.status)}</em>${lastPunch}</td></tr>`;
+            }).join('');
+            status.innerHTML = '<i class="fa-solid fa-circle" style="color:#22c55e;margin-right:5px"></i>Live biometric data · last refreshed ' + escapeHtml(data.refreshedAt);
+        };
+        const refresh = async () => {
+            try {
+                const response = await fetch('@Url.Action("ManagerAttendanceLive", "Main")', { cache: 'no-store' });
+                if (!response.ok) throw new Error();
+                render(await response.json());
+            } catch {
+                status.textContent = 'Live refresh temporarily unavailable. Retrying automatically…';
+            }
+        };
+        refresh();
+        window.setInterval(refresh, 15000);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+    })();
+</script>

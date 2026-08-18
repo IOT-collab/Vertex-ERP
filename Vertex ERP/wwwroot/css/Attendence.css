@@ -122,7 +122,14 @@
         text-align: center;
         box-shadow: 0 4px 15px rgba(0, 0, 0, .02);
         border: 1px solid #e2e8f0;
+        text-decoration: none;
+        color: inherit;
+        transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
     }
+
+    .attendance-panel-container a.card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(15,23,42,.12); }
+    .attendance-panel-container a.card.active-filter { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.18); }
+    .attendance-panel-container .card small { display:block; margin-top:7px; color:#94a3b8; font-size:11px; font-weight:600; }
 
         .attendance-panel-container .card h3 {
             font-size: 34px;

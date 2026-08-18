@@ -404,7 +404,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'RequestVerificationToken': form.querySelector('input[name="__RequestVerificationToken"]').value
+                    'X-CSRF-TOKEN': form.querySelector('input[name="__RequestVerificationToken"]').value
                 },
                 body: JSON.stringify({
                     title: document.getElementById('taskTitle').value,
@@ -474,7 +474,7 @@
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'RequestVerificationToken': form.querySelector('input[name="__RequestVerificationToken"]').value
+                    'X-CSRF-TOKEN': form.querySelector('input[name="__RequestVerificationToken"]').value
                 },
                 body: JSON.stringify({
                     id: currentEditingTaskId,
@@ -511,7 +511,7 @@
             const response = await fetch(`/api/task-management/tasks/${taskId}`, {
                 method: 'DELETE',
                 headers: {
-                    'RequestVerificationToken': form.querySelector('input[name="__RequestVerificationToken"]').value
+                    'X-CSRF-TOKEN': form.querySelector('input[name="__RequestVerificationToken"]').value
                 }
             });
             if (!response.ok) {

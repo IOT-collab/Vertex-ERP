@@ -17,5 +17,9 @@ public class AttendanceLog
     [Required, MaxLength(64)] public string UniqueHash { get; set; } = string.Empty;
     [Required] public string RawPayload { get; set; } = string.Empty;
     [MaxLength(45)] public string? SourceIpAddress { get; set; }
+    public decimal? Latitude { get; set; }
+    public decimal? Longitude { get; set; }
+    public decimal? AccuracyMetres { get; set; }
+    [MaxLength(300)] public string? SelfiePath { get; set; }
     public DateTime ReceivedAtUtc { get; set; } = DateTime.UtcNow;
 }
