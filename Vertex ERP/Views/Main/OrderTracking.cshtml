@@ -1,0 +1,848 @@
+﻿@{
+    ViewData["Title"] = "Order Tracking";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+<style>
+
+    /* =========================================================
+                    VERTEX ERP - ORDER TRACKING
+           ========================================================= */
+
+    .ot-page {
+        width: min(100% - 32px, 1250px);
+        margin: 24px auto 40px;
+        color: #ffffff !important;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+        .ot-page * {
+            box-sizing: border-box;
+        }
+
+
+    /* =========================================================
+                    HEADER
+           ========================================================= */
+
+    .ot-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 20px;
+        margin-bottom: 18px;
+    }
+
+    .ot-breadcrumb {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #a9b7cc !important;
+        font-size: 12px;
+    }
+
+        .ot-breadcrumb a {
+            color: #d6e0ef !important;
+            text-decoration: none;
+        }
+
+            .ot-breadcrumb a:hover {
+                color: #2563eb;
+            }
+
+    .ot-title {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 750;
+        color: #ffffff !important;
+        letter-spacing: -.35px;
+    }
+
+    .ot-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 15px;
+        border-radius: 8px;
+        background: #2563eb;
+        color: #fff !important;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 700;
+        border: 0;
+    }
+
+        .ot-back-btn:hover {
+            background: #1d4ed8;
+        }
+
+
+    /* =========================================================
+                    COMMON CARD
+           ========================================================= */
+
+    .ot-card {
+        background: #111c31 !important;
+        border: 1px solid #293b59 !important;
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, .20);
+    }
+
+
+    /* =========================================================
+                    ORDER SUMMARY
+           ========================================================= */
+
+    .ot-summary {
+        display: grid;
+        grid-template-columns: 1.35fr 1fr .75fr;
+        padding: 22px;
+        margin-bottom: 18px;
+    }
+
+    .ot-summary-section {
+        padding: 0 22px;
+        border-right: 1px solid #2a3b58;
+    }
+
+        .ot-summary-section:first-child {
+            padding-left: 0;
+        }
+
+        .ot-summary-section:last-child {
+            padding-right: 0;
+            border-right: 0;
+        }
+
+    .ot-order-top {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .ot-order-icon {
+        width: 54px;
+        height: 54px;
+        min-width: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 11px;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 23px;
+    }
+
+    .ot-label {
+        display: block;
+        margin-bottom: 4px;
+        color: #9fb0c8 !important;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .45px;
+    }
+
+    .ot-order-number {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 750;
+        color: #ffffff !important;
+    }
+
+    .ot-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        margin-left: 5px;
+        border-radius: 999px;
+        background: #dcfce7;
+        color: #15803d;
+        font-size: 11px;
+        font-weight: 700;
+        vertical-align: middle;
+    }
+
+        .ot-status::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            margin-right: 5px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+    .ot-meta {
+        display: flex;
+        gap: 35px;
+        margin: 15px 0 0 68px;
+    }
+
+    .ot-meta-item {
+        display: flex;
+        gap: 7px;
+        align-items: flex-start;
+        color: #e5edf8 !important;
+        font-size: 12px;
+    }
+
+    .ot-meta-icon {
+        color: #64748b;
+    }
+
+    .ot-customer-name {
+        margin: 4px 0 10px;
+        color: #ffffff !important;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .ot-contact {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        color: #d8e3f1 !important;
+        font-size: 12px;
+    }
+
+    .ot-total-label {
+        color: #9fb0c8 !important;
+        font-size: 12px;
+    }
+
+    .ot-total {
+        margin: 6px 0 15px;
+        color: #ffffff !important;
+        font-size: 23px;
+        font-weight: 750;
+    }
+
+    .ot-invoice-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 12px;
+        border: 1px solid #dbe4ef;
+        border-radius: 8px;
+        background: #f8fafc;
+        color: #2563eb;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+        .ot-invoice-btn:hover {
+            background: #eff6ff;
+        }
+
+
+    /* =========================================================
+                    TRACKING PROGRESS (FIXED OVERLAP & ALIGNMENT)
+           ========================================================= */
+
+    .ot-progress {
+        padding: 36px 22px 28px;
+        margin-bottom: 18px;
+        overflow-x: auto;
+    }
+
+    .ot-progress-inner {
+        min-width: 800px;
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+        /* Background Connecting Track Line */
+        .ot-progress-inner::before {
+            content: "";
+            position: absolute;
+            top: 22px;
+            left: 40px;
+            right: 40px;
+            height: 3px;
+            background: #293b59;
+            z-index: 1;
+        }
+
+    .ot-step {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .ot-step-icon {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: 2px solid #3a4d69;
+        background: #111c31 !important;
+        color: #9fb0c8;
+        font-size: 15px;
+        z-index: 3;
+    }
+
+    .ot-step.completed .ot-step-icon {
+        border-color: #4ade80;
+        background: #111c31 !important;
+        color: #4ade80;
+    }
+
+    .ot-step.current .ot-step-icon {
+        border-color: #60a5fa;
+        background: #111c31 !important;
+        color: #60a5fa;
+        box-shadow: 0 0 0 5px rgba(37, 99, 235, .2);
+    }
+
+    .ot-step-title {
+        color: #ffffff !important;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .ot-step-date {
+        color: #94a3b8 !important;
+        font-size: 11px;
+        line-height: 15px;
+    }
+
+
+    /* =========================================================
+                    LOWER CONTENT
+           ========================================================= */
+
+    .ot-content-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr);
+        gap: 18px;
+    }
+
+    .ot-content-card {
+        padding: 20px;
+    }
+
+    .ot-section-title {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin: 0 0 18px;
+        color: #ffffff !important;
+        font-size: 16px;
+        font-weight: 750;
+    }
+
+    .ot-section-title-icon {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 14px;
+    }
+
+
+    /* =========================================================
+                    ORDER ITEMS TABLE
+           ========================================================= */
+
+    .ot-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .ot-table {
+        width: 100%;
+        min-width: 620px;
+        border-collapse: collapse;
+    }
+
+        .ot-table th {
+            padding: 11px 10px;
+            background: #18263e !important;
+            color: #cbd8e8 !important;
+            font-size: 10px;
+            font-weight: 700;
+            text-align: left;
+            border-bottom: 1px solid #2a3b58;
+        }
+
+        .ot-table td {
+            padding: 13px 10px;
+            color: #e8eef7 !important;
+            font-size: 12px;
+            border-bottom: 1px solid #263853;
+            vertical-align: middle;
+        }
+
+        .ot-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+    .ot-product {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .ot-product-image {
+        width: 40px;
+        height: 40px;
+        border: 1px solid #30435f;
+        border-radius: 7px;
+        object-fit: cover;
+        background: #18263e !important;
+    }
+
+    .ot-product-name {
+        color: #ffffff !important;
+        font-weight: 700;
+    }
+
+    .ot-sku {
+        margin-top: 3px;
+        color: #8fa2bb !important;
+        font-size: 10px;
+    }
+
+    .ot-money {
+        color: #ffffff !important;
+        font-weight: 700;
+    }
+
+    .ot-grand-total {
+        color: #ffffff !important;
+        font-size: 16px;
+    }
+
+    .ot-info-box {
+        display: flex;
+        gap: 8px;
+        margin-top: 15px;
+        padding: 11px 13px;
+        border-radius: 8px;
+        background: #16263f !important;
+        color: #cbd8e8 !important;
+        font-size: 11px;
+        border: 1px solid #263b59;
+    }
+
+        .ot-info-box strong {
+            color: #2563eb;
+        }
+
+
+    /* =========================================================
+                    TIMELINE
+           ========================================================= */
+
+    .ot-timeline {
+        position: relative;
+        padding-left: 27px;
+    }
+
+        .ot-timeline::before {
+            content: "";
+            position: absolute;
+            left: 8px;
+            top: 5px;
+            bottom: 8px;
+            width: 2px;
+            background: #2a3b58;
+        }
+
+    .ot-event {
+        position: relative;
+        padding: 0 0 20px 8px;
+    }
+
+        .ot-event:last-child {
+            padding-bottom: 0;
+        }
+
+    .ot-event-dot {
+        position: absolute;
+        left: -26px;
+        top: 2px;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #123526;
+        border: 2px solid #111c31;
+        box-shadow: 0 0 0 1px #4ade80;
+        color: #4ade80;
+        font-size: 8px;
+    }
+
+    .ot-event.current .ot-event-dot {
+        background: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .2);
+        color: #ffffff;
+    }
+
+    .ot-event-title {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin: 0 0 4px;
+        color: #ffffff !important;
+        font-size: 13px;
+        font-weight: 750;
+    }
+
+    .ot-current-tag {
+        padding: 3px 6px;
+        border-radius: 5px;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 9px;
+        font-weight: 700;
+    }
+
+    .ot-event-text {
+        margin: 0 0 4px;
+        color: #b4c1d3 !important;
+        font-size: 11px;
+        line-height: 16px;
+    }
+
+    .ot-event-time {
+        color: #8fa2bb !important;
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+                    RESPONSIVE BREAKPOINTS
+           ========================================================= */
+
+    @@media (max-width: 950px) {
+        .ot-summary {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .ot-summary-section:nth-child(2) {
+            border-right: 0;
+        }
+
+        .ot-summary-section:nth-child(3) {
+            grid-column: span 2;
+            border-top: 1px solid #2a3b58;
+            padding: 18px 0 0;
+            margin-top: 18px;
+        }
+
+        .ot-content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 650px) {
+        .ot-page {
+            width: calc(100% - 20px);
+            margin: 15px auto 30px;
+        }
+
+        .ot-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .ot-title {
+            font-size: 23px;
+        }
+
+        .ot-back-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .ot-summary {
+            display: block;
+            padding: 16px;
+        }
+
+        .ot-summary-section {
+            padding: 0 0 16px !important;
+            margin: 0 0 16px !important;
+            border-right: 0 !important;
+            border-bottom: 1px solid #2a3b58;
+        }
+
+            .ot-summary-section:last-child {
+                padding-bottom: 0 !important;
+                margin-bottom: 0 !important;
+                border-bottom: 0 !important;
+            }
+
+        .ot-meta {
+            margin-left: 0;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+    }
+
+</style>
+
+
+<main class="ot-page">
+
+    <!-- HEADER -->
+    <header class="ot-header">
+        <div>
+            <div class="ot-breadcrumb">
+                <a asp-controller="Main" asp-action="Index">Home</a>
+                <span>/</span>
+                <a asp-controller="Orders" asp-action="Index">Orders</a>
+                <span>/</span>
+                <span>ORD-2026-001</span>
+            </div>
+            <h1 class="ot-title">Order Tracking</h1>
+        </div>
+      @*   <a asp-controller="Orders" asp-action="Index" class="ot-back-btn">
+            ← Back to Orders
+        </a> *@
+    </header>
+
+    <!-- ORDER SUMMARY -->
+    <section class="ot-card ot-summary">
+        <!-- ORDER -->
+        <div class="ot-summary-section">
+            <div class="ot-order-top">
+                <div class="ot-order-icon">📋</div>
+                <div>
+                    <span class="ot-label">ORDER ID</span>
+                    <h2 class="ot-order-number">
+                        ORD-2026-001
+                        <span class="ot-status">In Transit</span>
+                    </h2>
+                </div>
+            </div>
+            <div class="ot-meta">
+                <div class="ot-meta-item">
+                    <span class="ot-meta-icon">📅</span>
+                    <div>
+                        <span class="ot-label">Order Date</span>
+                        <strong>18 Aug 2026, 10:30 AM</strong>
+                    </div>
+                </div>
+                <div class="ot-meta-item">
+                    <span class="ot-meta-icon">◷</span>
+                    <div>
+                        <span class="ot-label">Expected Delivery</span>
+                        <strong>24 Aug 2026, 05:00 PM</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CUSTOMER -->
+        <div class="ot-summary-section">
+            <span class="ot-label">Customer</span>
+            <div class="ot-customer-name">ABC Industries Pvt. Ltd.</div>
+            <div class="ot-contact">
+                <span>☎ +91 9876543210</span>
+                <span>✉ contact@abcindustries.com</span>
+            </div>
+        </div>
+
+        <!-- AMOUNT -->
+        <div class="ot-summary-section">
+            <span class="ot-total-label">Total Amount</span>
+            <div class="ot-total">₹ 45,000.00</div>
+            <a href="#" class="ot-invoice-btn">↓ Download Invoice</a>
+        </div>
+    </section>
+
+    <!-- ORDER PROGRESS -->
+    <section class="ot-card ot-progress">
+        <div class="ot-progress-inner">
+
+            <!-- CREATED -->
+            <div class="ot-step completed">
+                <div class="ot-step-icon">✓</div>
+                <div class="ot-step-title">Order Created</div>
+                <div class="ot-step-date">18 Aug 2026<br>10:30 AM</div>
+            </div>
+
+            <!-- CONFIRMED -->
+            <div class="ot-step completed">
+                <div class="ot-step-icon">✓</div>
+                <div class="ot-step-title">Confirmed</div>
+                <div class="ot-step-date">18 Aug 2026<br>11:15 AM</div>
+            </div>
+
+            <!-- PROCESSING -->
+            <div class="ot-step completed">
+                <div class="ot-step-icon">✓</div>
+                <div class="ot-step-title">Processing</div>
+                <div class="ot-step-date">19 Aug 2026<br>09:20 AM</div>
+            </div>
+
+            <!-- QC -->
+            <div class="ot-step completed">
+                <div class="ot-step-icon">✓</div>
+                <div class="ot-step-title">Quality Check</div>
+                <div class="ot-step-date">20 Aug 2026<br>03:45 PM</div>
+            </div>
+
+            <!-- DISPATCHED -->
+            <div class="ot-step completed">
+                <div class="ot-step-icon">✓</div>
+                <div class="ot-step-title">Dispatched</div>
+                <div class="ot-step-date">21 Aug 2026<br>10:05 AM</div>
+            </div>
+
+            <!-- IN TRANSIT -->
+            <div class="ot-step current">
+                <div class="ot-step-icon">🚚</div>
+                <div class="ot-step-title">In Transit</div>
+                <div class="ot-step-date">22 Aug 2026<br>08:30 AM</div>
+            </div>
+
+            <!-- DELIVERED -->
+            <div class="ot-step">
+                <div class="ot-step-icon">□</div>
+                <div class="ot-step-title">Delivered</div>
+                <div class="ot-step-date">24 Aug 2026<br />Pending</div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- LOWER CONTENT -->
+    <div class="ot-content-grid">
+
+        <!-- ORDER ITEMS -->
+        <section class="ot-card ot-content-card">
+            <h2 class="ot-section-title">
+                <span class="ot-section-title-icon">▣</span>
+                Order Items
+            </h2>
+            <div class="ot-table-wrapper">
+                <table class="ot-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>SKU</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="ot-product">
+                                    <div class="ot-product-image"></div>
+                                    <div>
+                                        <div class="ot-product-name">Industrial Component A</div>
+                                        <div class="ot-sku">PROD-001</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>PROD-001</td>
+                            <td>10</td>
+                            <td class="ot-money">₹ 2,500.00</td>
+                            <td class="ot-money">₹ 25,000.00</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="ot-product">
+                                    <div class="ot-product-image"></div>
+                                    <div>
+                                        <div class="ot-product-name">Industrial Component B</div>
+                                        <div class="ot-sku">PROD-002</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>PROD-002</td>
+                            <td>5</td>
+                            <td class="ot-money">₹ 4,000.00</td>
+                            <td class="ot-money">₹ 20,000.00</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="ot-total-row">
+                            <td colspan="4" style="text-align:right;">Total Amount</td>
+                            <td class="ot-grand-total">₹ 45,000.00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="ot-info-box">
+                <strong>ⓘ</strong>
+                <span>All amounts are in INR. Taxes and shipping charges may apply.</span>
+            </div>
+        </section>
+
+        <!-- TIMELINE -->
+        <section class="ot-card ot-content-card">
+            <h2 class="ot-section-title">
+                <span class="ot-section-title-icon">◷</span>
+                Order Timeline
+            </h2>
+            <div class="ot-timeline">
+                <div class="ot-event current">
+                    <div class="ot-event-dot">●</div>
+                    <h3 class="ot-event-title">
+                        In Transit
+                        <span class="ot-current-tag">Current</span>
+                    </h3>
+                    <p class="ot-event-text">Your order is on the way and will reach soon.</p>
+                    <div class="ot-event-time">22 Aug 2026, 08:30 AM</div>
+                </div>
+                <div class="ot-event">
+                    <div class="ot-event-dot">✓</div>
+                    <h3 class="ot-event-title">Dispatched</h3>
+                    <p class="ot-event-text">Your order has been dispatched.</p>
+                    <div class="ot-event-time">21 Aug 2026, 10:05 AM</div>
+                </div>
+                <div class="ot-event">
+                    <div class="ot-event-dot">✓</div>
+                    <h3 class="ot-event-title">Quality Check</h3>
+                    <p class="ot-event-text">Order passed quality check.</p>
+                    <div class="ot-event-time">20 Aug 2026, 03:45 PM</div>
+                </div>
+                <div class="ot-event">
+                    <div class="ot-event-dot">✓</div>
+                    <h3 class="ot-event-title">Processing</h3>
+                    <p class="ot-event-text">Your order is under processing.</p>
+                    <div class="ot-event-time">19 Aug 2026, 09:20 AM</div>
+                </div>
+                <div class="ot-event">
+                    <div class="ot-event-dot">✓</div>
+                    <h3 class="ot-event-title">Confirmed</h3>
+                    <p class="ot-event-text">Your order has been confirmed.</p>
+                    <div class="ot-event-time">18 Aug 2026, 11:15 AM</div>
+                </div>
+                <div class="ot-event">
+                    <div class="ot-event-dot">✓</div>
+                    <h3 class="ot-event-title">Order Created</h3>
+                    <p class="ot-event-text">Your order has been created successfully.</p>
+                    <div class="ot-event-time">18 Aug 2026, 10:30 AM</div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+</main>

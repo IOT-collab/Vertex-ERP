@@ -1,4 +1,1124 @@
 @model VertexERP.Models.SiteEmployeeLocationViewModel
-@{ ViewData["Title"]="Employee Location Tracking";Layout="~/Views/Shared/_LayoutMaster.cshtml";var s=Model.SelectedEmployee;var date=Context.Request.Query["date"].ToString(); }
-<style>.lt{max-width:1250px;margin:26px auto;padding:0 18px}.lt h1{color:#172a46}.lt-grid{display:grid;grid-template-columns:330px 1fr;gap:18px}.lt-list,.lt-detail{background:#fff;border:1px solid #dbe4ef;border-radius:14px;padding:16px}.lt-form{display:flex;gap:7px;margin-bottom:14px}.lt-form input,.lt-form button{padding:9px;border:1px solid #cbd5e1;border-radius:8px}.lt-form button{background:#2563eb;color:white;font-weight:700}.emp{display:block;padding:11px;margin:5px 0;text-decoration:none;color:#172a46;border-radius:9px}.emp:hover,.emp.sel{background:#eef5ff}.emp small{display:block;color:#64748b;margin-top:3px}.tag{display:inline-block;padding:3px 7px;border-radius:99px;background:#dcfce7;color:#166534;font-size:11px;margin-top:5px}.tag.out,.tag.none{background:#f1f5f9;color:#64748b}.profile{border-bottom:1px solid #e2e8f0;padding-bottom:14px}.profile h2{margin:0}.profile p{color:#64748b}.punches{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}.punch{border:1px solid #dbe4ef;border-radius:11px;padding:15px}.punch h3{margin:0;color:#2563eb}.punch.out h3{color:#059669}.punch p{color:#475569}.map{color:#1d4ed8;font-weight:700}.selfie{width:150px;height:150px;object-fit:cover;border-radius:10px;border:1px solid #cbd5e1}@@media(max-width:780px){.lt-grid,.punches{grid-template-columns:1fr}}</style>
-<main class="lt"><h1>Employee Location Tracking</h1><p>HR/Admin can see all employees and their field attendance location, time, accuracy and selfie.</p><div class="lt-grid"><aside class="lt-list"><form class="lt-form"><input type="date" name="date" value="@date"><button>View</button></form><b>Employees (@Model.Employees.Count)</b>@foreach(var e in Model.Employees){<a class="emp @(s?.EmployeeId==e.EmployeeId?"sel":"")" asp-action="LocationTracking" asp-route-date="@date" asp-route-employeeId="@e.EmployeeId"><b>@e.EmployeeName</b><small>@e.EmployeeCode · @e.Department</small><span class="tag @(e.IsCheckedOut?"out":e.CheckInTime.HasValue?"":"none")">@(e.CheckInTime.HasValue?(e.IsCheckedOut?"Checked out":"Checked in"):"No field attendance")</span></a>}</aside><section class="lt-detail">@if(s is null){<p>Select an employee who has field attendance for the selected date.</p>}else{<div class="profile"><h2>@s.EmployeeName</h2><p>@s.EmployeeCode · @s.Designation · @s.Department</p></div><div class="punches"><article class="punch"><h3>Check In</h3>@if(s.CheckInTime.HasValue){<p><b>Time:</b> @s.CheckInTime.Value.ToString("dd MMM yyyy, hh:mm tt")</p><p><b>GPS:</b> @s.CheckInLatitude, @s.CheckInLongitude<br><b>Accuracy:</b> @(s.CheckInAccuracyMetres?.ToString("0.0")??"—") m</p><a class="map" target="_blank" href="https://www.google.com/maps?q=@s.CheckInLatitude,@s.CheckInLongitude">Open location on map</a>@if(s.CheckInSelfiePath is not null){<p><img class="selfie" src="@s.CheckInSelfiePath" alt="Check-in selfie"></p>}}else{<p>No check-in recorded.</p>}</article><article class="punch out"><h3>Check Out</h3>@if(s.CheckOutTime.HasValue){<p><b>Time:</b> @s.CheckOutTime.Value.ToString("dd MMM yyyy, hh:mm tt")</p><p><b>GPS:</b> @s.CheckOutLatitude, @s.CheckOutLongitude<br><b>Accuracy:</b> @(s.CheckOutAccuracyMetres?.ToString("0.0")??"—") m</p><a class="map" target="_blank" href="https://www.google.com/maps?q=@s.CheckOutLatitude,@s.CheckOutLongitude">Open location on map</a>@if(s.CheckOutSelfiePath is not null){<p><img class="selfie" src="@s.CheckOutSelfiePath" alt="Check-out selfie"></p>}}else{<p>Check-out not recorded yet.</p>}</article></div>}</section></div></main>
+
+@{
+    ViewData["Title"] = "Employee Location Tracking";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+
+    var s = Model.SelectedEmployee;
+    var date = Context.Request.Query["date"].ToString();
+}
+
+<style>
+    /* ================================
+                       Employee Location Tracking
+                       ================================ */
+
+    .location-page {
+        max-width: 1250px;
+        margin: 24px auto;
+        padding: 0 18px 30px;
+        color: #172a46 !important;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+        .location-page * {
+            color: inherit;
+        }
+
+    /* Header */
+
+    .location-header {
+        margin-bottom: 18px;
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #64748b !important;
+        margin-bottom: 14px;
+    }
+
+        .breadcrumb span {
+            color: #64748b !important;
+        }
+
+    .location-title-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .location-title-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #e8f1ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #2563eb !important;
+        font-size: 22px;
+    }
+
+    .location-title {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+        color: #172a46 !important;
+    }
+
+    .location-subtitle {
+        margin: 5px 0 0 54px;
+        font-size: 14px;
+        color: #64748b !important;
+    }
+
+
+    /* Main Grid */
+
+    .location-grid {
+        display: grid;
+        grid-template-columns: 355px 1fr;
+        gap: 18px;
+        align-items: start;
+    }
+
+
+    /* Common Card */
+
+    .location-card {
+        background: #ffffff !important;
+        border: 1px solid #dbe4ef;
+        border-radius: 14px;
+        box-shadow: 0 5px 18px rgba(15, 23, 42, 0.05);
+    }
+
+
+    /* Employee Sidebar */
+
+    .employee-sidebar {
+        padding: 14px;
+        height: calc(100vh - 245px);
+        max-height: calc(100vh - 245px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        box-sizing: border-box;
+        position: sticky;
+        top: 20px;
+    }
+
+        .employee-sidebar::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        .employee-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .employee-sidebar::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+
+            .employee-sidebar::-webkit-scrollbar-thumb:hover {
+                background: #64748b;
+            }
+
+    .date-form {
+        display: grid;
+        grid-template-columns: 1fr 82px;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .date-input {
+        width: 100%;
+        height: 40px;
+        box-sizing: border-box;
+        padding: 0 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #ffffff !important;
+        color: #172a46 !important;
+        font-size: 13px;
+        outline: none;
+    }
+
+        .date-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+        }
+
+    .view-btn {
+        height: 40px;
+        border: 0;
+        border-radius: 8px;
+        background: #2563eb !important;
+        color: #ffffff !important;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+        .view-btn:hover {
+            background: #1d4ed8 !important;
+        }
+
+    .employee-count {
+        margin-bottom: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #172a46 !important;
+    }
+
+
+    /* Employee Item */
+
+    .employee-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 72px;
+        box-sizing: border-box;
+        padding: 9px 10px;
+        margin-bottom: 7px;
+        text-decoration: none !important;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #ffffff !important;
+        transition: all 0.18s ease;
+    }
+
+        .employee-item:hover {
+            background: #f8fbff !important;
+            border-color: #93c5fd;
+        }
+
+        .employee-item.selected {
+            background: #eef5ff !important;
+            border: 1.5px solid #2563eb;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.10);
+        }
+
+    .employee-avatar {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid #dbe4ef;
+        background: #f1f5f9;
+    }
+
+    .employee-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .employee-name {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: #172a46 !important;
+        margin-bottom: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .employee-meta {
+        display: block;
+        font-size: 11px;
+        line-height: 16px;
+        color: #64748b !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    /* Status */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 9px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+        .status-badge::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+    .status-in {
+        background: #dcfce7 !important;
+        color: #15803d !important;
+    }
+
+    .status-out {
+        background: #dcfce7 !important;
+        color: #059669 !important;
+    }
+
+    .status-none {
+        background: #f1f5f9 !important;
+        color: #64748b !important;
+    }
+
+
+    /* Right Side */
+
+    .location-detail {
+        min-width: 0;
+    }
+
+
+    /* Employee Profile */
+
+    .employee-profile {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 16px;
+        min-height: 105px;
+        box-sizing: border-box;
+    }
+
+    .profile-image {
+        width: 112px;
+        height: 90px;
+        border-radius: 9px;
+        object-fit: cover;
+        border: 1px solid #dbe4ef;
+        background: #f1f5f9;
+    }
+
+    .profile-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .profile-top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .profile-name {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        color: #172a46 !important;
+    }
+
+    .profile-status {
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: #dcfce7 !important;
+        color: #15803d !important;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .profile-description {
+        margin: 8px 0;
+        color: #475569 !important;
+        font-size: 13px;
+    }
+
+    .profile-contact {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        font-size: 11px;
+        color: #64748b !important;
+    }
+
+
+    /* Punch Cards */
+
+    .punch-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-top: 14px;
+    }
+
+    .punch-card {
+        min-height: 205px;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+
+    .punch-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+    }
+
+    .punch-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #172a46 !important;
+    }
+
+    .punch-icon {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #dcfce7;
+        color: #16a34a !important;
+    }
+
+        .punch-icon.checkout {
+            background: #fee2e2;
+            color: #dc2626 !important;
+        }
+
+    .punch-status {
+        padding: 5px 9px;
+        border-radius: 999px;
+        background: #dcfce7 !important;
+        color: #15803d !important;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+        .punch-status.pending {
+            background: #f1f5f9 !important;
+            color: #64748b !important;
+        }
+
+    .punch-body {
+        position: relative;
+        min-height: 125px;
+    }
+
+    .punch-details {
+        padding-right: 110px;
+    }
+
+    .punch-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+        font-size: 12px;
+    }
+
+    .punch-label {
+        min-width: 55px;
+        font-weight: 700;
+        color: #475569 !important;
+    }
+
+    .punch-value {
+        color: #172a46 !important;
+    }
+
+    .selfie {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 92px;
+        height: 82px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #dbe4ef;
+    }
+
+    .map-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 3px;
+        color: #2563eb !important;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+        .map-link:hover {
+            text-decoration: underline;
+        }
+
+    .no-checkout {
+        color: #64748b !important;
+        font-size: 12px;
+        margin-top: 25px;
+    }
+
+
+    /* Map */
+
+    .map-card {
+        margin-top: 14px;
+        padding: 14px;
+    }
+
+    .map-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #172a46 !important;
+    }
+
+    .map-wrapper {
+        position: relative;
+        width: 100%;
+        height: 190px;
+        overflow: hidden;
+        border-radius: 9px;
+        background: #e8eef5;
+    }
+
+        .map-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+    .map-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 7px;
+        background: #f1f5f9;
+        color: #64748b !important;
+        font-size: 12px;
+    }
+
+        .map-placeholder strong {
+            color: #172a46 !important;
+        }
+
+
+    /* Empty */
+
+    .empty-state {
+        padding: 40px;
+        text-align: center;
+        color: #64748b !important;
+    }
+
+
+    /* Responsive */
+
+    @@media (max-width: 950px) {
+
+        .location-grid {
+            grid-template-columns: 300px 1fr;
+        }
+
+        .punch-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 780px) {
+
+        .location-page {
+            padding: 0 10px 25px;
+            margin-top: 15px;
+        }
+
+        .location-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .employee-sidebar {
+            height: auto;
+            max-height: 420px;
+            position: static;
+        }
+
+        .location-title {
+            font-size: 23px;
+        }
+
+        .location-subtitle {
+            margin-left: 54px;
+        }
+
+        .employee-profile {
+            align-items: flex-start;
+        }
+
+        .profile-image {
+            width: 90px;
+            height: 80px;
+        }
+
+        .punch-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 480px) {
+
+        .location-title-row {
+            align-items: flex-start;
+        }
+
+        .location-title-icon {
+            width: 36px;
+            height: 36px;
+        }
+
+        .location-title {
+            font-size: 20px;
+        }
+
+        .location-subtitle {
+            margin-left: 0;
+            margin-top: 8px;
+        }
+
+        .employee-profile {
+            flex-direction: column;
+        }
+
+        .profile-image {
+            width: 100px;
+            height: 85px;
+        }
+
+        .date-form {
+            grid-template-columns: 1fr;
+        }
+
+        .punch-details {
+            padding-right: 0;
+        }
+
+        .selfie {
+            position: static;
+            margin-top: 12px;
+        }
+
+        .punch-body {
+            display: flex;
+            flex-direction: column;
+        }
+    }
+
+
+    /* ================================
+               Dark Layout Compatibility
+               ================================ */
+
+    .location-page .employee-count {
+        color: #ffffff !important;
+    }
+
+    .location-page .location-title {
+        color: #ffffff !important;
+    }
+
+    .location-page .location-subtitle {
+        color: #cbd5e1 !important;
+    }
+
+    .location-page .breadcrumb,
+    .location-page .breadcrumb span {
+        color: #94a3b8 !important;
+    }
+
+    .location-page .empty-state {
+        color: #cbd5e1 !important;
+    }
+
+        .location-page .empty-state h3 {
+            color: #ffffff !important;
+        }
+
+        .location-page .empty-state p {
+            color: #cbd5e1 !important;
+        }
+</style>
+
+
+<main class="location-page">
+
+    <!-- HEADER -->
+    <div class="location-header">
+
+        <div class="breadcrumb">
+            <span>⌂</span>
+            <span>Home</span>
+            <span>/</span>
+            <span>HRMS</span>
+            <span>/</span>
+            <span>Employee Location Tracking</span>
+        </div>
+
+        <div class="location-title-row">
+
+            <div class="location-title-icon">
+                📍
+            </div>
+
+            <h1 class="location-title">
+                Employee Location Tracking
+            </h1>
+
+        </div>
+
+        <p class="location-subtitle">
+            HR/Admin can see all employees and their field attendance location,
+            time, accuracy and selfie.
+        </p>
+
+    </div>
+
+
+    <!-- MAIN -->
+    <div class="location-grid">
+
+        <!-- LEFT EMPLOYEE LIST -->
+        <aside class="location-card employee-sidebar">
+
+            <form class="date-form" method="get">
+
+                <input type="date"
+                       name="date"
+                       value="@date"
+                       class="date-input" />
+
+                <button type="submit" class="view-btn">
+                    View
+                </button>
+
+            </form>
+
+
+            <div class="employee-count">
+                Employees (@Model.Employees.Count)
+            </div>
+
+
+            @foreach (var e in Model.Employees)
+            {
+                var isSelected = s?.EmployeeId == e.EmployeeId;
+
+                var statusClass =
+                e.CheckInTime.HasValue
+                ? (e.IsCheckedOut ? "status-out" : "status-in")
+                : "status-none";
+
+                var statusText =
+                e.CheckInTime.HasValue
+                ? (e.IsCheckedOut ? "Checked out" : "Checked in")
+                : "No field attendance";
+
+                <a class="employee-item @(isSelected ? "selected" : "")"
+                   asp-action="LocationTracking"
+                   asp-route-date="@date"
+                   asp-route-employeeId="@e.EmployeeId">
+
+                    <div>
+
+                        @if (!string.IsNullOrEmpty(e.CheckInSelfiePath))
+                        {
+                            <img src="@e.CheckInSelfiePath"
+                                 class="employee-avatar"
+                                 alt="@e.EmployeeName" />
+                        }
+                        else
+                        {
+                            <div class="employee-avatar"></div>
+                        }
+
+                    </div>
+
+
+                    <div class="employee-info">
+
+                        <span class="employee-name">
+                            @e.EmployeeName
+                        </span>
+
+                        <span class="employee-meta">
+                            @e.EmployeeCode · @e.Department
+                        </span>
+
+                        <span class="employee-meta">
+                            @e.Designation
+                        </span>
+
+                    </div>
+
+
+                    <span class="status-badge @statusClass">
+                        @statusText
+                    </span>
+
+                </a>
+            }
+
+        </aside>
+
+
+        <!-- RIGHT DETAIL -->
+        <section class="location-detail">
+
+            @if (s is null)
+            {
+                <div class="location-card empty-state">
+
+                    <h3>
+                        Employee Location Tracking
+                    </h3>
+
+                    <p>
+                        Select an employee who has field attendance
+                        for the selected date.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+
+                <!-- PROFILE -->
+                <div class="location-card employee-profile">
+
+                    @if (!string.IsNullOrEmpty(s.CheckInSelfiePath))
+                    {
+                        <img src="@s.CheckInSelfiePath"
+                             class="profile-image"
+                             alt="@s.EmployeeName" />
+                    }
+                    else
+                    {
+                        <div class="profile-image"></div>
+                    }
+
+
+                    <div class="profile-content">
+
+                        <div class="profile-top">
+
+                            <h2 class="profile-name">
+                                @s.EmployeeName
+                            </h2>
+
+                            @if (s.CheckInTime.HasValue && !s.IsCheckedOut)
+                            {
+                                <span class="profile-status">
+                                    ● Checked in
+                                </span>
+                            }
+                            else if (s.IsCheckedOut)
+                            {
+                                <span class="profile-status">
+                                    ● Checked out
+                                </span>
+                            }
+
+                        </div>
+
+
+                        <p class="profile-description">
+                            @s.EmployeeCode ·
+                            @s.Designation ·
+                            @s.Department
+                        </p>
+
+
+                        <div class="profile-contact">
+
+                            <span>
+                                📍 Field Attendance Location
+                            </span>
+
+                            @if (s.CheckInTime.HasValue)
+                            {
+                                <span>
+                                    🕐 @s.CheckInTime.Value.ToString("dd MMM yyyy, hh:mm tt")
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CHECK IN / CHECK OUT -->
+                <div class="punch-grid">
+
+                    <!-- CHECK IN -->
+                    <article class="location-card punch-card">
+
+                        <div class="punch-header">
+
+                            <h3 class="punch-title">
+
+                                <span class="punch-icon">
+                                    ●
+                                </span>
+
+                                Check In
+
+                            </h3>
+
+                            @if (s.CheckInTime.HasValue)
+                            {
+                                <span class="punch-status">
+                                    Checked In
+                                </span>
+                            }
+
+                        </div>
+
+
+                        @if (s.CheckInTime.HasValue)
+                        {
+                            <div class="punch-body">
+
+                                <div class="punch-details">
+
+                                    <div class="punch-row">
+
+                                        <span class="punch-label">
+                                            Time:
+                                        </span>
+
+                                        <span class="punch-value">
+                                            @s.CheckInTime.Value.ToString(
+                                            "dd MMM yyyy, hh:mm tt")
+                                </span>
+
+                            </div>
+
+
+                            <div class="punch-row">
+
+                                <span class="punch-label">
+                                    GPS:
+                                </span>
+
+                                <span class="punch-value">
+                                    @s.CheckInLatitude,
+                                    @s.CheckInLongitude
+                                </span>
+
+                            </div>
+
+
+                            <div class="punch-row">
+
+                                <span class="punch-label">
+                                    Accuracy:
+                                </span>
+
+                                <span class="punch-value">
+                                    @(s.CheckInAccuracyMetres?.ToString("0.0") ?? "—") m
+                                </span>
+
+                            </div>
+
+
+                            <a class="map-link"
+                               target="_blank"
+                               href="https://www.google.com/maps?q=@s.CheckInLatitude,@s.CheckInLongitude">
+
+                                📍 Open location on map
+
+                            </a>
+
+                        </div>
+
+
+                        @if (!string.IsNullOrEmpty(s.CheckInSelfiePath))
+                                {
+                                    <img src="@s.CheckInSelfiePath"
+                                         class="selfie"
+                                         alt="Check-in selfie" />
+                                }
+
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="no-checkout">
+                                No check-in recorded.
+                            </p>
+                        }
+
+                    </article>
+
+
+                    <!-- CHECK OUT -->
+                    <article class="location-card punch-card">
+
+                        <div class="punch-header">
+
+                            <h3 class="punch-title">
+
+                                <span class="punch-icon checkout">
+                                    ●
+                                </span>
+
+                                Check Out
+
+                            </h3>
+
+
+                            @if (s.CheckOutTime.HasValue)
+                            {
+                                <span class="punch-status">
+                                    Checked Out
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="punch-status pending">
+                                    Not Recorded Yet
+                                </span>
+                            }
+
+                        </div>
+
+
+                        @if (s.CheckOutTime.HasValue)
+                        {
+                            <div class="punch-body">
+
+                                <div class="punch-details">
+
+                                    <div class="punch-row">
+
+                                        <span class="punch-label">
+                                            Time:
+                                        </span>
+
+                                        <span class="punch-value">
+                                            @s.CheckOutTime.Value.ToString(
+                                            "dd MMM yyyy, hh:mm tt")
+                                </span>
+
+                            </div>
+
+
+                            <div class="punch-row">
+
+                                <span class="punch-label">
+                                    GPS:
+                                </span>
+
+                                <span class="punch-value">
+                                    @s.CheckOutLatitude,
+                                    @s.CheckOutLongitude
+                                </span>
+
+                            </div>
+
+
+                            <div class="punch-row">
+
+                                <span class="punch-label">
+                                    Accuracy:
+                                </span>
+
+                                <span class="punch-value">
+                                    @(s.CheckOutAccuracyMetres?.ToString("0.0") ?? "—") m
+                                </span>
+
+                            </div>
+
+
+                            <a class="map-link"
+                               target="_blank"
+                               href="https://www.google.com/maps?q=@s.CheckOutLatitude,@s.CheckOutLongitude">
+
+                                📍 Open location on map
+
+                            </a>
+
+                        </div>
+
+
+                        @if (!string.IsNullOrEmpty(s.CheckOutSelfiePath))
+                                {
+                                    <img src="@s.CheckOutSelfiePath"
+                                         class="selfie"
+                                         alt="Check-out selfie" />
+                                }
+
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="no-checkout">
+                                Check-out not recorded yet.
+                            </p>
+                        }
+
+                    </article>
+
+                </div>
+
+
+                <!-- LOCATION MAP -->
+                @if (s.CheckInLatitude.HasValue &&
+                            s.CheckInLongitude.HasValue)
+                {
+                    <div class="location-card map-card">
+
+                        <div class="map-card-title">
+
+                            <span>
+                                🗺️
+                            </span>
+
+                            Location Map
+
+                        </div>
+
+
+                        <div class="map-wrapper">
+
+                            <iframe src="https://www.google.com/maps?q=@s.CheckInLatitude,@s.CheckInLongitude&output=embed"
+                                    loading="lazy"
+                                    allowfullscreen>
+                            </iframe>
+
+                        </div>
+
+                    </div>
+                }
+
+            }
+
+        </section>
+
+    </div>
+
+</main>

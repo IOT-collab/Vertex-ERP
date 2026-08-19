@@ -947,6 +947,11 @@ namespace VertexERP.Controllers
             return View();
         }
 
+        public IActionResult OrderTracking()
+        {
+            return View();
+        }
+
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> ManagerAttendance()
         {

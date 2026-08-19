@@ -1,24 +1,827 @@
 @model VertexERP.Models.FieldAttendanceViewModel
-@{ ViewData["Title"] = "Mark Attendance"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
+
+@{
+    ViewData["Title"] = "Mark Attendance";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
 <style>
-.field-attendance{max-width:850px;margin:30px auto;padding:clamp(18px,4vw,38px);background:#111c31;border:1px solid #2b3d5d;border-radius:18px;color:#edf4ff}.field-attendance h1{margin:0;font-size:clamp(25px,4vw,34px)}.field-attendance p{color:#aabbd5}.field-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:26px}.field-action{border:0;border-radius:14px;padding:25px 18px;background:#2866dd;color:#fff;font:700 17px inherit;cursor:pointer}.field-action.checkout{background:#0f9f73}.field-action:disabled{opacity:.45;cursor:not-allowed}.field-details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px}.field-details article{padding:16px;border-radius:12px;background:#172641}.field-details small{display:block;color:#9db0cf}.field-details strong{display:block;margin-top:7px;font-size:18px}.selfie-panel{margin-top:24px;padding:18px;border:1px dashed #4b6b99;border-radius:14px}.selfie-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center}.selfie-preview{display:none;width:120px;height:120px;object-fit:cover;border-radius:12px;border:2px solid #5687e6}.field-message{min-height:22px;margin-top:18px;color:#c1d4f3}.field-message.error{color:#ffaaa9}@@media(max-width:560px){.field-actions,.field-details{grid-template-columns:1fr}.field-attendance{margin:14px}.field-action{min-height:100px}}
+
+    /* =========================================
+                   FIELD ATTENDANCE
+                   ========================================= */
+
+    .field-attendance {
+        width: min(100% - 32px, 1050px);
+        margin: 28px auto;
+        padding: 30px;
+        box-sizing: border-box;
+        background: #111c31;
+        border: 1px solid #2b3d5d;
+        border-radius: 18px;
+        color: #edf4ff;
+    }
+
+        .field-attendance h1 {
+            margin: 0;
+            font-size: clamp(25px, 4vw, 34px);
+            line-height: 1.2;
+            color: #ffffff;
+        }
+
+        .field-attendance > p {
+            margin: 8px 0 0;
+            color: #aabbd5;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+
+    /* =========================================
+                   ACTION CARDS
+                   ========================================= */
+
+    .field-actions {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: flex-start !important;
+        gap: 16px !important;
+        margin-top: 24px !important;
+        width: 100% !important;
+    }
+
+    .attendance-action-card {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        width: auto !important;
+        height: auto !important;
+        padding: 14px !important;
+        margin: 0 !important;
+        align-self: flex-start !important;
+        border-radius: 14px;
+        background: #172641;
+        border: 1px solid #263b5e;
+        box-sizing: border-box;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+
+    /* =========================================
+                   BUTTONS
+                   ========================================= */
+
+    .field-action {
+        display: block;
+        width: 100%;
+        min-height: 58px;
+        height: 58px;
+        flex: 0 0 58px;
+        border: 0;
+        border-radius: 10px;
+        padding: 14px 18px;
+        color: #ffffff;
+        font: 700 16px inherit;
+        cursor: pointer;
+        transition: background .2s ease, opacity .2s ease, transform .15s ease;
+    }
+
+        .field-action.checkin {
+            background: #2866dd;
+        }
+
+            .field-action.checkin:hover:not(:disabled) {
+                background: #1d5bd0;
+                transform: translateY(-1px);
+            }
+
+        .field-action.checkout {
+            background: #0f9f73;
+        }
+
+            .field-action.checkout:hover:not(:disabled) {
+                background: #0b8c65;
+                transform: translateY(-1px);
+            }
+
+        .field-action:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+
+    /* =========================================
+                   ATTENDANCE TIME
+                   ========================================= */
+
+    .attendance-status {
+        display: block !important;
+        flex: 0 0 auto !important;
+        margin: 8px 0 0 !important;
+        padding: 8px 10px !important;
+        background: #111c31;
+        border: 1px solid #263b5e;
+        border-radius: 9px;
+        min-height: 0 !important;
+        height: auto !important;
+        box-sizing: border-box;
+    }
+
+        .attendance-status small {
+            display: block;
+            color: #9db0cf;
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+
+        .attendance-status strong {
+            display: block;
+            color: #ffffff;
+            font-size: 16px;
+            line-height: 1.2;
+        }
+
+
+    /* =========================================
+                   SELFIE
+                   ========================================= */
+
+    .selfie-panel {
+        margin-top: 18px;
+        padding: 14px 16px;
+        border: 1px dashed #4b6b99;
+        border-radius: 14px;
+        background: rgba(17, 28, 49, .55);
+    }
+
+    .selfie-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .selfie-button {
+        width: auto;
+        min-height: 44px;
+        padding: 10px 16px;
+        background: #2866dd;
+        border-radius: 9px;
+        font-size: 14px;
+    }
+
+        .selfie-button:hover {
+            background: #1d5bd0;
+        }
+
+    .selfie-help {
+        color: #aabbd5;
+        font-size: 13px;
+    }
+
+    .selfie-preview {
+        display: none;
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 2px solid #5687e6;
+    }
+
+
+    /* =========================================
+                   MESSAGE
+                   ========================================= */
+
+    .field-message {
+        min-height: 20px;
+        margin: 14px 0 0;
+        color: #c1d4f3;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+        .field-message.error {
+            color: #ffaaa9;
+        }
+
+
+    /* =========================================
+                   DISABLED CHECK-IN LOOK
+                   ========================================= */
+
+    .field-action.checkin:disabled {
+        background: #315181 !important;
+        opacity: 1 !important;
+        color: #b9c8df !important;
+        cursor: not-allowed;
+    }
+
+    .field-action.checkout:disabled {
+        background: #285f52;
+        opacity: .55;
+    }
+
+
+    /* =========================================
+                   TABLET
+                   ========================================= */
+
+    @@media (max-width: 768px) {
+
+        .field-attendance {
+            width: min(100% - 24px, 700px);
+            padding: 22px;
+            margin: 18px auto;
+        }
+
+        .field-actions {
+            gap: 12px;
+        }
+
+        .attendance-action-card {
+            padding: 12px;
+        }
+
+        .field-action {
+            min-height: 54px;
+            font-size: 15px;
+        }
+    }
+
+
+    /* =========================================
+                   MOBILE
+                   ========================================= */
+
+    @@media (max-width: 560px) {
+
+        .field-attendance {
+            width: calc(100% - 20px);
+            margin: 12px auto;
+            padding: 16px;
+            border-radius: 14px;
+        }
+
+            .field-attendance h1 {
+                font-size: 24px;
+            }
+
+            .field-attendance > p {
+                font-size: 13px;
+            }
+        /*
+                       Keep Check In and Check Out
+                       on the same row even on mobile.
+                    */
+
+        .field-actions {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            gap: 8px !important;
+            margin-top: 18px !important;
+        }
+
+        .attendance-action-card {
+            flex: 1 1 0 !important;
+            padding: 8px !important;
+            border-radius: 10px;
+        }
+
+        .field-action {
+            min-height: 50px;
+            height: 50px;
+            flex-basis: 50px;
+            padding: 8px 5px;
+            font-size: 13px;
+            border-radius: 8px;
+        }
+
+        .attendance-status {
+            margin-top: 7px !important;
+            padding: 7px !important;
+            min-height: 0 !important;
+        }
+
+            .attendance-status small {
+                font-size: 10px;
+            }
+
+            .attendance-status strong {
+                font-size: 13px;
+            }
+
+        .selfie-panel {
+            margin-top: 14px;
+            padding: 12px;
+        }
+
+        .selfie-row {
+            gap: 10px;
+        }
+
+        .selfie-button {
+            min-height: 42px;
+            font-size: 13px;
+            padding: 9px 12px;
+        }
+
+        .selfie-help {
+            font-size: 11px;
+        }
+    }
+
+
+    /* =========================================
+                   VERY SMALL MOBILE
+                   ========================================= */
+
+    @@media (max-width: 380px) {
+
+        .field-attendance {
+            width: calc(100% - 12px);
+            padding: 12px;
+        }
+
+        .field-actions {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            gap: 6px !important;
+        }
+
+        .attendance-action-card {
+            flex: 1 1 0 !important;
+            padding: 6px !important;
+        }
+
+        .field-action {
+            min-height: 46px;
+            height: 46px;
+            flex-basis: 46px;
+            font-size: 12px;
+            padding: 7px 3px;
+        }
+
+        .attendance-status strong {
+            font-size: 12px;
+            margin: 0;
+        }
+    }
 </style>
+
+
 <section class="field-attendance">
-    <h1>Field Attendance</h1><p>Check in/out records your current GPS location and server time. Add a selfie if required for the visit.</p>
-    <div class="field-actions"><button id="checkIn" class="field-action" @(Model.HasCheckedIn ? "disabled" : "")><i class="fa-solid fa-right-to-bracket"></i> Check In</button><button id="checkOut" class="field-action checkout" @(!Model.HasCheckedIn || Model.HasCheckedOut ? "disabled" : "")><i class="fa-solid fa-right-from-bracket"></i> Check Out</button></div>
-    <div class="field-details"><article><small>Check In</small><strong id="checkInTime">@(Model.CheckInTime?.ToString("hh:mm tt") ?? "Not recorded")</strong></article><article><small>Check Out</small><strong id="checkOutTime">@(Model.CheckOutTime?.ToString("hh:mm tt") ?? "Not recorded")</strong></article></div>
-    <div class="selfie-panel"><div class="selfie-row"><button id="captureSelfie" type="button" class="field-action" style="padding:11px 15px;font-size:14px"><i class="fa-solid fa-camera"></i> Capture Selfie</button><input id="selfieFile" type="file" accept="image/*" capture="user" hidden><img id="selfiePreview" class="selfie-preview" alt="Selfie preview"><span>Optional selfie: camera opens on supported phones.</span></div></div>
-    <p class="field-message" id="fieldMessage" aria-live="polite"></p>
+
+    <h1>
+        Field Attendance
+    </h1>
+
+    <p>
+        Check in/out records your current GPS location and server time.
+        Add a selfie if required for the visit.
+    </p>
+
+
+    <!-- =========================================
+         CHECK IN / CHECK OUT
+         ========================================= -->
+
+    <div class="field-actions">
+
+        <!-- CHECK IN -->
+        <div class="attendance-action-card">
+
+            <button id="checkIn"
+                    type="button"
+                    class="field-action checkin"
+                    @(Model.HasCheckedIn ? "disabled" : "")>
+
+                <i class="fa-solid fa-right-to-bracket"></i>
+                Check In
+
+            </button>
+
+            <div class="attendance-status">
+
+                <small>
+                    Check In
+                </small>
+
+                <strong id="checkInTime">
+                    @(Model.CheckInTime?.ToString("hh:mm tt") ?? "Not recorded")
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- CHECK OUT -->
+        <div class="attendance-action-card">
+
+            <button id="checkOut"
+                    type="button"
+                    class="field-action checkout"
+                    @(!Model.HasCheckedIn || Model.HasCheckedOut ? "disabled" : "")>
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Check Out
+
+            </button>
+
+            <div class="attendance-status">
+
+                <small>
+                    Check Out
+                </small>
+
+                <strong id="checkOutTime">
+                    @(Model.CheckOutTime?.ToString("hh:mm tt") ?? "Not recorded")
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         SELFIE
+         ========================================= -->
+
+    <div class="selfie-panel">
+
+        <div class="selfie-row">
+
+            <button id="captureSelfie"
+                    type="button"
+                    class="field-action selfie-button">
+
+                <i class="fa-solid fa-camera"></i>
+                Capture Selfie
+
+            </button>
+
+            <input id="selfieFile"
+                   type="file"
+                   accept="image/*"
+                   capture="user"
+                   hidden />
+
+            <img id="selfiePreview"
+                 class="selfie-preview"
+                 alt="Selfie preview" />
+
+            <span class="selfie-help">
+                Optional selfie: camera opens on supported phones.
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- MESSAGE -->
+
+    <p class="field-message"
+       id="fieldMessage"
+       aria-live="polite"></p>
+
+
     @Html.AntiForgeryToken()
+
 </section>
+
+
 <script>
-(() => {
- const message=document.getElementById('fieldMessage'), selfieFile=document.getElementById('selfieFile'), preview=document.getElementById('selfiePreview'); let selfieData=null;
- document.getElementById('captureSelfie').onclick=()=>selfieFile.click();
- selfieFile.onchange=()=>{const file=selfieFile.files[0]; if(!file)return; if(file.size>5*1024*1024){show('Selfie must be smaller than 5 MB.',true);return;} const reader=new FileReader(); reader.onload=()=>{selfieData=reader.result;preview.src=selfieData;preview.style.display='block';};reader.readAsDataURL(file);};
- const show=(text,error=false)=>{message.textContent=text;message.className=error?'field-message error':'field-message';};
- const position=()=>new Promise((resolve,reject)=>{if(!navigator.geolocation)return reject(new Error('This device does not support location services.'));navigator.geolocation.getCurrentPosition(resolve,error=>reject(new Error(error.code===1?'Please allow location permission to mark attendance.':'Unable to get your current location. Please turn on location and try again.')),{enableHighAccuracy:true,timeout:20000,maximumAge:0});});
- async function mark(action){const button=action==='Check In'?document.getElementById('checkIn'):document.getElementById('checkOut');button.disabled=true;show('Getting your current location…');try{const gps=await position();show('Saving attendance…');const response=await fetch('@Url.Action("SubmitFieldAttendance","Main")',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('input[name="__RequestVerificationToken"]').value},body:JSON.stringify({action,latitude:gps.coords.latitude,longitude:gps.coords.longitude,accuracyMetres:gps.coords.accuracy,selfieDataUrl:selfieData})});const data=await response.json();if(!response.ok)throw new Error(data.message||'Could not save attendance.');show(data.message);document.getElementById(action==='Check In'?'checkInTime':'checkOutTime').textContent=data.time;if(action==='Check In')document.getElementById('checkOut').disabled=false;else button.disabled=true;selfieData=null;selfieFile.value='';preview.style.display='none';}catch(error){button.disabled=false;show(error.message,true);}}
- document.getElementById('checkIn').onclick=()=>mark('Check In');document.getElementById('checkOut').onclick=()=>mark('Check Out');
-})();
+
+    (() => {
+
+        const message =
+            document.getElementById('fieldMessage');
+
+        const selfieFile =
+            document.getElementById('selfieFile');
+
+        const preview =
+            document.getElementById('selfiePreview');
+
+        let selfieData = null;
+
+
+        /* =========================================
+           SELFIE
+           ========================================= */
+
+        document.getElementById('captureSelfie').onclick = () => {
+
+            selfieFile.click();
+
+        };
+
+
+        selfieFile.onchange = () => {
+
+            const file = selfieFile.files[0];
+
+            if (!file)
+                return;
+
+
+            if (file.size > 5 * 1024 * 1024) {
+
+                show(
+                    'Selfie must be smaller than 5 MB.',
+                    true
+                );
+
+                selfieFile.value = '';
+
+                return;
+            }
+
+
+            const reader = new FileReader();
+
+
+            reader.onload = () => {
+
+                selfieData = reader.result;
+
+                preview.src = selfieData;
+
+                preview.style.display = 'block';
+
+            };
+
+
+            reader.readAsDataURL(file);
+
+        };
+
+
+        /* =========================================
+           MESSAGE
+           ========================================= */
+
+        const show = (text, error = false) => {
+
+            message.textContent = text;
+
+            message.className =
+                error
+                    ? 'field-message error'
+                    : 'field-message';
+
+        };
+
+
+        /* =========================================
+           GPS
+           ========================================= */
+
+        const position = () => new Promise(
+            (resolve, reject) => {
+
+                if (!navigator.geolocation) {
+
+                    return reject(
+                        new Error(
+                            'This device does not support location services.'
+                        )
+                    );
+
+                }
+
+
+                navigator.geolocation.getCurrentPosition(
+
+                    resolve,
+
+                    error => reject(
+                        new Error(
+                            error.code === 1
+                                ? 'Please allow location permission to mark attendance.'
+                                : 'Unable to get your current location. Please turn on location and try again.'
+                        )
+                    ),
+
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 20000,
+                        maximumAge: 0
+                    }
+
+                );
+
+            }
+        );
+
+
+        /* =========================================
+           MARK ATTENDANCE
+           ========================================= */
+
+        async function mark(action) {
+
+            const checkInButton =
+                document.getElementById('checkIn');
+
+            const checkOutButton =
+                document.getElementById('checkOut');
+
+
+            const button =
+                action === 'Check In'
+                    ? checkInButton
+                    : checkOutButton;
+
+
+            /*
+             * Disable immediately so user
+             * cannot double-click.
+             */
+
+            button.disabled = true;
+
+
+            show(
+                'Getting your current location…'
+            );
+
+
+            try {
+
+                const gps = await position();
+
+
+                show(
+                    'Saving attendance…'
+                );
+
+
+                const response = await fetch(
+
+                    '@Url.Action("SubmitFieldAttendance", "Main")',
+
+                    {
+                        method: 'POST',
+
+                        headers: {
+                            'Content-Type': 'application/json',
+
+                            'X-CSRF-TOKEN':
+                                document.querySelector(
+                                    'input[name="__RequestVerificationToken"]'
+                                ).value
+                        },
+
+                        body: JSON.stringify({
+
+                            action,
+
+                            latitude:
+                                gps.coords.latitude,
+
+                            longitude:
+                                gps.coords.longitude,
+
+                            accuracyMetres:
+                                gps.coords.accuracy,
+
+                            selfieDataUrl:
+                                selfieData
+
+                        })
+                    }
+
+                );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.message ||
+                        'Could not save attendance.'
+                    );
+
+                }
+
+
+                /* =================================
+                   SUCCESS
+                   ================================= */
+
+                show(
+                    data.message
+                );
+
+
+                if (action === 'Check In') {
+
+                    document.getElementById(
+                        'checkInTime'
+                    ).textContent = data.time;
+
+
+                    /*
+                     * Check In remains disabled
+                     * after successful check-in.
+                     */
+
+                    checkInButton.disabled = true;
+
+
+                    /*
+                     * Check Out becomes enabled.
+                     */
+
+                    checkOutButton.disabled = false;
+
+                }
+
+
+                if (action === 'Check Out') {
+
+                    document.getElementById(
+                        'checkOutTime'
+                    ).textContent = data.time;
+
+
+                    /*
+                     * After checkout,
+                     * checkout also remains disabled.
+                     */
+
+                    checkOutButton.disabled = true;
+
+                }
+
+
+                /* Clear selfie */
+
+                selfieData = null;
+
+                selfieFile.value = '';
+
+                preview.style.display = 'none';
+
+            }
+
+
+            catch (error) {
+
+                /*
+                 * If request fails,
+                 * allow user to try again.
+                 */
+
+                button.disabled = false;
+
+
+                show(
+                    error.message,
+                    true
+                );
+
+            }
+
+        }
+
+
+        /* =========================================
+           BUTTON EVENTS
+           ========================================= */
+
+        document.getElementById('checkIn').onclick =
+            () => mark('Check In');
+
+
+        document.getElementById('checkOut').onclick =
+            () => mark('Check Out');
+
+        // Keep the initial button state consistent with the server model.
+        const initialCheckIn = document.getElementById('checkIn');
+        const initialCheckOut = document.getElementById('checkOut');
+
+        if (initialCheckIn) {
+            initialCheckIn.disabled = @Model.HasCheckedIn.ToString().ToLowerInvariant();
+        }
+
+        if (initialCheckOut) {
+            initialCheckOut.disabled = @((!Model.HasCheckedIn || Model.HasCheckedOut).ToString().ToLowerInvariant());
+        }
+
+
+    })();
+
 </script>
