@@ -22,6 +22,7 @@ namespace VertexERP.Data
         public DbSet<EmployeeBankDetail> EmployeeBankDetails => Set<EmployeeBankDetail>();
         public DbSet<BankDetailUpdateRequest> BankDetailUpdateRequests => Set<BankDetailUpdateRequest>();
         public DbSet<EmployeeSalaryDetail> EmployeeSalaryDetails => Set<EmployeeSalaryDetail>();
+        public DbSet<EmployeeDocument> EmployeeDocuments => Set<EmployeeDocument>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -79,6 +80,13 @@ namespace VertexERP.Data
             modelBuilder.Entity<EmployeeBankDetail>(entity => { entity.ToTable("EmployeeBankDetails"); entity.HasIndex(x => x.EmployeeId).IsUnique(); entity.HasOne(x => x.Employee).WithOne().HasForeignKey<EmployeeBankDetail>(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade); });
             modelBuilder.Entity<BankDetailUpdateRequest>(entity => { entity.ToTable("BankDetailUpdateRequests"); entity.HasIndex(x => new { x.EmployeeId, x.Status }); entity.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade); });
             modelBuilder.Entity<EmployeeSalaryDetail>(entity => { entity.ToTable("EmployeeSalaryDetails"); entity.HasIndex(x => x.EmployeeId).IsUnique(); entity.Property(x => x.BasicSalary).HasPrecision(18,2); entity.Property(x => x.HouseRentAllowance).HasPrecision(18,2); entity.Property(x => x.ConveyanceAllowance).HasPrecision(18,2); entity.Property(x => x.SpecialAllowance).HasPrecision(18,2); entity.Property(x => x.ProvidentFund).HasPrecision(18,2); entity.Property(x => x.ProfessionalTax).HasPrecision(18,2); entity.Property(x => x.Tds).HasPrecision(18,2); entity.Property(x => x.OtherDeductions).HasPrecision(18,2); entity.HasOne(x => x.Employee).WithOne().HasForeignKey<EmployeeSalaryDetail>(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade); });
+            modelBuilder.Entity<EmployeeDocument>(entity =>
+            {
+                entity.ToTable("EmployeeDocuments");
+                entity.HasIndex(x => new { x.EmployeeId, x.DocumentType });
+                entity.Property(x => x.UploadedAtUtc).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity<Department>(entity =>
             {

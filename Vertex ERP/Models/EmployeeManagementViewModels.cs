@@ -173,9 +173,9 @@ public class EmployeeFormViewModel : IValidatableObject
     public string? BankAccountHolderName { get; set; }
     [StringLength(120), Display(Name = "Bank Name")]
     public string? BankName { get; set; }
-    [RegularExpression(@"^$|^[0-9]{8,20}$", ErrorMessage = "Account number must contain 8 to 20 digits."), Display(Name = "New Account Number")]
+    [RegularExpression(@"^$|^[0-9]{8,18}$", ErrorMessage = "Account number must contain 8 to 18 digits."), Display(Name = "New Account Number")]
     public string? BankAccountNumber { get; set; }
-    [RegularExpression(@"^$|^[0-9]{8,20}$", ErrorMessage = "Account number must contain 8 to 20 digits."), Compare(nameof(BankAccountNumber), ErrorMessage = "Account numbers do not match."), Display(Name = "Confirm Account Number")]
+    [RegularExpression(@"^$|^[0-9]{8,18}$", ErrorMessage = "Account number must contain 8 to 18 digits."), Compare(nameof(BankAccountNumber), ErrorMessage = "Account numbers do not match."), Display(Name = "Confirm Account Number")]
     public string? ConfirmBankAccountNumber { get; set; }
     [Display(Name = "IFSC Code")]
     public string? BankIfscCode { get; set; }
@@ -236,8 +236,8 @@ public class EmployeeBankDraft
 {
     [StringLength(120)] public string? BankAccountHolderName { get; set; }
     [StringLength(120)] public string? BankName { get; set; }
-    [RegularExpression(@"^$|^[0-9]{8,20}$", ErrorMessage = "Account number must contain 8 to 20 digits.")] public string? BankAccountNumber { get; set; }
-    [RegularExpression(@"^$|^[0-9]{8,20}$", ErrorMessage = "Account number must contain 8 to 20 digits."), Compare(nameof(BankAccountNumber), ErrorMessage = "Bank account numbers do not match.")] public string? ConfirmBankAccountNumber { get; set; }
+    [RegularExpression(@"^$|^[0-9]{8,18}$", ErrorMessage = "Account number must contain 8 to 18 digits.")] public string? BankAccountNumber { get; set; }
+    [RegularExpression(@"^$|^[0-9]{8,18}$", ErrorMessage = "Account number must contain 8 to 18 digits."), Compare(nameof(BankAccountNumber), ErrorMessage = "Bank account numbers do not match.")] public string? ConfirmBankAccountNumber { get; set; }
     [RegularExpression(@"^$|^[A-Za-z]{4}0[A-Za-z0-9]{6}$", ErrorMessage = "Enter a valid IFSC code.")] public string? BankIfscCode { get; set; }
     [StringLength(120)] public string? BankBranchName { get; set; }
     [StringLength(30)] public string? BankAccountType { get; set; }
@@ -347,8 +347,8 @@ public class HrAddEmployeeViewModel : IValidatableObject
 
     [StringLength(120)] public string? BankAccountHolderName { get; set; }
     [StringLength(120)] public string? BankName { get; set; }
-    [RegularExpression(@"^$|^[0-9]{8,20}$", ErrorMessage = "Account number must contain 8 to 20 digits.")] public string? BankAccountNumber { get; set; }
-    [RegularExpression(@"^$|^[0-9]{8,20}$", ErrorMessage = "Account number must contain 8 to 20 digits."), Compare(nameof(BankAccountNumber), ErrorMessage = "Bank account numbers do not match.")] public string? ConfirmBankAccountNumber { get; set; }
+    [RegularExpression(@"^$|^[0-9]{8,18}$", ErrorMessage = "Account number must contain 8 to 18 digits.")] public string? BankAccountNumber { get; set; }
+    [RegularExpression(@"^$|^[0-9]{8,18}$", ErrorMessage = "Account number must contain 8 to 18 digits."), Compare(nameof(BankAccountNumber), ErrorMessage = "Bank account numbers do not match.")] public string? ConfirmBankAccountNumber { get; set; }
     [RegularExpression(@"^$|^[A-Za-z]{4}0[A-Za-z0-9]{6}$", ErrorMessage = "Enter a valid IFSC code.")] public string? BankIfscCode { get; set; }
     [StringLength(120)] public string? BankBranchName { get; set; }
     [StringLength(30)] public string? BankAccountType { get; set; }

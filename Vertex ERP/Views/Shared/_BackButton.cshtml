@@ -24,6 +24,7 @@
         && action is "Department" or "AddDepartment" or "EditDepartment" or "DeleteDepartment" or "DepartmentDetails";
     var isEmployeePage = string.Equals(controller, "Employee", StringComparison.OrdinalIgnoreCase);
     var isEmployeeIndex = isEmployeePage && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase);
+    var isHrPage = string.Equals(controller, "Hr", StringComparison.OrdinalIgnoreCase);
     var backController = isDepartmentPage
         ? (string.Equals(action, "Department", StringComparison.OrdinalIgnoreCase) ? "Main" : "Hr")
         : isEmployeeIndex ? "Main"
@@ -34,6 +35,24 @@
         : isEmployeeIndex ? "Hrms"
         : isEmployeePage ? "Index"
         : ViewData["BackAction"]?.ToString();
+    if (isHrPage && !isDepartmentPage)
+    {
+        if (action is "GenerateDocument" or "UploadDocument")
+        {
+            backController = "Hr";
+            backAction = "EmpDocuments";
+        }
+        else if (action is "AddEmployeeBankDetails" or "AddEmployeeSalaryDetails")
+        {
+            backController = "Hr";
+            backAction = "HrAddEmp";
+        }
+        else
+        {
+            backController = "Main";
+            backAction = "Hrms";
+        }
+    }
     var hasExplicitBackRoute = !string.IsNullOrWhiteSpace(backController) && !string.IsNullOrWhiteSpace(backAction);
     var isActiveIssuesPage = string.Equals(controller, "Main", StringComparison.OrdinalIgnoreCase)
         && action is "WorkflowManagement" or "ManagerQueries";

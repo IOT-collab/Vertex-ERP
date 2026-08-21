@@ -11,3 +11,4 @@ Vertex ERP/appsettings.Production.json
 *.suo
 *.userosscache
 *.sln.docstates
+/Vertex ERP/output/pdf/Sanjeev_Kumar_ATS_Resume.pdf

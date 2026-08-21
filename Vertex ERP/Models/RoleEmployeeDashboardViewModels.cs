@@ -145,6 +145,12 @@ public sealed class FieldAttendanceViewModel
     public bool HasCheckedOut { get; init; }
     public DateTime? CheckInTime { get; init; }
     public DateTime? CheckOutTime { get; init; }
+    public decimal? CheckInLatitude { get; init; }
+    public decimal? CheckInLongitude { get; init; }
+    public decimal? CheckInAccuracyMetres { get; init; }
+    public decimal? CheckOutLatitude { get; init; }
+    public decimal? CheckOutLongitude { get; init; }
+    public decimal? CheckOutAccuracyMetres { get; init; }
 }
 
 public sealed class FieldAttendanceRequest
@@ -157,6 +163,8 @@ public sealed class FieldAttendanceRequest
     public decimal? Longitude { get; set; }
     [Required, Range(0, 100000)]
     public decimal? AccuracyMetres { get; set; }
+    [Required]
+    public DateTimeOffset? CapturedAtUtc { get; set; }
     public string? SelfieDataUrl { get; set; }
 }
 

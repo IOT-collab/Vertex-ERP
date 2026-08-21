@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/common-back-button.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/common-ui.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Vertex_ERP.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/erp-buttons.css" asp-append-version="true" />
 </head>
 <body>
     <header>
@@ -17,7 +19,6 @@
         <main role="main" class="pb-3">
             <partial name="_BackButton" />
             @RenderBody()
-            <link rel="stylesheet" href="~/css/common-ui.css" asp-append-version="true" />
         </main>
     </div>
 
@@ -29,6 +30,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/input-rules.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

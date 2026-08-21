@@ -4,6 +4,9 @@ using VertexERP.Data;
 using VertexERP.Models;
 using VertexERP.Services;
 using System.Text.Json;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 
 namespace Vertex_ERP.Controllers
 {
@@ -54,14 +57,421 @@ namespace Vertex_ERP.Controllers
             return View();
         }
 
-        public IActionResult EmpDocuments()
+        public async Task<IActionResult> EmpDocuments()
+        {
+            var documents = await _dbContext.EmployeeDocuments.AsNoTracking().Include(item => item.Employee)
+                .OrderByDescending(item => item.UploadedAtUtc).Select(item => new
+                {
+                    item.Id, Name = item.DocumentName, Code = "DOC-" + item.Id.ToString("D5"),
+                    FileSize = item.FileSize < 1024 * 1024 ? $"{item.FileSize / 1024d:F0} KB" : $"{item.FileSize / 1024d / 1024d:F1} MB",
+                    Extension = Path.GetExtension(item.OriginalFileName).TrimStart('.'), EmployeeName = item.Employee.FullName,
+                    EmployeeId = item.Employee.EmployeeCode, item.Employee.Department, item.Employee.Designation,
+                    Category = item.DocumentType, UploadDate = item.UploadedAtUtc.ToLocalTime().ToString("dd MMM yyyy"),
+                    ExpiryDate = item.ExpiryDate.HasValue ? item.ExpiryDate.Value.ToString("dd MMM yyyy") : "—",
+                    Status = item.ExpiryDate.HasValue && item.ExpiryDate.Value <= DateOnly.FromDateTime(DateTime.Today.AddDays(30)) ? "Expiring Soon" : "Verified"
+                }).ToListAsync();
+            return View(new
             {
-                return View();
+                Title = "Employee Documents", Documents = documents, TotalDocuments = documents.Count,
+                PendingReview = 0, ExpiringSoon = documents.Count(item => item.Status == "Expiring Soon"),
+                VerifiedRate = documents.Count == 0 ? "0%" : $"{documents.Count(item => item.Status == "Verified") * 100 / documents.Count}%"
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GenerateDocument(int? employeeId)
+        {
+            var model = new EmployeeDocumentFormViewModel { EmployeeId = employeeId };
+            await PopulateDocumentEmployeesAsync(model);
+            if (employeeId.HasValue)
+            {
+                var employee = await _dbContext.Employees.AsNoTracking().Include(item => item.ReportingManager).FirstOrDefaultAsync(item => item.Id == employeeId.Value);
+                if (employee != null) FillDocumentEmployee(model, employee);
+            }
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GenerateDocument(EmployeeDocumentFormViewModel model)
+        {
+            var allowedTypes = new[] { "Offer Letter", "Increment / Promotion Letter", "Relieving Letter", "Experience Letter" };
+            if (!allowedTypes.Contains(model.DocumentType)) ModelState.AddModelError(nameof(model.DocumentType), "Select a valid document type.");
+            if (model.DocumentType == "Offer Letter")
+            {
+                if (string.IsNullOrWhiteSpace(model.PanNumber)) ModelState.AddModelError(nameof(model.PanNumber), "PAN number is required for an offer letter.");
+                if (string.IsNullOrWhiteSpace(model.AnnualCtc)) ModelState.AddModelError(nameof(model.AnnualCtc), "Annual CTC is required for an offer letter.");
+                if (string.IsNullOrWhiteSpace(model.WorkLocation)) ModelState.AddModelError(nameof(model.WorkLocation), "Work location is required for an offer letter.");
+                if (!model.BasicSalary.HasValue) ModelState.AddModelError(nameof(model.BasicSalary), "Basic salary is required for an offer letter.");
+            }
+            if (model.DocumentType == "Increment / Promotion Letter" && string.IsNullOrWhiteSpace(model.RevisedCompensation))
+                ModelState.AddModelError(nameof(model.RevisedCompensation), "Revised compensation is required for an increment / promotion letter.");
+            if (model.DocumentType == "Relieving Letter" && string.IsNullOrWhiteSpace(model.ClearanceStatus))
+                ModelState.AddModelError(nameof(model.ClearanceStatus), "Clearance status is required for a relieving letter.");
+            if (!ModelState.IsValid) { await PopulateDocumentEmployeesAsync(model); return View(model); }
+            var pdf = BuildEmployeeDocumentPdf(model);
+            Response.Headers.ContentDisposition = $"inline; filename=\"{BuildDocumentFileName(model)}\"";
+            return File(pdf, "application/pdf");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DownloadGeneratedDocument(EmployeeDocumentFormViewModel model)
+        {
+            if (!ModelState.IsValid) return BadRequest("Document details are incomplete.");
+            var allowedTypes = new[] { "Offer Letter", "Increment / Promotion Letter", "Relieving Letter", "Experience Letter" };
+            if (!allowedTypes.Contains(model.DocumentType)) return BadRequest("Invalid document type.");
+            return File(BuildEmployeeDocumentPdf(model), "application/pdf", BuildDocumentFileName(model));
+        }
+
+        private byte[] BuildEmployeeDocumentPdf(EmployeeDocumentFormViewModel model)
+        {
+            var templatePath = Path.Combine(_environment.ContentRootPath, "DocumentTemplates", "Vertex-Offer-Letter-Template.pdf");
+            if (!System.IO.File.Exists(templatePath))
+                throw new FileNotFoundException("The official HR letterhead template is missing.", templatePath);
+
+            var stationeryPath = Path.Combine(_environment.ContentRootPath, "DocumentTemplates", "Vertex-Offer-Letter-Stationery.png");
+            if (!System.IO.File.Exists(stationeryPath))
+                throw new FileNotFoundException("The official HR letterhead stationery image is missing.", stationeryPath);
+            using var document = new PdfDocument();
+            var page = AddStationeryPage();
+            if (model.DocumentType == "Offer Letter")
+            {
+                AddStationeryPage();
+                AddStationeryPage();
+            }
+            using var graphics = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Append);
+            var bodyFont = new XFont("VertexSans", 10.5, XFontStyleEx.Regular);
+            var boldFont = new XFont("VertexSans", 10.5, XFontStyleEx.Bold);
+            var titleFont = new XFont("VertexSans", 14, XFontStyleEx.Bold);
+            var smallFont = new XFont("VertexSans", 9, XFontStyleEx.Regular);
+            var ink = new XSolidBrush(XColor.FromArgb(25, 35, 52));
+            const double left = 58;
+            const double right = 539;
+            const double lineHeight = 16;
+            var y = 138d;
+
+            graphics.DrawString($"Date: {DateTime.Today:dd MMMM yyyy}", bodyFont, ink, new XRect(left, y, right - left, 18), XStringFormats.TopRight);
+            y += 34;
+            graphics.DrawString(model.DocumentType.ToUpperInvariant(), titleFont, ink, new XRect(left, y, right - left, 22), XStringFormats.TopCenter);
+            y += 38;
+
+            DrawLine("To,", bodyFont);
+            DrawLine(model.EmployeeName, boldFont);
+            DrawLine(model.Email, bodyFont);
+            DrawLine(model.Mobile, bodyFont);
+            y += 10;
+            DrawLine($"Dear {model.EmployeeName},", bodyFont);
+            y += 8;
+
+            var effectiveDate = model.EffectiveDate.ToString("dd MMMM yyyy");
+            if (model.DocumentType == "Offer Letter")
+            {
+                DrawParagraph($"We are pleased to offer you the position of {model.Designation} in the {model.Department} department at Vertex Automation System (P.) Ltd., effective from {effectiveDate}.");
+                DrawLabelValue("Designation", model.Designation);
+                DrawLabelValue("Department", model.Department);
+                DrawLabelValue("Reporting Manager", model.ManagerName);
+                DrawLabelValue("Joining Date", effectiveDate);
+                DrawLabelValue("PAN Number", model.PanNumber);
+                DrawLabelValue("Work Location", model.WorkLocation);
+                DrawLabelValue("Annual CTC", model.AnnualCtc);
+                if (!string.IsNullOrWhiteSpace(model.MonthlyGross)) DrawLabelValue("Monthly Gross", model.MonthlyGross);
+                if (!string.IsNullOrWhiteSpace(model.ProbationPeriod)) DrawLabelValue("Probation", model.ProbationPeriod);
+                y += 8;
+                DrawParagraph("This appointment is subject to the terms and conditions set out in the following pages of this letter.");
+            }
+            else if (model.DocumentType == "Increment / Promotion Letter")
+            {
+                DrawParagraph($"In recognition of your contribution and performance, we are pleased to confirm your increment / promotion with effect from {effectiveDate}.");
+                if (!string.IsNullOrWhiteSpace(model.IncrementType)) DrawLabelValue("Change Type", model.IncrementType);
+                DrawLabelValue("Current Designation", model.Designation);
+                if (!string.IsNullOrWhiteSpace(model.NewDesignation)) DrawLabelValue("New Designation", model.NewDesignation);
+                if (!string.IsNullOrWhiteSpace(model.CurrentCompensation)) DrawLabelValue("Current Compensation", model.CurrentCompensation);
+                DrawLabelValue("Revised Compensation", model.RevisedCompensation);
+                if (!string.IsNullOrWhiteSpace(model.IncrementPercentage)) DrawLabelValue("Increment", model.IncrementPercentage);
+                DrawLabelValue("Reporting Manager", model.ManagerName);
+                y += 8;
+                DrawParagraph("All other terms and conditions of your employment remain unchanged unless separately communicated in writing. We appreciate your continued commitment and wish you further success.");
+            }
+            else if (model.DocumentType == "Relieving Letter")
+            {
+                DrawParagraph($"This is to confirm that you are relieved from your duties as {model.Designation} in the {model.Department} department at the close of business on {effectiveDate}.");
+                if (model.ResignationDate.HasValue) DrawLabelValue("Resignation Date", model.ResignationDate.Value.ToString("dd MMMM yyyy"));
+                DrawLabelValue("Clearance Status", model.ClearanceStatus);
+                DrawParagraph($"During your employment you reported to {model.ManagerName}. Subject to completion of the required handover and clearance formalities, the company acknowledges the conclusion of your employment.");
+                DrawParagraph("We thank you for your contribution and wish you success in your future endeavours.");
+            }
+            else
+            {
+                var joiningDate = model.JoiningDate?.ToString("dd MMMM yyyy") ?? "the recorded joining date";
+                DrawParagraph($"This is to certify that {model.EmployeeName} was employed with Vertex Automation System (P.) Ltd. from {joiningDate} to {effectiveDate}.");
+                DrawParagraph($"During this period, {model.EmployeeName} worked as {model.Designation} in the {model.Department} department and reported to {model.ManagerName}.");
+                DrawParagraph("During the tenure with the organization, the employee carried out the assigned responsibilities with professionalism and sincerity. We found the employee's conduct and performance satisfactory.");
+                DrawParagraph("We appreciate the contribution made to the organization and wish the employee success in all future professional endeavours.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.AdditionalNotes))
+            {
+                y += 5;
+                DrawLine("Additional Information:", boldFont);
+                DrawParagraph(model.AdditionalNotes.Trim());
+            }
+
+            if (model.DocumentType == "Offer Letter")
+            {
+                DrawOfferSalaryAndTermsPage(document.Pages[1]);
+                DrawOfferTermsPage(document.Pages[2], 3, "GENERAL TERMS AND ACCEPTANCE", new[]
+                {
+                    "4. Working hours and attendance: You must follow the notified working hours, attendance, leave, remote-work and overtime policies. Attendance must be recorded through the approved company system wherever applicable.",
+                    "5. Place of work: Your primary work location is stated on page one. The company may require you to work at another office, customer site or project location based on business requirements."
+                    ,"6. Confidentiality and intellectual property: You must protect all confidential information, customer information, technical data, business plans and trade secrets. All work product created in the course of employment will remain the property of the company, subject to applicable law.",
+                    "7. Code of conduct: You are expected to maintain professional conduct, comply with company policies, avoid conflicts of interest and act respectfully with colleagues, customers and partners. Any breach may result in disciplinary action.",
+                    "8. Statutory and policy compliance: You must provide accurate documents and information, including PAN and other statutory details, and promptly inform HR of any change. Your employment is subject to the company's HR, IT, information-security and workplace policies as amended from time to time.",
+                    "9. Separation: Either party may end the employment in accordance with the appointment terms, notice requirements and applicable law. On separation, all company property, data and confidential material must be returned and clearance formalities completed.",
+                    "10. Acceptance: By accepting this offer, you confirm that the information provided by you is accurate and that you agree to comply with these terms and the company policies."
+                }, includeAcceptance: true);
+            }
+            else
+            {
+                y = Math.Min(Math.Max(y + 35, 610), 690);
+                DrawLine("For Vertex Automation System (P.) Ltd.", bodyFont);
+                y += 36;
+                DrawLine("Authorized Signatory", boldFont);
+                DrawLine("Human Resources", smallFont);
+            }
+
+            using var stream = new MemoryStream();
+            document.Save(stream, false);
+            return stream.ToArray();
+
+            void DrawLine(string? text, XFont font)
+            {
+                graphics.DrawString(text ?? string.Empty, font, ink, new XPoint(left, y));
+                y += lineHeight;
+            }
+
+            void DrawLabelValue(string label, string? value)
+            {
+                graphics.DrawString(label + ":", boldFont, ink, new XPoint(left + 12, y));
+                graphics.DrawString(value ?? string.Empty, bodyFont, ink, new XPoint(left + 126, y));
+                y += lineHeight;
+            }
+
+            void DrawParagraph(string text)
+            {
+                var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var line = string.Empty;
+                foreach (var word in words)
+                {
+                    var candidate = string.IsNullOrEmpty(line) ? word : line + " " + word;
+                    if (graphics.MeasureString(candidate, bodyFont).Width <= right - left)
+                    {
+                        line = candidate;
+                        continue;
+                    }
+                    DrawLine(line, bodyFont);
+                    line = word;
+                }
+                if (!string.IsNullOrEmpty(line)) DrawLine(line, bodyFont);
+                y += 9;
+            }
+
+            void DrawOfferTermsPage(PdfPage continuationPage, int pageNumber, string heading, IEnumerable<string> paragraphs, bool includeAcceptance = false)
+            {
+                using var continuation = XGraphics.FromPdfPage(continuationPage, XGraphicsPdfPageOptions.Append);
+                var continuationY = 138d;
+                continuation.DrawString($"Date: {DateTime.Today:dd MMMM yyyy}", smallFont, ink, new XRect(left, continuationY, right - left, 18), XStringFormats.TopRight);
+                continuationY += 34;
+                continuation.DrawString(heading, titleFont, ink, new XRect(left, continuationY, right - left, 22), XStringFormats.TopCenter);
+                continuationY += 42;
+                foreach (var paragraph in paragraphs)
+                {
+                    var words = paragraph.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    var line = string.Empty;
+                    foreach (var word in words)
+                    {
+                        var candidate = string.IsNullOrEmpty(line) ? word : line + " " + word;
+                        if (continuation.MeasureString(candidate, bodyFont).Width <= right - left) { line = candidate; continue; }
+                        continuation.DrawString(line, bodyFont, ink, new XPoint(left, continuationY));
+                        continuationY += lineHeight;
+                        line = word;
+                    }
+                    if (!string.IsNullOrEmpty(line)) { continuation.DrawString(line, bodyFont, ink, new XPoint(left, continuationY)); continuationY += lineHeight; }
+                    continuationY += 11;
+                }
+                if (includeAcceptance)
+                {
+                    continuationY = Math.Max(continuationY + 18, 600);
+                    continuation.DrawString("For Vertex Automation System (P.) Ltd.", bodyFont, ink, new XPoint(left, continuationY));
+                    continuationY += 40;
+                    continuation.DrawString("Authorized Signatory", boldFont, ink, new XPoint(left, continuationY));
+                    continuation.DrawString("Accepted by: ______________________________", bodyFont, ink, new XPoint(left + 235, continuationY));
+                    continuationY += lineHeight;
+                    continuation.DrawString("Human Resources", smallFont, ink, new XPoint(left, continuationY));
+                    continuation.DrawString(model.EmployeeName, smallFont, ink, new XPoint(left + 235, continuationY));
+                }
+                continuation.DrawString($"Page {pageNumber} of 3", smallFont, ink, new XRect(left, 770, right - left, 16), XStringFormats.TopRight);
+            }
+
+            void DrawOfferSalaryAndTermsPage(PdfPage continuationPage)
+            {
+                using var continuation = XGraphics.FromPdfPage(continuationPage, XGraphicsPdfPageOptions.Append);
+                var pageY = 138d;
+                continuation.DrawString($"Date: {DateTime.Today:dd MMMM yyyy}", smallFont, ink, new XRect(left, pageY, right - left, 18), XStringFormats.TopRight);
+                pageY += 34;
+                continuation.DrawString("COMPENSATION STRUCTURE", titleFont, ink, new XRect(left, pageY, right - left, 22), XStringFormats.TopCenter);
+                pageY += 38;
+                var earnings = new[] { ("Basic", model.BasicSalary ?? 0m), ("HRA", model.HouseRentAllowance ?? 0m), ("Conveyance Allowance", model.ConveyanceAllowance ?? 0m), ("Special Allowance", model.SpecialAllowance ?? 0m) };
+                var deductions = new[] { ("Provident Fund", model.ProvidentFund ?? 0m), ("Professional Tax", model.ProfessionalTax ?? 0m), ("TDS", model.Tds ?? 0m), ("Other Deductions", model.OtherDeductions ?? 0m) };
+                var totalSalary = earnings.Sum(row => row.Item2) - deductions.Sum(row => row.Item2);
+                DrawSalaryTable(left, pageY, 235, "EARNINGS", earnings, null);
+                DrawSalaryTable(left + 246, pageY, 235, "DEDUCTIONS", deductions, "TOTAL DEDUCTIONS");
+                pageY += 118;
+                var totalSalaryPen = new XPen(XColor.FromArgb(65, 86, 128), .7);
+                continuation.DrawRectangle(new XSolidBrush(XColor.FromArgb(229, 236, 247)), left, pageY, right - left, 28);
+                continuation.DrawRectangle(totalSalaryPen, left, pageY, right - left, 28);
+                continuation.DrawString("TOTAL SALARY", boldFont, ink, new XRect(left + 10, pageY + 5, 220, 18), XStringFormats.TopLeft);
+                continuation.DrawString($"INR {totalSalary:N2}", boldFont, ink, new XRect(left + 230, pageY + 5, right - left - 240, 18), XStringFormats.TopRight);
+                pageY += 48;
+                continuation.DrawString("Bank and statutory details", boldFont, ink, new XPoint(left, pageY));
+                pageY += 17;
+                continuation.DrawString($"Bank: {model.BankName ?? "Not provided"}    Account: {model.BankAccountNumber ?? "Not provided"}", smallFont, ink, new XPoint(left, pageY));
+                pageY += 15;
+                continuation.DrawString($"PF No.: {model.PfNumber ?? "Not provided"}    PF UAN: {model.PfUan ?? "Not provided"}", smallFont, ink, new XPoint(left, pageY));
+                pageY += 34;
+                continuation.DrawString("KEY EMPLOYMENT TERMS", titleFont, ink, new XRect(left, pageY, right - left, 22), XStringFormats.TopCenter);
+                pageY += 36;
+                DrawContinuationParagraph("1. Appointment and duties: You will perform the responsibilities assigned to your designation and any other reasonable duties assigned by the company. You will devote your full working time, attention and skill to the business of the company.");
+                DrawContinuationParagraph("2. Probation: Your employment will be subject to the probation period stated on page one. The company will review performance, conduct, attendance and suitability for the role and may extend probation where required.");
+                DrawContinuationParagraph("3. Compensation: Salary components shown above are subject to the applicable payroll structure, statutory deductions, tax laws and company policy. Any incentive, reimbursement or variable component is subject to eligibility.");
+                continuation.DrawString("Page 2 of 3", smallFont, ink, new XRect(left, 770, right - left, 16), XStringFormats.TopRight);
+
+                void DrawSalaryTable(double x, double yStart, double width, string heading, IEnumerable<(string Name, decimal Amount)> rows, string? totalLabel)
+                {
+                    const double rowHeight = 19;
+                    var pen = new XPen(XColor.FromArgb(65, 86, 128), .7);
+                    var includeTotal = !string.IsNullOrWhiteSpace(totalLabel);
+                    continuation.DrawRectangle(pen, x, yStart, width, rowHeight * (includeTotal ? 6 : 5));
+                    continuation.DrawRectangle(new XSolidBrush(XColor.FromArgb(229, 236, 247)), x, yStart, width, rowHeight);
+                    continuation.DrawString(heading, boldFont, ink, new XRect(x + 6, yStart + 3, width - 12, rowHeight), XStringFormats.TopCenter);
+                    var total = 0m; var rowIndex = 1;
+                    foreach (var row in rows) { total += row.Amount; continuation.DrawLine(pen, x, yStart + rowHeight * rowIndex, x + width, yStart + rowHeight * rowIndex); continuation.DrawString(row.Name, smallFont, ink, new XPoint(x + 6, yStart + rowHeight * rowIndex + 13)); continuation.DrawString($"INR {row.Amount:N2}", smallFont, ink, new XRect(x + 92, yStart + rowHeight * rowIndex + 3, width - 98, rowHeight), XStringFormats.TopRight); rowIndex++; }
+                    if (includeTotal)
+                    {
+                        continuation.DrawLine(pen, x, yStart + rowHeight * 5, x + width, yStart + rowHeight * 5);
+                        continuation.DrawString(totalLabel!, boldFont, ink, new XPoint(x + 6, yStart + rowHeight * 5 + 13));
+                        continuation.DrawString($"INR {total:N2}", boldFont, ink, new XRect(x + 92, yStart + rowHeight * 5 + 3, width - 98, rowHeight), XStringFormats.TopRight);
+                    }
+                }
+
+                void DrawContinuationParagraph(string text)
+                {
+                    var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries); var line = string.Empty;
+                    foreach (var word in words) { var candidate = string.IsNullOrEmpty(line) ? word : line + " " + word; if (continuation.MeasureString(candidate, bodyFont).Width <= right - left) { line = candidate; continue; } continuation.DrawString(line, bodyFont, ink, new XPoint(left, pageY)); pageY += lineHeight; line = word; }
+                    if (!string.IsNullOrEmpty(line)) { continuation.DrawString(line, bodyFont, ink, new XPoint(left, pageY)); pageY += lineHeight; }
+                    pageY += 9;
+                }
+            }
+
+            PdfPage AddStationeryPage()
+            {
+                var stationeryPage = document.AddPage();
+                stationeryPage.Width = XUnit.FromPoint(597);
+                stationeryPage.Height = XUnit.FromPoint(843);
+                using var background = XGraphics.FromPdfPage(stationeryPage);
+                using var stationery = XImage.FromFile(stationeryPath);
+                background.DrawImage(stationery, 0, 0, stationeryPage.Width.Point, stationeryPage.Height.Point);
+                return stationeryPage;
+            }
+        }
+
+        private static string BuildDocumentFileName(EmployeeDocumentFormViewModel model)
+        {
+            var safeName = string.Join("-", model.EmployeeName.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
+            var safeType = model.DocumentType.Replace(" / ", "-").Replace(' ', '-');
+            return $"{safeName}-{safeType}.pdf";
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UploadDocument()
+        {
+            var model = new EmployeeDocumentUploadViewModel(); await PopulateUploadEmployeesAsync(model); return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequestSizeLimit(16 * 1024 * 1024)]
+        public async Task<IActionResult> UploadDocument(EmployeeDocumentUploadViewModel model)
+        {
+            var allowedTypes = new[] { "Aadhaar Card", "PAN Card", "10th Certificate", "12th Certificate", "Graduation", "Post Graduation", "Employee Photo", "Previous Company Documents", "UAN Passbook", "Other" };
+            if (!allowedTypes.Contains(model.DocumentType)) ModelState.AddModelError(nameof(model.DocumentType), "Select a valid document type.");
+            var employee = model.EmployeeId.HasValue ? await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(item => item.Id == model.EmployeeId.Value && item.IsActive) : null;
+            if (employee == null) ModelState.AddModelError(nameof(model.EmployeeId), "Select a valid active employee.");
+            if (model.File == null || model.File.Length == 0 || model.File.Length > 15 * 1024 * 1024) ModelState.AddModelError(nameof(model.File), "Choose a file up to 15 MB.");
+            var extension = model.File == null ? string.Empty : Path.GetExtension(model.File.FileName).ToLowerInvariant();
+            if (!new[] { ".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx" }.Contains(extension)) ModelState.AddModelError(nameof(model.File), "Allowed formats: PDF, JPG, PNG, DOC and DOCX.");
+            if (!ModelState.IsValid) { await PopulateUploadEmployeesAsync(model); return View(model); }
+
+            var storedName = $"{Guid.NewGuid():N}{extension}"; var directory = Path.Combine(_environment.ContentRootPath, "App_Data", "EmployeeDocuments"); Directory.CreateDirectory(directory);
+            var targetPath = Path.Combine(directory, storedName);
+            try
+            {
+                await using (var target = new FileStream(targetPath, FileMode.CreateNew)) await model.File!.CopyToAsync(target);
+                _dbContext.EmployeeDocuments.Add(new EmployeeDocument
+                {
+                    EmployeeId = employee!.Id, DocumentType = model.DocumentType, DocumentName = model.DocumentName.Trim(),
+                    OriginalFileName = Path.GetFileName(model.File.FileName), StoredFileName = storedName,
+                    ContentType = extension switch { ".pdf" => "application/pdf", ".jpg" or ".jpeg" => "image/jpeg", ".png" => "image/png", ".doc" => "application/msword", ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document", _ => "application/octet-stream" },
+                    FileSize = model.File.Length, ExpiryDate = model.ExpiryDate, Notes = string.IsNullOrWhiteSpace(model.Notes) ? null : model.Notes.Trim(),
+                    UploadedBy = User.Identity?.Name ?? "HR", UploadedAtUtc = DateTime.UtcNow
+                });
+                await _dbContext.SaveChangesAsync();
+            }
+            catch
+            {
+                if (System.IO.File.Exists(targetPath)) System.IO.File.Delete(targetPath); throw;
+            }
+            TempData["DocumentMessage"] = $"{model.DocumentName} uploaded for {employee.FullName}."; return RedirectToAction(nameof(EmpDocuments));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ViewDocument(int id, bool download = false)
+        {
+            var document = await _dbContext.EmployeeDocuments.AsNoTracking().FirstOrDefaultAsync(item => item.Id == id); if (document == null) return NotFound();
+            var path = Path.Combine(_environment.ContentRootPath, "App_Data", "EmployeeDocuments", document.StoredFileName); if (!System.IO.File.Exists(path)) return NotFound();
+            return PhysicalFile(path, document.ContentType, download ? document.OriginalFileName : null, enableRangeProcessing: true);
         }
 
         public IActionResult Holiday()
         {
             return View();
+        }
+
+        private async Task PopulateDocumentEmployeesAsync(EmployeeDocumentFormViewModel model)
+        {
+            model.Employees = await _dbContext.Employees.AsNoTracking().Include(item => item.ReportingManager)
+                .Where(item => item.IsActive).OrderBy(item => item.FullName)
+                .Select(item => new EmployeeDocumentEmployeeOption
+                {
+                    Id = item.Id, EmployeeCode = item.EmployeeCode, Name = item.FullName,
+                    DateOfBirth = item.DateOfBirth.HasValue ? item.DateOfBirth.Value.ToString("yyyy-MM-dd") : null,
+                    JoiningDate = item.JoiningDate.ToString("yyyy-MM-dd"),
+                    Mobile = item.PhoneNumber, Email = item.Email, Designation = item.Designation,
+                    Department = item.Department, ManagerName = item.ReportingManager != null ? item.ReportingManager.FullName : "Not assigned"
+                }).ToListAsync();
+        }
+
+        private static void FillDocumentEmployee(EmployeeDocumentFormViewModel model, Employee employee)
+        {
+            model.EmployeeName = employee.FullName; model.DateOfBirth = employee.DateOfBirth; model.JoiningDate = employee.JoiningDate; model.Mobile = employee.PhoneNumber;
+            model.Email = employee.Email; model.Designation = employee.Designation; model.Department = employee.Department;
+            model.ManagerName = employee.ReportingManager?.FullName ?? "Not assigned";
+        }
+
+        private async Task PopulateUploadEmployeesAsync(EmployeeDocumentUploadViewModel model)
+        {
+            model.Employees = await _dbContext.Employees.AsNoTracking().Include(item => item.ReportingManager).Where(item => item.IsActive).OrderBy(item => item.FullName)
+                .Select(item => new EmployeeDocumentEmployeeOption { Id = item.Id, EmployeeCode = item.EmployeeCode, Name = item.FullName, Designation = item.Designation, Department = item.Department, Email = item.Email, Mobile = item.PhoneNumber, ManagerName = item.ReportingManager != null ? item.ReportingManager.FullName : "Not assigned" }).ToListAsync();
         }
         public async Task<IActionResult> Department()
         {

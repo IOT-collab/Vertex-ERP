@@ -4,8 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
 using VertexERP.Repositories;
 using VertexERP.Services;
+using PdfSharp.Fonts;
 
 var builder = WebApplication.CreateBuilder(args);
+var documentTemplateDirectory = Path.Combine(builder.Environment.ContentRootPath, "DocumentTemplates");
+GlobalFontSettings.FontResolver = new EmployeeDocumentFontResolver(documentTemplateDirectory);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
@@ -29,6 +32,11 @@ builder.Services.AddScoped<IBiometricRepository, BiometricRepository>();
 builder.Services.AddScoped<IBiometricDeviceService, BiometricDeviceService>();
 builder.Services.AddScoped<IAttendanceSyncService, AttendanceSyncService>();
 builder.Services.AddScoped<IAttendanceProcessingService, AttendanceProcessingService>();
+builder.Services.AddHttpClient<IShipmentTrackingService, DtdcTrackingService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(15);
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("VertexERP/1.0");
+});
 var keyDirectory = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtectionKeys");
 Directory.CreateDirectory(keyDirectory);
 builder.Services.AddDataProtection()

@@ -18,13 +18,15 @@ namespace VertexERP.Controllers
         private readonly IAttendanceProcessingService _attendanceProcessingService;
         private readonly BankAccountProtectionService _bankProtection;
         private readonly IWebHostEnvironment _environment;
+        private readonly IShipmentTrackingService _shipmentTrackingService;
 
-        public MainController(ApplicationDbContext dbContext, IAttendanceProcessingService attendanceProcessingService, BankAccountProtectionService bankProtection, IWebHostEnvironment environment)
+        public MainController(ApplicationDbContext dbContext, IAttendanceProcessingService attendanceProcessingService, BankAccountProtectionService bankProtection, IWebHostEnvironment environment, IShipmentTrackingService shipmentTrackingService)
         {
             _dbContext = dbContext;
             _attendanceProcessingService = attendanceProcessingService;
             _bankProtection = bankProtection;
             _environment = environment;
+            _shipmentTrackingService = shipmentTrackingService;
         }
 
         [AllowAnonymous]
@@ -351,14 +353,20 @@ namespace VertexERP.Controllers
                     && log.BiometricDevice.CommunicationMode == "Field")
                 .OrderBy(log => log.PunchTime)
                 .ToListAsync();
+            var checkIn = logs.FirstOrDefault(log => log.PunchState == "Check In");
+            var checkOut = logs.LastOrDefault(log => log.PunchState == "Check Out");
             return View("FieldAttendanceLive", new FieldAttendanceViewModel
             {
-                HasCheckedIn = logs.Any(log => log.PunchState == "Check In"),
-                HasCheckedOut = logs.Any(log => log.PunchState == "Check Out"),
-                // The attendance screen starts blank after each login. The stored records
-                // still protect against a duplicate check-in/out on the server.
-                CheckInTime = null,
-                CheckOutTime = null
+                HasCheckedIn = checkIn != null,
+                HasCheckedOut = checkOut != null,
+                CheckInTime = checkIn?.PunchTime,
+                CheckOutTime = checkOut?.PunchTime,
+                CheckInLatitude = checkIn?.Latitude,
+                CheckInLongitude = checkIn?.Longitude,
+                CheckInAccuracyMetres = checkIn?.AccuracyMetres,
+                CheckOutLatitude = checkOut?.Latitude,
+                CheckOutLongitude = checkOut?.Longitude,
+                CheckOutAccuracyMetres = checkOut?.AccuracyMetres
             });
         }
 
@@ -372,6 +380,12 @@ namespace VertexERP.Controllers
             if (!request.Latitude.HasValue || !request.Longitude.HasValue || !request.AccuracyMetres.HasValue)
                 return BadRequest(new { message = "Your current GPS location is required to mark attendance." });
             if (!ModelState.IsValid) return ValidationProblem(ModelState);
+            if (request.Latitude.Value == 0 && request.Longitude.Value == 0)
+                return BadRequest(new { message = "A valid GPS position is required. Turn on precise location and try again." });
+            if (request.AccuracyMetres.Value > 50)
+                return BadRequest(new { message = $"GPS accuracy is only ±{request.AccuracyMetres.Value:F0} metres. Attendance requires accuracy within 50 metres. Move outdoors or near a window and try again." });
+            if (!request.CapturedAtUtc.HasValue || Math.Abs((DateTimeOffset.UtcNow - request.CapturedAtUtc.Value).TotalMinutes) > 2)
+                return BadRequest(new { message = "Your GPS reading is no longer fresh. Capture the current location again." });
 
             var employee = await LoadLoggedInEmployeeAsync();
             if (employee == null) return Unauthorized();
@@ -415,7 +429,15 @@ namespace VertexERP.Controllers
                 SelfiePath = selfiePath
             });
             await _dbContext.SaveChangesAsync();
-            return Ok(new { message = $"{request.Action} recorded at {now:hh:mm tt}.", time = now.ToString("hh:mm tt"), selfiePath });
+            return Ok(new
+            {
+                message = $"{request.Action} recorded with GPS at {now:dd MMM yyyy, hh:mm tt}.",
+                time = now.ToString("dd MMM yyyy, hh:mm tt"),
+                latitude = request.Latitude.Value.ToString("F6"),
+                longitude = request.Longitude.Value.ToString("F6"),
+                accuracyMetres = request.AccuracyMetres.Value.ToString("F0"),
+                selfiePath
+            });
         }
 
         [Authorize(Roles = "Employee,User,Manager,HR")]
@@ -523,18 +545,34 @@ namespace VertexERP.Controllers
             return RedirectToAction(nameof(EmployeeQueries));
         }
 
-        [Authorize(Roles = "Admin,HR,Manager,Employee,User")]
+        [Authorize(Roles = "Admin,HR,Manager")]
         public async Task<IActionResult> LocationTracking(DateOnly? date, int? employeeId)
         {
             var selectedDate = date ?? DateOnly.FromDateTime(DateTime.Today);
             var start = selectedDate.ToDateTime(TimeOnly.MinValue);
             var end = start.AddDays(1);
-            var employees = await _dbContext.Employees.AsNoTracking().Where(employee => employee.IsActive)
+            var employeesQuery = _dbContext.Employees.AsNoTracking().Where(employee => employee.IsActive);
+            var hasCompanyWideAccess = User.IsInRole("Admin") || User.IsInRole("HR");
+            var isManagerOnlyView = User.IsInRole("Manager") && !hasCompanyWideAccess;
+            if (isManagerOnlyView)
+            {
+                var managerEmployeeId = await GetLoggedInEmployeeIdAsync();
+                if (!managerEmployeeId.HasValue) return Forbid();
+                // A manager can only query employees whose Reporting Manager is
+                // directly assigned to this manager.
+                // The employeeId query-string is applied after this server-side scope.
+                employeesQuery = employeesQuery.Where(employee => employee.ReportingManagerId == managerEmployeeId.Value);
+            }
+
+            var employees = await employeesQuery
                 .OrderBy(employee => employee.FullName)
                 .Select(employee => new { employee.Id, employee.FullName, employee.EmployeeCode, employee.Department, employee.Designation })
                 .ToListAsync();
+            var visibleEmployeeIds = employees.Select(employee => employee.Id).ToList();
             var logs = await _dbContext.AttendanceLogs.AsNoTracking()
-                .Where(log => log.EmployeeId != null && log.PunchTime >= start && log.PunchTime < end && log.BiometricDevice.CommunicationMode == "Field")
+                .Where(log => log.EmployeeId.HasValue && visibleEmployeeIds.Contains(log.EmployeeId.Value)
+                    && log.PunchTime >= start && log.PunchTime < end
+                    && log.BiometricDevice.CommunicationMode == "Field")
                 .OrderBy(log => log.PunchTime).ToListAsync();
             var items = employees.Select(employee =>
             {
@@ -554,7 +592,12 @@ namespace VertexERP.Controllers
                 };
             }).ToList();
             var selected = items.FirstOrDefault(item => item.EmployeeId == employeeId) ?? items.FirstOrDefault(item => item.CheckInTime.HasValue);
-            return View("LocationTrackingLive", new SiteEmployeeLocationViewModel { Employees = items, SelectedEmployee = selected });
+            return View("LocationTrackingLive", new SiteEmployeeLocationViewModel
+            {
+                Employees = items,
+                SelectedEmployee = selected,
+                IsManagerView = isManagerOnlyView
+            });
         }
 
         [HttpPost]
@@ -664,9 +707,38 @@ namespace VertexERP.Controllers
             var employeeLeaves = await _dbContext.LeaveRequests.AsNoTracking().Where(request => request.EmployeeId == employee.Id)
                 .OrderByDescending(request => request.AppliedAtUtc).ToListAsync();
             var todayStart = DateTime.Today;
-            var punches = await _dbContext.AttendanceLogs.AsNoTracking().Where(log => log.EmployeeId == employee.Id && log.PunchTime >= todayStart && log.PunchTime < todayStart.AddDays(1))
+            var punches = await _dbContext.AttendanceLogs.AsNoTracking().Where(log => log.EmployeeId == employee.Id
+                    && log.PunchTime >= todayStart && log.PunchTime < todayStart.AddDays(1)
+                    && log.BiometricDevice.CommunicationMode != "Field")
                 .OrderBy(log => log.PunchTime).Select(log => log.PunchTime).ToListAsync();
             return View("EmployeeDashboard", new EmployeePortalViewModel { Employee = employee, Tasks = employeeTasks, LeaveRequests = employeeLeaves, CheckIn = punches.Count > 0 ? punches.First() : null, CheckOut = punches.Count > 1 ? punches.Last() : null });
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Employee,User")]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        public async Task<IActionResult> MyLiveAttendance(CancellationToken cancellationToken)
+        {
+            var employeeId = await GetLoggedInEmployeeIdAsync();
+            if (!employeeId.HasValue) return Forbid();
+
+            var today = DateTime.Today;
+            var punches = await _dbContext.AttendanceLogs.AsNoTracking()
+                .Where(log => log.EmployeeId == employeeId.Value
+                    && log.PunchTime >= today && log.PunchTime < today.AddDays(1)
+                    && log.BiometricDevice.CommunicationMode != "Field")
+                .OrderBy(log => log.PunchTime)
+                .Select(log => log.PunchTime)
+                .ToListAsync(cancellationToken);
+
+            var checkIn = punches.FirstOrDefault();
+            var checkOut = punches.Count > 1 ? punches.Last() : (DateTime?)null;
+            return Ok(new
+            {
+                checkIn = punches.Count > 0 ? checkIn.ToString("hh:mm tt") : null,
+                checkOut = checkOut?.ToString("hh:mm tt"),
+                status = punches.Count > 0 ? "Present" : "Absent"
+            });
         }
 
         [Authorize(Roles = "Admin,HR")]
@@ -947,9 +1019,30 @@ namespace VertexERP.Controllers
             return View();
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin,HR,Manager")]
         public IActionResult OrderTracking()
         {
-            return View();
+            return View(new ShipmentTrackingPageViewModel { IsApiConfigured = _shipmentTrackingService.IsConfigured });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,HR,Manager")]
+        public async Task<IActionResult> OrderTracking(ShipmentTrackingPageViewModel model, CancellationToken cancellationToken)
+        {
+            model.IsApiConfigured = _shipmentTrackingService.IsConfigured;
+            if (!ModelState.IsValid) return View(model);
+            if (!model.IsApiConfigured)
+            {
+                // The page already shows the configuration notice. Avoid a second,
+                // duplicate service error when credentials have not been installed.
+                return View(model);
+            }
+            var result = await _shipmentTrackingService.TrackAsync(model.TrackingNumber, cancellationToken);
+            model.Shipment = result.Shipment;
+            model.ErrorMessage = result.ErrorMessage;
+            return View(model);
         }
 
         [Authorize(Roles = "Manager")]
@@ -997,8 +1090,10 @@ namespace VertexERP.Controllers
         private async Task<ManagerAttendanceViewModel> BuildManagerAttendanceAsync()
         {
             var managerId = await GetLoggedInEmployeeIdAsync();
-            var departmentId = await _dbContext.Employees.AsNoTracking().Where(employee => employee.Id == managerId).Select(employee => employee.DepartmentId).FirstOrDefaultAsync();
-            var team = await _dbContext.Employees.AsNoTracking().Where(employee => departmentId.HasValue && employee.IsActive && employee.Id != managerId && employee.DepartmentId == departmentId && !_dbContext.AppUsers.Any(user => user.EmployeeId == employee.Id && user.IsActive && user.Role == "Manager")).OrderBy(employee => employee.FullName).ToListAsync();
+            if (!managerId.HasValue) return new ManagerAttendanceViewModel();
+            var team = await _dbContext.Employees.AsNoTracking()
+                .Where(employee => employee.IsActive && employee.ReportingManagerId == managerId.Value)
+                .OrderBy(employee => employee.FullName).ToListAsync();
             var teamIds = team.Select(employee => employee.Id).ToList();
             var today = DateTime.Today;
             var presentIds = await _dbContext.AttendanceLogs.AsNoTracking().Where(log => log.EmployeeId.HasValue && teamIds.Contains(log.EmployeeId.Value) && log.PunchTime >= today && log.PunchTime < today.AddDays(1)).Select(log => log.EmployeeId!.Value).Distinct().ToListAsync();
