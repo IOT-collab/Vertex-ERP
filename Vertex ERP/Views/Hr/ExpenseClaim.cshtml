@@ -1,257 +1,48 @@
-﻿@model dynamic
-
+@model VertexERP.Models.ExpenseClaimPageViewModel
 @{
-    ViewData["Title"] = "Expense Claims";
+    ViewData["Title"] = Model.Mode is "Employee" or "Self" ? "My Expense Claims" : Model.Mode == "Manager" ? "Team Expense Approvals" : "Expense Claims Audit";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var isEmployee = Model.Mode is "Employee" or "Self";
+    var isManagerSelf = Model.Mode == "Self";
+    var isManager = Model.Mode == "Manager";
+    var canDecide = Model.Mode is "Manager" or "HR";
 }
-
-<link href="~/css/expenseclaim.css" rel="stylesheet" />
-
+<link href="~/css/ExpenseClaim.css" rel="stylesheet" asp-append-version="true" />
 <div class="exp-container">
-    <!-- Header Section -->
-    <div class="exp-header">
-        <div class="exp-header-main">
-            <div>
-                <h1 class="exp-title">Expense Claims</h1>
-                <p class="exp-subtitle">Manage employee business travel, hotel, cab & food reimbursements</p>
-            </div>
-        </div>
-
-        <div class="exp-header-actions">
-            <button class="exp-btn-primary" onclick="openClaimModal()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                <span>New Expense Claim</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Quick Stats Grid -->
-    <div class="exp-grid-stats">
-        <div class="exp-stat-card">
-            <div class="exp-stat-top">
-                <div>
-                    <span class="exp-stat-label">Total Claimed</span>
-                    <h3 class="exp-stat-value">@(Model?.TotalClaimedAmount ?? "₹0")</h3>
-                </div>
-                <div class="exp-icon-box icon-blue">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>
-                </div>
-            </div>
-            <span class="exp-stat-sub text-emerald">@(Model?.TotalClaimsCount ?? "0") Claims Submitted</span>
-        </div>
-
-        <div class="exp-stat-card">
-            <div class="exp-stat-top">
-                <div>
-                    <span class="exp-stat-label">Pending Approval</span>
-                    <h3 class="exp-stat-value">@(Model?.PendingAmount ?? "₹0")</h3>
-                </div>
-                <div class="exp-icon-box icon-amber">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                </div>
-            </div>
-            <span class="exp-stat-sub text-amber">@(Model?.PendingClaimsCount ?? "0") Claims Under Review</span>
-        </div>
-
-        <div class="exp-stat-card">
-            <div class="exp-stat-top">
-                <div>
-                    <span class="exp-stat-label">Approved Amount</span>
-                    <h3 class="exp-stat-value">@(Model?.ApprovedAmount ?? "₹0")</h3>
-                </div>
-                <div class="exp-icon-box icon-green">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-                </div>
-            </div>
-            <span class="exp-stat-sub text-emerald">@(Model?.ApprovedClaimsCount ?? "0") Claims Settled</span>
-        </div>
-
-        <div class="exp-stat-card">
-            <div class="exp-stat-top">
-                <div>
-                    <span class="exp-stat-label">Rejected Claims</span>
-                    <h3 class="exp-stat-value">@(Model?.RejectedAmount ?? "₹0")</h3>
-                </div>
-                <div class="exp-icon-box icon-purple">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
-                </div>
-            </div>
-            <span class="exp-stat-sub text-red">@(Model?.RejectedClaimsCount ?? "0") Claim Rejected</span>
-        </div>
-    </div>
-
-    <!-- Main Content Panel -->
-    <div class="exp-main-panel">
-        <div class="exp-controls">
-            <div class="exp-search-box">
-                <svg class="exp-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                <input type="text" id="expSearchInput" placeholder="Search claims by title or type..." onkeyup="filterClaims()" />
-            </div>
-
-            <select class="exp-select" id="typeFilter" onchange="filterClaims()">
-                <option value="All">All Categories</option>
-                <option value="Hotel">Hotel Stay</option>
-                <option value="Cab">Cab & Travel</option>
-                <option value="Food">Food & Meals</option>
-                <option value="Other">Other Expenses</option>
-            </select>
-        </div>
-
-        <!-- Expense Claims List Table -->
-        <div class="exp-table-responsive">
-            <table class="exp-table" id="claimsTable">
-                <thead>
-                    <tr>
-                        <th>Claim Details</th>
-                        <th>Category</th>
-                        <th>Date</th>
-                        <th>Amount</th>
-                        <th>Receipt</th>
-                        <th>Status</th>
-                        <th style="text-align: right;">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model?.ClaimsList != null && Model.ClaimsList.Count > 0)
-                    {
-                        foreach (var claim in Model.ClaimsList)
-                        {
-                            <tr>
-                                <td>
-                                    <div class="exp-claim-info">
-                                        <span class="claim-title">@claim.Title</span>
-                                        <span class="claim-emp">Emp: @claim.EmployeeName</span>
-                                    </div>
-                                </td>
-                                <td><span class="badge @claim.CategoryBadgeClass">@claim.Category</span></td>
-                                <td>@claim.Date</td>
-                                <td class="exp-amount">@claim.Amount</td>
-                                <td><a href="@claim.ReceiptUrl" target="_blank" class="exp-link">@claim.ReceiptName</a></td>
-                                <td><span class="status-badge @claim.StatusBadgeClass">@claim.Status</span></td>
-                                <td style="text-align: right;">
-                                    <button class="exp-btn-view" onclick="viewClaimDetails('@claim.Id')">View</button>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="7" style="text-align: center; color: #64748b; padding: 2rem;">No expense claims found.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
+ <div class="exp-header"><div><h1 class="exp-title">@ViewData["Title"]</h1><p class="exp-subtitle">@(isManagerSelf ? "Submit your own business expenses to HR and track the decision." : isEmployee ? "Submit business expenses and track your manager's decision." : isManager ? "Review claims from employees directly assigned to you." : "Review all claims, approve or reject pending requests, and track decisions.")</p></div>@if(isEmployee){<button type="button" class="exp-btn-primary" onclick="openClaimModal()"><i class="fa-solid fa-plus"></i> New Expense Claim</button>}</div>
+ @if(TempData["ExpenseMessage"] is string message){<div class="exp-alert exp-alert-success"><i class="fa-solid fa-circle-check"></i> @message</div>}
+ @if(TempData["ExpenseError"] is string error){<div class="exp-alert exp-alert-error"><i class="fa-solid fa-circle-exclamation"></i> @error</div>}
+ <div class="exp-grid-stats">
+  <div class="exp-stat-card"><span class="exp-stat-label">Total Claimed</span><h3 class="exp-stat-value">₹@Model.TotalAmount.ToString("N2")</h3><span class="exp-stat-sub">@Model.Claims.Count claims</span></div>
+  <div class="exp-stat-card"><span class="exp-stat-label">Pending Approval</span><h3 class="exp-stat-value">₹@Model.PendingAmount.ToString("N2")</h3><span class="exp-stat-sub text-amber">@Model.Claims.Count(x=>x.Status=="Pending") under review</span></div>
+  <div class="exp-stat-card"><span class="exp-stat-label">Approved Amount</span><h3 class="exp-stat-value">₹@Model.ApprovedAmount.ToString("N2")</h3><span class="exp-stat-sub text-emerald">@Model.Claims.Count(x=>x.Status=="Approved") approved</span></div>
+  <div class="exp-stat-card"><span class="exp-stat-label">Rejected Amount</span><h3 class="exp-stat-value">₹@Model.RejectedAmount.ToString("N2")</h3><span class="exp-stat-sub text-red">@Model.Claims.Count(x=>x.Status=="Rejected") rejected</span></div>
+ </div>
+ <div class="exp-main-panel">
+  <div class="exp-controls"><div class="exp-search-box"><i class="fa-solid fa-magnifying-glass exp-search-icon"></i><input type="search" id="expSearchInput" placeholder="Search employee, title or category..." oninput="filterClaims()" /></div><select class="exp-select" id="statusFilter" onchange="filterClaims()"><option value="All">All statuses</option><option>Pending</option><option>Approved</option><option>Rejected</option></select></div>
+  <div class="exp-table-responsive"><table class="exp-table" id="claimsTable"><thead><tr><th>Claim details</th><th>Category</th><th>Date</th><th>Amount</th><th>Receipt</th><th>Status</th><th>@(canDecide ? "Decision" : "Manager update")</th></tr></thead><tbody>
+  @if(Model.Claims.Count==0){<tr><td colspan="7"><div class="exp-empty"><i class="fa-regular fa-folder-open"></i><strong>No expense claims found</strong><span>@(isEmployee ? "Submit your first reimbursement using the button above." : "Employee claims will appear here.")</span></div></td></tr>}
+  @foreach(var claim in Model.Claims){<tr data-status="@claim.Status">
+   <td><div class="exp-claim-info"><strong class="claim-title">@claim.Title</strong><span class="claim-emp">@(isEmployee ? $"Submitted {claim.SubmittedAtUtc.ToLocalTime():dd MMM yyyy, hh:mm tt}" : $"{claim.Employee.FullName} • {claim.Employee.EmployeeCode}")</span>@if(!string.IsNullOrWhiteSpace(claim.Remarks)){<small class="claim-remarks">@claim.Remarks</small>}</div></td>
+   <td><span class="badge">@claim.Category</span></td><td>@claim.ExpenseDate.ToString("dd MMM yyyy")</td><td class="exp-amount">₹@claim.Amount.ToString("N2")</td>
+   <td><a asp-controller="Expense" asp-action="Receipt" asp-route-id="@claim.Id" target="_blank" class="exp-link"><i class="fa-solid fa-paperclip"></i> @claim.OriginalFileName</a></td><td><span class="status-badge status-@claim.Status.ToLowerInvariant()">@claim.Status</span></td>
+   <td>@if(canDecide && claim.Status=="Pending"){<form asp-controller="Expense" asp-action="Decide" method="post" class="exp-decision-form"><input type="hidden" name="id" value="@claim.Id"/><textarea name="note" maxlength="500" placeholder="Decision note (optional)" aria-label="Decision note"></textarea><div class="exp-decision-actions"><button name="decision" value="Approved" class="exp-approve" type="submit">Approve</button><button name="decision" value="Rejected" class="exp-reject" type="submit">Reject</button></div></form>}else{<div class="exp-manager-update"><strong>@(claim.DecidedByUser?.FullName ?? claim.ReportingManager?.FullName ?? "Manager not assigned")</strong>@if(claim.DecidedAtUtc.HasValue){<span>Decided @claim.DecidedAtUtc.Value.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</span>}else{<span>Awaiting review</span>}@if(!string.IsNullOrWhiteSpace(claim.DecisionNote)){<small>“@claim.DecisionNote”</small>}</div>}</td>
+  </tr>}
+  </tbody></table></div>
+ </div>
 </div>
-
-<!-- Add Expense Claim Modal Popup -->
-<div class="exp-modal-overlay" id="claimModal">
-    <div class="exp-modal">
-        <div class="exp-modal-header">
-            <h2>Submit Expense Claim</h2>
-            <button class="exp-modal-close" onclick="closeClaimModal()">&times;</button>
-        </div>
-        <form id="expForm" method="post" action="@Url.Action("SubmitClaim", "Expense")" enctype="multipart/form-data">
-            <div class="exp-modal-body">
-                <div class="exp-form-group">
-                    <label>Claim Category</label>
-                    <select class="exp-input" name="Category" required>
-                        <option value="">Select Category</option>
-                        <option value="Hotel">Hotel & Accommodation</option>
-                        <option value="Cab">Cab / Taxi / Travel</option>
-                        <option value="Food">Food & Business Meals</option>
-                        <option value="Flight">Flight / Train Ticket</option>
-                        <option value="Other">Other Allowance</option>
-                    </select>
-                </div>
-
-                <div class="exp-form-group">
-                    <label>Expense Title / Purpose</label>
-                    <input type="text" class="exp-input" name="Title" placeholder="e.g. Hotel stay for Mumbai client visit" required />
-                </div>
-
-                <div class="exp-form-row">
-                    <div class="exp-form-group">
-                        <label>Date of Expense</label>
-                        <input type="date" class="exp-input" name="Date" required />
-                    </div>
-                    <div class="exp-form-group">
-                        <label>Amount (₹)</label>
-                        <input type="number" class="exp-input" name="Amount" placeholder="0.00" min="1" required />
-                    </div>
-                </div>
-
-                <div class="exp-form-group">
-                    <label>Attach Bill / Receipt</label>
-                    <div class="exp-file-upload">
-                        <input type="file" id="billFile" name="ReceiptFile" hidden required onchange="updateFileName(this)" />
-                        <label for="billFile" class="exp-file-label">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-                            <span id="fileLabelText">Click to upload Invoice or Receipt (PDF, JPG, PNG)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="exp-form-group">
-                    <label>Remarks / Description</label>
-                    <textarea class="exp-input exp-textarea" name="Remarks" rows="3" placeholder="Add additional details about the expense..."></textarea>
-                </div>
-            </div>
-
-            <div class="exp-modal-footer">
-                <button type="button" class="exp-btn-secondary" onclick="closeClaimModal()">Cancel</button>
-                <button type="submit" class="exp-btn-primary">Submit Claim</button>
-            </div>
-        </form>
-    </div>
-</div>
-
+@if(isEmployee){<div class="exp-modal-overlay" id="claimModal" role="dialog" aria-modal="true" aria-labelledby="claimModalTitle"><div class="exp-modal"><div class="exp-modal-header"><div><h2 id="claimModalTitle">Submit Expense Claim</h2><p>@(isManagerSelf ? "HR will receive this claim." : "Your reporting manager will receive this claim.")</p></div><button type="button" class="exp-modal-close" onclick="closeClaimModal()" aria-label="Close">&times;</button></div><form asp-controller="Expense" asp-action="Submit" method="post" enctype="multipart/form-data"><div class="exp-modal-body">
+ <div class="exp-form-group"><label for="expenseCategory">Claim category</label><select id="expenseCategory" class="exp-input" name="Category" required><option value="">Select category</option><option>Hotel</option><option>Cab</option><option>Food</option><option>Flight / Train</option><option>Office Supplies</option><option>Other</option></select></div>
+ <div class="exp-form-group"><label for="expenseTitle">Expense title / purpose</label><input id="expenseTitle" type="text" class="exp-input" name="Title" maxlength="150" placeholder="Example: Hotel for Mumbai client visit" required/></div>
+ <div class="exp-form-row"><div class="exp-form-group"><label for="expenseDate">Date of expense</label><input id="expenseDate" type="date" class="exp-input" name="ExpenseDate" max="@DateTime.Today.ToString("yyyy-MM-dd")" required/></div><div class="exp-form-group"><label for="expenseAmount">Amount (₹)</label><input id="expenseAmount" type="number" class="exp-input" name="Amount" min="0.01" max="10000000" step="0.01" required/></div></div>
+ <div class="exp-form-group"><label>Bill / receipt</label><div class="exp-file-upload"><input type="file" id="billFile" name="ReceiptFile" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required onchange="updateFileName(this)"/><label for="billFile" class="exp-file-label"><i class="fa-solid fa-cloud-arrow-up"></i><strong id="fileLabelText">Choose PDF, JPG or PNG</strong><span>Maximum file size: 10 MB</span></label></div></div>
+ <div class="exp-form-group"><label for="expenseRemarks">Remarks / description</label><textarea id="expenseRemarks" class="exp-input exp-textarea" name="Remarks" maxlength="1000" rows="3" placeholder="Add details for your manager"></textarea></div></div>
+ <div class="exp-modal-footer"><button type="button" class="exp-btn-secondary" onclick="closeClaimModal()">Cancel</button><button type="submit" class="exp-btn-primary">Submit to Manager</button></div></form></div></div>}
 <script>
-    function openClaimModal() {
-        document.getElementById("claimModal").style.display = "flex";
-    }
-
-    function closeClaimModal() {
-        document.getElementById("claimModal").style.display = "none";
-    }
-
-    function updateFileName(input) {
-        const textElement = document.getElementById("fileLabelText");
-        if (input.files && input.files[0]) {
-            textElement.textContent = "Selected: " + input.files[0].name;
-        }
-    }
-
-    function viewClaimDetails(id) {
-        // Handle view action logic or redirect
-        location.href = '@Url.Action("Details", "Expense")?id=' + id;
-    }
-
-    function filterClaims() {
-        const input = document.getElementById("expSearchInput").value.toUpperCase();
-        const categoryFilter = document.getElementById("typeFilter").value.toUpperCase();
-        const table = document.getElementById("claimsTable");
-        const tr = table.getElementsByTagName("tr");
-
-        for (let i = 1; i < tr.length; i++) {
-            const tdTitle = tr[i].getElementsByTagName("td")[0];
-            const tdCategory = tr[i].getElementsByTagName("td")[1];
-
-            if (tdTitle && tdCategory) {
-                const titleText = tdTitle.textContent || tdTitle.innerText;
-                const categoryText = tdCategory.textContent || tdCategory.innerText;
-
-                const matchesSearch = titleText.toUpperCase().indexOf(input) > -1;
-                const matchesCategory = categoryFilter === "ALL" || categoryText.toUpperCase().indexOf(categoryFilter) > -1;
-
-                if (matchesSearch && matchesCategory) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
-                }
-            }
-        }
-    }
+ const claimModal=document.getElementById('claimModal');
+ function openClaimModal(){claimModal?.classList.add('is-open');document.body.classList.add('exp-modal-open');document.getElementById('expenseCategory')?.focus();}
+ function closeClaimModal(){claimModal?.classList.remove('is-open');document.body.classList.remove('exp-modal-open');}
+ function updateFileName(input){const label=document.getElementById('fileLabelText');if(label&&input.files?.[0])label.textContent=input.files[0].name;}
+ function filterClaims(){const search=document.getElementById('expSearchInput').value.toLowerCase(),status=document.getElementById('statusFilter').value;document.querySelectorAll('#claimsTable tbody tr[data-status]').forEach(row=>row.hidden=!(row.textContent.toLowerCase().includes(search)&&(status==='All'||row.dataset.status===status)));}
+ claimModal?.addEventListener('click',e=>{if(e.target===claimModal)closeClaimModal();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeClaimModal();});
 </script>

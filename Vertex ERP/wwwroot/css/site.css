@@ -57,7 +57,7 @@ section,
     color: var(--app-text-soft) !important;
 }
 
-.page-content > div:not(.dashboard),
+.page-content > div:not(.dashboard):not([class*="modal"]):not([role="dialog"]),
 .report-container,
 .project-page,
 .hrms-page,
@@ -219,7 +219,8 @@ td,
 .attendance-card:hover,
 .document-card:hover,
 .vault-card:hover {
-    transform: translateY(-2px) scale(1.01) !important;
+    /* Avoid scaling cards beyond their grid or clipping their actions. */
+    transform: none !important;
     border-color: var(--app-border-strong) !important;
     box-shadow: 0 24px 58px rgba(0, 0, 0, .34), 0 0 28px rgba(59, 130, 246, .13) !important;
 }
@@ -254,7 +255,6 @@ table,
     background: rgba(255, 255, 255, .035) !important;
 }
 
-thead,
 table th,
 .modern-table th,
 .vault-doc-table th {
@@ -289,7 +289,7 @@ tbody tr:hover td,
     color: #ffffff !important;
 }
 
-input,
+input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="submit"], [type="button"], [type="reset"], [type="color"]),
 select,
 textarea,
 .form-control,
@@ -329,6 +329,24 @@ textarea:focus,
 select option {
     color: #ffffff !important;
     background: #111827 !important;
+}
+
+/* Native date/time picker glyphs otherwise render dark on the ERP's dark inputs. */
+input[type="date"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="time"] {
+    color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    /* color-scheme: dark already provides a light native icon. */
+    filter: none;
+    opacity: .95;
 }
 
 button,
@@ -602,4 +620,17 @@ hr,
 
 body.employee-self-service-only .common-back-nav {
     display: none !important;
+}
+
+/* Keep numeric fields clean and consistent across the entire ERP UI. */
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
 }

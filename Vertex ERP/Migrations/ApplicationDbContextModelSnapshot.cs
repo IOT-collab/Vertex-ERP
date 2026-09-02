@@ -505,6 +505,53 @@ namespace Vertex_ERP.Migrations
                     b.ToTable("Employees", (string)null);
                 });
 
+            modelBuilder.Entity("VertexERP.Models.EmployeeAsset", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AssetName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("AssetTag")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateOnly>("IssueDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("SerialNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssetTag")
+                        .IsUnique();
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("EmployeeAssets");
+                });
+
             modelBuilder.Entity("VertexERP.Models.EmployeeBankDetail", b =>
                 {
                     b.Property<int>("Id")
@@ -623,6 +670,69 @@ namespace Vertex_ERP.Migrations
                     b.ToTable("EmployeeDeviceMapping", (string)null);
                 });
 
+            modelBuilder.Entity("VertexERP.Models.EmployeeDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("DocumentName")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateOnly?>("ExpiryDate")
+                        .HasColumnType("date");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("character varying(260)");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<DateTime>("UploadedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("UploadedBy")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId", "DocumentType");
+
+                    b.ToTable("EmployeeDocuments", (string)null);
+                });
+
             modelBuilder.Entity("VertexERP.Models.EmployeeSalaryDetail", b =>
                 {
                     b.Property<int>("Id")
@@ -689,6 +799,95 @@ namespace Vertex_ERP.Migrations
                         .IsUnique();
 
                     b.ToTable("EmployeeSalaryDetails", (string)null);
+                });
+
+            modelBuilder.Entity("VertexERP.Models.ExpenseClaim", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("DecidedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("DecidedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DecisionNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateOnly>("ExpenseDate")
+                        .HasColumnType("date");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("character varying(260)");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<int?>("ReportingManagerId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("RequiresHrApproval")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("character varying(260)");
+
+                    b.Property<DateTime>("SubmittedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DecidedByUserId");
+
+                    b.HasIndex("EmployeeId", "SubmittedAtUtc");
+
+                    b.HasIndex("ReportingManagerId", "Status");
+
+                    b.ToTable("ExpenseClaims", (string)null);
                 });
 
             modelBuilder.Entity("VertexERP.Models.LeaveRequest", b =>
@@ -817,6 +1016,54 @@ namespace Vertex_ERP.Migrations
                     b.ToTable("QueryTickets", (string)null);
                 });
 
+            modelBuilder.Entity("VertexERP.Models.RecruitmentHiringRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ActualHires")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("TargetHires")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("WeekNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId", "Year", "Month", "WeekNumber")
+                        .IsUnique();
+
+                    b.ToTable("RecruitmentHiringRecords", (string)null);
+                });
+
             modelBuilder.Entity("VertexERP.Models.WorkTask", b =>
                 {
                     b.Property<int>("Id")
@@ -938,6 +1185,17 @@ namespace Vertex_ERP.Migrations
                     b.Navigation("ReportingManager");
                 });
 
+            modelBuilder.Entity("VertexERP.Models.EmployeeAsset", b =>
+                {
+                    b.HasOne("VertexERP.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("VertexERP.Models.EmployeeBankDetail", b =>
                 {
                     b.HasOne("VertexERP.Models.Employee", "Employee")
@@ -968,6 +1226,17 @@ namespace Vertex_ERP.Migrations
                     b.Navigation("Employee");
                 });
 
+            modelBuilder.Entity("VertexERP.Models.EmployeeDocument", b =>
+                {
+                    b.HasOne("VertexERP.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("VertexERP.Models.EmployeeSalaryDetail", b =>
                 {
                     b.HasOne("VertexERP.Models.Employee", "Employee")
@@ -977,6 +1246,31 @@ namespace Vertex_ERP.Migrations
                         .IsRequired();
 
                     b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("VertexERP.Models.ExpenseClaim", b =>
+                {
+                    b.HasOne("VertexERP.Models.AppUser", "DecidedByUser")
+                        .WithMany()
+                        .HasForeignKey("DecidedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("VertexERP.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VertexERP.Models.Employee", "ReportingManager")
+                        .WithMany()
+                        .HasForeignKey("ReportingManagerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("DecidedByUser");
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("ReportingManager");
                 });
 
             modelBuilder.Entity("VertexERP.Models.LeaveRequest", b =>
@@ -1027,6 +1321,17 @@ namespace Vertex_ERP.Migrations
                     b.Navigation("ReportingManager");
 
                     b.Navigation("ResolvedByUser");
+                });
+
+            modelBuilder.Entity("VertexERP.Models.RecruitmentHiringRecord", b =>
+                {
+                    b.HasOne("VertexERP.Models.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Department");
                 });
 
             modelBuilder.Entity("VertexERP.Models.WorkTask", b =>

@@ -1,25 +1,154 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>Vertex_ERP</RootNamespace>
-    <UserSecretsId>VertexERP-LocalDevelopment</UserSecretsId>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>Vertex_ERP</RootNamespace>
+		<UserSecretsId>VertexERP-LocalDevelopment</UserSecretsId>
+	</PropertyGroup>
+
+	<!-- ============================================================
+       ERP NUGET PACKAGES
+       ============================================================ -->
 
 	<ItemGroup>
+
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.8" />
+
 		<PackageReference Include="PDFsharp" Version="6.2.0" />
+
 	</ItemGroup>
 
+
+	<!-- ============================================================
+       DOCUMENT TEMPLATES
+       ============================================================ -->
+
 	<ItemGroup>
+
 		<None Remove="DocumentTemplates\**\*" />
-		<Content Include="DocumentTemplates\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+		<!-- Generated receiver bundles must not become ERP source content. -->
+		<None Remove="BiometricReceiver\**\*" />
+		<Content Remove="BiometricReceiver\**\*" />
+
+		<Content Include="DocumentTemplates\**\*"
+				 CopyToOutputDirectory="PreserveNewest"
+				 CopyToPublishDirectory="PreserveNewest" />
+
 	</ItemGroup>
+
+
+	<!-- ============================================================
+       BIOMETRIC RECEIVER CONFIGURATION
+
+       BiometricReceiver has a ProjectReference to Vertex ERP.
+
+       Therefore we DO NOT add a ProjectReference from ERP to
+       BiometricReceiver.
+
+       Instead:
+       1. ERP publishes normally.
+       2. After ERP publish completes, BiometricReceiver is published
+          directly into the ERP publish folder.
+       3. Its complete output is available at:
+          
+          Publish ERP\BiometricReceiver\
+       ============================================================ -->
+
+	<PropertyGroup>
+
+		<BiometricReceiverProject>$(MSBuildProjectDirectory)\..\BiometricReceiver\BiometricReceiver.csproj</BiometricReceiverProject>
+
+		<BiometricReceiverPublishDirectory>$([MSBuild]::EnsureTrailingSlash('$(PublishDir)'))BiometricReceiver\</BiometricReceiverPublishDirectory>
+
+		<ErpPublishedSettingsFile>$(MSBuildProjectDirectory)\appsettings.json</ErpPublishedSettingsFile>
+
+	</PropertyGroup>
+
+
+	<!-- ============================================================
+       BUILD + COPY BIOMETRIC RECEIVER AFTER ERP PUBLISH
+       ============================================================ -->
+
+	<Target
+	  Name="BuildAndBundleBiometricReceiver"
+	  AfterTargets="Publish"
+	  Condition="Exists('$(BiometricReceiverProject)') And '$(IsBiometricReceiverBundleBuild)' != 'true'">
+
+		<!-- Show information in Visual Studio Output window -->
+
+		<Message
+		  Importance="high"
+		  Text="============================================================" />
+
+		<Message
+		  Importance="high"
+		  Text="BUILDING BIOMETRIC RECEIVER" />
+
+		<Message
+		  Importance="high"
+		  Text="BiometricReceiver Project: $(BiometricReceiverProject)" />
+
+		<Message
+		  Importance="high"
+		  Text="ERP Publish Directory: $(PublishDir)" />
+
+		<Message
+		  Importance="high"
+		  Text="============================================================" />
+
+
+		<!-- ==========================================================
+         PUBLISH BIOMETRIC RECEIVER DIRECTLY TO ITS FINAL FOLDER.
+
+         The flag prevents this ERP target from running again when
+         BiometricReceiver resolves its ERP project reference.
+         ========================================================== -->
+
+		<!-- Remove only the previous receiver bundle. This prevents old,
+             nested BiometricReceiver folders from surviving a republish. -->
+		<RemoveDir Directories="$(BiometricReceiverPublishDirectory)"
+				   Condition="Exists('$(BiometricReceiverPublishDirectory)')" />
+
+		<MSBuild
+		  Projects="$(BiometricReceiverProject)"
+		  Targets="Publish"
+		  Properties="Configuration=$(Configuration);BuildProjectReferences=false;PublishDir=$(BiometricReceiverPublishDirectory);IsBiometricReceiverBundleBuild=true" />
+
+		<!-- The receiver writes attendance to the exact same database as
+             the published ERP application. -->
+		<Copy
+		  SourceFiles="$(ErpPublishedSettingsFile)"
+		  DestinationFiles="$(BiometricReceiverPublishDirectory)appsettings.json"
+		  Condition="Exists('$(ErpPublishedSettingsFile)')" />
+
+
+		<!-- ==========================================================
+         FINAL MESSAGE
+         ========================================================== -->
+
+		<Message
+		  Importance="high"
+		  Text="============================================================" />
+
+		<Message
+		  Importance="high"
+		  Text="BIOMETRIC RECEIVER BUNDLED SUCCESSFULLY" />
+
+		<Message
+		  Importance="high"
+		  Text="Location: $(BiometricReceiverPublishDirectory)" />
+
+		<Message
+		  Importance="high"
+		  Text="============================================================" />
+
+	</Target>
 
 </Project>

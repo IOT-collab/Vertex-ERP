@@ -1,36 +1,100 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Responsive / Mobile Support -->
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
     <title>@ViewData["Title"] - Vertex_ERP</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/common-back-button.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/common-ui.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Vertex_ERP.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/erp-buttons.css" asp-append-version="true" />
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Site CSS -->
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <!-- Common Back Button CSS -->
+    <link rel="stylesheet"
+          href="~/css/common-back-button.css"
+          asp-append-version="true" />
+
+    <!-- Common UI CSS -->
+    <link rel="stylesheet"
+          href="~/css/common-ui.css"
+          asp-append-version="true" />
+
+    <!-- Razor / Scoped CSS -->
+    <link rel="stylesheet"
+          href="~/Vertex ERP.styles.css"
+          asp-append-version="true" />
+
+    <!-- ERP Buttons CSS -->
+    <link rel="stylesheet"
+          href="~/css/erp-buttons.css"
+          asp-append-version="true" />
+
+    <!-- Main ERP Layout CSS -->
+    <link rel="stylesheet"
+          href="~/css/Style.css"
+          asp-append-version="true" />
+    <link href="~/css/hr-modules.css" rel="stylesheet" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
+
 <body>
+
+    <!-- Header -->
     <header>
-      
     </header>
+
+    <!-- Main Page Content -->
     <div class="container">
         <main role="main" class="pb-3">
+
+            <!-- Common Back Button -->
             <partial name="_BackButton" />
+
+            <!-- Page Content -->
             @RenderBody()
+
         </main>
     </div>
 
+    <!-- Footer -->
     <footer class="border-top footer text-muted">
-       @*  <div class="container">
-            &copy; 2026 - Vertex_ERP - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div> *@
+        @*
+        <div class="container">
+            &copy; 2026 - Vertex_ERP -
+            <a asp-area=""
+               asp-controller="Home"
+               asp-action="Privacy">
+                Privacy
+            </a>
+        </div>
+        *@
     </footer>
+
+    <!-- jQuery -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <!-- Bootstrap JS -->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/input-rules.js" asp-append-version="true"></script>
+
+    <!-- Site JS -->
+    <script src="~/js/site.js"
+            asp-append-version="true"></script>
+
+    <!-- Input Rules JS -->
+    <script src="~/js/input-rules.js"
+            asp-append-version="true"></script>
+
+    <!-- Page Specific Scripts -->
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

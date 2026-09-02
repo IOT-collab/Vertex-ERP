@@ -1,0 +1,121 @@
+/* HR pages share the shell's gutters; inner cards retain their own spacing. */
+:is(.page-content, body > .container > main) > :is(.hrms-page, .employee-dashboard-wrapper, .leave-dashboard-wrapper, .payroll-dashboard-wrapper, .perf-dashboard-wrapper, .recruitment-container, .emp-docs-container, .hc-container, .hr-container, .exp-container, .rpt-container, .add-employee-page, .erp-page-wrapper, .employee-section) {
+    padding: 0;
+    min-height: 0;
+    min-width: 0;
+}
+
+/* Fixed-width grid tracks must never dictate the width of a nested panel. */
+:is(.employee-dashboard-wrapper, .leave-dashboard-wrapper, .payroll-dashboard-wrapper, .perf-dashboard-wrapper, .recruitment-container, .emp-docs-container, .hr-container, .exp-container, .rpt-container, .meeting-container) :is(.dashboard-grid, .bottom-grid, .stats-grid, .stats-row, .breakdown-columns, .account-details, .form-row, .hr-dept-grid, .rpt-templates-grid, .jobs-grid) > * {
+    min-width: 0;
+}
+
+:is(.payroll-dashboard-wrapper, .perf-dashboard-wrapper, .leave-dashboard-wrapper) .dashboard-grid {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+}
+
+:is(.employee-dashboard-wrapper, .emp-docs-container, .recruitment-container, .hr-container) :is(.search-box, .employee-id-box, .hr-search) {
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* Reserve space for an icon only in fields that actually contain one. */
+:is(.page-content, body > .container) :is(.search-box, .employee-id-box, .hr-search):has(> :is(i, svg)) > input {
+    padding-left: 40px !important;
+}
+
+:is(.employee-dashboard-wrapper, .emp-docs-container, .recruitment-container, .hr-container, .hc-container, .exp-container, .rpt-container) :is(.header-left, .header-right, .header-actions, .header-left-group, .hr-header-main, .rpt-header-main, .hc-header-main, .exp-header-main) {
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+/* Long table data scrolls within its panel, including on laptops. */
+:is(.employee-dashboard-wrapper, .emp-docs-container, .recruitment-container, .hc-container, .exp-container, .rpt-container, .employee-section) :is(.table-container, .table-responsive, .table-wrapper, .employee-panel, .rpt-table-wrapper, .exp-table-wrapper, .hc-table-wrapper) {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+:is(.employee-dashboard-wrapper, .payroll-dashboard-wrapper, .perf-dashboard-wrapper, .recruitment-container, .emp-docs-container, .hc-container, .exp-container, .rpt-container) :is(.stat-value, .rpt-stat-value, .exp-stat-value, .hc-stat-value) {
+    font-size: clamp(22px, 2.2vw, 30px) !important;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+/* Native radios stay keyboard accessible and show the selected meeting type. */
+.meeting-container .platform-card input:focus-visible + .card-content {
+    outline: 3px solid #93c5fd;
+    outline-offset: 3px;
+}
+
+/* Restore a readable document surface inside the dark application. */
+:is(.page-content, body > .container) .letter-sheet {
+    color: #172033 !important;
+    background: #fff !important;
+}
+:is(.page-content, body > .container) .letter-sheet :is(h1, h2, h3, p, span, strong, div, header, footer) {
+    color: #172033 !important;
+}
+:is(.page-content, body > .container) .letter-sheet p {
+    font-size: 15px !important;
+}
+
+@media (max-width: 1024px) {
+    :is(.payroll-dashboard-wrapper, .perf-dashboard-wrapper, .leave-dashboard-wrapper) .dashboard-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    :is(.employee-dashboard-wrapper, .emp-docs-container, .recruitment-container, .employee-section) > :is(header, .header-section, .dashboard-header-card) {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+    :is(.employee-dashboard-wrapper, .emp-docs-container, .recruitment-container) :is(.header-actions, .header-right, .filter-section, .filter-controls, .filters-left) {
+        width: 100%;
+        min-width: 0;
+        flex-wrap: wrap;
+    }
+    .meeting-container .form-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .meeting-container .form-row > * {
+        grid-column: auto;
+    }
+    .hr-container .hr-dept-actions {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    :is(.page-content, body > .container) .letter-brand {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    :is(.employee-dashboard-wrapper, .emp-docs-container, .recruitment-container) :is(.header-actions, .header-right) > :is(a, button),
+    .employee-section > header > a {
+        width: 100%;
+        white-space: normal !important;
+    }
+    :is(.employee-dashboard-wrapper, .emp-docs-container, .recruitment-container, .hr-container) :is(.card, .table-card, .content-card, .hr-dept-card) {
+        padding: 16px;
+    }
+    .meeting-container {
+        padding: 16px;
+    }
+    .meeting-container .platform-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .hr-container .hr-dept-actions {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media print {
+    :is(.page-content, body > .container) .letter-sheet {
+        max-width: none !important;
+        width: 100% !important;
+        color: #000 !important;
+        box-shadow: none !important;
+    }
+}

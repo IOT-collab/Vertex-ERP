@@ -1,4 +1,6 @@
 using System.Net;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VertexERP.Models;
@@ -24,6 +26,33 @@ public sealed class BiometricApiController : ControllerBase
         var result = await _sync.ReceiveNormalizedAsync(request.DeviceSerialNumber, punches, HttpContext.Connection.RemoteIpAddress?.ToString(), cancellationToken);
         var response = new BiometricPunchBatchResponse(result.Accepted, result.Received, result.Saved, result.Unmapped, result.Message);
         return result.Accepted ? Ok(response) : Unauthorized(response);
+    }
+
+    // Used only by the on-premise receiver. ADMS devices must continue to send
+    // their proprietary protocol to the local receiver, never to Azure directly.
+    [HttpPost("adms")]
+    public async Task<IActionResult> ReceiveAdms([FromQuery(Name = "SN")] string? serialNumber, CancellationToken cancellationToken)
+    {
+        if (!HasValidGatewayKey()) return Unauthorized(new { message = "Invalid biometric gateway key." });
+        if (Request.ContentLength is > 1_048_576) return StatusCode(StatusCodes.Status413PayloadTooLarge);
+
+        using var reader = new StreamReader(Request.Body);
+        var payload = await reader.ReadToEndAsync(cancellationToken);
+        if (payload.Length > 1_048_576) return StatusCode(StatusCodes.Status413PayloadTooLarge);
+
+        var result = await _sync.ReceiveAsync(serialNumber ?? string.Empty, payload,
+            HttpContext.Connection.RemoteIpAddress?.ToString(), cancellationToken);
+        return result.Accepted
+            ? Ok(new { result.Received, result.Saved, result.Unmapped })
+            : Unauthorized(new { result.Message });
+    }
+
+    private bool HasValidGatewayKey()
+    {
+        var configuredKey = HttpContext.RequestServices.GetRequiredService<IConfiguration>()["BiometricIngress:ApiKey"];
+        var suppliedKey = Request.Headers["X-Biometric-Gateway-Key"].ToString();
+        if (string.IsNullOrWhiteSpace(configuredKey) || string.IsNullOrWhiteSpace(suppliedKey)) return false;
+        return CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(configuredKey), Encoding.UTF8.GetBytes(suppliedKey));
     }
 
     private bool IsLanRequest()

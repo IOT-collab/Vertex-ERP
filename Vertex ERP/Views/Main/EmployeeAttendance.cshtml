@@ -1,4 +1,12 @@
 @model VertexERP.Models.EmployeeAttendanceViewModel
-@{ ViewData["Title"]="My Attendance"; Layout="~/Views/Shared/_LayoutMaster.cshtml"; }
+@{ ViewData["Title"] = "My Attendance"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
 <link href="~/css/EmployeeSections.css" rel="stylesheet" asp-append-version="true" />
-<section class="employee-section"><header><div><h1>Attendance</h1><p>@Model.Month.ToString("MMMM yyyy") attendance for @Model.Employee.FullName</p></div><form method="get"><select name="month">@for(var m=1;m<=12;m++){<option value="@m" selected="@(m==Model.Month.Month)">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)</option>}</select><input type="number" name="year" value="@Model.Month.Year" min="2000" max="@DateTime.Today.Year"/><button type="submit" class="btn btn-primary">View</button></form></header><div class="employee-summary"><article><small>Working Days</small><strong>@Model.Days.Count</strong></article><article><small>Present</small><strong>@Model.Present</strong></article><article><small>Absent</small><strong>@Model.Absent</strong></article><article><small>On Leave</small><strong>@Model.OnLeave</strong></article></div><div class="employee-panel"><table class="employee-table"><thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th></tr></thead><tbody>@foreach(var day in Model.Days){<tr><td>@day.Date.ToString("ddd, dd MMM yyyy")</td><td>@(day.CheckIn?.ToString("hh:mm tt") ?? "--")</td><td>@(day.CheckOut?.ToString("hh:mm tt") ?? "--")</td><td><span class="employee-badge @day.Status.ToLowerInvariant().Replace(" ","-")">@day.Status</span></td></tr>}</tbody></table></div></section>
+<section class="employee-section">
+<header><div><h1>My Attendance</h1><p>@Model.Employee.FullName (@Model.Employee.EmployeeCode) · Last 30 days</p><p>@Model.StartDate.ToString("dd MMM yyyy") – @Model.EndDate.ToString("dd MMM yyyy")</p></div></header>
+<div class="employee-summary"><article><small>Total Days</small><strong>@Model.Days.Count</strong></article><article><small>Present</small><strong>@Model.Present</strong></article><article><small>Absent</small><strong>@Model.Absent</strong></article><article><small>On Leave</small><strong>@Model.OnLeave</strong></article></div>
+<div class="employee-panel"><table class="employee-table"><thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th></tr></thead><tbody>
+@foreach (var day in Model.Days)
+{
+<tr><td>@day.Date.ToString("ddd, dd MMM yyyy")</td><td>@(day.CheckIn?.ToString("hh:mm tt") ?? "--")</td><td>@(day.CheckOut?.ToString("hh:mm tt") ?? "--")</td><td><span class="employee-badge @day.Status.ToLowerInvariant().Replace(" ", "-")">@day.Status</span></td></tr>
+}
+</tbody></table></div></section>

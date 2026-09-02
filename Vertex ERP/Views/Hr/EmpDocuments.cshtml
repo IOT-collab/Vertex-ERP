@@ -1,4 +1,4 @@
-﻿@model dynamic
+@model dynamic
 @{
     ViewData["Title"] = Model?.Title ?? "Employee Documents";
     Layout = "_Layout";
@@ -21,7 +21,7 @@
     var backUrl = Url.Action("Index", "Dashboard");
 }
 
-<link rel="stylesheet" href="~/css/empdocuments.css" />
+<link rel="stylesheet" href="~/css/EmpDocuments.css" asp-append-version="true" />
 
 <!-- FontAwesome CDN for modern icons -->
 <link rel="stylesheet"

@@ -1,9 +1,9 @@
-﻿@{
+@{
     ViewData["Title"] = "Leave Management";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
 
-<link href="~/css/leavemgm.css" rel="stylesheet" />
+<link href="~/css/LeaveMgm.css" rel="stylesheet" asp-append-version="true" />
 
 <div class="leave-page">
     @if (TempData["LeaveMessage"] != null) { <div class="alert alert-success">@TempData["LeaveMessage"]</div> }

@@ -5,7 +5,7 @@
     ViewData["BackAction"] = "Department";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
-<link href="~/css/AddDepartment.css" rel="stylesheet" />
+<link href="~/css/AddDepartment.css" rel="stylesheet" asp-append-version="true" />
 <div class="add-department-page">
     <div class="department-form-card department-confirm-card">
         <div class="department-form-header"><h1>Delete Department</h1><p>@Model.DepartmentName — @Model.DepartmentCode</p></div>

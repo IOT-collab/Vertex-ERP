@@ -8,6 +8,10 @@ using PdfSharp.Fonts;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ============================================================
+// DOCUMENT TEMPLATES / PDF FONTS
+// ============================================================
+
 var documentTemplateDirectory = Path.Combine(
     builder.Environment.ContentRootPath,
     "DocumentTemplates"
@@ -16,17 +20,17 @@ var documentTemplateDirectory = Path.Combine(
 GlobalFontSettings.FontResolver =
     new EmployeeDocumentFontResolver(documentTemplateDirectory);
 
+// ============================================================
+// LOGGING
+// ============================================================
+
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-// The browser application owns only its local UI port.
-// The standalone BiometricReceiver process owns LAN port 8082,
-// so attendance stays available even when Visual Studio restarts this application.
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenLocalhost(7090);
-});
+// ============================================================
+// DATABASE CONNECTION
+// ============================================================
 
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection")
@@ -34,16 +38,29 @@ var connectionString =
         "Connection string 'DefaultConnection' was not found."
     );
 
-// Add services to the container.
+// ============================================================
+// MVC
+// ============================================================
+
 builder.Services.AddControllersWithViews();
+
+// ============================================================
+// ANTIFORGERY
+// ============================================================
 
 builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "X-CSRF-TOKEN";
 });
 
+// ============================================================
+// ATTENDANCE
+// ============================================================
+
 builder.Services.Configure<AttendanceOptions>(
-    builder.Configuration.GetSection(AttendanceOptions.SectionName)
+    builder.Configuration.GetSection(
+        AttendanceOptions.SectionName
+    )
 );
 
 builder.Services.AddScoped<IBiometricRepository, BiometricRepository>();
@@ -51,13 +68,26 @@ builder.Services.AddScoped<IBiometricDeviceService, BiometricDeviceService>();
 builder.Services.AddScoped<IAttendanceSyncService, AttendanceSyncService>();
 builder.Services.AddScoped<IAttendanceProcessingService, AttendanceProcessingService>();
 
-builder.Services.AddHttpClient<IShipmentTrackingService, DtdcTrackingService>(client =>
+// ============================================================
+// DTDC / SHIPMENT TRACKING
+// ============================================================
+
+builder.Services.AddHttpClient<
+    IShipmentTrackingService,
+    DtdcTrackingService
+>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(15);
-    client.DefaultRequestHeaders.UserAgent.ParseAdd("VertexERP/1.0");
+
+    client.DefaultRequestHeaders.UserAgent.ParseAdd(
+        "VertexERP/1.0"
+    );
 });
 
-// Data Protection Keys
+// ============================================================
+// DATA PROTECTION
+// ============================================================
+
 var keyDirectory = Path.Combine(
     builder.Environment.ContentRootPath,
     "App_Data",
@@ -68,17 +98,27 @@ Directory.CreateDirectory(keyDirectory);
 
 builder.Services
     .AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(keyDirectory))
+    .PersistKeysToFileSystem(
+        new DirectoryInfo(keyDirectory)
+    )
     .SetApplicationName("VertexERP");
 
 builder.Services.AddScoped<BankAccountProtectionService>();
 
-// Session
+// ============================================================
+// SESSION
+// ============================================================
+
 builder.Services.AddSession();
 
-// Authentication
+// ============================================================
+// AUTHENTICATION
+// ============================================================
+
 builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddAuthentication(
+        CookieAuthenticationDefaults.AuthenticationScheme
+    )
     .AddCookie(options =>
     {
         options.LoginPath = "/Main/Login";
@@ -99,43 +139,46 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
-// PostgreSQL
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(
-        connectionString,
-        npgsqlOptions =>
-        {
-            npgsqlOptions.EnableRetryOnFailure();
-        }
-    )
+// ============================================================
+// POSTGRESQL / ENTITY FRAMEWORK CORE
+// ============================================================
+
+builder.Services.AddDbContext<ApplicationDbContext>(
+    options =>
+        options.UseNpgsql(
+            connectionString,
+            npgsqlOptions =>
+            {
+                npgsqlOptions.EnableRetryOnFailure();
+            }
+        )
 );
+
+// ============================================================
+// BUILD APPLICATION
+// ============================================================
 
 var app = builder.Build();
 
 // ============================================================
-// DATABASE MIGRATION
+// DATABASE MIGRATION & SEEDING
 // ============================================================
 
 using (var scope = app.Services.CreateScope())
 {
     var dbContext =
-        scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        scope.ServiceProvider
+            .GetRequiredService<ApplicationDbContext>();
 
     dbContext.Database.Migrate();
 
-    var developmentUserPassword =
-        builder.Configuration["SeedUsers:Password"];
+    var defaultPassword =
+        builder.Configuration["SeedUsers:Password"] ?? "password";
 
-    if (
-        app.Environment.IsDevelopment()
-        && !string.IsNullOrWhiteSpace(developmentUserPassword)
-    )
-    {
-        DatabaseInitializer.SeedDevelopmentUsers(
-            dbContext,
-            developmentUserPassword
-        );
-    }
+    DatabaseInitializer.SeedDevelopmentUsers(
+        dbContext,
+        defaultPassword
+    );
 }
 
 // ============================================================
@@ -146,14 +189,16 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
 
-    // The default HSTS value is 30 days.
     app.UseHsts();
 }
 
-// Local biometric deployments use a direct Ethernet HTTP endpoint.
-// Redirect only when an HTTPS address is actually configured.
+// ============================================================
+// HTTPS
+// ============================================================
+
 var configuredUrls =
-    builder.Configuration["ASPNETCORE_URLS"] ?? string.Empty;
+    builder.Configuration["ASPNETCORE_URLS"]
+    ?? string.Empty;
 
 if (
     configuredUrls.Contains(
@@ -165,13 +210,33 @@ if (
     app.UseHttpsRedirection();
 }
 
+// ============================================================
+// STATIC FILES
+// ============================================================
+
 app.UseStaticFiles();
+
+// ============================================================
+// ROUTING
+// ============================================================
 
 app.UseRouting();
 
+// ============================================================
+// SESSION
+// ============================================================
+
 app.UseSession();
 
+// ============================================================
+// AUTHENTICATION
+// ============================================================
+
 app.UseAuthentication();
+
+// ============================================================
+// AUTHORIZATION
+// ============================================================
 
 app.UseAuthorization();
 
@@ -180,43 +245,40 @@ app.UseAuthorization();
 // ============================================================
 
 app.MapControllerRoute(
+    name: "expense",
+    pattern: "Expense/{action=Index}/{id?}",
+    defaults: new { controller = "Expense" }
+);
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Main}/{action=Start}/{id?}"
 );
 
 // ============================================================
-// AUTOMATICALLY OPEN ERP IN BROWSER
+// START APPLICATION
 // ============================================================
+
+var appUrl = "http://localhost:5000";
 
 app.Lifetime.ApplicationStarted.Register(() =>
 {
     try
     {
-        // Small delay gives Kestrel enough time to start listening.
-        Task.Run(async () =>
-        {
-            await Task.Delay(1000);
-
-            var url = "http://localhost:7090";
-
-            System.Diagnostics.Process.Start(
-                new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                }
-            );
-        });
+        System.Diagnostics.Process.Start(
+            new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = appUrl + "/Main/Start",
+                UseShellExecute = true
+            }
+        );
     }
-    catch
+    catch (Exception ex)
     {
-        // If browser cannot be opened, the ERP server
-        // will continue running normally.
+        Console.WriteLine(
+            $"Could not open browser automatically: {ex.Message}"
+        );
     }
 });
-
-// ============================================================
-// START APPLICATION
-// ============================================================
 
 app.Run();

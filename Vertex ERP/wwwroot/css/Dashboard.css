@@ -285,7 +285,7 @@
 
 .dashboard .card-row {
     display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)) !important;
     gap: 18px !important;
     margin-bottom: 24px !important;
 }
@@ -488,7 +488,7 @@
 
 .dashboard .content-row {
     display: grid !important;
-    grid-template-columns: minmax(0, 2.65fr) minmax(280px, 1fr) !important;
+    grid-template-columns: minmax(0, 2.65fr) minmax(min(100%, 280px), 1fr) !important;
     gap: 20px !important;
     margin-bottom: 24px !important;
 }
@@ -634,7 +634,7 @@
 
 .dashboard .bar-chart {
     display: grid !important;
-    grid-template-columns: repeat(5, minmax(34px, 1fr)) !important;
+    grid-template-columns: repeat(5, minmax(min(100%, 34px), 1fr)) !important;
     align-items: end !important;
     gap: 14px !important;
     min-height: 230px !important;
@@ -1121,7 +1121,7 @@
 
 .dashboard .bottom-row {
     display: grid !important;
-    grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr) !important;
+    grid-template-columns: minmax(0, 1.55fr) minmax(min(100%, 320px), 1fr) !important;
     gap: 20px !important;
 }
 
@@ -1654,7 +1654,7 @@
     }
 
     .dashboard .bar-chart {
-        grid-template-columns: repeat(5, minmax(24px, 1fr)) !important;
+        grid-template-columns: repeat(5, minmax(min(100%, 24px), 1fr)) !important;
         gap: 7px !important;
         min-height: 190px !important;
         padding-inline: 0 !important;

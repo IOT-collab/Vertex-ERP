@@ -314,15 +314,13 @@ namespace VertexERP.Controllers
         }
 
         [Authorize(Roles = "Employee,User,Manager,HR")]
-        public async Task<IActionResult> EmployeeAttendance(int? month, int? year)
+        public async Task<IActionResult> EmployeeAttendance()
         {
             var employee = await LoadLoggedInEmployeeAsync();
             if (employee == null) return RedirectToAction(nameof(AccessDenied));
             var now = DateTime.Today;
-            var requestedMonth = Math.Clamp(month ?? now.Month, 1, 12);
-            var requestedYear = Math.Clamp(year ?? now.Year, 2000, now.Year);
-            var start = new DateTime(requestedYear, requestedMonth, 1);
-            var end = start.AddMonths(1);
+            var start = now.AddDays(-29);
+            var end = now.AddDays(1);
             var logs = await _dbContext.AttendanceLogs.AsNoTracking()
                 .Where(log => log.EmployeeId == employee.Id && log.PunchTime >= start && log.PunchTime < end)
                 .OrderBy(log => log.PunchTime).Select(log => log.PunchTime).ToListAsync();
@@ -332,13 +330,25 @@ namespace VertexERP.Controllers
             var days = new List<EmployeeAttendanceDay>();
             for (var date = start; date <= lastDay; date = date.AddDays(1))
             {
-                if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday) continue;
                 var punches = logs.Where(log => log.Date == date.Date).ToList();
                 var dateOnly = DateOnly.FromDateTime(date);
                 var onLeave = leaves.Any(leave => leave.FromDate <= dateOnly && leave.ToDate >= dateOnly);
-                days.Add(new EmployeeAttendanceDay(dateOnly, punches.FirstOrDefault(), punches.Count > 1 ? punches.Last() : null, punches.Count > 0 ? "Present" : onLeave ? "On Leave" : "Absent"));
+                var isWeekend = date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
+                days.Add(new EmployeeAttendanceDay(dateOnly, punches.Count > 0 ? punches.First() : null, punches.Count > 1 ? punches.Last() : null, punches.Count > 0 ? "Present" : onLeave ? "On Leave" : isWeekend ? "Weekend" : "Absent"));
             }
-            return View(new EmployeeAttendanceViewModel { Employee = employee, Month = DateOnly.FromDateTime(start), Days = days.OrderByDescending(day => day.Date).ToList() });
+            return View(new EmployeeAttendanceViewModel { Employee = employee, StartDate = DateOnly.FromDateTime(start), EndDate = DateOnly.FromDateTime(now), Days = days.OrderByDescending(day => day.Date).ToList() });
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Employee,User,Manager,HR")]
+        public async Task<IActionResult> EmployeeAssets()
+        {
+            var employee = await LoadLoggedInEmployeeAsync();
+            if (employee == null) return RedirectToAction(nameof(AccessDenied));
+            var assets = await _dbContext.EmployeeAssets.AsNoTracking()
+                .Where(asset => asset.EmployeeId == employee.Id)
+                .OrderByDescending(asset => asset.IssueDate).ThenByDescending(asset => asset.Id).ToListAsync();
+            return View(new EmployeeAssetsViewModel { Employee = employee, Assets = assets });
         }
 
         [HttpGet]

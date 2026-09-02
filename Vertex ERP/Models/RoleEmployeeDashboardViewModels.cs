@@ -39,7 +39,8 @@ public sealed record EmployeeAttendanceDay(DateOnly Date, DateTime? CheckIn, Dat
 public sealed class EmployeeAttendanceViewModel
 {
     public Employee Employee { get; init; } = null!;
-    public DateOnly Month { get; init; }
+    public DateOnly StartDate { get; init; }
+    public DateOnly EndDate { get; init; }
     public IReadOnlyList<EmployeeAttendanceDay> Days { get; init; } = Array.Empty<EmployeeAttendanceDay>();
     public int Present => Days.Count(day => day.Status == "Present");
     public int Absent => Days.Count(day => day.Status == "Absent");

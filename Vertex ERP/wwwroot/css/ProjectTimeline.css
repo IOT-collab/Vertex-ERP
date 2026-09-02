@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    ProjectTimeline.css - Dynamic, Fully Responsive Glassmorphism Design
    ========================================================================== */
 
@@ -254,7 +254,7 @@ body {
 /* --- Metrics Grid --- */
 .metrics-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
     gap: 1.25rem;
 }
 
@@ -500,7 +500,7 @@ body {
 
 .gantt-months {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 100px), 1fr));
     padding-left: 180px;
     font-size: 0.8rem;
     font-weight: 600;

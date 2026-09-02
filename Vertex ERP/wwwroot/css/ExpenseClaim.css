@@ -189,6 +189,21 @@
     color: #f87171;
 }
 
+.text-blue { color: #60a5fa; }
+
+.exp-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    border: 1px solid;
+    border-radius: 10px;
+    font-size: 13px;
+}
+.exp-alert-success { color: #6ee7b7; background: rgba(16,185,129,.1); border-color: rgba(16,185,129,.35); }
+.exp-alert-error { color: #fca5a5; background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.35); }
+
 /* Main Panel & Table */
 .exp-main-panel {
     background: #111827;
@@ -340,6 +355,31 @@
     color: #34d399;
 }
 
+.status-rejected {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+}
+
+.claim-remarks {
+    color: #94a3b8;
+    max-width: 320px;
+    margin-top: 5px;
+    line-height: 1.4;
+}
+
+.exp-manager-update { display: flex; flex-direction: column; min-width: 170px; gap: 3px; }
+.exp-manager-update strong { color: #e2e8f0; font-size: 12px; }
+.exp-manager-update span, .exp-manager-update small { color: #64748b; font-size: 11px; }
+.exp-decision-form { min-width: 220px; }
+.exp-decision-form textarea { width: 100%; min-height: 58px; resize: vertical; border: 1px solid #28354f; border-radius: 8px; padding: 8px; background: #0b0f19; color: #e2e8f0; }
+.exp-decision-actions { display: flex; gap: 8px; margin-top: 8px; }
+.exp-decision-actions button { border: 0; border-radius: 7px; padding: 7px 12px; color: #fff; cursor: pointer; font-weight: 650; }
+.exp-approve { background: #059669; }
+.exp-reject { background: #dc2626; }
+.exp-empty { min-height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #64748b; text-align: center; }
+.exp-empty i { font-size: 30px; color: #475569; }
+.exp-empty strong { color: #cbd5e1; font-size: 15px; }
+
 .exp-btn-view {
     background: #161f30;
     border: 1px solid #28354f;
@@ -365,6 +405,8 @@
     z-index: 999;
     padding: 1rem;
 }
+.exp-modal-overlay.is-open { display: flex; }
+.exp-modal-open { overflow: hidden; }
 
 .exp-modal {
     background: #111827;
@@ -384,6 +426,7 @@
     align-items: center;
     margin-bottom: 20px;
 }
+.exp-modal-header p { margin: 4px 0 0; color: #64748b; font-size: 12px; }
 
     .exp-modal-header h2 {
         font-size: 18px;
@@ -435,6 +478,10 @@
     text-align: center;
     background: #0b0f19;
 }
+.exp-file-upload input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.exp-file-label i { font-size: 24px; color: #60a5fa; }
+.exp-file-label strong { color: #cbd5e1; overflow-wrap: anywhere; }
+.exp-file-label span { color: #64748b; }
 
 .exp-file-label {
     display: flex;
@@ -484,5 +531,12 @@
 
         .exp-header-actions button {
             justify-content: center;
-        }
+    }
+
+    .exp-header > .exp-btn-primary, .exp-search-box, .exp-select { width: 100%; max-width: none; min-width: 0; justify-content: center; }
+    .exp-main-panel { padding: 12px; }
+    .exp-table { min-width: 900px; }
+    .exp-modal { padding: 18px; max-height: calc(100vh - 24px); }
+    .exp-modal-footer { flex-direction: column-reverse; }
+    .exp-modal-footer button { width: 100%; justify-content: center; }
 }

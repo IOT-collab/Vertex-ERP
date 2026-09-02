@@ -1,4 +1,4 @@
-﻿/* Container & Base Canvas Layout */
+/* Container & Base Canvas Layout */
 .hr-dashboard-container {
     padding: 30px;
     width: 100%;
@@ -103,7 +103,7 @@
     .hr-dashboard-container .settings-grid {
         display: grid;
         /* Shifts dynamically from multi-column configurations to single column based on canvas boundaries */
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
         gap: 25px;
         margin-bottom: 30px;
     }

@@ -40,10 +40,10 @@ body > .container * {
 }
 
 .page-content > * ,
-.page-content [class*="grid"] > *,
+.page-content [class*="grid"]:not(.calendar-days-grid) > *,
 .page-content [class*="row"] > *,
 .page-content [class*="flex"] > *,
-body > .container [class*="grid"] > *,
+body > .container [class*="grid"]:not(.calendar-days-grid) > *,
 body > .container [class*="row"] > *,
 body > .container [class*="flex"] > * {
     min-width: 0;
@@ -60,21 +60,20 @@ body > .container {
 
 .page-content {
     padding: 24px !important;
-    overflow-x: hidden !important;
+    overflow-x: auto !important;
 }
 
 body > .container {
     padding: 24px !important;
 }
 
-.page-content > :not(link):not(script):not(style),
-body > .container > main > :not(link):not(script):not(style) {
+.page-content > :not(link):not(script):not(style):not(dialog):not([class*="modal"]):not([role="dialog"]),
+body > .container > main > :not(link):not(script):not(style):not(dialog):not([class*="modal"]):not([role="dialog"]) {
     width: 100% !important;
     max-width: var(--erp-page-width) !important;
     margin-right: auto !important;
     margin-left: auto !important;
     box-sizing: border-box !important;
-    background-color: transparent !important;
 }
 
 .page-content > .common-back-nav,
@@ -142,12 +141,9 @@ body > .container p {
     font-size: 14px !important;
 }
 
-.page-content .page-header,
-.page-content [class$="-header"],
-.page-content [class*="header-card"],
-body > .container .page-header,
-body > .container [class$="-header"],
-body > .container [class*="header-card"] {
+/* Only surface components receive a theme. Substring selectors also matched
+   selectable cards, icons and nested headers, masking their own states. */
+:is(.page-content, body > .container) :is(.page-header, .dashboard-header-card, .report-header) {
     border-color: var(--erp-border) !important;
     border-radius: var(--erp-radius) !important;
     background: var(--erp-surface) !important;
@@ -155,31 +151,12 @@ body > .container [class*="header-card"] {
     box-shadow: var(--erp-shadow) !important;
 }
 
-.page-content [class*="card"],
-.page-content [class*="panel"],
-.page-content [class*="wrapper"],
-body > .container [class*="card"],
-body > .container [class*="panel"],
-body > .container [class*="wrapper"] {
+:is(.page-content, body > .container) :is(.card, .panel, .form-card, .table-card, .filter-panel, .summary-card, .stat-card, .module-card, .setting-card, .report-card, .category-card, .document-card, .vault-card, .employee-panel, .config-card) {
     border-color: var(--erp-border) !important;
     border-radius: var(--erp-radius) !important;
     background-color: var(--erp-surface) !important;
     color: var(--erp-text) !important;
-    box-sizing: border-box !important;
-}
-
-.page-content [class*="container"]:not([class*="progress"]),
-body > .container [class*="container"]:not([class*="progress"]) {
-    border-color: var(--erp-border) !important;
-    background-color: var(--erp-surface) !important;
-    color: var(--erp-text) !important;
-}
-
-.page-content [class*="section"],
-body > .container [class*="section"] {
-    border-color: var(--erp-border) !important;
-    color: var(--erp-text) !important;
-    box-sizing: border-box !important;
+    box-sizing: border-box;
 }
 
 .page-content table,
@@ -204,9 +181,9 @@ body > .container [class*="table-responsive"] {
     -webkit-overflow-scrolling: touch;
 }
 
-.page-content [class*="grid"],
+.page-content [class*="grid"]:not(.calendar-days-grid),
 .page-content [class*="card-row"],
-body > .container [class*="grid"],
+body > .container [class*="grid"]:not(.calendar-days-grid),
 body > .container [class*="card-row"] {
     max-width: 100% !important;
 }
@@ -236,10 +213,10 @@ body > .container td {
     font-size: 14px !important;
 }
 
-.page-content input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.page-content input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="submit"], [type="button"], [type="reset"], [type="color"]),
 .page-content select,
 .page-content textarea,
-body > .container input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+body > .container input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="submit"], [type="button"], [type="reset"], [type="color"]),
 body > .container select,
 body > .container textarea {
     min-height: 42px !important;
@@ -334,12 +311,11 @@ body > .container iframe {
     max-width: 100% !important;
 }
 
-.page-content [class*="modal"],
-.page-content [class*="dialog"],
-body > .container [class*="modal"],
-body > .container [class*="dialog"] {
-    max-width: min(94vw, 760px) !important;
+.page-content :is(.modal-box, .report-modal, .rpt-modal, .exp-modal, dialog),
+body > .container :is(.modal-box, .report-modal, .rpt-modal, .exp-modal, dialog) {
+    max-width: calc(100vw - 32px);
     max-height: 90dvh !important;
+    overflow-y: auto;
 }
 
 .page-content [class*="modal-body"],
@@ -436,12 +412,6 @@ body > .container [class*="dialog-body"] {
         padding: 18px !important;
     }
 
-    .page-content [class*="grid"],
-    .page-content [class*="card-row"],
-    body > .container [class*="grid"],
-    body > .container [class*="card-row"] {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
 }
 
 @media (max-width: 768px) {
@@ -450,21 +420,13 @@ body > .container [class*="dialog-body"] {
         padding: 16px !important;
     }
 
-    .page-content [class*="grid"],
-    .page-content [class*="card-row"],
-    .page-content [class*="form-row"],
-    body > .container [class*="grid"],
-    body > .container [class*="card-row"],
-    body > .container [class*="form-row"] {
-        grid-template-columns: minmax(0, 1fr) !important;
-    }
 
     .page-content .page-header,
-    .page-content [class$="-header"],
-    .page-content [class*="header-card"],
+    .page-content :is(.dashboard-header, .rpt-header, .hc-header, .exp-header, .hr-header),
+    .page-content .dashboard-header-card,
     body > .container .page-header,
-    body > .container [class$="-header"],
-    body > .container [class*="header-card"] {
+    body > .container :is(.dashboard-header, .rpt-header, .hc-header, .exp-header, .hr-header),
+    body > .container .dashboard-header-card {
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 14px !important;
@@ -482,17 +444,17 @@ body > .container [class*="dialog-body"] {
     }
 
     .page-content [class*="search"] input,
-    .page-content [class*="filter"] input,
+    .page-content [class*="filter"] input:not([type="checkbox"]):not([type="radio"]),
     .page-content [class*="filter"] select,
     body > .container [class*="search"] input,
-    body > .container [class*="filter"] input,
+    body > .container [class*="filter"] input:not([type="checkbox"]):not([type="radio"]),
     body > .container [class*="filter"] select {
         width: 100% !important;
         min-width: 0 !important;
     }
 
-    .page-content table,
-    body > .container table {
+    .page-content table:not(:is([class*="table-wrap"], [class*="table-container"], [class*="table-responsive"]) table),
+    body > .container table:not(:is([class*="table-wrap"], [class*="table-container"], [class*="table-responsive"]) table) {
         display: block;
         width: 100% !important;
         min-width: 0;
@@ -553,17 +515,11 @@ body > .container [class*="dialog-body"] {
         padding: 10px !important;
     }
 
-    .page-content [class*="grid"],
-    .page-content [class*="card-row"],
-    body > .container [class*="grid"],
-    body > .container [class*="card-row"] {
-        grid-template-columns: minmax(0, 1fr) !important;
-    }
 
     .page-content .page-header,
-    .page-content [class$="-header"],
+    .page-content :is(.dashboard-header, .rpt-header, .hc-header, .exp-header, .hr-header),
     body > .container .page-header,
-    body > .container [class$="-header"] {
+    body > .container :is(.dashboard-header, .rpt-header, .hc-header, .exp-header, .hr-header) {
         align-items: stretch !important;
         gap: 14px !important;
     }
@@ -585,13 +541,9 @@ body > .container [class*="dialog-body"] {
         max-width: 100% !important;
     }
 
-    .page-content [class*="modal"],
-    .page-content [class*="dialog"],
-    body > .container [class*="modal"],
-    body > .container [class*="dialog"] {
-        width: calc(100vw - 24px) !important;
-        max-width: calc(100vw - 24px) !important;
-        margin: 12px !important;
+    .page-content :is(.modal-box, .report-modal, .rpt-modal, .exp-modal, dialog),
+    body > .container :is(.modal-box, .report-modal, .rpt-modal, .exp-modal, dialog) {
+        max-width: calc(100vw - 32px) !important;
     }
 
     .login-shell {
@@ -634,10 +586,67 @@ body > .container [class*="dialog-body"] {
 }
 
 @media (min-width: 1200px) {
-    .page-content [class*="grid"],
+    .page-content [class*="grid"]:not(.calendar-days-grid),
     .page-content [class*="card-row"],
-    body > .container [class*="grid"],
+    body > .container [class*="grid"]:not(.calendar-days-grid),
     body > .container [class*="card-row"] {
         min-width: 0 !important;
     }
+}
+
+/* Overlays cover the viewport; only their inner panels have a size limit. */
+:is(.page-content, body > .container) :is(.modal-overlay, .report-modal-overlay, .rpt-modal-overlay, .exp-modal-overlay) {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+:is(.page-content, body > .container) dialog {
+    margin: auto;
+}
+
+/* Native controls must not inherit text-field dimensions. */
+:is(.page-content, body > .container) input:is([type="checkbox"], [type="radio"]) {
+    min-height: 0;
+    flex-shrink: 0;
+    accent-color: var(--erp-primary);
+}
+
+:is(.page-content, body > .container) :is(input, select, textarea) {
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* Keep the login icon, editable text and visibility button in one field. */
+.login-shell .login-form .input-shell input {
+    min-width: 0;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.login-shell .input-icon {
+    flex-shrink: 0;
+}
+
+/* A cell that spans desktop columns must not create implicit mobile columns. */
+@media (max-width: 768px) {
+    :is(.page-content, body > .container) :is(.form-grid, .form-row, .rpt-form-row, .exp-form-row) > * {
+        grid-column: auto !important;
+        min-width: 0;
+    }
+}
+
+:is(.page-content, body > .container) :is(.rpt-modal-close, .exp-modal-close, .report-modal-close, .btn-close-modal) {
+    width: 36px;
+    min-width: 36px;
+    flex: 0 0 36px;
+    padding: 0;
 }

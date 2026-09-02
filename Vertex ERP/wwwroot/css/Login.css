@@ -31,7 +31,8 @@ body {
 }
 
 body {
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     color: var(--text);
 }
 
@@ -342,6 +343,7 @@ body {
 }
 
 .input-shell input {
+    min-width: 0;
     width: 100%;
     border: 0;
     outline: 0;

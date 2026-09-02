@@ -1,4 +1,4 @@
-﻿/* Custom Scrollbar for Dark Theme */
+/* Custom Scrollbar for Dark Theme */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -144,7 +144,7 @@ html, body {
 /* Platform Cards */
 .platform-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
     gap: 0.85rem;
     margin-top: 0.75rem;
     width: 100%;
@@ -302,7 +302,7 @@ html, body {
 
 .employee-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
     gap: 0.5rem;
     width: 100%;
     box-sizing: border-box;

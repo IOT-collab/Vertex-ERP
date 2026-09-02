@@ -1,4 +1,4 @@
-﻿/* Clean ERP Typography & Layout Setup */
+/* Clean ERP Typography & Layout Setup */
 .admin-control-page {
     padding: 30px;
     width: 100%;
@@ -66,7 +66,7 @@
     .admin-control-page .admin-modules-grid {
         display: grid;
         /* auto-fill dynamically handles 1, 2, or 3 columns based on space without rigid media queries */
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
         gap: 25px;
     }
 

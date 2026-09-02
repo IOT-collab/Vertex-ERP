@@ -23,11 +23,20 @@ namespace VertexERP.Data
         public DbSet<BankDetailUpdateRequest> BankDetailUpdateRequests => Set<BankDetailUpdateRequest>();
         public DbSet<EmployeeSalaryDetail> EmployeeSalaryDetails => Set<EmployeeSalaryDetail>();
         public DbSet<EmployeeDocument> EmployeeDocuments => Set<EmployeeDocument>();
+        public DbSet<EmployeeAsset> EmployeeAssets => Set<EmployeeAsset>();
+        public DbSet<ExpenseClaim> ExpenseClaims => Set<ExpenseClaim>();
+        public DbSet<RecruitmentHiringRecord> RecruitmentHiringRecords => Set<RecruitmentHiringRecord>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.HasSequence<long>("EmployeeCodeSequence");
+            modelBuilder.Entity<EmployeeAsset>(entity =>
+            {
+                entity.HasIndex(asset => asset.AssetTag).IsUnique();
+                entity.HasOne(asset => asset.Employee).WithMany()
+                    .HasForeignKey(asset => asset.EmployeeId).OnDelete(DeleteBehavior.Restrict);
+            });
 
             modelBuilder.Entity<AppUser>(entity =>
             {
@@ -52,6 +61,26 @@ namespace VertexERP.Data
                     .WithMany(manager => manager.DirectReports)
                     .HasForeignKey(employee => employee.ReportingManagerId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+            modelBuilder.Entity<ExpenseClaim>(entity =>
+            {
+                entity.ToTable("ExpenseClaims");
+                entity.HasIndex(claim => new { claim.EmployeeId, claim.SubmittedAtUtc });
+                entity.HasIndex(claim => new { claim.ReportingManagerId, claim.Status });
+                entity.Property(claim => claim.Amount).HasPrecision(18, 2);
+                entity.Property(claim => claim.RequiresHrApproval).HasDefaultValue(false);
+                entity.Property(claim => claim.SubmittedAtUtc).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.HasOne(claim => claim.Employee).WithMany().HasForeignKey(claim => claim.EmployeeId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(claim => claim.ReportingManager).WithMany().HasForeignKey(claim => claim.ReportingManagerId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(claim => claim.DecidedByUser).WithMany().HasForeignKey(claim => claim.DecidedByUserId).OnDelete(DeleteBehavior.SetNull);
+            });
+            modelBuilder.Entity<RecruitmentHiringRecord>(entity =>
+            {
+                entity.ToTable("RecruitmentHiringRecords");
+                entity.HasIndex(record => new { record.DepartmentId, record.Year, record.Month, record.WeekNumber }).IsUnique();
+                entity.Property(record => record.CreatedAtUtc).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(record => record.UpdatedAtUtc).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.HasOne(record => record.Department).WithMany().HasForeignKey(record => record.DepartmentId).OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<LeaveRequest>(entity =>

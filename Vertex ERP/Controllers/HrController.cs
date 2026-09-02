@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
 using VertexERP.Models;
@@ -52,9 +52,45 @@ namespace Vertex_ERP.Controllers
             return View();
         }
 
-        public IActionResult Recuirement()
+        public async Task<IActionResult> Recuirement(int? year, int? month)
         {
-            return View();
+            var selectedYear = year is >= 2020 and <= 2100 ? year.Value : DateTime.Today.Year;
+            var selectedMonth = month is >= 1 and <= 12 ? month.Value : DateTime.Today.Month;
+            return View(new RecruitmentTrackerViewModel
+            {
+                Year = selectedYear,
+                Month = selectedMonth,
+                Departments = await _dbContext.Departments.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.DepartmentName).ToListAsync(),
+                Records = await _dbContext.RecruitmentHiringRecords.AsNoTracking().Include(x => x.Department)
+                    .Where(x => x.Year == selectedYear && x.Month == selectedMonth)
+                    .OrderBy(x => x.WeekNumber).ThenBy(x => x.Department.DepartmentName).ToListAsync()
+            });
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveHiringRecord(int id, int departmentId, int year, int month, int weekNumber, int targetHires, int actualHires, string? notes)
+        {
+            if (year is < 2020 or > 2100 || month is < 1 or > 12 || weekNumber is < 1 or > 5 || targetHires is < 0 or > 10000 || actualHires is < 0 or > 10000)
+            { TempData["RecruitmentError"] = "Please enter valid recruitment values."; return RedirectToAction(nameof(Recuirement), new { year, month }); }
+            if (!await _dbContext.Departments.AnyAsync(x => x.Id == departmentId && x.IsActive)) return BadRequest();
+            var duplicate = await _dbContext.RecruitmentHiringRecords.AnyAsync(x => x.Id != id && x.DepartmentId == departmentId && x.Year == year && x.Month == month && x.WeekNumber == weekNumber);
+            if (duplicate) { TempData["RecruitmentError"] = "This department and week already has a record. Edit the existing row."; return RedirectToAction(nameof(Recuirement), new { year, month }); }
+            var record = id > 0 ? await _dbContext.RecruitmentHiringRecords.FirstOrDefaultAsync(x => x.Id == id) : null;
+            if (id > 0 && record == null) return NotFound();
+            if (record == null) { record = new RecruitmentHiringRecord(); _dbContext.RecruitmentHiringRecords.Add(record); }
+            record.DepartmentId = departmentId; record.Year = year; record.Month = month; record.WeekNumber = weekNumber;
+            record.TargetHires = targetHires; record.ActualHires = actualHires; record.Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim()[..Math.Min(notes.Trim().Length, 500)]; record.UpdatedAtUtc = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync(); TempData["RecruitmentMessage"] = "Hiring record saved.";
+            return RedirectToAction(nameof(Recuirement), new { year, month });
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteHiringRecord(int id)
+        {
+            var record = await _dbContext.RecruitmentHiringRecords.FirstOrDefaultAsync(x => x.Id == id);
+            if (record == null) return NotFound();
+            var year = record.Year; var month = record.Month; _dbContext.Remove(record); await _dbContext.SaveChangesAsync();
+            TempData["RecruitmentMessage"] = "Hiring record deleted."; return RedirectToAction(nameof(Recuirement), new { year, month });
         }
 
         public async Task<IActionResult> EmpDocuments()
@@ -645,12 +681,55 @@ namespace Vertex_ERP.Controllers
         }
         public IActionResult ExpenseClaim()
         {
-            return View();
+            return RedirectToAction("Index", "Expense");
         }
 
-        public IActionResult AssetManagement()
+        public async Task<IActionResult> AssetManagement()
         {
-            return View();
+            return View(await _dbContext.EmployeeAssets.AsNoTracking().Include(asset => asset.Employee)
+                .OrderByDescending(asset => asset.IssueDate).ThenByDescending(asset => asset.Id).ToListAsync());
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> IssueAsset()
+        {
+            return View(new IssueAssetViewModel { Employees = await _dbContext.Employees.AsNoTracking()
+                .Where(employee => employee.IsActive).OrderBy(employee => employee.FullName).ToListAsync() });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> IssueAsset(IssueAssetViewModel model)
+        {
+            model.AssetTag = (model.AssetTag ?? string.Empty).Trim().ToUpperInvariant();
+            if (!await _dbContext.Employees.AnyAsync(employee => employee.Id == model.EmployeeId && employee.IsActive))
+                ModelState.AddModelError(nameof(model.EmployeeId), "Select an active employee.");
+            if (model.IssueDate > DateOnly.FromDateTime(DateTime.Today))
+                ModelState.AddModelError(nameof(model.IssueDate), "Issue date cannot be in the future.");
+            if (await _dbContext.EmployeeAssets.AnyAsync(asset => asset.AssetTag == model.AssetTag))
+                ModelState.AddModelError(nameof(model.AssetTag), "This asset tag has already been issued.");
+            if (ModelState.IsValid)
+            {
+                _dbContext.EmployeeAssets.Add(new EmployeeAsset
+                {
+                    EmployeeId = model.EmployeeId, AssetTag = model.AssetTag, AssetName = model.AssetName.Trim(),
+                    Category = model.Category.Trim(), SerialNumber = model.SerialNumber?.Trim(),
+                    IssueDate = model.IssueDate!.Value, Notes = model.Notes?.Trim()
+                });
+                try
+                {
+                    await _dbContext.SaveChangesAsync();
+                    TempData["AssetMessage"] = "Asset issued successfully. It is now visible in the employee's Assets page.";
+                    return RedirectToAction(nameof(AssetManagement));
+                }
+                catch (DbUpdateException exception) when (exception.InnerException is Npgsql.PostgresException { SqlState: "23505" })
+                {
+                    ModelState.AddModelError(nameof(model.AssetTag), "This asset tag has already been issued.");
+                }
+            }
+            model.Employees = await _dbContext.Employees.AsNoTracking().Where(employee => employee.IsActive)
+                .OrderBy(employee => employee.FullName).ToListAsync();
+            return View(model);
         }
 
         public IActionResult Meetings()

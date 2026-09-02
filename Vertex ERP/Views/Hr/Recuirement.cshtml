@@ -1,143 +1,24 @@
-﻿@{
-    ViewData["Title"] = "Recruitment Management";
-}
-<link href="~/css/recuirement.css" rel="stylesheet" />
-
+@model VertexERP.Models.RecruitmentTrackerViewModel
+@using System.Globalization
+@{ ViewData["Title"]="Recruitment Management"; var monthName=CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(Model.Month); }
+<link href="~/css/Recuirement.css" rel="stylesheet" asp-append-version="true" />
 <div class="recruitment-container">
-    <!-- Top Header -->
-    <div class="header-section">
-        <div class="header-left">
-            <div>
-                <h1 class="page-title">Recruitment Management</h1>
-                <p class="page-subtitle">Manage job openings, candidate pipelines & interviews</p>
-            </div>
-        </div>
-        <button class="btn-primary" id="postNewJobBtn">
-            <i class="fa-solid fa-plus"></i>
-            <span>Post New Job</span>
-        </button>
-    </div>
-
-    <!-- Stats Cards -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-content">
-                <div>
-                    <span class="stat-title">Open Positions</span>
-                    <h3 class="stat-value" id="statOpenPositions">0</h3>
-                </div>
-                <div class="stat-icon icon-blue">
-                    <i class="fa-solid fa-briefcase"></i>
-                </div>
-            </div>
-            <p class="stat-meta" id="metaOpenPositions">Updated just now</p>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-content">
-                <div>
-                    <span class="stat-title">Total Applicants</span>
-                    <h3 class="stat-value" id="statTotalApplicants">0</h3>
-                </div>
-                <div class="stat-icon icon-purple">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-            </div>
-            <p class="stat-meta" id="metaTotalApplicants">Updated just now</p>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-content">
-                <div>
-                    <span class="stat-title">Interviews Today</span>
-                    <h3 class="stat-value" id="statInterviewsToday">0</h3>
-                </div>
-                <div class="stat-icon icon-orange">
-                    <i class="fa-solid fa-calendar-days"></i>
-                </div>
-            </div>
-            <p class="stat-meta" id="metaInterviewsToday">Scheduled for today</p>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-content">
-                <div>
-                    <span class="stat-title">Hired (This Month)</span>
-                    <h3 class="stat-value" id="statHiredMonth">0</h3>
-                </div>
-                <div class="stat-icon icon-green">
-                    <i class="fa-solid fa-user-check"></i>
-                </div>
-            </div>
-            <p class="stat-meta" id="metaHiredTarget">Current cycle</p>
-        </div>
-    </div>
-
-    <!-- Main Content Panel -->
-    <div class="main-panel">
-        <!-- Controls & Navigation Bar -->
-        <div class="controls-bar">
-            <div class="tab-group">
-                <button class="tab-btn active" id="tabCandidates">Candidates</button>
-                <button class="tab-btn" id="tabJobs">Active Jobs</button>
-            </div>
-
-            <div class="action-group">
-                <div class="search-box">
-                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                    <input type="text" placeholder="Search candidate or job..." id="searchInput" />
-                </div>
-                <button class="btn-secondary" id="filterBtn">
-                    <i class="fa-solid fa-filter"></i>
-                    <span class="hide-mobile">Filter</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Candidates Table Section -->
-        <div class="table-wrapper" id="candidatesSection">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Candidate</th>
-                        <th>Applied Role</th>
-                        <th>Current Stage</th>
-                        <th>Interview Date</th>
-                        <th>Status</th>
-                        <th class="text-right">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="candidatesTableBody">
-                    <!-- Dynamically populated or empty state -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Active Jobs Section (Initially Hidden) -->
-        <div class="jobs-grid hidden" id="jobsSection">
-            <!-- Dynamically populated or empty state -->
-        </div>
-    </div>
+ <div class="header-section"><div><h1 class="page-title">Recruitment Target Tracker</h1><p class="page-subtitle">Department-wise weekly hiring targets and actual recruitment records</p></div><button class="btn-primary" type="button" onclick="openHiringForm()"><i class="fa-solid fa-plus"></i> Add Hiring Record</button></div>
+ @if(TempData["RecruitmentMessage"] is string message){<div class="rec-alert success">@message</div>}@if(TempData["RecruitmentError"] is string error){<div class="rec-alert error">@error</div>}
+ <form method="get" asp-action="Recuirement" class="period-filter"><label>Report period</label><select name="month">@for(var m=1;m<=12;m++){<option value="@m" selected="@(m==Model.Month)">@CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)</option>}</select><input type="number" name="year" min="2020" max="2100" value="@Model.Year"/><button class="btn-secondary" type="submit">View Report</button></form>
+ <div class="stats-grid">
+  <div class="stat-card"><span class="stat-title">Hiring Target</span><h3 class="stat-value">@Model.TotalTarget</h3><p class="stat-meta">@monthName @Model.Year</p></div>
+  <div class="stat-card"><span class="stat-title">Actual Hiring</span><h3 class="stat-value">@Model.TotalHired</h3><p class="stat-meta">Recorded hires</p></div>
+  <div class="stat-card"><span class="stat-title">Target Remaining</span><h3 class="stat-value">@Model.Remaining</h3><p class="stat-meta">Hiring gap</p></div>
+  <div class="stat-card"><span class="stat-title">Achievement</span><h3 class="stat-value">@Model.Achievement%</h3><div class="rec-progress"><span style="width:@Math.Min(Model.Achievement,100)%"></span></div></div>
+ </div>
+ <div class="main-panel"><div class="controls-bar"><div><h2 class="section-title">@monthName @Model.Year records</h2><p class="page-subtitle">Week and department breakdown</p></div><div class="search-box"><i class="fa-solid fa-magnifying-glass search-icon"></i><input type="search" id="searchInput" placeholder="Search department..." oninput="filterRows()"/></div></div>
+ <div class="table-wrapper"><table class="data-table"><thead><tr><th>Week</th><th>Department</th><th>Target</th><th>Hired</th><th>Gap</th><th>Achievement</th><th>Notes</th><th class="text-right">Action</th></tr></thead><tbody id="recordRows">
+ @if(Model.Records.Count==0){<tr><td colspan="8"><div class="rec-empty"><i class="fa-solid fa-bullseye"></i><strong>No hiring record for this month</strong><span>Add weekly targets to start tracking recruitment.</span></div></td></tr>}
+ @foreach(var item in Model.Records){var pct=item.TargetHires==0?0:(int)Math.Round(item.ActualHires*100d/item.TargetHires);<tr data-record data-search="@item.Department.DepartmentName.ToLowerInvariant() week @item.WeekNumber"><td><span class="badge badge-blue">Week @item.WeekNumber</span></td><td class="font-bold">@item.Department.DepartmentName</td><td>@item.TargetHires</td><td class="rec-hired">@item.ActualHires</td><td>@Math.Max(0,item.TargetHires-item.ActualHires)</td><td><span class="badge @(pct>=100?"badge-green":"badge-orange")">@pct%</span></td><td class="rec-notes">@(item.Notes??"—")</td><td class="rec-actions"><button type="button" class="btn-icon" onclick='editRecord(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {item.Id,item.DepartmentId,item.Year,item.Month,item.WeekNumber,item.TargetHires,item.ActualHires,item.Notes})))' title="Edit"><i class="fa-solid fa-pen"></i></button><form asp-action="DeleteHiringRecord" method="post" onsubmit="return confirm('Delete this hiring record?')"><input type="hidden" name="id" value="@item.Id"/><button class="btn-icon danger" title="Delete"><i class="fa-solid fa-trash"></i></button></form></td></tr>}
+ </tbody></table></div></div>
 </div>
-
+<div class="rec-modal" id="hiringModal"><div class="rec-modal-card"><div class="rec-modal-head"><div><h2 id="formTitle">Add Hiring Record</h2><p>Save a weekly department target and actual hiring.</p></div><button type="button" onclick="closeHiringForm()">&times;</button></div><form asp-action="SaveHiringRecord" method="post"><input type="hidden" id="recordId" name="id" value="0"/><input type="hidden" name="year" value="@Model.Year"/><input type="hidden" name="month" value="@Model.Month"/><div class="rec-form-grid"><label>Department<select id="departmentId" name="departmentId" required><option value="">Select department</option>@foreach(var dept in Model.Departments){<option value="@dept.Id">@dept.DepartmentName</option>}</select></label><label>Week<select id="weekNumber" name="weekNumber" required>@for(var w=1;w<=5;w++){<option value="@w">Week @w</option>}</select></label><label>Hiring target<input id="targetHires" name="targetHires" type="number" min="0" max="10000" required/></label><label>Actual hired<input id="actualHires" name="actualHires" type="number" min="0" max="10000" required/></label><label class="wide">Notes<textarea id="recordNotes" name="notes" maxlength="500" rows="3" placeholder="Roles hired, pending profiles, remarks..."></textarea></label></div><div class="rec-modal-actions"><button type="button" class="btn-secondary" onclick="closeHiringForm()">Cancel</button><button class="btn-primary" type="submit">Save Record</button></div></form></div></div>
 <script>
-    // Tab switching functionality
-    const tabCandidates = document.getElementById('tabCandidates');
-    const tabJobs = document.getElementById('tabJobs');
-    const candidatesSection = document.getElementById('candidatesSection');
-    const jobsSection = document.getElementById('jobsSection');
-
-    tabCandidates.addEventListener('click', () => {
-        tabCandidates.classList.add('active');
-        tabJobs.classList.remove('active');
-        candidatesSection.classList.remove('hidden');
-        jobsSection.classList.add('hidden');
-    });
-
-    tabJobs.addEventListener('click', () => {
-        tabJobs.classList.add('active');
-        tabCandidates.classList.remove('active');
-        jobsSection.classList.remove('hidden');
-        candidatesSection.classList.add('hidden');
-    });
+ const modal=document.getElementById('hiringModal');function openHiringForm(){document.getElementById('formTitle').textContent='Add Hiring Record';document.getElementById('recordId').value=0;document.querySelector('#hiringModal form').reset();modal.classList.add('open')}function closeHiringForm(){modal.classList.remove('open')}function editRecord(x){openHiringForm();document.getElementById('formTitle').textContent='Edit Hiring Record';recordId.value=x.Id;departmentId.value=x.DepartmentId;weekNumber.value=x.WeekNumber;targetHires.value=x.TargetHires;actualHires.value=x.ActualHires;recordNotes.value=x.Notes||''}function filterRows(){const q=searchInput.value.toLowerCase();document.querySelectorAll('[data-record]').forEach(x=>x.hidden=!x.dataset.search.includes(q))}modal.addEventListener('click',e=>{if(e.target===modal)closeHiringForm()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHiringForm()});
 </script>

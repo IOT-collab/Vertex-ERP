@@ -19,7 +19,7 @@ body {
     width: 100%;
     height: 100%;
     min-height: 100%;
-    overflow: hidden;
+    overflow-y: auto;
     overflow-x: hidden;
     background:
         radial-gradient(circle at 16% 0%, rgba(59, 130, 246, .22), transparent 30%),
@@ -432,4 +432,33 @@ body {
         padding-top: 7px;
         padding-bottom: 7px;
     }
+}
+
+/* Page styles may style body; retain the dashboard's independent scroll area. */
+body.erp-shell {
+    display: block;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.layout > .main-content > .topbar {
+    flex-shrink: 0;
+}
+
+.topbar .profile-text {
+    display: block;
+    max-width: min(34vw, 360px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.topbar .hamburger-menu-btn,
+.topbar .profile form {
+    flex-shrink: 0;
+}
+
+@media (max-width: 420px) {
+    .topbar .profile-text { display: none; }
 }

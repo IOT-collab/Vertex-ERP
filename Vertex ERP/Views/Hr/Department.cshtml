@@ -1,4 +1,4 @@
-﻿@model dynamic
+@model dynamic
 @{
     ViewData["Title"] = "HR Departments Overview";
     ViewData["BackController"] = "Main";
@@ -18,7 +18,7 @@
     var addDepartmentUrl = Url.Action("AddDepartment", "Hr");
     var getDepartmentDetailsUrl = Url.Action("DepartmentDetails", "Hr");
 }
-<link href="~/css/department.css" rel="stylesheet" />
+<link href="~/css/Department.css" rel="stylesheet" asp-append-version="true" />
 
 <div class="hr-container">
     @if (TempData["DepartmentMessage"] is string departmentMessage)

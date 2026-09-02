@@ -1,4 +1,4 @@
-﻿:root {
+:root {
     --bg-main: #0b1120;
     --card-bg: #1e293b;
     --card-inner: #0f172a;
@@ -268,7 +268,7 @@ body {
 /* DASHBOARD GRID */
 .dash-grid {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+    grid-template-columns: minmax(0, 2fr) minmax(min(100%, 300px), 1fr);
     gap: 24px;
     width: 100%;
 }

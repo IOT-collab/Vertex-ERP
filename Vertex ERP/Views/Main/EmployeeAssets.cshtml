@@ -1,0 +1,18 @@
+@model VertexERP.Models.EmployeeAssetsViewModel
+@{ ViewData["Title"] = "My Assets"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
+<link href="~/css/EmployeeSections.css" rel="stylesheet" asp-append-version="true" />
+<section class="employee-section">
+    <header><div><h1>My Assets</h1><p>Assets issued by HR to @Model.Employee.FullName (@Model.Employee.EmployeeCode)</p></div></header>
+    <div class="employee-summary"><article><small>Issued Assets</small><strong>@Model.Assets.Count</strong></article></div>
+    <div class="employee-panel">
+        @if (Model.Assets.Count == 0) { <div class="employee-empty">No assets have been issued to you yet.</div> }
+        else
+        {
+            <table class="employee-table"><thead><tr><th>Asset Tag</th><th>Asset</th><th>Category</th><th>Serial Number</th><th>Issue Date</th><th>Notes</th></tr></thead>
+            <tbody>@foreach (var asset in Model.Assets)
+            {
+                <tr><td>@asset.AssetTag</td><td>@asset.AssetName</td><td>@asset.Category</td><td>@(asset.SerialNumber ?? "--")</td><td>@asset.IssueDate.ToString("dd MMM yyyy")</td><td>@(asset.Notes ?? "--")</td></tr>
+            }</tbody></table>
+        }
+    </div>
+</section>

@@ -1,18 +1,19 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 @inject VertexERP.Data.ApplicationDbContext LayoutDb
-<!html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewBag.Title - Vertex ERP</title>
-    <link href="~/css/style.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/Style.css" rel="stylesheet" asp-append-version="true" />
     <link href="~/css/site.css" rel="stylesheet" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="~/css/common-ui.css" rel="stylesheet" asp-append-version="true" />
     <link href="~/css/common-back-button.css" rel="stylesheet" asp-append-version="true" />
     <link href="~/css/erp-buttons.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/hr-modules.css" rel="stylesheet" asp-append-version="true" />
 </head>
-<body class="@((User.IsInRole("Employee") || User.IsInRole("User")) ? "employee-self-service-only" : "")">
+<body class="erp-shell @((User.IsInRole("Employee") || User.IsInRole("User")) ? "employee-self-service-only" : "")">
     @{
         var currentRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "User";
         var currentName = User.Identity?.Name ?? currentRole;
@@ -53,6 +54,8 @@
                     <li><a href="/Main/EmployeeNotifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Notifications</span></a></li>
                     <li><a href="/Main/EmployeeQueries"><i class="fa-regular fa-circle-question" aria-hidden="true"></i><span>Raise Query</span></a></li>
                     <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Salary Slip</span></a></li>
+                    <li><a href="/Main/EmployeeAssets"><i class="fa-solid fa-laptop" aria-hidden="true"></i><span>Assets</span></a></li>
+                    <li><a asp-controller="Expense" asp-action="Index"><i class="fa-solid fa-receipt" aria-hidden="true"></i><span>Expense Claims</span></a></li>
                     <li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns" aria-hidden="true"></i><span>My Bank Details</span></a></li>
                 }
                 else if (isManager)
@@ -62,6 +65,7 @@
                     <li><a href="/Main/ManagerAttendance"><i class="fa-solid fa-users-viewfinder" aria-hidden="true"></i><span>Team Attendance</span></a></li>
                     <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Site Employee Location</span></a></li>
                     <li><a href="/Main/ManagerLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Team Leave</span></a></li>
+                    <li><a asp-controller="Expense" asp-action="Index"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Team Expenses</span></a></li>
                     <li><a href="/Main/ManagerQueries"><i class="fa-regular fa-circle-question" aria-hidden="true"></i><span>Queries</span></a></li>
                     <li><a href="/Main/TaskMgm"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Task Management</span></a></li>
                     <li><a href="/Main/ManagerProjects"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Project Management</span></a></li>
@@ -72,7 +76,8 @@
                     <li><a href="/Main/EmployeeLeaves"><i class="fa-regular fa-calendar-check" aria-hidden="true"></i><span>My Leave</span></a></li>
                     <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user" aria-hidden="true"></i><span>My Profile</span></a></li>
                     <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Salary Slip</span></a></li>
-                    <li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns" aria-hidden="true"></i><span>My Bank Details</span></a></li>
+                    <li><a asp-controller="Expense" asp-action="Index" asp-route-view="self"><i class="fa-solid fa-receipt" aria-hidden="true"></i><span>My Expense Claims</span></a></li>
+                    <li><a href="/Main/EmployeeAssets"><i class="fa-solid fa-laptop" aria-hidden="true"></i><span>Assets</span></a></li><li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns" aria-hidden="true"></i><span>My Bank Details</span></a></li>
                 }
                 else
                 {
@@ -99,7 +104,8 @@
                         <li><a href="/Main/EmployeeLeaves"><i class="fa-regular fa-calendar-check"></i><span>My Leave</span></a></li>
                         <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user"></i><span>My Profile</span></a></li>
                         <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar"></i><span>Salary Slip</span></a></li>
-                        <li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns"></i><span>My Bank Details</span></a></li>
+                        <li><a asp-controller="Expense" asp-action="Index"><i class="fa-solid fa-receipt" aria-hidden="true"></i><span>Expense Audit</span></a></li>
+                        <li><a href="/Main/EmployeeAssets"><i class="fa-solid fa-laptop" aria-hidden="true"></i><span>Assets</span></a></li><li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns"></i><span>My Bank Details</span></a></li>
                         <li><a href="/Main/BankUpdateRequests"><i class="fa-solid fa-building-circle-check"></i><span>Bank Update Requests</span>@if(pendingBankRequestCount>0){<b style="margin-left:auto;background:#ef4444;color:#fff;border-radius:999px;padding:3px 7px;font-size:11px">@pendingBankRequestCount</b>}</a></li>
                     }
                 }
@@ -148,6 +154,7 @@
             const attendanceSelectors = {
                 '/Main/Attendence': '.attendance-panel-container',
                 '/Main/EmployeeAttendance': '.employee-section',
+                '/Main/EmployeeAssets': '.employee-section',
                 '/Main/Hrms': '.hrms-page'
             };
             const selector = attendanceSelectors[window.location.pathname];
