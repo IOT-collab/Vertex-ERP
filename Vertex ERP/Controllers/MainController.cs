@@ -765,33 +765,90 @@ namespace VertexERP.Controllers
         }
 
         [Authorize(Roles = "Admin,HR")]
-        public async Task<IActionResult> ExportAttendance(string? searchQuery, string? department, DateOnly? filterDate, string? status, CancellationToken cancellationToken)
+        public async Task<IActionResult> ExportAttendance(string? searchQuery, string? department, DateOnly? filterDate, string? status, string exportPeriod = "day", string? exportMonth = null, CancellationToken cancellationToken = default)
         {
             var date = filterDate ?? DateOnly.FromDateTime(DateTime.Today);
-            var attendance = await _attendanceProcessingService.GetDailyAttendanceAsync(date, searchQuery, department, status, cancellationToken);
-            var csv = new StringBuilder();
-            csv.AppendLine("Emp ID,Employee Name,Department,Date,Check In,Check Out,Working Hours,Punch Count,Status");
-            foreach (var item in attendance.Records)
+            var isMonthlyExport = string.Equals(exportPeriod, "month", StringComparison.OrdinalIgnoreCase);
+            var dates = new List<DateOnly>();
+            if (isMonthlyExport)
             {
+                if (!DateOnly.TryParseExact($"{exportMonth}-01", "yyyy-MM-dd", out var monthStart)) return BadRequest("Select a valid month.");
+                if (monthStart > DateOnly.FromDateTime(DateTime.Today)) return BadRequest("Future month attendance cannot be exported.");
+                var lastDay = monthStart.AddMonths(1).AddDays(-1);
+                if (lastDay > DateOnly.FromDateTime(DateTime.Today)) lastDay = DateOnly.FromDateTime(DateTime.Today);
+                for (var day = monthStart; day <= lastDay; day = day.AddDays(1)) dates.Add(day);
+            }
+            else
+            {
+                if (date > DateOnly.FromDateTime(DateTime.Today)) return BadRequest("Future attendance cannot be exported.");
+                dates.Add(date);
+            }
+            var csv = new StringBuilder();
+            var exportRecords = new List<DailyAttendanceViewModel>();
+            foreach (var exportDate in dates)
+            {
+                var attendance = await _attendanceProcessingService.GetDailyAttendanceAsync(exportDate,
+                    isMonthlyExport ? null : searchQuery, isMonthlyExport ? null : department, isMonthlyExport ? null : status, cancellationToken);
+                exportRecords.AddRange(attendance.Records.Where(item => item.EmployeeId > 0));
+            }
+            var monthlySummary = exportRecords.GroupBy(item => item.EmployeeId).ToDictionary(group => group.Key, group => new
+            {
+                Present = group.Count(item => item.Status is "Present" or "Late"),
+                Absent = group.Count(item => item.Status == "Absent"),
+                Late = group.Count(item => item.Status == "Late"),
+                Work = TimeSpan.FromTicks(group.Sum(item => item.WorkingHours.Ticks))
+            });
+            if (isMonthlyExport)
+                return BuildMonthlyAttendanceWorkbook(exportRecords, dates, monthlySummary.ToDictionary(x => x.Key, x => (x.Value.Present, x.Value.Absent, x.Value.Late, x.Value.Work)));
+            csv.AppendLine("Emp ID,Employee Name,Department,Date,Day,Check In,Check Out,Working Hours,Punch Count,Status,Month Present Days,Month Absent Days,Month Late Days,Month Total Hours");
+            foreach (var item in exportRecords.OrderBy(item => item.EmployeeName).ThenBy(item => item.EmpId).ThenBy(item => item.Date))
+            {
+                var summary = monthlySummary[item.EmployeeId];
                 csv.AppendLine(string.Join(',', new[]
                 {
-                    Csv(item.EmpId),
-                    Csv(item.EmployeeName),
-                    Csv(item.Department),
-                    Csv(item.Date.ToString("yyyy-MM-dd")),
-                    Csv(item.CheckIn?.ToString("hh:mm tt") ?? string.Empty),
-                    Csv(item.CheckOut?.ToString("hh:mm tt") ?? string.Empty),
-                    Csv(item.WorkingHours.ToString(@"hh\:mm")),
-                    item.PunchCount.ToString(),
-                    Csv(item.Status)
+                    Csv(item.EmpId), Csv(item.EmployeeName), Csv(item.Department), Csv(item.Date.ToString("dd-MMM-yyyy")), Csv(item.Date.DayOfWeek.ToString()),
+                    Csv(item.CheckIn?.ToString("hh:mm tt") ?? string.Empty), Csv(item.CheckOut?.ToString("hh:mm tt") ?? string.Empty),
+                    Csv(item.WorkingHours.ToString(@"hh\:mm")), item.PunchCount.ToString(), Csv(item.Status),
+                    summary.Present.ToString(), summary.Absent.ToString(), summary.Late.ToString(), Csv($"{(int)summary.Work.TotalHours:D2}:{summary.Work.Minutes:D2}")
                 }));
             }
 
             var bytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true).GetBytes(csv.ToString());
-            return File(bytes, "text/csv; charset=utf-8", $"Attendance-{date:yyyy-MM-dd}.csv");
+            var periodLabel = dates.Count == 1 ? dates[0].ToString("yyyy-MM-dd") : dates[0].ToString("yyyy-MM");
+            return File(bytes, "text/csv; charset=utf-8", $"Attendance-{periodLabel}.csv");
         }
 
         private static string Csv(string value) => $"\"{value.Replace("\"", "\"\"")}\"";
+
+        private FileContentResult BuildMonthlyAttendanceWorkbook(List<DailyAttendanceViewModel> records, List<DateOnly> dates, Dictionary<int, (int Present, int Absent, int Late, TimeSpan Work)> summaries)
+        {
+            static string X(string? value) => System.Security.SecurityElement.Escape(value ?? string.Empty) ?? string.Empty;
+            var month = dates[0];
+            var xml = new StringBuilder("<?xml version=\"1.0\"?><Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:x=\"urn:schemas-microsoft-com:office:excel\">");
+            xml.Append("<Styles><Style ss:ID=\"Default\"><Alignment ss:Vertical=\"Center\"/><Font ss:FontName=\"Calibri\" ss:Size=\"10\"/></Style><Style ss:ID=\"Title\"><Alignment ss:Horizontal=\"Center\"/><Font ss:Bold=\"1\" ss:Size=\"16\" ss:Color=\"#FFFFFF\"/><Interior ss:Color=\"#1D4ED8\" ss:Pattern=\"Solid\"/></Style><Style ss:ID=\"Header\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Font ss:Bold=\"1\" ss:Color=\"#FFFFFF\"/><Interior ss:Color=\"#1E3A5F\" ss:Pattern=\"Solid\"/></Style><Style ss:ID=\"Text\"><Borders><Border ss:Position=\"Bottom\" ss:LineStyle=\"Continuous\" ss:Weight=\"1\" ss:Color=\"#DCE3EA\"/></Borders></Style><Style ss:ID=\"Present\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Interior ss:Color=\"#DCFCE7\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#166534\"/></Style><Style ss:ID=\"Late\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Interior ss:Color=\"#FEF3C7\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#92400E\"/></Style><Style ss:ID=\"Absent\"><Alignment ss:Horizontal=\"Center\"/><Interior ss:Color=\"#FEE2E2\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#991B1B\"/></Style></Styles>");
+            xml.Append($"<Worksheet ss:Name=\"{X(month.ToString("MMM-yyyy"))}\"><Table><Column ss:Width=\"65\"/><Column ss:Width=\"145\"/><Column ss:Width=\"100\"/><Column ss:Width=\"55\" ss:Span=\"3\"/><Column ss:Width=\"70\"/>");
+            foreach (var _ in dates) xml.Append("<Column ss:Width=\"82\"/>");
+            var columnCount = 7 + dates.Count;
+            xml.Append($"<Row ss:Height=\"30\"><Cell ss:StyleID=\"Title\" ss:MergeAcross=\"{columnCount - 1}\"><Data ss:Type=\"String\">Monthly Attendance Pivot Report - {X(month.ToString("MMMM yyyy"))}</Data></Cell></Row>");
+            xml.Append("<Row ss:StyleID=\"Header\"><Cell><Data ss:Type=\"String\">Emp ID</Data></Cell><Cell><Data ss:Type=\"String\">Employee Name</Data></Cell><Cell><Data ss:Type=\"String\">Department</Data></Cell><Cell><Data ss:Type=\"String\">Present</Data></Cell><Cell><Data ss:Type=\"String\">Absent</Data></Cell><Cell><Data ss:Type=\"String\">Late</Data></Cell><Cell><Data ss:Type=\"String\">Total Hours</Data></Cell>");
+            foreach (var day in dates) xml.Append($"<Cell><Data ss:Type=\"String\">{day:dd MMM}\n{day:ddd}</Data></Cell>");
+            xml.Append("</Row>");
+            foreach (var employee in records.GroupBy(x => x.EmployeeId).OrderBy(x => x.First().EmployeeName))
+            {
+                var first = employee.First(); var summary = summaries[employee.Key]; var byDate = employee.ToDictionary(x => x.Date);
+                xml.Append($"<Row ss:Height=\"34\"><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.EmpId)}</Data></Cell><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.EmployeeName)}</Data></Cell><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.Department)}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Present}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Absent}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Late}</Data></Cell><Cell><Data ss:Type=\"String\">{(int)summary.Work.TotalHours:D2}:{summary.Work.Minutes:D2}</Data></Cell>");
+                foreach (var day in dates)
+                {
+                    var item = byDate[day]; var style = item.Status is "Present" ? "Present" : item.Status is "Late" ? "Late" : "Absent";
+                    var code = item.Status is "Present" ? "P" : item.Status is "Late" ? "L" : "A";
+                    var timing = item.CheckIn.HasValue ? $"&#10;{item.CheckIn:hh:mm tt}-{(item.CheckOut.HasValue ? item.CheckOut.Value.ToString("hh:mm tt") : "—")}" : string.Empty;
+                    xml.Append($"<Cell ss:StyleID=\"{style}\"><Data ss:Type=\"String\">{code}{timing}</Data></Cell>");
+                }
+                xml.Append("</Row>");
+            }
+            xml.Append("</Table><WorksheetOptions xmlns=\"urn:schemas-microsoft-com:office:excel\"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>2</SplitHorizontal><TopRowBottomPane>2</TopRowBottomPane><SplitVertical>3</SplitVertical><LeftColumnRightPane>3</LeftColumnRightPane><ProtectObjects>False</ProtectObjects><ProtectScenarios>False</ProtectScenarios></WorksheetOptions></Worksheet></Workbook>");
+            return File(new UTF8Encoding(true).GetBytes(xml.ToString()), "application/vnd.ms-excel", $"Attendance-Pivot-{month:yyyy-MM}.xls");
+        }
 
         [Authorize(Roles = "Admin,HR,Manager")]
         public async Task<IActionResult> AddAttendance()
@@ -937,8 +994,13 @@ namespace VertexERP.Controllers
 
             var managerIds = managers.Select(manager => manager.Id).ToList();
             var managerDepartmentIds = managers.Where(manager => manager.DepartmentId.HasValue).Select(manager => manager.DepartmentId!.Value).Distinct().ToList();
+            var managerLogin = User.IsInRole("Manager");
             var teamMembers = await _dbContext.Employees.AsNoTracking()
-                .Where(employee => employee.IsActive && employee.DepartmentId.HasValue && managerDepartmentIds.Contains(employee.DepartmentId.Value) && !managerIds.Contains(employee.Id) && !_dbContext.AppUsers.Any(user => user.EmployeeId == employee.Id && user.IsActive && user.Role == "Manager"))
+                .Where(employee => employee.IsActive && !managerIds.Contains(employee.Id)
+                    && (managerLogin
+                        ? employee.ReportingManagerId.HasValue && managerIds.Contains(employee.ReportingManagerId.Value)
+                        : employee.DepartmentId.HasValue && managerDepartmentIds.Contains(employee.DepartmentId.Value))
+                    && !_dbContext.AppUsers.Any(user => user.EmployeeId == employee.Id && user.IsActive && user.Role == "Manager"))
                 .OrderBy(employee => employee.FullName)
                 .ToListAsync();
             var teamMemberIds = teamMembers.Select(employee => employee.Id).ToList();
@@ -952,6 +1014,18 @@ namespace VertexERP.Controllers
                 .OrderByDescending(request => request.AppliedAtUtc).ToListAsync();
             var queryTickets = await _dbContext.QueryTickets.AsNoTracking().Include(ticket => ticket.Employee)
                 .Where(ticket => managerIds.Contains(ticket.ReportingManagerId ?? 0)).OrderByDescending(ticket => ticket.CreatedAtUtc).ToListAsync();
+            var expenseClaims = await _dbContext.ExpenseClaims.AsNoTracking().Include(claim => claim.Employee)
+                .Where(claim => claim.Status == "Pending" && (managerIds.Contains(claim.ReportingManagerId ?? 0) || (!managerLogin && claim.RequiresHrApproval)))
+                .OrderByDescending(claim => claim.SubmittedAtUtc).ToListAsync();
+            var notifications = new List<DashboardNotification>();
+            notifications.AddRange(leaveRequests.Where(x => x.Status == "Pending").Select(x => new DashboardNotification(
+                "Leave", $"Leave request from {x.Employee.FullName}", $"{x.LeaveType}: {x.FromDate:dd MMM} - {x.ToDate:dd MMM}", managerLogin ? "/Main/ManagerLeaves" : "/Main/WorkflowManagement", x.AppliedAtUtc)));
+            notifications.AddRange(queryTickets.Where(x => x.Status != "Resolved" && x.Status != "Closed").Select(x => new DashboardNotification(
+                "Query", $"Query from {x.Employee.FullName}", x.Subject, managerLogin ? "/Main/ManagerQueries" : "/Main/WorkflowManagement", x.CreatedAtUtc)));
+            notifications.AddRange(expenseClaims.Select(x => new DashboardNotification(
+                "Expense", $"Expense claim from {x.Employee.FullName}", $"{x.Title} · ₹{x.Amount:N2}", "/Expense/Index", x.SubmittedAtUtc)));
+            notifications.AddRange(tasks.Where(x => !x.Status.Equals("Completed", StringComparison.OrdinalIgnoreCase) && x.DueDate < DateOnly.FromDateTime(DateTime.Today)).Select(x => new DashboardNotification(
+                "Task", $"Overdue task: {x.Title}", $"Assigned to {x.Assignee.FullName} · due {x.DueDate:dd MMM}", "/Main/TaskMgm", x.CreatedAtUtc)));
 
             return View(new ManagerDashboardViewModel
             {
@@ -959,7 +1033,9 @@ namespace VertexERP.Controllers
                 TeamMembers = teamMembers,
                 Tasks = tasks,
                 LeaveRequests = leaveRequests,
-                QueryTickets = queryTickets
+                QueryTickets = queryTickets,
+                ExpenseClaims = expenseClaims,
+                Notifications = notifications.OrderByDescending(x => x.CreatedAtUtc).ToList()
             });
         }
 
@@ -1095,6 +1171,45 @@ namespace VertexERP.Controllers
                 absent = model.Absent,
                 onLeave = model.OnLeave
             });
+        }
+
+        [HttpGet, Authorize(Roles = "Admin,HR,Manager")]
+        public async Task<IActionResult> ManagerNotificationCount(DateTime sinceUtc)
+        {
+            if (sinceUtc == default) sinceUtc = DateTime.UtcNow;
+            if (User.IsInRole("Manager"))
+            {
+                var managerId = await GetLoggedInEmployeeIdAsync();
+                if (!managerId.HasValue) return Json(new { count = 0 });
+                var newLeave = await _dbContext.LeaveRequests.AnyAsync(x => x.Status == "Pending" && x.AssignedApproverEmployeeId == managerId && x.AppliedAtUtc > sinceUtc);
+                var newQuery = await _dbContext.QueryTickets.AnyAsync(x => x.ReportingManagerId == managerId && x.Status != "Resolved" && x.Status != "Closed" && x.CreatedAtUtc > sinceUtc);
+                var newExpense = await _dbContext.ExpenseClaims.AnyAsync(x => !x.RequiresHrApproval && x.ReportingManagerId == managerId && x.Status == "Pending" && x.SubmittedAtUtc > sinceUtc);
+                return Json(new { hasNew = newLeave || newQuery || newExpense });
+            }
+            var hrNewLeave = await _dbContext.LeaveRequests.AnyAsync(x => x.Status == "Pending" && x.AppliedAtUtc > sinceUtc);
+            var hrNewQuery = await _dbContext.QueryTickets.AnyAsync(x => x.Status != "Resolved" && x.Status != "Closed" && x.CreatedAtUtc > sinceUtc);
+            var hrNewExpense = await _dbContext.ExpenseClaims.AnyAsync(x => x.Status == "Pending" && x.SubmittedAtUtc > sinceUtc);
+            return Json(new { hasNew = hrNewLeave || hrNewQuery || hrNewExpense });
+        }
+
+        [HttpGet, Authorize(Roles = "Admin,HR,Manager")]
+        public async Task<IActionResult> ManagerNotificationCount()
+        {
+            if (User.IsInRole("Manager"))
+            {
+                var managerId = await GetLoggedInEmployeeIdAsync();
+                if (!managerId.HasValue) return Json(new { count = 0 });
+                var leaveCount = await _dbContext.LeaveRequests.CountAsync(x => x.Status == "Pending" && x.AssignedApproverEmployeeId == managerId);
+                var queryCount = await _dbContext.QueryTickets.CountAsync(x => x.ReportingManagerId == managerId && x.Status != "Resolved" && x.Status != "Closed");
+                var expenseCount = await _dbContext.ExpenseClaims.CountAsync(x => !x.RequiresHrApproval && x.ReportingManagerId == managerId && x.Status == "Pending");
+                var overdueCount = await _dbContext.WorkTasks.CountAsync(x => x.ManagerId == managerId && x.Status != "Completed" && x.DueDate < DateOnly.FromDateTime(DateTime.Today));
+                return Json(new { count = leaveCount + queryCount + expenseCount + overdueCount });
+            }
+            var hrLeaveCount = await _dbContext.LeaveRequests.CountAsync(x => x.Status == "Pending");
+            var hrQueryCount = await _dbContext.QueryTickets.CountAsync(x => x.Status != "Resolved" && x.Status != "Closed");
+            var hrExpenseCount = await _dbContext.ExpenseClaims.CountAsync(x => x.Status == "Pending");
+            var hrOverdueCount = await _dbContext.WorkTasks.CountAsync(x => x.Status != "Completed" && x.DueDate < DateOnly.FromDateTime(DateTime.Today));
+            return Json(new { count = hrLeaveCount + hrQueryCount + hrExpenseCount + hrOverdueCount });
         }
 
         private async Task<ManagerAttendanceViewModel> BuildManagerAttendanceAsync()

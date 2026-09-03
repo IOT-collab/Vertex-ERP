@@ -7,6 +7,8 @@ public sealed class ManagerDashboardViewModel
     public IReadOnlyList<WorkTask> Tasks { get; init; } = Array.Empty<WorkTask>();
     public IReadOnlyList<LeaveRequest> LeaveRequests { get; init; } = Array.Empty<LeaveRequest>();
     public IReadOnlyList<QueryTicket> QueryTickets { get; init; } = Array.Empty<QueryTicket>();
+    public IReadOnlyList<ExpenseClaim> ExpenseClaims { get; init; } = Array.Empty<ExpenseClaim>();
+    public IReadOnlyList<DashboardNotification> Notifications { get; init; } = Array.Empty<DashboardNotification>();
     public int TotalTasks => Tasks.Count;
     public int CompletedTasks => Tasks.Count(task => task.Status.Equals("Completed", StringComparison.OrdinalIgnoreCase));
     public int PendingTasks => Tasks.Count(task => !task.Status.Equals("Completed", StringComparison.OrdinalIgnoreCase));
@@ -14,4 +16,7 @@ public sealed class ManagerDashboardViewModel
     public int OverdueTasks => Tasks.Count(task => !task.Status.Equals("Completed", StringComparison.OrdinalIgnoreCase) && task.DueDate < DateOnly.FromDateTime(DateTime.Today));
     public int PendingLeaveRequests => LeaveRequests.Count(request => request.Status.Equals("Pending", StringComparison.OrdinalIgnoreCase));
     public int OpenQueryTickets => QueryTickets.Count(ticket => !ticket.Status.Equals("Resolved", StringComparison.OrdinalIgnoreCase) && !ticket.Status.Equals("Closed", StringComparison.OrdinalIgnoreCase));
+    public int NotificationCount => Notifications.Count;
 }
+
+public sealed record DashboardNotification(string Type, string Title, string Detail, string Url, DateTime CreatedAtUtc);

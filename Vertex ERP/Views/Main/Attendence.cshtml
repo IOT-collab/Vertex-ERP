@@ -9,12 +9,7 @@
     <div class="page-header">
         <div class="header-left"><div class="header-text"><h2>Attendance Management</h2><p>Track biometric checkpoints, daily attendance, late arrivals, and working hours.</p></div></div>
         <div class="header-actions">
-            <a asp-controller="Main" asp-action="ExportAttendance"
-               asp-route-searchQuery="@Model.SearchQuery"
-               asp-route-department="@Model.Department"
-               asp-route-filterDate="@filterDateValue"
-               asp-route-status="@Model.Status"
-               class="btn-add btn-export">Download Excel</a>
+            <button type="button" class="btn-add btn-export" onclick="openAttendanceExport()"><i class="fa-solid fa-file-excel"></i> Download Excel</button>
             <a asp-controller="Main" asp-action="AddAttendance" class="btn-add">+ Mark Attendance</a>
         </div>
     </div>
@@ -52,3 +47,21 @@
         </table>
     </div>
 </div>
+<div class="attendance-export-modal" id="attendanceExportModal" role="dialog" aria-modal="true" aria-labelledby="attendanceExportTitle">
+ <div class="attendance-export-card"><header><div><h3 id="attendanceExportTitle">Download Attendance</h3><p>Choose a particular day or complete month.</p></div><button type="button" onclick="closeAttendanceExport()" aria-label="Close">&times;</button></header>
+ <form asp-controller="Main" asp-action="ExportAttendance" method="get">
+  <input type="hidden" name="searchQuery" value="@Model.SearchQuery"/><input type="hidden" name="department" value="@Model.Department"/><input type="hidden" name="status" value="@Model.Status"/>
+  <div class="export-period-options"><label><input type="radio" name="exportPeriod" value="day" checked onchange="setExportPeriod('day')"/><span><i class="fa-regular fa-calendar-day"></i><b>Particular Day</b><small>One selected date</small></span></label><label><input type="radio" name="exportPeriod" value="month" onchange="setExportPeriod('month')"/><span><i class="fa-regular fa-calendar-days"></i><b>Complete Month</b><small>Day-wise monthly report</small></span></label></div>
+  <label class="export-date-field" id="exportDayField"><span>Select date</span><input type="date" name="filterDate" value="@filterDateValue" max="@DateTime.Today.ToString("yyyy-MM-dd")"/></label>
+  <label class="export-date-field hidden" id="exportMonthField"><span>Select month</span><input type="month" name="exportMonth" value="@Model.FilterDate.ToString("yyyy-MM")" max="@DateTime.Today.ToString("yyyy-MM")" disabled/></label>
+  <div class="export-note"><i class="fa-solid fa-circle-info"></i><span>Complete Month report includes every active employee for every date, grouped employee-wise. Day export follows the current filters.</span></div>
+  <footer><button type="button" class="export-cancel" onclick="closeAttendanceExport()">Cancel</button><button type="submit" class="export-download"><i class="fa-solid fa-download"></i> Download</button></footer>
+ </form></div>
+</div>
+<script>
+ const attendanceExportModal=document.getElementById('attendanceExportModal');
+ function openAttendanceExport(){attendanceExportModal.classList.add('open');}
+ function closeAttendanceExport(){attendanceExportModal.classList.remove('open');}
+ function setExportPeriod(period){const monthly=period==='month';document.getElementById('exportDayField').classList.toggle('hidden',monthly);document.getElementById('exportMonthField').classList.toggle('hidden',!monthly);document.querySelector('#exportDayField input').disabled=monthly;document.querySelector('#exportMonthField input').disabled=!monthly;}
+ attendanceExportModal.addEventListener('click',event=>{if(event.target===attendanceExportModal)closeAttendanceExport();});document.addEventListener('keydown',event=>{if(event.key==='Escape')closeAttendanceExport();});
+</script>
