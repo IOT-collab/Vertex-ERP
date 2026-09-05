@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -19,14 +20,16 @@ namespace VertexERP.Controllers
         private readonly BankAccountProtectionService _bankProtection;
         private readonly IWebHostEnvironment _environment;
         private readonly IShipmentTrackingService _shipmentTrackingService;
+        private readonly IPasswordResetEmailService _passwordResetEmailService;
 
-        public MainController(ApplicationDbContext dbContext, IAttendanceProcessingService attendanceProcessingService, BankAccountProtectionService bankProtection, IWebHostEnvironment environment, IShipmentTrackingService shipmentTrackingService)
+        public MainController(ApplicationDbContext dbContext, IAttendanceProcessingService attendanceProcessingService, BankAccountProtectionService bankProtection, IWebHostEnvironment environment, IShipmentTrackingService shipmentTrackingService, IPasswordResetEmailService passwordResetEmailService)
         {
             _dbContext = dbContext;
             _attendanceProcessingService = attendanceProcessingService;
             _bankProtection = bankProtection;
             _environment = environment;
             _shipmentTrackingService = shipmentTrackingService;
+            _passwordResetEmailService = passwordResetEmailService;
         }
 
         [AllowAnonymous]
@@ -127,6 +130,103 @@ namespace VertexERP.Controllers
             HttpContext.Session.SetString("role", role);
             HttpContext.Session.SetString("fullName", user.FullName);
             return RedirectToRoleHome(role);
+        }
+
+        [AllowAnonymous]
+        public IActionResult ForgotPassword() => View(new ForgotPasswordViewModel());
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+            var email = model.Email.Trim().ToLowerInvariant();
+            var user = await _dbContext.AppUsers.Include(item => item.Employee)
+                .FirstOrDefaultAsync(item => item.IsActive && item.Employee != null && item.Employee.Email == email);
+
+            // Do not reveal whether an email is registered. Only registered employee emails receive an OTP.
+            if (user != null)
+            {
+                var otp = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
+                var activeTokens = await _dbContext.PasswordResetTokens
+                    .Where(item => item.AppUserId == user.Id && item.UsedAtUtc == null).ToListAsync();
+                foreach (var token in activeTokens) token.UsedAtUtc = DateTime.UtcNow;
+
+                _dbContext.PasswordResetTokens.Add(new PasswordResetToken
+                {
+                    AppUserId = user.Id,
+                    OtpHash = PasswordHashService.HashPassword(otp),
+                    ExpiresAtUtc = DateTime.UtcNow.AddMinutes(10)
+                });
+                await _dbContext.SaveChangesAsync();
+
+                try { await _passwordResetEmailService.SendOtpAsync(email, otp, HttpContext.RequestAborted); }
+                catch
+                {
+                    ModelState.AddModelError(string.Empty, "We could not send the reset code right now. Please try again later.");
+                    return View(model);
+                }
+            }
+
+            TempData["ResetNotice"] = "If this is a registered employee email, a six-digit reset code has been sent.";
+            return RedirectToAction(nameof(VerifyResetOtp), new { email });
+        }
+
+        [AllowAnonymous]
+        public IActionResult VerifyResetOtp(string email) => View(new VerifyResetOtpViewModel { Email = email });
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyResetOtp(VerifyResetOtpViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+            var email = model.Email.Trim().ToLowerInvariant();
+            var token = await _dbContext.PasswordResetTokens.Include(item => item.AppUser).ThenInclude(item => item!.Employee)
+                .Where(item => item.UsedAtUtc == null && item.ExpiresAtUtc > DateTime.UtcNow && item.FailedAttempts < 5 && item.AppUser!.IsActive && item.AppUser.Employee!.Email == email)
+                .OrderByDescending(item => item.CreatedAtUtc).FirstOrDefaultAsync();
+
+            if (token == null || !PasswordHashService.VerifyPassword(model.Otp, token.OtpHash))
+            {
+                if (token != null) { token.FailedAttempts++; await _dbContext.SaveChangesAsync(); }
+                ModelState.AddModelError(nameof(model.Otp), "The code is invalid or has expired.");
+                return View(model);
+            }
+
+            token.UsedAtUtc = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync();
+            HttpContext.Session.SetInt32("PasswordResetUserId", token.AppUserId);
+            HttpContext.Session.SetString("PasswordResetEmail", email);
+            return RedirectToAction(nameof(ResetPassword));
+        }
+
+        [AllowAnonymous]
+        public IActionResult ResetPassword()
+        {
+            var email = HttpContext.Session.GetString("PasswordResetEmail");
+            return string.IsNullOrWhiteSpace(email) ? RedirectToAction(nameof(ForgotPassword)) : View(new ResetPasswordViewModel { Email = email });
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            var resetUserId = HttpContext.Session.GetInt32("PasswordResetUserId");
+            var resetEmail = HttpContext.Session.GetString("PasswordResetEmail");
+            if (!ModelState.IsValid) return View(model);
+            if (!resetUserId.HasValue || !string.Equals(model.Email, resetEmail, StringComparison.OrdinalIgnoreCase)) return RedirectToAction(nameof(ForgotPassword));
+            var user = await _dbContext.AppUsers.FirstOrDefaultAsync(item => item.Id == resetUserId && item.IsActive);
+            if (user == null) return RedirectToAction(nameof(ForgotPassword));
+
+            user.PasswordHash = PasswordHashService.HashPassword(model.NewPassword);
+            user.MustChangePassword = false;
+            await _dbContext.SaveChangesAsync();
+            HttpContext.Session.Remove("PasswordResetUserId");
+            HttpContext.Session.Remove("PasswordResetEmail");
+            TempData["LoginMessage"] = "Password reset successfully. Please sign in.";
+            return RedirectToAction(nameof(Login));
         }
 
         [HttpGet]

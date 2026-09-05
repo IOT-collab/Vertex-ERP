@@ -11,6 +11,7 @@ namespace VertexERP.Data
         }
 
         public DbSet<AppUser> AppUsers => Set<AppUser>();
+        public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
         public DbSet<Employee> Employees => Set<Employee>();
         public DbSet<Department> Departments => Set<Department>();
         public DbSet<BiometricDevice> BiometricDevices => Set<BiometricDevice>();
@@ -61,6 +62,12 @@ namespace VertexERP.Data
                     .WithMany(manager => manager.DirectReports)
                     .HasForeignKey(employee => employee.ReportingManagerId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+            modelBuilder.Entity<PasswordResetToken>(entity =>
+            {
+                entity.ToTable("PasswordResetTokens");
+                entity.HasIndex(token => new { token.AppUserId, token.ExpiresAtUtc });
+                entity.HasOne(token => token.AppUser).WithMany().HasForeignKey(token => token.AppUserId).OnDelete(DeleteBehavior.Cascade);
             });
             modelBuilder.Entity<ExpenseClaim>(entity =>
             {

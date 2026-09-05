@@ -592,8 +592,7 @@
                 <div class="form-group">
                     <label asp-for="LoginUsername">Login Username <span>*</span></label>
                     <div class="credential-input-row">
-                        <input asp-for="LoginUsername" type="text" autocomplete="off" placeholder="Enter or generate username" required />
-                        <button type="button" class="credential-generate-btn" onclick="generateLoginUsername()">Generate</button>
+                        <input asp-for="LoginUsername" type="text" autocomplete="off" placeholder="Enter username" required />
                     </div>
                     <span asp-validation-for="LoginUsername" class="field-validation"></span>
                 </div>
@@ -606,13 +605,12 @@
                     </div>
                     <span asp-validation-for="TemporaryPassword" class="field-validation"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="ConfirmPassword">Confirm Password <span>*</span></label>
-                    <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" placeholder="Re-enter temporary password" required />
-                    <span asp-validation-for="ConfirmPassword" class="field-validation"></span>
+                <div class="form-group credential-generate-group">
+                    <label>Generate Credentials</label>
+                    <button type="button" class="credential-generate-btn credential-generate-all-btn" onclick="generateCredentials()"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate</button>
                 </div>
-                <div class="form-group account-option-group">
-                    <small>The username and password saved by HR will remain the employee's login credentials.</small>
+                <div class="form-group account-option-group full-width">
+                    <small>The exact username and password shown here are saved as this employee's login credentials. Generated credentials stay unchanged.</small>
                 </div>
             </div>
         </div>
@@ -777,16 +775,33 @@
 </script>
 
 <script>
-    function generateLoginUsername() {
+    function generateCredentials() {
         const usernameInput = document.getElementById('LoginUsername');
+        const passwordInput = document.getElementById('TemporaryPassword');
+        const generateButton = document.querySelector('.credential-generate-all-btn');
+        if (usernameInput.dataset.credentialsLocked === 'true') return;
         const firstName = document.getElementById('FirstName').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
         const lastName = document.getElementById('LastName').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 
-        // Never replace a username that HR has entered manually. Generated usernames are
-        // based on the employee's name and are deliberately independent of Employee ID.
-        if (usernameInput.value.trim()) return;
+        // Never replace credentials that HR has already entered. Generate only a missing value.
+        if (!usernameInput.value.trim()) {
+            const randomSuffix = Math.floor(100 + Math.random() * 900);
+            usernameInput.value = `${[firstName, lastName].filter(Boolean).join('.') || 'employee'}${randomSuffix}`;
+        }
 
-        usernameInput.value = [firstName, lastName].filter(Boolean).join('.');
+        if (!passwordInput.value) {
+            const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!\u0040#$%';
+            const randomBytes = new Uint32Array(12);
+            crypto.getRandomValues(randomBytes);
+            passwordInput.value = Array.from(randomBytes, value => characters[value % characters.length]).join('');
+            passwordInput.type = 'text';
+        }
+
+        usernameInput.readOnly = true;
+        passwordInput.readOnly = true;
+        usernameInput.dataset.credentialsLocked = 'true';
+        generateButton.disabled = true;
+        generateButton.innerHTML = '<i class="fa-solid fa-lock"></i> Generated';
     }
 
     document.getElementById('togglePassword').addEventListener('click', function () {
@@ -799,17 +814,8 @@
 
     document.querySelector('.employee-form').addEventListener('submit', function () {
         const username = document.getElementById('LoginUsername');
-        const password = document.getElementById('TemporaryPassword');
-        const confirmation = document.getElementById('ConfirmPassword');
 
         username.value = username.value.trim();
-        // Password values are deliberately left untouched. The server stores and verifies
-        // the exact case-sensitive values entered by HR.
-        if (password.value !== confirmation.value) {
-            confirmation.setCustomValidity('Password and confirmation must be exactly the same.');
-        } else {
-            confirmation.setCustomValidity('');
-        }
     });
 </script>
 ```

@@ -1055,6 +1055,67 @@ body {
     gap: 10px;
 }
 
+/* ===========================================================================
+   Vertex ERP dark-surface alignment
+   This page is loaded after site.css, so its original light-only declarations
+   must be explicitly brought back onto the application colour system.
+   ========================================================================== */
+.add-employee-page .employee-photo-card,
+.add-employee-page .form-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, .088), rgba(255, 255, 255, .044)) !important;
+    border-color: var(--app-border) !important;
+    box-shadow: var(--app-shadow) !important;
+    color: var(--app-text-soft) !important;
+}
+
+.add-employee-page .employee-photo-preview {
+    border-color: rgba(255, 255, 255, .14) !important;
+    background: rgba(255, 255, 255, .065) !important;
+}
+
+.add-employee-page .employee-photo-content h3,
+.add-employee-page .card-header h3,
+.add-employee-page .form-group label {
+    color: var(--app-text) !important;
+}
+
+.add-employee-page .employee-photo-content p,
+.add-employee-page .card-header p,
+.add-employee-page .photo-help-text {
+    color: var(--app-muted) !important;
+}
+
+.add-employee-page .card-header {
+    border-color: rgba(255, 255, 255, .1) !important;
+}
+
+.add-employee-page .form-group input,
+.add-employee-page .form-group select,
+.add-employee-page .form-group textarea {
+    border-color: rgba(255, 255, 255, .13) !important;
+    background: rgba(255, 255, 255, .07) !important;
+    color: var(--app-text) !important;
+}
+
+.add-employee-page .form-group input::placeholder,
+.add-employee-page .form-group textarea::placeholder {
+    color: rgba(168, 179, 207, .76) !important;
+}
+
+.add-employee-page .photo-remove-btn,
+.add-employee-page .btn-cancel {
+    border-color: rgba(255, 255, 255, .16) !important;
+    background: rgba(255, 255, 255, .07) !important;
+    color: var(--app-text-soft) !important;
+}
+
+.add-employee-page .photo-remove-btn:hover,
+.add-employee-page .btn-cancel:hover {
+    border-color: rgba(59, 130, 246, .5) !important;
+    background: rgba(59, 130, 246, .16) !important;
+    color: #fff !important;
+}
+
 .credential-input-row input {
     flex: 1;
     min-width: 0;
@@ -1068,6 +1129,24 @@ body {
     padding: 0 16px;
     font-weight: 700;
     cursor: pointer;
+}
+
+.credential-generate-group {
+    justify-content: flex-end;
+}
+
+.credential-generate-all-btn {
+    min-height: 42px;
+    width: 100%;
+    gap: 8px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+}
+
+.credential-generate-all-btn:disabled {
+    cursor: default;
+    opacity: .8;
+    transform: none;
 }
 
 .account-option-group {

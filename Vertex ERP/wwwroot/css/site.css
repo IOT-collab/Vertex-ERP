@@ -622,6 +622,27 @@ body.employee-self-service-only .common-back-nav {
     display: none !important;
 }
 
+/* Compatibility layer for legacy views that still use generic light-panel
+   class names. Specific page styles can retain semantic status colours, but
+   normal content surfaces now always inherit the application dark theme. */
+.content-card,
+.content-panel,
+.form-container,
+.form-container-wrapper,
+.details-card,
+.info-card,
+.data-card,
+.table-container,
+.table-wrapper,
+.list-container,
+.action-card,
+.employee-photo-card {
+    border-color: var(--app-border) !important;
+    background: linear-gradient(145deg, rgba(255, 255, 255, .088), rgba(255, 255, 255, .044)) !important;
+    color: var(--app-text-soft) !important;
+    box-shadow: var(--app-shadow) !important;
+}
+
 /* Keep numeric fields clean and consistent across the entire ERP UI. */
 input[type="number"] {
     -moz-appearance: textfield;

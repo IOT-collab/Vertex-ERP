@@ -338,10 +338,6 @@ public class HrAddEmployeeViewModel : IValidatableObject
     [Display(Name = "Temporary Password")]
     public string TemporaryPassword { get; set; } = string.Empty;
 
-    [Required, Compare(nameof(TemporaryPassword), ErrorMessage = "Password and confirmation do not match.")]
-    [Display(Name = "Confirm Password")]
-    public string ConfirmPassword { get; set; } = string.Empty;
-
     [Display(Name = "Employee must change password on first login")]
     public bool MustChangePassword { get; set; } = true;
 

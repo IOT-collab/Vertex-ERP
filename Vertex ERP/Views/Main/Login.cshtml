@@ -47,6 +47,10 @@
             {
                 <div class="login-alert">@ViewBag.ErrorMessage</div>
             }
+            @if (TempData["LoginMessage"] is string loginMessage)
+            {
+                <div class="login-alert">@loginMessage</div>
+            }
 
             <form asp-action="Login" asp-controller="Main" method="post" autocomplete="off" class="login-form">
                 <div class="form-group">
@@ -74,7 +78,7 @@
                         <span></span>
                         Remember me
                     </label>
-                    <a href="#" class="forgot-link">Forgot Password?</a>
+                    <a asp-controller="Main" asp-action="ForgotPassword" class="forgot-link">Forgot Password?</a>
                 </div>
 
                 <button type="submit" class="login-button">
