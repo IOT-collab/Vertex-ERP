@@ -1,0 +1,534 @@
+@*
+    Task Management Dashboard - Dynamic View Layout
+*@
+@{
+    ViewData["Title"] = "Task Management";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.css" />
+<link href="~/css/TaskMgm.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="task-dash-container">
+
+    <!-- TOP HEADER -->
+    <div class="dash-header">
+        <div class="header-left">
+            <div class="header-title">
+                <h2><i class="fas fa-tasks text-accent"></i> Task Management</h2>
+                <p>Assign, track, and manage team tasks efficiently</p>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div class="view-switcher">
+                <button type="button" class="switch-btn active" id="btnKanbanView" onclick="switchView('kanban')">
+                    <i class="fas fa-columns"></i> Kanban
+                </button>
+                <button type="button" class="switch-btn" id="btnGanttView" onclick="switchView('gantt')">
+                    <i class="fas fa-chart-gantt"></i> Gantt
+                </button>
+            </div>
+
+            <button type="button" class="btn-assign" onclick="openAssignTaskModal()">
+                <i class="fas fa-plus"></i> Assign New Task
+            </button>
+        </div>
+    </div>
+
+    <!-- METRICS CARDS -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-icon bg-blue"><i class="fas fa-user-tie"></i></div>
+            <div class="metric-info">
+                <span>Managers</span>
+                <h3 id="metricManagersCount">0</h3>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-purple"><i class="fas fa-users"></i></div>
+            <div class="metric-info">
+                <span>Employees</span>
+                <h3 id="metricEmployeesCount">0</h3>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-teal"><i class="fas fa-list-check"></i></div>
+            <div class="metric-info">
+                <span>Total Tasks</span>
+                <h3 id="metricTotalTasksCount">0</h3>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-red"><i class="fas fa-exclamation-circle"></i></div>
+            <div class="metric-info">
+                <span>Overdue</span>
+                <h3 id="metricOverdueTasksCount">0</h3>
+            </div>
+        </div>
+    </div>
+
+        <!-- MANAGER TO EMPLOYEE ASSIGNMENTS TABLE -->
+    <div class="assignment-overview-panel">
+        <div class="panel-header">
+            <h3><i class="fas fa-sitemap text-accent"></i> Manager to Employee Task Mapping</h3>
+            <span class="sub-text">Task assignment mapping overview</span>
+        </div>
+        <div class="table-responsive">
+            <table class="assignment-table">
+                <thead>
+                    <tr>
+                        <th>Task ID & Title</th>
+                        <th>Assigned By (Manager)</th>
+                        <th>Assigned To (Employee)</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="assignmentTableBody">
+                    <!-- Dynamic Rows Rendered Via JS -->
+                </tbody>
+            </table>
+
+            <div class="empty-state" id="tableEmptyState" style="display: none;">
+                <i class="fas fa-inbox"></i>
+                <p>No task assignments found.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEARCH & FILTERS BAR -->
+    <div class="filter-bar">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="taskSearchInput" placeholder="Search tasks by name or ID..." onkeyup="filterTasks()" />
+        </div>
+        <div class="filter-dropdowns">
+            <select class="filter-select" id="filterManager" onchange="filterTasks()">
+                <option value="">All Managers</option>
+            </select>
+            <select class="filter-select" id="filterAssignee" onchange="filterTasks()">
+                <option value="">All Assignees</option>
+            </select>
+            <select class="filter-select" id="filterPriority" onchange="filterTasks()">
+                <option value="">All Priorities</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- KANBAN BOARD -->
+    <div class="kanban-board" id="kanbanView">
+        <!-- TO DO -->
+        <div class="kanban-col">
+            <div class="col-header">
+                <h4><i class="far fa-circle"></i> To Do</h4>
+                <span class="count-badge" id="countToDo">0</span>
+            </div>
+            <div class="kanban-cards" id="colToDo">
+                <!-- Dynamic Cards -->
+            </div>
+        </div>
+
+        <!-- IN PROGRESS -->
+        <div class="kanban-col">
+            <div class="col-header">
+                <h4><i class="fas fa-spinner"></i> In Progress</h4>
+                <span class="count-badge" id="countInProgress">0</span>
+            </div>
+            <div class="kanban-cards" id="colInProgress">
+                <!-- Dynamic Cards -->
+            </div>
+        </div>
+
+        <!-- IN REVIEW -->
+        <div class="kanban-col">
+            <div class="col-header">
+                <h4><i class="fas fa-eye"></i> In Review</h4>
+                <span class="count-badge" id="countInReview">0</span>
+            </div>
+            <div class="kanban-cards" id="colInReview">
+                <!-- Dynamic Cards -->
+            </div>
+        </div>
+
+        <!-- COMPLETED -->
+        <div class="kanban-col">
+            <div class="col-header">
+                <h4><i class="fas fa-check-circle"></i> Completed</h4>
+                <span class="count-badge" id="countCompleted">0</span>
+            </div>
+            <div class="kanban-cards" id="colCompleted">
+                <!-- Dynamic Cards -->
+            </div>
+        </div>
+    </div>
+
+    <!-- PREMIUM GANTT CHART -->
+    <div class="gantt-wrapper" id="ganttView" style="display: none;">
+        <div class="gantt-controls-container">
+            <span class="gantt-control-label"><i class="far fa-calendar-alt"></i> Timeline View:</span>
+            <div class="gantt-controls">
+                <button type="button" class="btn-gantt-mode active" onclick="setGanttMode(this, 'Day')">Day</button>
+                <button type="button" class="btn-gantt-mode" onclick="setGanttMode(this, 'Week')">Week</button>
+                <button type="button" class="btn-gantt-mode" onclick="setGanttMode(this, 'Month')">Month</button>
+            </div>
+        </div>
+        <div class="gantt-container"><svg id="gantt"></svg></div>
+        <div class="gantt-empty-state" id="ganttEmptyState">
+            <i class="fas fa-calendar-times"></i>
+            <p>No active tasks available to construct Gantt timeline.</p>
+        </div>
+    </div>
+
+</div>
+
+<!-- ASSIGN TASK MODAL -->
+<div class="modal-overlay" id="assignTaskModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="fas fa-plus-circle text-accent"></i> Assign New Task</h3>
+            <button type="button" class="btn-close-modal" onclick="closeAssignTaskModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="assignTaskForm">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label>Task Title <span class="text-red">*</span></label>
+                    <input type="text" id="taskTitle" class="form-control" placeholder="Enter task title" required />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Assigned By (Manager) <span class="text-red">*</span></label>
+                        <select id="modalManagerSelect" class="form-control" required>
+                            <option value="">Select Manager</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Assign To (Employee) <span class="text-red">*</span></label>
+                        <select id="modalEmployeeSelect" class="form-control" required>
+                            <option value="">Select Employee</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Priority <span class="text-red">*</span></label>
+                        <select id="taskPriority" class="form-control" required>
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Due Date <span class="text-red">*</span></label>
+                        <input type="date" id="taskDueDate" class="form-control" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="taskDescription" class="form-control" rows="3" placeholder="Task details..."></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeAssignTaskModal()">Cancel</button>
+            <button type="button" class="btn-submit" onclick="submitTaskAssignment()">Assign Task</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
+<script>
+    function goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.href = '/';
+        }
+    }
+
+    function openAssignTaskModal() { document.getElementById('assignTaskModal').classList.add('active'); }
+    function closeAssignTaskModal() { document.getElementById('assignTaskModal').classList.remove('active'); resetModalToCreate(); }
+
+    let ganttChart = null;
+    let taskDataset = [];
+    let peopleDataset = { managers: [], employees: [] };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const [peopleResponse, tasksResponse] = await Promise.all([
+                fetch('/api/task-management/people'),
+                fetch('/api/task-management/tasks')
+            ]);
+            if (!peopleResponse.ok || !tasksResponse.ok) throw new Error('Unable to load task management data.');
+            peopleDataset = await peopleResponse.json();
+            populatePeople();
+            renderTaskData(await tasksResponse.json());
+        } catch (error) {
+            showTaskError(error.message);
+        }
+    });
+
+    function populatePeople() {
+        fillPeopleSelect('modalManagerSelect', peopleDataset.managers, 'Select Manager');
+        fillPeopleSelect('modalEmployeeSelect', peopleDataset.employees, 'Select Employee');
+        fillPeopleSelect('filterManager', peopleDataset.managers, 'All Managers');
+        fillPeopleSelect('filterAssignee', peopleDataset.employees, 'All Assignees');
+        document.getElementById('metricManagersCount').textContent = peopleDataset.managers.length;
+        document.getElementById('metricEmployeesCount').textContent = peopleDataset.employees.length;
+    }
+
+    function fillPeopleSelect(id, people, placeholder) {
+        const select = document.getElementById(id);
+        select.innerHTML = `<option value="">${placeholder}</option>` + people.map(person =>
+            `<option value="${person.id}">${escapeHtml(person.fullName)} (${escapeHtml(person.employeeCode)})</option>`
+        ).join('');
+    }
+
+    function renderTaskData(data) {
+        taskDataset = data.tasks || [];
+        document.getElementById('metricTotalTasksCount').textContent = data.metrics.totalTasks;
+        document.getElementById('metricOverdueTasksCount').textContent = data.metrics.overdue;
+        filterTasks();
+    }
+
+    function renderTasks(tasks) {
+        const body = document.getElementById('assignmentTableBody');
+        body.innerHTML = tasks.map(task => `<tr>
+            <td><strong>${escapeHtml(task.taskCode)}</strong><br>${escapeHtml(task.title)}</td>
+            <td>${escapeHtml(task.managerName)}<br><small>${escapeHtml(task.managerCode)}</small></td>
+            <td>${escapeHtml(task.assigneeName)}<br><small>${escapeHtml(task.assigneeCode)}</small></td>
+            <td>${escapeHtml(task.priority)}</td><td>${escapeHtml(task.status)}</td><td>${formatDate(task.dueDate)}</td>
+            <td>
+                <button type="button" class="btn-action-update" title="Edit Task" onclick="openUpdateTaskModal(${task.id})"><i class="fas fa-edit"></i> Update</button>
+                <button type="button" class="btn-action-delete" title="Delete Task" onclick="deleteTask(${task.id})"><i class="fas fa-trash"></i> Delete</button>
+            </td>
+        </tr>`).join('');
+        document.getElementById('tableEmptyState').style.display = tasks.length ? 'none' : 'flex';
+
+        const columns = { 'To Do': 'colToDo', 'In Progress': 'colInProgress', 'In Review': 'colInReview', 'Completed': 'colCompleted' };
+        Object.values(columns).forEach(id => document.getElementById(id).innerHTML = '');
+        tasks.forEach(task => {
+            const column = document.getElementById(columns[task.status] || columns['To Do']);
+            column.insertAdjacentHTML('beforeend', `<div class="task-card">
+                <strong>${escapeHtml(task.title)}</strong><p>${escapeHtml(task.assigneeName)}</p>
+                <small>${escapeHtml(task.priority)} · Due ${formatDate(task.dueDate)}</small></div>`);
+        });
+        document.getElementById('countToDo').textContent = tasks.filter(task => task.status === 'To Do').length;
+        document.getElementById('countInProgress').textContent = tasks.filter(task => task.status === 'In Progress').length;
+        document.getElementById('countInReview').textContent = tasks.filter(task => task.status === 'In Review').length;
+        document.getElementById('countCompleted').textContent = tasks.filter(task => task.status === 'Completed').length;
+    }
+
+    function initGantt() {
+        const svgElement = document.getElementById("gantt");
+        const emptyState = document.getElementById("ganttEmptyState");
+
+        if (!taskDataset || taskDataset.length === 0) {
+            svgElement.style.display = "none";
+            emptyState.style.display = "flex";
+            return;
+        }
+
+        svgElement.style.display = "block";
+        emptyState.style.display = "none";
+
+        const ganttTasks = taskDataset.map(t => ({
+            id: t.id,
+            name: t.title,
+            start: t.startDate,
+            end: t.dueDate,
+            progress: t.progress || 0
+        }));
+
+        if (!ganttChart) {
+            ganttChart = new Gantt("#gantt", ganttTasks, { view_mode: 'Day' });
+        } else {
+            ganttChart.refresh(ganttTasks);
+        }
+    }
+
+    function setGanttMode(btn, mode) {
+        document.querySelectorAll('.btn-gantt-mode').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (ganttChart) {
+            ganttChart.change_view_mode(mode);
+        }
+    }
+
+    function switchView(viewName) {
+        const kanban = document.getElementById('kanbanView');
+        const gantt = document.getElementById('ganttView');
+        const btnKanban = document.getElementById('btnKanbanView');
+        const btnGantt = document.getElementById('btnGanttView');
+
+        if (viewName === 'gantt') {
+            kanban.style.display = 'none';
+            gantt.style.display = 'block';
+            btnKanban.classList.remove('active');
+            btnGantt.classList.add('active');
+            initGantt();
+        } else {
+            gantt.style.display = 'none';
+            kanban.style.display = 'grid';
+            btnGantt.classList.remove('active');
+            btnKanban.classList.add('active');
+        }
+    }
+
+    function filterTasks() {
+        const term = document.getElementById('taskSearchInput').value.trim().toLowerCase();
+        const managerId = document.getElementById('filterManager').value;
+        const assigneeId = document.getElementById('filterAssignee').value;
+        const priority = document.getElementById('filterPriority').value;
+        renderTasks(taskDataset.filter(task =>
+            (!term || task.title.toLowerCase().includes(term) || task.taskCode.toLowerCase().includes(term)) &&
+            (!managerId || String(task.managerId) === managerId) &&
+            (!assigneeId || String(task.assigneeId) === assigneeId) &&
+            (!priority || task.priority === priority)));
+    }
+
+    async function submitTaskAssignment() {
+        const form = document.getElementById('assignTaskForm');
+        if (!form.reportValidity()) return;
+        const button = document.querySelector('.btn-submit');
+        button.disabled = true;
+        try {
+            const response = await fetch('/api/task-management/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': form.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({
+                    title: document.getElementById('taskTitle').value,
+                    managerId: Number(document.getElementById('modalManagerSelect').value),
+                    assigneeId: Number(document.getElementById('modalEmployeeSelect').value),
+                    priority: document.getElementById('taskPriority').value,
+                    dueDate: document.getElementById('taskDueDate').value,
+                    description: document.getElementById('taskDescription').value
+                })
+            });
+            if (!response.ok) {
+                const problem = await response.json();
+                throw new Error(Object.values(problem.errors || {}).flat().join(' ') || 'Task could not be assigned.');
+            }
+            form.reset();
+            document.getElementById('taskPriority').value = 'Medium';
+            closeAssignTaskModal();
+            const tasksResponse = await fetch('/api/task-management/tasks');
+            renderTaskData(await tasksResponse.json());
+        } catch (error) {
+            showTaskError(error.message);
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    function formatDate(value) { return new Date(`${value}T00:00:00`).toLocaleDateString(); }
+    function escapeHtml(value) {
+        const element = document.createElement('div');
+        element.textContent = value || '';
+        return element.innerHTML;
+    }
+    function showTaskError(message) { window.alert(message); }
+
+    let currentEditingTaskId = null;
+
+    async function openUpdateTaskModal(taskId) {
+        const task = taskDataset.find(t => t.id === taskId);
+        if (!task) {
+            showTaskError('Task not found.');
+            return;
+        }
+
+        currentEditingTaskId = taskId;
+        document.getElementById('taskTitle').value = task.title;
+        document.getElementById('modalManagerSelect').value = task.managerId;
+        document.getElementById('modalEmployeeSelect').value = task.assigneeId;
+        document.getElementById('taskPriority').value = task.priority;
+        document.getElementById('taskDueDate').value = task.dueDate;
+        document.getElementById('taskDescription').value = task.description || '';
+
+        // Change modal title and button text for update
+        document.querySelector('.modal-header h3').innerHTML = '<i class="fas fa-edit text-accent"></i> Edit Task';
+        document.querySelector('.btn-submit').textContent = 'Update Task';
+        document.querySelector('.btn-submit').onclick = submitTaskUpdate;
+
+        openAssignTaskModal();
+    }
+
+    async function submitTaskUpdate() {
+        const form = document.getElementById('assignTaskForm');
+        if (!form.reportValidity()) return;
+        const button = document.querySelector('.btn-submit');
+        button.disabled = true;
+        try {
+            const response = await fetch(`/api/task-management/tasks/${currentEditingTaskId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': form.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({
+                    id: currentEditingTaskId,
+                    title: document.getElementById('taskTitle').value,
+                    managerId: Number(document.getElementById('modalManagerSelect').value),
+                    assigneeId: Number(document.getElementById('modalEmployeeSelect').value),
+                    priority: document.getElementById('taskPriority').value,
+                    dueDate: document.getElementById('taskDueDate').value,
+                    description: document.getElementById('taskDescription').value
+                })
+            });
+            if (!response.ok) {
+                const problem = await response.json();
+                throw new Error(Object.values(problem.errors || {}).flat().join(' ') || 'Task could not be updated.');
+            }
+            form.reset();
+            document.getElementById('taskPriority').value = 'Medium';
+            closeAssignTaskModal();
+            resetModalToCreate();
+            const tasksResponse = await fetch('/api/task-management/tasks');
+            renderTaskData(await tasksResponse.json());
+        } catch (error) {
+            showTaskError(error.message);
+        } finally {
+            button.disabled = false;
+            currentEditingTaskId = null;
+        }
+    }
+
+    async function deleteTask(taskId) {
+        if (!confirm('Are you sure you want to delete this task?')) return;
+        try {
+            const form = document.getElementById('assignTaskForm');
+            const response = await fetch(`/api/task-management/tasks/${taskId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': form.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            });
+            if (!response.ok) {
+                const problem = await response.json();
+                throw new Error(problem.message || 'Task could not be deleted.');
+            }
+            const tasksResponse = await fetch('/api/task-management/tasks');
+            renderTaskData(await tasksResponse.json());
+        } catch (error) {
+            showTaskError(error.message);
+        }
+    }
+
+    function resetModalToCreate() {
+        document.querySelector('.modal-header h3').innerHTML = '<i class="fas fa-plus-circle text-accent"></i> Assign New Task';
+        document.querySelector('.btn-submit').textContent = 'Assign Task';
+        document.querySelector('.btn-submit').onclick = submitTaskAssignment;
+        currentEditingTaskId = null;
+    }
+</script>

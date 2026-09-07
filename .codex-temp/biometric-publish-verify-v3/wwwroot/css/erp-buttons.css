@@ -1,0 +1,203 @@
+:root {
+    --erp-button-height: 44px;
+    --erp-button-radius: 10px;
+    --erp-button-primary: #2563eb;
+    --erp-button-primary-hover: #1d4ed8;
+    --erp-button-secondary: #1e293b;
+    --erp-button-secondary-hover: #29364c;
+    --erp-button-danger: #dc2626;
+    --erp-button-danger-hover: #b91c1c;
+}
+
+/*
+ * Shared ERP action-button system. Legacy class aliases are intentionally
+ * included so existing screens receive the same design without changing
+ * their routes, forms or JavaScript hooks.
+ */
+body :is(
+    .erp-btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-save,
+    .btn-submit,
+    .btn-cancel,
+    .department-submit,
+    .department-cancel,
+    .department-delete-confirm,
+    .bio-primary,
+    .bio-secondary,
+    .bank-primary,
+    .bank-secondary,
+    .bank-danger,
+    .manual-cancel,
+    .generate-button,
+    .rpt-btn-primary,
+    .rpt-btn-secondary,
+    .exp-btn-primary,
+    .exp-btn-secondary,
+    .hr-btn-primary,
+    .hc-btn-primary,
+    .btn-primary-glow,
+    .btn-secondary-glow
+) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    min-height: var(--erp-button-height) !important;
+    padding: 10px 18px !important;
+    border: 1px solid transparent !important;
+    border-radius: var(--erp-button-radius) !important;
+    box-sizing: border-box !important;
+    font-family: "Segoe UI", Arial, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0 !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .16) !important;
+    transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease !important;
+}
+
+body :is(
+    .erp-btn-primary,
+    .btn-primary,
+    .btn-save,
+    .btn-submit,
+    .department-submit,
+    .bio-primary,
+    .bank-primary,
+    .generate-button,
+    .rpt-btn-primary,
+    .exp-btn-primary,
+    .hr-btn-primary,
+    .hc-btn-primary,
+    .btn-primary-glow
+) {
+    color: #fff !important;
+    background: var(--erp-button-primary) !important;
+    border-color: #3b82f6 !important;
+}
+
+body :is(
+    .erp-btn-primary,
+    .btn-primary,
+    .btn-save,
+    .btn-submit,
+    .department-submit,
+    .bio-primary,
+    .bank-primary,
+    .generate-button,
+    .rpt-btn-primary,
+    .exp-btn-primary,
+    .hr-btn-primary,
+    .hc-btn-primary,
+    .btn-primary-glow
+):hover {
+    color: #fff !important;
+    background: var(--erp-button-primary-hover) !important;
+    border-color: #60a5fa !important;
+    transform: translateY(-1px) !important;
+}
+
+body :is(
+    .erp-btn-secondary,
+    .btn-secondary,
+    .btn-cancel,
+    .department-cancel,
+    .bio-secondary,
+    .bank-secondary,
+    .manual-cancel,
+    .rpt-btn-secondary,
+    .exp-btn-secondary,
+    .btn-secondary-glow
+) {
+    color: #e2e8f0 !important;
+    background: var(--erp-button-secondary) !important;
+    border-color: #475569 !important;
+}
+
+body :is(
+    .erp-btn-secondary,
+    .btn-secondary,
+    .btn-cancel,
+    .department-cancel,
+    .bio-secondary,
+    .bank-secondary,
+    .manual-cancel,
+    .rpt-btn-secondary,
+    .exp-btn-secondary,
+    .btn-secondary-glow
+):hover {
+    color: #fff !important;
+    background: var(--erp-button-secondary-hover) !important;
+    border-color: #64748b !important;
+    transform: translateY(-1px) !important;
+}
+
+body :is(.erp-btn-danger, .btn-danger, .department-delete-confirm, .bank-danger) {
+    color: #fff !important;
+    background: var(--erp-button-danger) !important;
+    border-color: #ef4444 !important;
+}
+
+body :is(.erp-btn-danger, .btn-danger, .department-delete-confirm, .bank-danger):hover {
+    color: #fff !important;
+    background: var(--erp-button-danger-hover) !important;
+    border-color: #f87171 !important;
+    transform: translateY(-1px) !important;
+}
+
+body :is(.erp-btn, [class*="btn-"]):focus-visible {
+    outline: 3px solid rgba(96, 165, 250, .35) !important;
+    outline-offset: 2px !important;
+}
+
+body :is(.erp-btn, [class*="btn-"]):disabled,
+body :is(.erp-btn, [class*="btn-"]).disabled {
+    opacity: .55 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+body :is(.btn-sm, .btn-small) {
+    min-height: 36px !important;
+    padding: 7px 12px !important;
+    font-size: 13px !important;
+}
+
+/* Keep paired actions aligned and evenly spaced throughout forms/modals. */
+body :is(
+    .profile-form-actions,
+    .form-actions,
+    .form-actions-footer,
+    .department-form-actions,
+    .builder-actions,
+    .bank-actions,
+    .bio-form-actions
+) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+}
+
+@media (max-width: 640px) {
+    body :is(
+        .profile-form-actions,
+        .form-actions,
+        .form-actions-footer,
+        .department-form-actions,
+        .builder-actions,
+        .bank-actions,
+        .bio-form-actions
+    ) > :is(a, button, input[type="submit"]) {
+        width: 100% !important;
+    }
+}

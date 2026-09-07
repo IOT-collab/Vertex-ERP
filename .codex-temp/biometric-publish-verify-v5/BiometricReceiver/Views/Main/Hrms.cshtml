@@ -1,0 +1,383 @@
+﻿@{
+    ViewData["Title"] = "HRMS";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+<link href="~/css/hrms.css" rel="stylesheet" />
+
+<div class="hrms-page">
+
+    <!-- ================= PAGE HEADER ================= -->
+    <div class="page-header">
+
+        <div class="header-left">
+
+            <div class="header-text">
+                <h2>Human Resource Management</h2>
+                <p>Manage Employees, Attendance, Payroll & Recruitment</p>
+            </div>
+
+        </div>
+
+        <a href="@Url.Action("HrAddEmp", "Hr")"
+           class="btn-add">
+            <span class="plus-icon">+</span>
+            Add Employee
+        </a>
+
+    </div>
+
+
+    <!-- ================= SUMMARY ================= -->
+    <!-- Values will come from Controller / Database -->
+
+    <div class="summary">
+
+        <div class="summary-card">
+            <span class="summary-icon">👨‍💼</span>
+
+            <div class="summary-content">
+                <p>Total Employees</p>
+                <h2>@Model.TotalEmployees</h2>
+            </div>
+        </div>
+
+
+        <div class="summary-card">
+            <span class="summary-icon">🟢</span>
+
+            <div class="summary-content">
+                <p>Present Today</p>
+                <h2>@Model.PresentToday</h2>
+            </div>
+        </div>
+
+
+        <div class="summary-card">
+            <span class="summary-icon">🏖</span>
+
+            <div class="summary-content">
+                <p>On Leave</p>
+                <h2>@Model.OnLeaveToday</h2>
+            </div>
+        </div>
+
+
+        <div class="summary-card">
+            <span class="summary-icon">🔴</span>
+
+            <div class="summary-content">
+                <p>Absent Today</p>
+                <h2>@Model.AbsentToday</h2>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- ================= HR MODULES ================= -->
+
+    <div class="module-grid">
+
+
+        <!-- Employee Management -->
+
+        <div class="module-card">
+
+            <div class="module-content">
+
+                <div class="icon">👨‍💼</div>
+
+                <h3>Employee Management</h3>
+
+                <p>Add, edit and manage employees.</p>
+
+            </div>
+
+            <a asp-controller="Hr"
+               asp-action="EmployeeDashboard"
+               class="btn-module-action">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- Attendance -->
+
+        <div class="module-card">
+
+            <div class="module-content">
+
+                <div class="icon">🕒</div>
+
+                <h3>Attendance</h3>
+
+                <p>Daily attendance and shift management.</p>
+
+            </div>
+
+            <a asp-controller="Hr"
+               asp-action="AttendanceDashboard"
+               class="btn-module-action">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- Leave Management -->
+
+        <div class="module-card">
+
+            <div class="module-content">
+
+                <div class="icon">🏖</div>
+
+                <h3>Leave Management</h3>
+
+                <p>Manage leave requests and approvals.</p>
+
+            </div>
+
+            <a asp-controller="Hr"
+               asp-action="EmpLeaveManagement"
+               class="btn-module-action">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- Payroll -->
+
+        <div class="module-card">
+
+            <div class="module-content">
+
+                <div class="icon">💰</div>
+
+                <h3>Payroll</h3>
+
+                <p>Manage salary and payslips.</p>
+
+            </div>
+
+            <a asp-controller="Hr"
+               asp-action="EmpPayroll"
+               class="btn-module-action">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- Performance -->
+
+        <div class="module-card">
+
+            <div class="module-content">
+
+                <div class="icon">📈</div>
+
+                <h3>Performance</h3>
+
+                <p>Manage KPIs and employee reviews.</p>
+
+            </div>
+
+            <a asp-controller="Hr"
+               asp-action="EmpPerformance"
+               class="btn-module-action">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- Recruitment -->
+
+        <div class="module-card">
+
+            <div class="module-content">
+
+                <div class="icon">🎯</div>
+
+                <h3>Recruitment</h3>
+
+                <p>Manage hiring and interview processes.</p>
+
+            </div>
+
+            <a asp-controller="Hr"
+               asp-action="Recuirement"
+               class="btn-module-action">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- Documents -->
+
+        <div class="module-card">
+
+            <div class="module-content">
+
+                <div class="icon">📄</div>
+
+                <h3>Documents</h3>
+
+                <p>Manage employee documents.</p>
+
+            </div>
+
+            <a asp-controller="Hr"
+               asp-action="EmpDocuments"
+               class="btn-module-action">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- Holiday Calendar -->
+
+        <div class="module-card">
+
+            <div class="module-content">
+
+                <div class="icon">📅</div>
+
+                <h3>Holiday Calendar</h3>
+
+                <p>Manage company holidays.</p>
+
+            </div>
+
+            <a asp-controller="Hr"
+               asp-action="Holiday"
+               class="btn-module-action">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- Departments -->
+
+        <div class="module-card">
+
+            <div class="module-content">
+
+                <div class="icon">🏢</div>
+
+                <h3>Departments</h3>
+
+                <p>Manage departments and teams.</p>
+
+            </div>
+
+            <a asp-controller="Hr"
+               asp-action="Department"
+               class="btn-module-action">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- Expense Claims -->
+
+        <div class="module-card">
+
+            <div class="module-content">
+
+                <div class="icon">🧾</div>
+
+                <h3>Expense Claims</h3>
+
+                <p>Manage employee reimbursements.</p>
+
+            </div>
+
+            <a asp-controller="Hr"
+               asp-action="ExpenseClaim"
+               class="btn-module-action">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- Asset Management -->
+
+        <div class="module-card">
+
+            <div class="module-content">
+
+                <div class="icon">💻</div>
+
+                <h3>Asset Management</h3>
+
+                <p>Track employee hardware and accessories.</p>
+
+            </div>
+
+            <a asp-controller="Hr"
+               asp-action="AssetManagement"
+               class="btn-module-action">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- Meetings -->
+
+        <div class="module-card">
+
+            <div class="module-content">
+
+                <div class="icon">📅</div>
+
+                <h3>Meetings</h3>
+
+                <p>Schedule and manage meetings.</p>
+
+            </div>
+
+            <a asp-controller="Hr"
+               asp-action="Meetings"
+               class="btn-module-action">
+                Open
+            </a>
+
+        </div>
+
+
+        <!-- Reports -->
+
+        <div class="module-card">
+
+            <div class="module-content">
+
+                <div class="icon">📊</div>
+
+                <h3>Reports</h3>
+
+                <p>HR analytics and reports.</p>
+
+            </div>
+
+            <a asp-controller="Hr"
+               asp-action="HrmReports"
+               class="btn-module-action">
+                Open
+            </a>
+
+        </div>
+
+    </div>
+
+</div>

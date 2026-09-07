@@ -1,0 +1,500 @@
+﻿@model dynamic
+@{
+    ViewData["Title"] = "Employee Self-Service Dashboard";
+
+    var employeeName = Model?.FullName ?? "";
+    var employeeRole = Model?.Designation ?? "";
+    var departmentName = Model?.Department ?? "";
+    var employeeInitials = Model?.Initials ?? "";
+    var employeeStatus = Model?.Status ?? "Active";
+    var shiftTiming = Model?.ShiftTime ?? "";
+    var employeeRecordId = Model?.Id ?? 0;
+    var employeePhoto = Model?.PhotoPath ?? "";
+
+    var leaveBalance = Model?.LeaveBalanceDays ?? "";
+    var loggedHours = Model?.LoggedHoursThisMonth ?? "";
+    var employmentType = Model?.EmploymentType ?? "";
+
+    var empId = Model?.EmployeeId ?? "";
+    var officialEmail = Model?.Email ?? "";
+    var phoneNumber = Model?.Phone ?? "";
+    var joiningDate = Model?.JoiningDate ?? "";
+    var reportingManager = Model?.ManagerName ?? "";
+
+    var casualLeaveCount = Model?.CasualLeaveCount ?? "";
+    var sickLeaveCount = Model?.SickLeaveCount ?? "";
+    var earnedLeaveCount = Model?.EarnedLeaveCount ?? "";
+
+    var bankName = Model?.BankName ?? "";
+    var accountNumber = Model?.AccountNumber ?? "";
+    var routingCode = Model?.RoutingCode ?? "";
+}
+<link href="~/css/employee11.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="emp-dash-container">
+
+    @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+    {
+        <nav class="common-back-nav" aria-label="Page navigation">
+            <button type="button" class="common-back-button" onclick="window.history.back()" aria-label="Go Back">
+                <svg class="common-back-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+                <span>Back</span>
+            </button>
+        </nav>
+    }
+
+    <!-- NAVIGATION BAR -->
+    <div class="emp-nav-header">
+        <div class="breadcrumb-text">Dashboard / <strong>Employee Self-Service</strong></div>
+    </div>
+
+    <!-- TOP PROFILE BAR -->
+    <div class="emp-profile-bar">
+        <div class="emp-user-info">
+            <div class="emp-avatar">
+                @if (!string.IsNullOrWhiteSpace((string)employeePhoto))
+                {
+                    <img src="@employeePhoto" alt="@employeeName profile photo" />
+                }
+                else
+                {
+                    <span>@employeeInitials</span>
+                }
+            </div>
+            <div>
+                <h2>@employeeName <span class="badge badge-active">@employeeStatus</span></h2>
+                <p>@employeeRole &bull; @departmentName</p>
+            </div>
+        </div>
+        <div class="emp-actions">
+            @if (!string.IsNullOrEmpty(shiftTiming))
+            {
+                <div class="timer-box">
+                    Shift: <strong>@shiftTiming</strong>
+                </div>
+            }
+
+            <button type="button" class="btn btn-secondary" id="locationBtn" onclick="captureLocation()">
+                <i class="fa-solid fa-location-dot"></i> Location
+            </button>
+
+            <button type="button" class="btn btn-primary" id="punchBtn" onclick="togglePunch()">
+                <i class="fa-solid fa-fingerprint"></i> Punch In
+            </button>
+
+            <button type="button" class="btn btn-secondary" onclick="openModal('profileDetailsModal')">
+                <i class="fa-solid fa-user"></i> View Profile
+            </button>
+            <button type="button" class="btn btn-primary" onclick="openModal('applyLeaveModal')">
+                <i class="fa-solid fa-calendar-plus"></i> Apply Leave
+            </button>
+            <!-- RAISE QUERY BUTTON ADDED HERE -->
+            <button type="button" class="btn btn-secondary" onclick="openModal('raiseQueryModal')">
+                <i class="fa-solid fa-circle-question"></i> Raise Query
+            </button>
+            @if (User.IsInRole("Employee"))
+            {
+                <a asp-controller="Main" asp-action="Logout" class="btn employee-dashboard-logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- METRICS GRID -->
+    <div class="stats-grid-3 stats-grid-4">
+        <div class="stat-card attendance-stat" id="attendanceCard">
+            <div class="stat-icon icon-red" id="attendanceIcon"><i class="fa-solid fa-user-clock"></i></div>
+            <div>
+                <span class="stat-value attendance-value" id="todayAttendance">Absent</span>
+                <span class="stat-label" id="attendanceHint">Not punched in today</span>
+            </div>
+            <span class="attendance-dot" id="attendanceDot"></span>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-green"><i class="fa-solid fa-calendar-check"></i></div>
+            <div>
+                <span class="stat-value">@leaveBalance</span>
+                <span class="stat-label">Leave Balance Available</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-purple"><i class="fa-solid fa-business-time"></i></div>
+            <div>
+                <span class="stat-value">@loggedHours</span>
+                <span class="stat-label">Productive Hours Logged</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-blue"><i class="fa-solid fa-id-card"></i></div>
+            <div>
+                <span class="stat-value">@employmentType</span>
+                <span class="stat-label">Employment Status</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="dash-grid">
+        <div class="dash-column">
+
+            <!-- PROFILE DATA -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-id-card text-amber"></i> Profile & Professional Data</h3>
+                    @if (employeeRecordId > 0)
+                    {
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="location.href='@Url.Action("Edit", "Employee", new { id = employeeRecordId })'">Update</button>
+                    }
+                </div>
+                <div class="card-body">
+                    <div class="info-row"><span>Employee Unique ID</span><strong>@empId</strong></div>
+                    <div class="info-row"><span>Corporate Email Address</span><strong>@officialEmail</strong></div>
+                    <div class="info-row"><span>Contact Phone Number</span><strong>@phoneNumber</strong></div>
+                    <div class="info-row"><span>Date of Onboarding</span><strong>@joiningDate</strong></div>
+                    <div class="info-row"><span>Direct Reporting Supervisor</span><strong>@reportingManager</strong></div>
+                </div>
+            </div>
+
+            <!-- TODAY'S TASKS -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-list-check text-amber"></i> Today's Tasks & Priorities</h3>
+                    <span class="badge badge-purple">Active</span>
+                </div>
+                <div class="card-body">
+                    <ul class="task-list">
+                        <li class="task-item" id="task1">
+                            <div class="task-check">
+                                <input type="checkbox" onchange="toggleTaskStatus('task1', 'statusTag1')" style="width: 18px; height: 18px; cursor: pointer;" />
+                                <span style="font-size: 14px;">Complete daily sprint standup & sync with team</span>
+                            </div>
+                            <div class="task-actions-group">
+                                <span id="statusTag1" class="tag tag-amber">Pending</span>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="openModal('taskReasonModal')"><i class="fa-solid fa-pen-to-square"></i> Reason</button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- UPCOMING TASKS -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-calendar-days text-amber"></i> Upcoming 30 Days Tasks & Milestones</h3>
+                    <span class="badge badge-active">Roadmap</span>
+                </div>
+                <div class="card-body">
+                    <ul class="task-list">
+                        <li class="task-item" id="taskUp1">
+                            <div class="task-check">
+                                <input type="checkbox" onchange="toggleTaskStatus('taskUp1', 'upcomingTag1')" style="width: 18px; height: 18px; cursor: pointer;" />
+                                <span style="font-size: 14px;">Quarterly performance appraisal and goals submission</span>
+                            </div>
+                            <div class="task-actions-group">
+                                <span id="upcomingTag1" class="tag tag-blue">Upcoming</span>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="openModal('taskReasonModal')"><i class="fa-solid fa-pen-to-square"></i> Reason</button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- LEAVE TRACKING -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-umbrella-beach text-amber"></i> Leave Tracking & Distribution</h3>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="openModal('applyLeaveModal')">New Request</button>
+                </div>
+                <div class="card-body">
+                    <div class="leave-grid-3">
+                        <div class="progress-bar-container" style="text-align: center;">
+                            <span class="stat-label">Casual Leaves</span>
+                            <strong style="font-size: 16px; display: block; margin-top: 4px;">@casualLeaveCount</strong>
+                        </div>
+                        <div class="progress-bar-container" style="text-align: center;">
+                            <span class="stat-label">Sick Leaves</span>
+                            <strong style="font-size: 16px; display: block; margin-top: 4px;">@sickLeaveCount</strong>
+                        </div>
+                        <div class="progress-bar-container" style="text-align: center;">
+                            <span class="stat-label">Earned Leaves</span>
+                            <strong style="font-size: 16px; display: block; margin-top: 4px;">@earnedLeaveCount</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dash-column">
+
+            <!-- SALARY SLIP -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-file-invoice-dollar text-amber"></i> Payroll & Salary Slips</h3>
+                </div>
+                <div class="card-body" style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="alert-box">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <div style="font-size: 13px;">Download your latest official monthly salary statement / payslip securely.</div>
+                    </div>
+                    <div class="info-row" style="align-items: center;">
+                        <div>
+                            <strong>Current Month Statement</strong>
+                            <p style="font-size: 11px; color: var(--text-muted);">Available for download</p>
+                        </div>
+                        <a href="@Url.Action("DownloadCurrentPayslip", "Payroll")" class="btn btn-sm btn-primary" style="white-space: nowrap;">
+                            <i class="fa-solid fa-download"></i> Download Slip
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BANKING INFORMATION -->
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-building-columns text-amber"></i> Banking Information</h3>
+                </div>
+                <div class="card-body">
+                    <div class="info-row"><span>Institution Name</span><strong>@bankName</strong></div>
+                    <div class="info-row"><span>Encrypted Account Number</span><strong>@accountNumber</strong></div>
+                    <div class="info-row"><span>Routing / IFSC Reference</span><strong>@routingCode</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div id="profileDetailsModal" class="report-modal-overlay">
+    <div class="report-modal">
+        <div class="report-modal-header">
+            <h3 style="font-size: 16px;"><i class="fa-solid fa-user text-amber"></i> Profile Overview</h3>
+            <button type="button" class="close-btn" onclick="closeModal('profileDetailsModal')">&times;</button>
+        </div>
+        <div class="report-modal-body">
+            <div style="text-align: center; margin-bottom: 10px;">
+                <div class="emp-avatar" style="margin: 0 auto 10px auto; width: 60px; height: 60px; font-size: 20px;">
+                    @if (!string.IsNullOrWhiteSpace((string)employeePhoto))
+                    {
+                        <img src="@employeePhoto" alt="@employeeName profile photo" />
+                    }
+                    else
+                    {
+                        <span>@employeeInitials</span>
+                    }
+                </div>
+                <h3 style="font-size: 16px;">@employeeName</h3>
+                <p style="color: var(--text-muted); font-size: 12px;">@employeeRole</p>
+            </div>
+            <div class="info-row"><span>Full Name</span><strong>@employeeName</strong></div>
+            <div class="info-row"><span>Designation</span><strong>@employeeRole</strong></div>
+            <div class="info-row"><span>Department</span><strong>@departmentName</strong></div>
+            <div class="info-row"><span>Official Email</span><strong>@officialEmail</strong></div>
+            <div class="info-row"><span>Phone Number</span><strong>@phoneNumber</strong></div>
+        </div>
+        <div class="report-modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('profileDetailsModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- LEAVE MODAL -->
+<div id="applyLeaveModal" class="report-modal-overlay">
+    <div class="report-modal">
+        <div class="report-modal-header">
+            <h3 style="font-size: 16px;"><i class="fa-solid fa-calendar-plus text-amber"></i> Submit Leave Application</h3>
+            <button type="button" class="close-btn" onclick="closeModal('applyLeaveModal')">&times;</button>
+        </div>
+        @using (Html.BeginForm("SubmitLeave", "Employee", FormMethod.Post))
+        {
+            <div class="report-modal-body">
+                <div class="form-group">
+                    <label class="form-label">Leave Category</label>
+                    <select name="LeaveType" class="form-control">
+                        <option value="Casual">Casual Leave</option>
+                        <option value="Sick">Sick Leave</option>
+                        <option value="Earned">Earned Leave</option>
+                    </select>
+                </div>
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="StartDate" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="EndDate" class="form-control" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reason</label>
+                    <textarea name="Reason" class="form-control" rows="3" placeholder="Enter reason..." required></textarea>
+                </div>
+            </div>
+            <div class="report-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('applyLeaveModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- RAISE QUERY MODAL ADDED HERE -->
+<div id="raiseQueryModal" class="report-modal-overlay">
+    <div class="report-modal">
+        <div class="report-modal-header">
+            <h3 style="font-size: 16px;"><i class="fa-solid fa-circle-question text-amber"></i> Raise a Support Query</h3>
+            <button type="button" class="close-btn" onclick="closeModal('raiseQueryModal')">&times;</button>
+        </div>
+        @using (Html.BeginForm("SubmitQuery", "Employee", FormMethod.Post))
+        {
+            <div class="report-modal-body">
+                <div class="form-group">
+                    <label class="form-label">Query Category</label>
+                    <select name="QueryCategory" class="form-control" required>
+                        <option value="">-- Select Category --</option>
+                        <option value="Payroll">Payroll & Salary</option>
+                        <option value="HR">HR & Policies</option>
+                        <option value="Attendance">Attendance & Punch</option>
+                        <option value="Technical">Technical Support</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Subject</label>
+                    <input type="text" name="Subject" class="form-control" placeholder="Brief subject line..." required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description / Details</label>
+                    <textarea name="Description" class="form-control" rows="4" placeholder="Explain your query in detail..." required></textarea>
+                </div>
+            </div>
+            <div class="report-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('raiseQueryModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit Query</button>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- PENDING TASK REASON & IMAGE UPLOAD MODAL -->
+<div id="taskReasonModal" class="report-modal-overlay">
+    <div class="report-modal">
+        <div class="report-modal-header">
+            <h3 style="font-size: 16px;"><i class="fa-solid fa-triangle-exclamation text-amber"></i> Task Pending Reason & Proof</h3>
+            <button type="button" class="close-btn" onclick="closeModal('taskReasonModal')">&times;</button>
+        </div>
+        <form action="javascript:void(0);" onsubmit="submitTaskReason()">
+            <div class="report-modal-body">
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label class="form-label">Select Date</label>
+                        <input type="date" id="taskDate" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Day</label>
+                        <input type="text" id="taskDay" class="form-control" placeholder="e.g. Monday" required />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reason / Explanation for Delay</label>
+                    <textarea id="taskReasonText" class="form-control" rows="3" placeholder="Enter why this task is pending..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Upload Image / Supporting Proof</label>
+                    <input type="file" id="taskImage" class="form-control" accept="image/*" />
+                </div>
+            </div>
+            <div class="report-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('taskReasonModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Details</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
+    }
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+    function toggleTaskStatus(taskContainerId, tagId) {
+        let taskContainer = document.getElementById(taskContainerId);
+        let checkbox = taskContainer.querySelector('input[type="checkbox"]');
+        let tag = document.getElementById(tagId);
+
+        if (checkbox.checked) {
+            tag.className = "tag tag-green";
+            tag.innerText = "Completed";
+            taskContainer.classList.add('completed');
+        } else {
+            tag.className = "tag tag-amber";
+            tag.innerText = "Pending";
+            taskContainer.classList.remove('completed');
+        }
+    }
+    function submitTaskReason() {
+        alert('Task reason and image uploaded successfully!');
+        closeModal('taskReasonModal');
+    }
+
+    // --- PUNCH IN / OUT TOGGLE SCRIPT ---
+    let isPunchedIn = false;
+    let punchInTime = null;
+    function togglePunch() {
+        let punchBtn = document.getElementById('punchBtn');
+        if (!isPunchedIn) {
+            isPunchedIn = true;
+            punchInTime = new Date();
+            punchBtn.innerHTML = '<i class="fa-solid fa-fingerprint"></i> Punch Out';
+            punchBtn.style.background = 'var(--accent-red)';
+            setAttendance(true);
+        } else {
+            if (!window.confirm('Are you sure you want to punch out?')) return;
+            isPunchedIn = false;
+            const punchOutTime = new Date();
+            punchBtn.innerHTML = '<i class="fa-solid fa-fingerprint"></i> Punch In';
+            punchBtn.style.background = 'var(--accent-blue)';
+            completeAttendance(punchOutTime);
+        }
+    }
+
+    function setAttendance(isPresent) {
+        const value = document.getElementById('todayAttendance');
+        const hint = document.getElementById('attendanceHint');
+        const icon = document.getElementById('attendanceIcon');
+        const card = document.getElementById('attendanceCard');
+        value.textContent = isPresent ? 'Present' : 'Absent';
+        hint.textContent = isPresent ? `Punched in at ${punchInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Not punched in today';
+        icon.className = `stat-icon ${isPresent ? 'icon-green' : 'icon-red'}`;
+        icon.innerHTML = `<i class="fa-solid ${isPresent ? 'fa-user-check' : 'fa-user-clock'}"></i>`;
+        card.classList.toggle('is-present', isPresent);
+    }
+
+    function completeAttendance(punchOutTime) {
+        const value = document.getElementById('todayAttendance');
+        const hint = document.getElementById('attendanceHint');
+        value.textContent = 'Present';
+        hint.textContent = `Punch in: ${punchInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Punch out: ${punchOutTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    }
+
+    // --- GEOLOCATION SCRIPT ---
+    function captureLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    alert(`Location Captured Successfully!\nLatitude: ${lat.toFixed(4)}\nLongitude: ${lon.toFixed(4)}`);
+                },
+                (error) => {
+                    alert("Unable to retrieve your location. Please check browser permissions.");
+                }
+            );
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+</script>

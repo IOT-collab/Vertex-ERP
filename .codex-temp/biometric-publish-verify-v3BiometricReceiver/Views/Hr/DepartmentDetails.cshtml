@@ -1,0 +1,20 @@
+@model VertexERP.Models.Department
+@{
+    ViewData["Title"] = "Department Details";
+    ViewData["BackController"] = "Hr";
+    ViewData["BackAction"] = "Department";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/AddDepartment.css" rel="stylesheet" />
+<div class="add-department-page">
+    <div class="department-form-card">
+        <div class="department-form-header"><h1>@Model.DepartmentName</h1><p>@Model.DepartmentCode</p></div>
+        <div class="department-detail-grid">
+            <div><span>Description</span><strong>@(Model.Description ?? "Not provided")</strong></div>
+            <div><span>Status</span><strong>@(Model.IsActive ? "Active" : "Inactive")</strong></div>
+            <div><span>Manager</span><strong>@(Model.Manager?.FullName ?? "Not Assigned")</strong></div>
+            <div><span>Employees</span><strong>@Model.Employees.Count</strong></div>
+        </div>
+        <div class="department-form-actions"><a asp-action="Department" class="department-cancel">Back</a><a asp-action="EditDepartment" asp-route-id="@Model.Id" class="department-submit">Edit Department</a></div>
+    </div>
+</div>

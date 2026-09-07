@@ -1,0 +1,218 @@
+﻿
+
+@{
+    ViewData["Title"] = "Performance & Reviews";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+<link href="~/css/empperformance.css" rel="stylesheet" />
+
+<div class="perf-dashboard-wrapper">
+
+    <!-- Page Header with Back Arrow -->
+    <div class="dashboard-header">
+        <div class="header-left-group">
+            <div class="header-text">
+                <h2>Performance &amp; Employee Reviews</h2>
+                <p>Track your KPIs, self-assessments, manager reviews, and active goals.</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-primary-glow" onclick="location.href='@Url.Action("SelfAssessment", "Performance")'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                Self Assessment
+            </button>
+            <button class="btn-secondary-glow" onclick="location.href='@Url.Action("DownloadReviewLetter", "Performance")'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                Download Review Letter
+            </button>
+        </div>
+    </div>
+
+    <!-- Top Summary Performance Cards -->
+    <div class="stats-grid">
+        <div class="stat-card accent-purple">
+            <div class="stat-icon icon-rating">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Overall Performance Score</span>
+                <span class="stat-value">@(Model?.OverallScore ?? "0.0") <small>/ 5.0</small></span>
+                <small class="stat-meta text-purple">★ @(Model?.ScoreLabel ?? "N/A")</small>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-kpi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">KPI Completion Rate</span>
+                <span class="stat-value">@(Model?.KpiCompletionRate ?? "0%")</span>
+                <small class="stat-meta text-green">@(Model?.KpiMeta ?? "N/A")</small>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-review">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Review Cycle</span>
+                <span class="stat-value">@(Model?.ReviewCycle ?? "N/A")</span>
+                <small class="stat-meta text-amber">Status: @(Model?.ReviewStatus ?? "N/A")</small>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-goals">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Goals &amp; Milestones</span>
+                <span class="stat-value">@(Model?.GoalsCompleted ?? "0") / @(Model?.GoalsTotal ?? "0")</span>
+                <small class="stat-meta text-green">@(Model?.GoalsInProgress ?? "0") In Progress</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Grid: KPIs & Review Feedback -->
+    <div class="dashboard-grid">
+
+        <!-- LEFT: KPI Metrics & Target Progress -->
+        <div class="glass-card kpi-section">
+            <div class="card-header">
+                <div>
+                    <h3>Key Performance Indicators (KPIs)</h3>
+                    <p class="subtitle">Current Evaluation Period (@(Model?.ReviewCycle ?? "N/A"))</p>
+                </div>
+                <span class="badge-cycle">Weightage Total: @(Model?.TotalWeightage ?? "100%")</span>
+            </div>
+
+            <div class="kpi-list">
+                @if (Model?.KpiList != null)
+                {
+                    foreach (var kpi in Model.KpiList)
+                    {
+                        <div class="kpi-item">
+                            <div class="kpi-head">
+                                <div class="kpi-title">
+                                    <strong>@kpi.Title</strong>
+                                    <span class="kpi-weight">Weightage: @kpi.Weightage</span>
+                                </div>
+                                <span class="status-badge @kpi.StatusBadgeClass">@kpi.StatusText</span>
+                            </div>
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-info">
+                                    <span>Target: @kpi.TargetDescription</span>
+                                    <span class="progress-perc">@kpi.ProgressPercentage</span>
+                                </div>
+                                <div class="progress-track">
+                                    <div class="progress-fill @kpi.ProgressBarClass" style="width: @kpi.ProgressValue%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted" style="text-align: center; color: #64748b; padding: 1rem;">No KPI data available.</p>
+                }
+            </div>
+        </div>
+
+        <!-- RIGHT: Manager Feedback & Appraisal Notes -->
+        <div class="glass-card review-notes-card">
+            <div class="card-header">
+                <h3>Latest Review Feedback</h3>
+                <span class="badge-approved">✓ Manager Verified</span>
+            </div>
+
+            <div class="manager-meta">
+                <div class="reviewer-avatar">@(Model?.ReviewerInitials ?? "RM")</div>
+                <div class="reviewer-info">
+                    <strong>@(Model?.ReviewerName ?? "N/A")</strong>
+                    <span>@(Model?.ReviewerDesignation ?? "N/A") • Evaluated on @(Model?.EvaluationDate ?? "N/A")</span>
+                </div>
+            </div>
+
+            <div class="feedback-blocks">
+                <div class="feedback-box">
+                    <label class="text-green">Key Strengths</label>
+                    <p>@(Model?.KeyStrengths ?? "No feedback provided.")</p>
+                </div>
+
+                <div class="feedback-box">
+                    <label class="text-amber">Areas of Growth</label>
+                    <p>@(Model?.AreasOfGrowth ?? "No feedback provided.")</p>
+                </div>
+            </div>
+
+            <div class="appraisal-summary-footer">
+                <div class="appraisal-val">
+                    <span>Recommended Grade</span>
+                    <strong>@(Model?.RecommendedGrade ?? "N/A")</strong>
+                </div>
+                <button class="btn-sm-outline" onclick="location.href='@Url.Action("CompleteHistory", "Performance")'">View Complete History</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BOTTOM: Skills Matrix & Peer Kudos -->
+    <div class="dashboard-grid bottom-grid">
+        <!-- Skills Radar / Matrix -->
+        <div class="glass-card">
+            <div class="card-header">
+                <h3>Technical &amp; Soft Skills</h3>
+                <span class="badge-tag">Endorsed</span>
+            </div>
+
+            <div class="skills-chips">
+                @if (Model?.SkillsList != null)
+                {
+                    foreach (var skill in Model.SkillsList)
+                    {
+                        <div class="skill-pill">
+                            <span>@skill.Name</span>
+                            <strong class="@skill.ColorClass">@skill.Score</strong>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted" style="color: #64748b;">No skills data available.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Peer Appreciations / Badges -->
+        <div class="glass-card">
+            <div class="card-header">
+                <h3>Badges &amp; Appreciations</h3>
+                <span class="badge-tag">@(Model?.BadgeCount ?? "0") Badges</span>
+            </div>
+
+            <div class="badge-list">
+                @if (Model?.BadgesList != null)
+                {
+                    foreach (var badge in Model.BadgesList)
+                    {
+                        <div class="badge-item">
+                            <div class="badge-icon">@badge.IconSymbol</div>
+                            <div class="badge-details">
+                                <strong>@badge.Title</strong>
+                                <span>@badge.Description</span>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted" style="color: #64748b;">No badges found.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+</div>

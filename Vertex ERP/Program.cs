@@ -104,6 +104,7 @@ builder.Services
     .SetApplicationName("VertexERP");
 
 builder.Services.AddScoped<BankAccountProtectionService>();
+builder.Services.AddScoped<IPasswordResetEmailService, PasswordResetEmailService>();
 
 // ============================================================
 // SESSION

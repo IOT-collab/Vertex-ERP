@@ -1,0 +1,13 @@
+@{ ViewData["Title"] = "Biometric Wi-Fi Setup"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; var addresses = (IReadOnlyList<string>)ViewBag.ServerAddresses; }
+<link href="~/css/BiometricDevices.css" rel="stylesheet" asp-append-version="true" />
+<div class="bio-page narrow">
+  <div class="bio-header"><div><span class="bio-kicker">SAME NETWORK SETUP</span><h1>K40 Pro Wi-Fi / LAN Setup</h1><p>The machine pushes attendance to Vertex ERP. Both devices must use the same router.</p></div><a asp-action="Index" class="bio-secondary">Back to devices</a></div>
+  <div class="bio-alert success"><strong>Detected ERP server IP:</strong> @(addresses.Count == 0 ? "No LAN IPv4 detected" : string.Join(", ", addresses))</div>
+  <div class="bio-form">
+    <h2>1. Configure the machine</h2><p>On K40 Pro open <strong>Menu → Comm. → Cloud Server Setting</strong>.</p>
+    <div class="bio-table-wrap"><table><tbody><tr><th>Server Mode</th><td>ADMS</td></tr><tr><th>Server Address</th><td>@(addresses.FirstOrDefault() ?? "ERP computer LAN IP")</td></tr><tr><th>Server Port</th><td>8082</td></tr><tr><th>HTTPS</th><td>OFF</td></tr><tr><th>Proxy</th><td>OFF</td></tr></tbody></table></div>
+    <h2>2. Register in ERP</h2><p>Add the device using its exact serial number, keep it Active, save, and restart the machine.</p>
+    <h2>3. Test and map</h2><p>Make one fingerprint punch. When the device becomes Online, open Employee Mappings and connect its Device User ID to the correct ERP employee.</p>
+    <h2>4. Firewall</h2><p>Allow inbound TCP port <strong>8082</strong> for the Windows Private network profile. Public/non-LAN requests are rejected.</p>
+  </div>
+</div>

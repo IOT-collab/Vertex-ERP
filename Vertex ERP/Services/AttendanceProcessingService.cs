@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Options;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using VertexERP.Models;
 using VertexERP.Repositories;
 
@@ -23,7 +25,7 @@ public sealed class AttendanceProcessingService : IAttendanceProcessingService
         {
             var firstLog = group.First(); var first = group.Min(log => log.PunchTime); var last = group.Max(log => log.PunchTime); var employee = firstLog.Employee;
             var late = TimeOnly.FromDateTime(first) > startTime;
-            return new DailyAttendanceViewModel { EmployeeId = employee?.Id ?? 0, EmpId = employee?.EmployeeCode ?? $"BIO-{firstLog.DeviceUserId}", EmployeeName = employee?.FullName ?? $"Unmapped User {firstLog.DeviceUserId}", Department = employee?.Department ?? "Unmapped", Date = date, CheckIn = TimeOnly.FromDateTime(first), CheckOut = group.Count() > 1 ? TimeOnly.FromDateTime(last) : null, WorkingHours = group.Count() > 1 ? last - first : TimeSpan.Zero, PunchCount = group.Count(), Status = employee is null ? "Unmapped" : late ? "Late" : "Present" };
+            return new DailyAttendanceViewModel { EmployeeId = employee?.Id ?? 0, EmpId = employee?.EmployeeCode ?? $"BIO-{firstLog.DeviceUserId}", EmployeeName = FormatDisplayText(employee?.FullName ?? $"Unmapped User {firstLog.DeviceUserId}"), Department = FormatDisplayText(employee?.Department ?? "Unmapped"), Date = date, CheckIn = TimeOnly.FromDateTime(first), CheckOut = group.Count() > 1 ? TimeOnly.FromDateTime(last) : null, WorkingHours = group.Count() > 1 ? last - first : TimeSpan.Zero, PunchCount = group.Count(), Status = employee is null ? "Unmapped" : late ? "Late" : "Present" };
         }).ToList();
         var punchedEmployeeIds = records.Where(record => record.EmployeeId > 0).Select(record => record.EmployeeId).ToHashSet();
         records.AddRange(employees.Where(employee => !punchedEmployeeIds.Contains(employee.Id)).Select(employee =>
@@ -31,8 +33,8 @@ public sealed class AttendanceProcessingService : IAttendanceProcessingService
             {
                 EmployeeId = employee.Id,
                 EmpId = employee.EmployeeCode,
-                EmployeeName = employee.FullName,
-                Department = employee.Department,
+                EmployeeName = FormatDisplayText(employee.FullName),
+                Department = FormatDisplayText(employee.Department),
                 Date = date,
                 CheckIn = null,
                 CheckOut = null,
@@ -48,6 +50,15 @@ public sealed class AttendanceProcessingService : IAttendanceProcessingService
         if (!string.IsNullOrWhiteSpace(department)) filtered = filtered.Where(record => string.Equals(record.Department, department, StringComparison.OrdinalIgnoreCase));
         if (!string.IsNullOrWhiteSpace(status)) filtered = filtered.Where(record => string.Equals(record.Status, status, StringComparison.OrdinalIgnoreCase));
         _logger.LogDebug("Built attendance for {Date}: {Punches} punches, {Employees} employees", date, logs.Count, records.Count);
-        return new AttendancePageViewModel { Records = filtered.OrderBy(record => record.EmployeeName).ToList(), Departments = employees.Select(employee => employee.Department).Where(value => !string.IsNullOrWhiteSpace(value)).Distinct(StringComparer.OrdinalIgnoreCase).Order().ToList(), PresentCount = presentCount, AbsentCount = absentCount, LeaveCount = 0, LateCount = lateCount, SearchQuery = search, Department = department, FilterDate = date, Status = status };
+        return new AttendancePageViewModel { Records = filtered.OrderBy(record => record.EmployeeName).ToList(), Departments = employees.Select(employee => FormatDisplayText(employee.Department)).Where(value => !string.IsNullOrWhiteSpace(value)).Distinct(StringComparer.OrdinalIgnoreCase).Order().ToList(), PresentCount = presentCount, AbsentCount = absentCount, LeaveCount = 0, LateCount = lateCount, SearchQuery = search, Department = department, FilterDate = date, Status = status };
+    }
+
+    private static string FormatDisplayText(string? value)
+    {
+        var trimmed = value?.Trim();
+        if (string.IsNullOrEmpty(trimmed)) return "Unassigned";
+
+        var spaced = Regex.Replace(trimmed, @"\s*&\s*", " & ");
+        return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(spaced.ToLowerInvariant());
     }
 }

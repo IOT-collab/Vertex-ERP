@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+<PropertyGroup><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><EnableDefaultContentItems>false</EnableDefaultContentItems></PropertyGroup>
+<ItemGroup><Reference Include="../expense-build-final/*.dll" /><Content Include="../../Vertex ERP/Views/**/*.cshtml" Link="Views/%(RecursiveDir)%(Filename)%(Extension)" /></ItemGroup>
+</Project>

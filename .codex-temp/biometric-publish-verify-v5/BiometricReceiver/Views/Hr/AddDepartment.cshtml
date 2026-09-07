@@ -1,0 +1,28 @@
+@model VertexERP.Models.AddDepartmentViewModel
+@{
+    var editing = Model.Id > 0;
+    ViewData["Title"] = editing ? "Edit Department" : "Add Department";
+    ViewData["BackController"] = "Hr";
+    ViewData["BackAction"] = "Department";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/AddDepartment.css" rel="stylesheet" />
+
+<div class="add-department-page">
+    <div class="department-form-card">
+        <div class="department-form-header"><h1>@(editing ? "Edit Department" : "Add Department")</h1><p>@(editing ? "Update department details and assignment." : "Create a department for employee assignment.")</p></div>
+        <form asp-controller="Hr" asp-action="@(editing ? "EditDepartment" : "AddDepartment")" asp-route-id="@(editing ? Model.Id : null)" method="post">
+            @Html.AntiForgeryToken()
+            <input asp-for="Id" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="department-validation"></div>
+            <div class="department-form-grid">
+                <div class="department-field"><label asp-for="DepartmentName"></label><span>*</span><input asp-for="DepartmentName" placeholder="Enter department name" /><span asp-validation-for="DepartmentName" class="department-validation"></span></div>
+                <div class="department-field"><label asp-for="DepartmentCode"></label><span>*</span><input asp-for="DepartmentCode" placeholder="Enter department code" /><span asp-validation-for="DepartmentCode" class="department-validation"></span></div>
+                <div class="department-field department-field-wide"><label asp-for="Description"></label><textarea asp-for="Description" rows="5" placeholder="Enter department description"></textarea><span asp-validation-for="Description" class="department-validation"></span></div>
+                <div class="department-field"><label asp-for="IsActive"></label><select asp-for="IsActive"><option value="true">Active</option><option value="false">Inactive</option></select></div>
+                <div class="department-field"><label asp-for="ManagerId"></label><select asp-for="ManagerId"><option value="">Select Manager</option>@foreach (var manager in Model.Managers){<option value="@manager.Id">@manager.FullName (@manager.EmployeeCode)</option>}</select><span asp-validation-for="ManagerId" class="department-validation"></span></div>
+            </div>
+            <div class="department-form-actions"><a asp-controller="Hr" asp-action="Department" class="department-cancel">Cancel</a><button type="submit" class="department-submit">@(editing ? "Update Department" : "Add Department")</button></div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,104 @@
+@model VertexERP.Models.EmployeeFormViewModel
+@{
+    var editing = Model.Id > 0;
+    ViewData["Title"] = editing ? "Edit Employee" : "Add Employee";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/AddEmpHrm.css" rel="stylesheet" />
+
+<div class="hrms-page">
+    <div class="page-header"><div class="header-text"><h2>@(editing ? "Edit Employee Profile" : "Add New Employee Profile")</h2><p>Setup personal details, employment information and organizational mapping.</p></div></div>
+    <div class="form-container-wrapper">
+        <form class="employee-onboarding-form" asp-controller="Employee" asp-action="@(editing ? "Edit" : "Create")" asp-route-id="@(editing ? Model.Id : null)" method="post" enctype="multipart/form-data">
+            <input asp-for="Id" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+            <div class="form-main-section" style="margin-bottom:18px;">
+                <div class="section-divider"><span>Employee Photo</span></div>
+                <div class="form-row">
+                    <div class="form-group">
+                        @if (!string.IsNullOrWhiteSpace(Model.PhotoPath))
+                        {
+                            <img id="editPhotoPreview" src="@Model.PhotoPath" alt="Employee photo" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #334155;" />
+                        }
+                        else
+                        {
+                            <div id="editPhotoPlaceholder" style="width:110px;height:110px;border-radius:50%;background:#e5e7eb;border:3px solid #334155;"></div>
+                            <img id="editPhotoPreview" src="" alt="Employee photo preview" style="display:none;width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #334155;" />
+                        }
+                    </div>
+                    <div class="form-group"><label asp-for="EmployeePhoto"></label><input asp-for="EmployeePhoto" type="file" accept="image/jpeg,image/png" /><span asp-validation-for="EmployeePhoto" class="field-validation"></span><small>JPG or PNG, maximum 5 MB.</small></div>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-main-section">
+                    <div class="section-divider"><span>Personal Specifications</span></div>
+                    <div class="form-row triple-row">
+                        <div class="form-group"><label asp-for="EmployeeCode"></label><input asp-for="EmployeeCode" /><span asp-validation-for="EmployeeCode" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="FirstName"></label><input asp-for="FirstName" /><span asp-validation-for="FirstName" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="LastName"></label><input asp-for="LastName" /><span asp-validation-for="LastName" class="field-validation"></span></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label asp-for="Email"></label><input asp-for="Email" /><span asp-validation-for="Email" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="PhoneNumber">Mobile Number</label><input asp-for="PhoneNumber" inputmode="numeric" maxlength="10" pattern="[0-9]{10}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" /><span asp-validation-for="PhoneNumber" class="field-validation"></span></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label asp-for="DateOfBirthText"></label><input asp-for="DateOfBirthText" type="text" inputmode="numeric" maxlength="10" placeholder="DD/MM/YYYY" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" /><span asp-validation-for="DateOfBirthText" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="Gender"></label><select asp-for="Gender"><option value="">Select gender</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label asp-for="MaritalStatus"></label><select asp-for="MaritalStatus"><option value="">Select status</option><option>Single</option><option>Married</option><option>Other</option></select></div>
+                        <div class="form-group"><label asp-for="EmergencyContact"></label><input asp-for="EmergencyContact" /><span asp-validation-for="EmergencyContact" class="field-validation"></span></div>
+                    </div>
+
+                    <div class="section-divider"><span>Address</span></div>
+                    <div class="form-group"><label asp-for="Address"></label><input asp-for="Address" /><span asp-validation-for="Address" class="field-validation"></span></div>
+                    <div class="form-row">
+                        <div class="form-group"><label asp-for="City"></label><input asp-for="City" /></div>
+                        <div class="form-group"><label asp-for="State"></label><input asp-for="State" /></div>
+                    </div>
+                    <div class="form-row"><div class="form-group"><label asp-for="PinCode"></label><input asp-for="PinCode" maxlength="6" inputmode="numeric" /><span asp-validation-for="PinCode" class="field-validation"></span></div></div>
+                </div>
+
+                <div class="form-side-section">
+                    <div class="config-card">
+                        <h3>Organizational Mapping</h3>
+                        <div class="form-group"><label asp-for="JoiningDate"></label><input asp-for="JoiningDate" type="date" /><span asp-validation-for="JoiningDate" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="Department"></label><input asp-for="Department" /><span asp-validation-for="Department" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="Designation"></label><input asp-for="Designation" /><span asp-validation-for="Designation" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="ReportingManagerId"></label><select asp-for="ReportingManagerId"><option value="">No reporting manager</option>@foreach (var manager in Model.Managers){<option value="@manager.Id">@manager.FullName (@manager.EmployeeCode)</option>}</select><span asp-validation-for="ReportingManagerId" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="WorkLocation"></label><input asp-for="WorkLocation" /></div>
+                        <div class="form-group"><label asp-for="EmploymentType"></label><select asp-for="EmploymentType"><option>Full Time</option><option>Part Time</option><option>Contract</option><option>Intern</option></select></div>
+                        <div class="form-group"><label asp-for="EmployeeStatus"></label><select asp-for="EmployeeStatus"><option>Active</option><option>Probation</option><option>Notice Period</option><option>Inactive</option></select></div>
+                    </div>
+                    <div class="config-card option-card"><h3>Record Status</h3><label class="custom-checkbox"><input asp-for="IsActive" /><span class="checkmark"></span> Active employee</label></div>
+                </div>
+            </div>
+            @if(editing)
+            {
+                <input asp-for="HasSalaryDetails" type="hidden" />
+                <div class="form-main-section" style="margin-top:18px">
+                    <div class="section-divider"><span>Bank &amp; Payroll Details (HR Only)</span></div>
+                    <p style="color:var(--app-muted);margin-bottom:18px">Current verified account: <strong>@(Model.MaskedBankAccountNumber ?? "Not available")</strong>. Leave account-number fields blank to keep the current account unchanged.</p>
+                    <div class="form-row"><div class="form-group"><label asp-for="BankAccountHolderName"></label><input asp-for="BankAccountHolderName"/><span asp-validation-for="BankAccountHolderName" class="field-validation"></span></div><div class="form-group"><label asp-for="BankName"></label><input asp-for="BankName"/><span asp-validation-for="BankName" class="field-validation"></span></div></div>
+                    <div class="form-row"><div class="form-group"><label asp-for="BankAccountNumber"></label><input asp-for="BankAccountNumber" type="text" inputmode="numeric" maxlength="18" pattern="[0-9]{18}" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,18)" placeholder="Enter only to add/change account"/><span asp-validation-for="BankAccountNumber" class="field-validation"></span></div><div class="form-group"><label asp-for="ConfirmBankAccountNumber"></label><input asp-for="ConfirmBankAccountNumber" type="text" inputmode="numeric" maxlength="18" pattern="[0-9]{18}" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,18)"/><span asp-validation-for="ConfirmBankAccountNumber" class="field-validation"></span></div></div>
+                    <div class="form-row triple-row"><div class="form-group"><label asp-for="BankIfscCode"></label><input asp-for="BankIfscCode"/><span asp-validation-for="BankIfscCode" class="field-validation"></span></div><div class="form-group"><label asp-for="BankBranchName"></label><input asp-for="BankBranchName"/></div><div class="form-group"><label asp-for="BankAccountType"></label><select asp-for="BankAccountType"><option>Savings</option><option>Current</option><option>Salary</option></select></div></div>
+                    <div class="form-row triple-row"><div class="form-group"><label asp-for="PanNumber"></label><input asp-for="PanNumber"/></div><div class="form-group"><label asp-for="UanNumber"></label><input asp-for="UanNumber"/></div><div class="form-group"><label asp-for="EsicNumber"></label><input asp-for="EsicNumber"/></div></div>
+                    <div class="form-row"><div class="form-group"><label asp-for="UpiId"></label><input asp-for="UpiId"/></div></div>
+                </div>
+                <div class="form-main-section" style="margin-top:18px"><div class="section-divider"><span>Salary Details (HR Only)</span></div><div class="form-row triple-row"><div class="form-group"><label asp-for="BasicSalary"></label><input asp-for="BasicSalary" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="HouseRentAllowance"></label><input asp-for="HouseRentAllowance" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="ConveyanceAllowance"></label><input asp-for="ConveyanceAllowance" type="text" inputmode="decimal"/></div></div><div class="form-row triple-row"><div class="form-group"><label asp-for="SpecialAllowance"></label><input asp-for="SpecialAllowance" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="ProvidentFund"></label><input asp-for="ProvidentFund" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="ProfessionalTax"></label><input asp-for="ProfessionalTax" type="text" inputmode="decimal"/></div></div><div class="form-row triple-row"><div class="form-group"><label asp-for="Tds"></label><input asp-for="Tds" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="OtherDeductions"></label><input asp-for="OtherDeductions" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="SalaryEffectiveFrom"></label><input asp-for="SalaryEffectiveFrom" type="date"/></div></div><div class="form-row"><div class="form-group"><label asp-for="PfNumber"></label><input asp-for="PfNumber"/></div><div class="form-group"><label asp-for="PfUan"></label><input asp-for="PfUan"/></div></div></div>
+            }
+            <div class="form-actions-footer"><a asp-controller="Employee" asp-action="Index" class="btn-cancel">Cancel</a><button type="submit" class="btn-submit">@(editing ? "Save Changes" : "Register Profile")</button></div>
+        </form>
+    </div>
+</div>
+<script>
+    document.getElementById('EmployeePhoto')?.addEventListener('change', function () {
+        const file = this.files?.[0];
+        if (!file) return;
+        const preview = document.getElementById('editPhotoPreview');
+        const placeholder = document.getElementById('editPhotoPlaceholder');
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
+    });
+</script>

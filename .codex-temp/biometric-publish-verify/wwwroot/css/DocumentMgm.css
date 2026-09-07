@@ -1,0 +1,321 @@
+﻿/* Container & Base Canvas Layout */
+.hr-dashboard-container {
+    padding: 30px;
+    width: 100%;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+    .hr-dashboard-container * {
+        box-sizing: border-box;
+    }
+
+    /* Page Header Structure - Responsive Flex Setup */
+    .hr-dashboard-container .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; /* Wraps components cleanly if horizontal width drops */
+        gap: 20px;
+        margin-bottom: 35px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 20px;
+    }
+
+    .hr-dashboard-container .header-text {
+        flex: 1;
+        min-width: 280px; /* Prevents text elements from squishing into awkward wraps */
+    }
+
+    .hr-dashboard-container .page-header h2 {
+        font-size: 26px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 5px 0;
+    }
+
+    .hr-dashboard-container .page-header p {
+        color: #64748b;
+        font-size: 14px;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+.save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 22px;
+    background: linear-gradient(135deg,#4f46e5,#4338ca);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: .3s;
+}
+
+    .save-btn:hover {
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(79,70,229,.35);
+    }
+
+    .save-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* Master Command Activation Button */
+    .hr-dashboard-container .save-btn {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        color: #fff;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        transition: all 0.2s ease-in-out;
+    }
+
+        .hr-dashboard-container .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+        }
+
+        .hr-dashboard-container .save-btn svg {
+            width: 16px !important;
+            height: 16px !important;
+            min-width: 16px;
+            min-height: 16px;
+            display: block;
+        }
+
+    /* Dynamic Intelligent Component Auto-Grid Layout */
+    .hr-dashboard-container .settings-grid {
+        display: grid;
+        /* Shifts dynamically from multi-column configurations to single column based on canvas boundaries */
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    /* Unified ERP Document Card Design Pattern */
+    .hr-dashboard-container .setting-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 15px rgba(15, 23, 42, 0.02);
+        transition: all 0.25s ease;
+    }
+
+        .hr-dashboard-container .setting-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(79, 70, 229, 0.06);
+            border-color: #cbd5e1;
+        }
+
+    /* Text Header Layout Layout */
+    .hr-dashboard-container .card-header {
+        background: #ffffff;
+        padding: 22px 20px 5px 20px;
+        text-align: center;
+    }
+
+        .hr-dashboard-container .card-header h3 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #1e293b;
+        }
+
+    .hr-dashboard-container .card-body {
+        padding: 20px 24px 24px 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #ffffff;
+        flex-grow: 1;
+        width: 100%;
+    }
+
+    /* Perfect Circular Soft Shaded Icons Container */
+    .hr-dashboard-container .center-icon {
+        width: 64px !important;
+        height: 64px !important;
+        min-width: 64px !important;
+        min-height: 64px !important;
+        background-color: #eff6ff;
+        border-radius: 50%;
+        color: #4f46e5;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin-bottom: 20px;
+        padding: 16px !important;
+        flex-shrink: 0;
+    }
+
+        /* Absolute Vector Containment Constraints */
+        .hr-dashboard-container .center-icon svg {
+            width: 30px !important;
+            height: 30px !important;
+            max-width: 30px !important;
+            max-height: 30px !important;
+            display: block;
+            stroke-width: 2px;
+        }
+
+    /* Bullet Feature Lists Framework */
+    .hr-dashboard-container .feature-list {
+        width: 100%;
+        margin: 0 0 25px 0;
+        padding-left: 0;
+        list-style-type: none;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex-grow: 1;
+    }
+
+        .hr-dashboard-container .feature-list li {
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            position: relative;
+            padding-left: 20px;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+            /* Premium Uniform Brand Purple Dots */
+            .hr-dashboard-container .feature-list li::before {
+                content: "•";
+                position: absolute;
+                left: 2px;
+                top: -2px;
+                font-size: 18px;
+                color: #4f46e5;
+                font-weight: bold;
+            }
+
+    /* Repository Console Pipelines */
+    .hr-dashboard-container .doc-action-hub {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; /* Prevents action items clipping horizontally if box compresses */
+        gap: 8px;
+        width: 100%;
+        margin-top: auto;
+        padding-top: 15px;
+        border-top: 1px dashed #e2e8f0;
+    }
+
+    /* Upload input masking pattern */
+    .hr-dashboard-container .btn-upload {
+        background-color: #f1f5f9;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        flex: 1;
+        min-width: 75px;
+        transition: all 0.15s ease;
+    }
+
+        .hr-dashboard-container .btn-upload input[type="file"] {
+            display: none;
+        }
+
+        .hr-dashboard-container .btn-upload:hover {
+            background-color: #e2e8f0;
+            color: #0f172a;
+        }
+
+    /* View/Download Action Button */
+    .hr-dashboard-container .btn-view {
+        background-color: #4f46e5;
+        color: #ffffff;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+        flex: 1;
+        min-width: 60px;
+        text-align: center;
+        transition: background-color 0.15s ease;
+    }
+
+        .hr-dashboard-container .btn-view:hover {
+            background-color: #4338ca;
+        }
+
+    /* Pure Red Hard Delete Button Control */
+    .hr-dashboard-container .btn-delete {
+        background-color: #fff1f2;
+        color: #ef4444;
+        border: 1px solid #fecdd3;
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+        flex: 1;
+        min-width: 70px;
+        text-align: center;
+        transition: all 0.15s ease;
+    }
+
+        .hr-dashboard-container .btn-delete:hover {
+            background-color: #fee2e2;
+            border-color: #fca5a5;
+        }
+
+/* Global Viewport Adjustment Targets */
+@media (max-width: 768px) {
+    .hr-dashboard-container {
+        padding: 20px;
+    }
+
+        .hr-dashboard-container .page-header {
+            margin-bottom: 25px;
+        }
+
+        .hr-dashboard-container .save-btn {
+            width: 100%;
+            justify-content: center;
+        }
+}
+
+@media (max-width: 360px) {
+    /* Stack action hub buttons vertically under extreme micro-viewport setups */
+    .hr-dashboard-container .doc-action-hub {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+        .hr-dashboard-container .doc-action-hub *,
+        .hr-dashboard-container .btn-upload {
+            width: 100%;
+            text-align: center;
+        }
+}

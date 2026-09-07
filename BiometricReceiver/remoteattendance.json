@@ -6,5 +6,11 @@
     "Password": "",
     "PollIntervalSeconds": 60,
     "PageSize": 1000
+  },
+  "CloudAttendanceForwarding": {
+    "Enabled": false,
+    "Endpoint": "",
+    "ApiKey": "",
+    "RetryIntervalSeconds": 30
   }
 }

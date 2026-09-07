@@ -1,0 +1,251 @@
+@{
+    ViewData["Title"] = "Admin Panel";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/Admin11.css" rel="stylesheet" asp-append-version="true" />
+
+<!-- FontAwesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<div class="admin-control-page">
+
+    <!-- Top Navigation Header -->
+    <header class="dashboard-header">
+        <div class="header-text">
+            <span class="badge-system"><i class="fa-solid fa-shield-halved"></i> Super Admin Mode</span>
+            <h2>ERP Master Control Dashboard</h2>
+            <p>Manage application modules, system configurations, access permissions, and global overrides.</p>
+        </div>
+
+        <div class="header-actions">
+            <button type="button" class="btn-secondary">
+                <i class="fa-solid fa-power-off"></i> Maintenance Mode
+            </button>
+            <button type="button" class="save-btn">
+                <i class="fa-solid fa-floppy-disk"></i> Save System State
+            </button>
+        </div>
+    </header>
+
+    <!-- Metrics & System Health Bar -->
+    <section class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-icon bg-blue-light"><i class="fa-solid fa-cubes text-blue"></i></div>
+            <div class="metric-info">
+                <span class="metric-title">Active Modules</span>
+                <span class="metric-value">@(ViewBag.ActiveModules ?? "0")</span>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-green-light"><i class="fa-solid fa-server text-green"></i></div>
+            <div class="metric-info">
+                <span class="metric-title">System Health</span>
+                <span class="metric-value">@(ViewBag.SystemHealth ?? "100%") <small>Optimal</small></span>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-purple-light"><i class="fa-solid fa-users text-purple"></i></div>
+            <div class="metric-info">
+                <span class="metric-title">Active Sessions</span>
+                <span class="metric-value">@(ViewBag.ActiveSessions ?? "0") Users</span>
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-icon bg-orange-light"><i class="fa-solid fa-database text-orange"></i></div>
+            <div class="metric-info">
+                <span class="metric-title">DB Backup Status</span>
+                <span class="metric-value">@(ViewBag.BackupStatus ?? "Up-to-date")</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Toolbar: Search, Filters & Quick Master Settings -->
+    <section class="dashboard-toolbar">
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search modules, configurations, or settings..." />
+        </div>
+        <div class="toolbar-actions">
+            <a asp-controller="Admin" asp-action="GlobalSettings" class="btn-quick-config">
+                <i class="fa-solid fa-gear"></i> Global App Settings
+            </a>
+            <a asp-controller="Admin" asp-action="RolesAndPermissions" class="btn-quick-config">
+                <i class="fa-solid fa-user-lock"></i> RBAC & Roles
+            </a>
+        </div>
+    </section>
+
+    <!-- Main Modules Grid -->
+    <main class="admin-modules-grid">
+
+        <!-- Module 01: System Configurations -->
+        <div class="module-card card-blue">
+            <div class="card-top">
+                <div class="icon-wrapper bg-blue-light"><i class="fa-solid fa-sliders text-blue"></i></div>
+                <label class="switch" title="Toggle Module Access">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="module-body">
+                <span class="module-index">MODULE 01</span>
+                <h3>System Configurations</h3>
+                <p>Manage application branding, regional setups, active company profiles, and global metadata variables.</p>
+
+                <ul class="quick-links">
+                    <li><a asp-controller="Admin" asp-action="Branding"><i class="fa-solid fa-angle-right"></i> Branding & Logo Setup</a></li>
+                    <li><a asp-controller="Admin" asp-action="TaxCurrency"><i class="fa-solid fa-angle-right"></i> Tax & Currency Rules</a></li>
+                </ul>
+
+                <div class="module-footer">
+                    <a asp-controller="Admin" asp-action="SystemConfig" class="btn-action">
+                        <i class="fa-solid fa-wrench"></i> Configure All
+                    </a>
+                    <span class="status-badge badge-active"><i class="fa-solid fa-circle"></i> Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 02: Human Resources Engine -->
+        <div class="module-card card-green">
+            <div class="card-top">
+                <div class="icon-wrapper bg-green-light"><i class="fa-solid fa-users-gear text-green"></i></div>
+                <label class="switch" title="Toggle Module Access">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="module-body">
+                <span class="module-index">MODULE 02</span>
+                <h3>Human Resources Engine</h3>
+                <p>Global employee masters, permission overrides, departmental routing matrices, and authorization levels.</p>
+
+                <ul class="quick-links">
+                    <li><a asp-controller="Admin" asp-action="EmployeeDirectory"><i class="fa-solid fa-angle-right"></i> Employee Master Directory</a></li>
+                    <li><a asp-controller="Admin" asp-action="Departments"><i class="fa-solid fa-angle-right"></i> Department & Designation Rules</a></li>
+                </ul>
+
+                <div class="module-footer">
+                    <a asp-controller="Admin" asp-action="HRAccess" class="btn-action">
+                        <i class="fa-solid fa-user-shield"></i> Manage HR Access
+                    </a>
+                    <span class="status-badge badge-active"><i class="fa-solid fa-circle"></i> Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 03: Attendance & Shifts -->
+        <div class="module-card card-indigo">
+            <div class="card-top">
+                <div class="icon-wrapper bg-indigo-light"><i class="fa-solid fa-clock text-indigo"></i></div>
+                <label class="switch" title="Toggle Module Access">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="module-body">
+                <span class="module-index">MODULE 03</span>
+                <h3>Attendance & Shifts</h3>
+                <p>Biometric device gateways, shift allocation engines, manual overrides, and structural late/overtime policies.</p>
+
+                <ul class="quick-links">
+                    <li><a asp-controller="Admin" asp-action="BiometricSync"><i class="fa-solid fa-angle-right"></i> Biometric Device Sync</a></li>
+                    <li><a asp-controller="Admin" asp-action="ShiftTimings"><i class="fa-solid fa-angle-right"></i> Shift Timings & Overtime</a></li>
+                </ul>
+
+                <div class="module-footer">
+                    <a asp-controller="Admin" asp-action="Gateways" class="btn-action">
+                        <i class="fa-solid fa-network-wired"></i> Open Gateways
+                    </a>
+                    <span class="status-badge badge-active"><i class="fa-solid fa-circle"></i> Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 04: Inventory Management -->
+        <div class="module-card card-orange">
+            <div class="card-top">
+                <div class="icon-wrapper bg-orange-light"><i class="fa-solid fa-boxes-stacked text-orange"></i></div>
+                <label class="switch" title="Toggle Module Access">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="module-body">
+                <span class="module-index">MODULE 04</span>
+                <h3>Inventory Management</h3>
+                <p>Warehouse racking rules, barcode mapping systems, live stock tracking, and validation rules setup.</p>
+
+                <ul class="quick-links">
+                    <li><a asp-controller="Admin" asp-action="WarehouseAllocation"><i class="fa-solid fa-angle-right"></i> Warehouse Allocation</a></li>
+                    <li><a asp-controller="Admin" asp-action="StockAlerts"><i class="fa-solid fa-angle-right"></i> Stock Alert Thresholds</a></li>
+                </ul>
+
+                <div class="module-footer">
+                    <a asp-controller="Admin" asp-action="InventoryConfig" class="btn-action">
+                        <i class="fa-solid fa-boxes-packing"></i> Configure Stock
+                    </a>
+                    <span class="status-badge badge-active"><i class="fa-solid fa-circle"></i> Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 05: Payroll & Compensation -->
+        <div class="module-card card-red">
+            <div class="card-top">
+                <div class="icon-wrapper bg-red-light"><i class="fa-solid fa-file-invoice-dollar text-red"></i></div>
+                <label class="switch" title="Toggle Module Access">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="module-body">
+                <span class="module-index">MODULE 05</span>
+                <h3>Payroll & Compensation</h3>
+                <p>Salary structure allocation, tax deduction engines, payslip generation locks, and direct dispersal gates.</p>
+
+                <ul class="quick-links">
+                    <li><a asp-controller="Admin" asp-action="TaxDeductions"><i class="fa-solid fa-angle-right"></i> Tax & Deductions Master</a></li>
+                    <li><a asp-controller="Admin" asp-action="PayslipRelease"><i class="fa-solid fa-angle-right"></i> Payslip Lock & Release</a></li>
+                </ul>
+
+                <div class="module-footer">
+                    <a asp-controller="Admin" asp-action="PayrollVault" class="btn-action">
+                        <i class="fa-solid fa-vault"></i> Access Vault
+                    </a>
+                    <span class="status-badge badge-active"><i class="fa-solid fa-circle"></i> Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 06: System APIs & Security Core -->
+        <div class="module-card card-purple">
+            <div class="card-top">
+                <div class="icon-wrapper bg-purple-light"><i class="fa-solid fa-key text-purple"></i></div>
+                <label class="switch" title="Toggle Module Access">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="module-body">
+                <span class="module-index">MODULE 06</span>
+                <h3>System APIs & Security Core</h3>
+                <p>Webhook management, core encryption keys lifecycle, cloud data synchronization logs, and system diagnostics.</p>
+
+                <ul class="quick-links">
+                    <li><a asp-controller="Admin" asp-action="ApiTokens"><i class="fa-solid fa-angle-right"></i> API Tokens & Webhooks</a></li>
+                    <li><a asp-controller="Admin" asp-action="AuditLogs"><i class="fa-solid fa-angle-right"></i> Security Audit Logs</a></li>
+                </ul>
+
+                <div class="module-footer">
+                    <a asp-controller="Admin" asp-action="CoreSecurity" class="btn-action">
+                        <i class="fa-solid fa-code-compare"></i> Core Settings
+                    </a>
+                    <span class="status-badge badge-active"><i class="fa-solid fa-circle"></i> Active</span>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+</div>

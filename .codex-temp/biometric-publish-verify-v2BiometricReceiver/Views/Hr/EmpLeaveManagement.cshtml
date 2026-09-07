@@ -1,0 +1,244 @@
+﻿
+@{
+    ViewData["Title"] = "Leave Management";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/empleavemanagement.css" rel="stylesheet" />
+
+<div class="leave-dashboard-wrapper">
+
+    <!-- Page Header with Back Arrow -->
+    <div class="dashboard-header">
+        <div class="header-left">
+            <div class="header-text">
+                <h2>Attendance Management</h2>
+                <p>Track global checkpoints, monthly metrics, total late limits, and remaining leave buckets.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Grid Dashboard -->
+    <div class="dashboard-grid">
+
+        <!-- LEFT SIDE: Apply Leave & Personal Leave Stats -->
+        <div class="left-section">
+
+            <!-- Quick Stats Row -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon total-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-value">@(Model?.TotalQuota ?? 0)</span>
+                        <span class="stat-label">Total Quota</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon consumed-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-value">@(Model?.ConsumedDays ?? 0)</span>
+                        <span class="stat-label">Consumed</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon pending-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-value">@(Model?.PendingApprovalsCount ?? 0)</span>
+                        <span class="stat-label">Pending Approval</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon balance-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                    </div>
+                    <div class="stat-details">
+                        <span class="stat-value">@(Model?.RemainingBalance ?? 0)</span>
+                        <span class="stat-label">Remaining Balance</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apply Leave Form Card -->
+            <div class="glass-card apply-leave-card">
+                <div class="card-header">
+                    <h3>Apply New Leave</h3>
+                    <span class="badge-accent">Quick Request</span>
+                </div>
+
+                <form class="leave-form" id="leaveApplicationForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Leave Type</label>
+                            <select class="form-input" name="LeaveType" required>
+                                <option value="" disabled selected>Select Leave Type</option>
+                                <option value="CL">Casual Leave (CL)</option>
+                                <option value="SL">Sick Leave (SL)</option>
+                                <option value="UL">Unpaid Leave (UL)</option>
+                                <option value="EL">Earned Leave (EL)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Duration</label>
+                            <select class="form-input" name="Duration" required>
+                                <option value="Full">Full Day</option>
+                                <option value="HalfFirst">Half Day (First Half)</option>
+                                <option value="HalfSecond">Half Day (Second Half)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>From Date</label>
+                            <input type="date" class="form-input calendar-input" name="FromDate" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label>To Date</label>
+                            <input type="date" class="form-input calendar-input" name="ToDate" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Reason for Leave</label>
+                        <textarea class="form-input text-area" name="Reason" rows="3" placeholder="Specify valid reason for leave application..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary-glow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+                        Submit
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- RIGHT SIDE: Company Holiday Calendar & Holidays List -->
+        <div class="right-section">
+
+            <div class="glass-card holiday-card">
+                <div class="card-header">
+                    <h3>Company Holiday Calendar</h3>
+                    <span class="year-badge">2026</span>
+                </div>
+
+                <!-- Calendar Widget Container -->
+                <div class="calendar-widget">
+                    <div class="calendar-month-nav">
+                        <button type="button" class="nav-btn" id="prevMonth">&lt;</button>
+                        <span class="current-month" id="currentMonthLabel">July 2026</span>
+                        <button type="button" class="nav-btn" id="nextMonth">&gt;</button>
+                    </div>
+
+                    <div class="calendar-days-grid">
+                        <span class="day-head">Su</span>
+                        <span class="day-head">Mo</span>
+                        <span class="day-head">Tu</span>
+                        <span class="day-head">We</span>
+                        <span class="day-head">Th</span>
+                        <span class="day-head">Fr</span>
+                        <span class="day-head">Sa</span>
+                        @if (Model?.CalendarDays != null)
+                        {
+                            @foreach (var day in Model.CalendarDays)
+                            {
+                                <span class="day-num @day.CssClass">@day.DayNumber</span>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Upcoming Holidays List -->
+                <div class="upcoming-holidays">
+                    <h4>Upcoming Company Holidays</h4>
+                    <ul class="holiday-list">
+                        @if (Model?.UpcomingHolidays != null && Model.UpcomingHolidays.Count > 0)
+                        {
+                            @foreach (var holiday in Model.UpcomingHolidays)
+                            {
+                                <li>
+                                    <div class="holiday-date">
+                                        <span class="h-day">@holiday.Day</span>
+                                        <span class="h-month">@holiday.Month</span>
+                                    </div>
+                                    <div class="holiday-info">
+                                        <h5>@holiday.Title</h5>
+                                        <small>@holiday.Type</small>
+                                    </div>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="no-data-item">
+                                <span class="no-data-text">No upcoming holidays found.</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- BOTTOM SECTION: Recent Leave History & Status Table -->
+    <div class="glass-card table-section">
+        <div class="card-header">
+            <h3>Recent Leave Requests</h3>
+            <div class="filter-pills">
+                <span class="pill active" data-filter="all">All</span>
+                <span class="pill" data-filter="pending">Pending</span>
+                <span class="pill" data-filter="approved">Approved</span>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Leave Type</th>
+                        <th>Applied On</th>
+                        <th>From - To Date</th>
+                        <th>Total Days</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model?.RecentLeaveRequests != null && Model.RecentLeaveRequests.Count > 0)
+                    {
+                        @foreach (var req in Model.RecentLeaveRequests)
+                        {
+                            <tr>
+                                <td><span class="type-badge @req.BadgeClass">@req.LeaveTypeName</span></td>
+                                <td>@req.AppliedOn</td>
+                                <td>@req.DateRange</td>
+                                <td>@req.TotalDays</td>
+                                <td>@req.Reason</td>
+                                <td><span class="status-badge @req.StatusBadgeClass">@req.Status</span></td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center-muted">No recent leave requests found.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

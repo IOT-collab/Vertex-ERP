@@ -1,0 +1,105 @@
+﻿@*
+    FileName: AdminPanel.cshtml
+*@
+@{
+    ViewData["Title"] = "AdminPanel";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/admin.css" rel="stylesheet" />
+
+<div class="admin-control-page">
+
+    <!-- Top Action Hub -->
+    <div class="page-header">
+        <div class="header-text">
+            <h2>ERP Application Control Center</h2>
+            <p>Central workspace to manage application scopes, module status, and global configuration overrides.</p>
+        </div>
+        <button class="save-btn">
+            Save System State
+        </button>
+    </div>
+
+    <!-- Core App Module Matrix -->
+    <div class="admin-modules-grid">
+
+        <!-- 01. GENERAL CONFIGURATION -->
+        <div class="module-card card-blue">
+            <div class="module-body">
+                <span class="module-index">01</span>
+                <h3>System Configurations</h3>
+                <p>Manage application branding, regional setups, active company profiles, and global metadata variables.</p>
+                <div class="module-footer">
+                    <a href="@Url.Action("AddAdminPanel", "Admin")" class="btn-action">Configure</a>
+                    <span class="status-badge badge-active">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 02. HR & DIRECTORY LAYER -->
+        <div class="module-card card-green">
+            <div class="module-body">
+                <span class="module-index">02</span>
+                <h3>Human Resources Engine</h3>
+                <p>Global employee masters, permission overrides, departmental routing matrices, and authorization levels.</p>
+                <div class="module-footer">
+                    <a href="@Url.Action("AddAdminPanel", "Admin")" class="btn-action">Manage Module</a>
+                    <span class="status-badge badge-active">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 03. ATTENDANCE & SHIFTS TERMINAL -->
+        <div class="module-card card-indigo">
+            <div class="module-body">
+                <span class="module-index">03</span>
+                <h3>Attendance & Shifts</h3>
+                <p>Biometric device gateways, shift allocation engines, manual overrides, and structural late/overtime policies.</p>
+                <div class="module-footer">
+                    <a href="@Url.Action("AddAdminPanel", "Admin")" class="btn-action">Open Gateways</a>
+                    <span class="status-badge badge-active">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 04. INVENTORY & STOCK GATEWAY -->
+        <div class="module-card card-orange">
+            <div class="module-body">
+                <span class="module-index">04</span>
+                <h3>Inventory Management</h3>
+                <p>Warehouse racking rules, barcode mapping systems, live stock tracking, and validation rules setup.</p>
+                <div class="module-footer">
+                    <a href="@Url.Action("AddAdminPanel", "Admin")" class="btn-action">Configure Stock</a>
+                    <span class="status-badge badge-active">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 05. PAYROLL & COMPENSATION PIPELINE -->
+        <div class="module-card card-red">
+            <div class="module-body">
+                <span class="module-index">05</span>
+                <h3>Payroll & Compensation</h3>
+                <p>Salary structure allocation, tax deduction engines, payslip generation locks, and direct dispersal gates.</p>
+                <div class="module-footer">
+                    <a href="@Url.Action("AddAdminPanel", "Admin")" class="btn-action">Access Vault</a>
+                    <span class="status-badge badge-active">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 06. SYSTEMS, APIS & DATA STACK -->
+        <div class="module-card card-purple">
+            <div class="module-body">
+                <span class="module-index">06</span>
+                <h3>System APIs & Sync</h3>
+                <p>Webhook management, core encryption keys lifecycle, cloud data synchronization logs, and system diagnostics.</p>
+                <div class="module-footer">
+                    <a href="@Url.Action("AddAdminPanel", "Admin")" class="btn-action">Core System</a>
+                    <span class="status-badge badge-active">Active</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,112 @@
+﻿@{
+    ViewData["Title"] = "Project Management";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/projectmgm.css" rel="stylesheet" />
+
+<div class="project-page">
+
+    <!-- Page Header Hub -->
+    <div class="page-header">
+        <div class="header-text">
+            <h2>Project Management</h2>
+            <p>Manage Projects, Tasks & Resources</p>
+        </div>
+
+        <a href="@Url.Action("AddProjectMgm", "Main")" class="btn-add">
+            + Create Project
+        </a>
+    </div>
+
+    <!-- Analytics Metrics Row -->
+    <div class="summary">
+        <div class="summary-card">
+            <h2>@(ViewBag.TotalProjects ?? 0)</h2>
+            <p>Total Projects</p>
+        </div>
+
+        <div class="summary-card">
+            <h2>@(ViewBag.ActiveTasks ?? 0)</h2>
+            <p>Active Tasks</p>
+        </div>
+
+        <div class="summary-card">
+            <h2>@(ViewBag.RunningProjects ?? 0)</h2>
+            <p>Running Projects</p>
+        </div>
+
+        <div class="summary-card">
+            <h2>@(ViewBag.CompletionRate ?? "0%")</h2>
+            <p>Completion</p>
+        </div>
+    </div>
+
+    <!-- Operational Modules Grid -->
+    <div class="module-grid">
+
+        <div class="module-card">
+            <div class="icon">📁</div>
+            <h3>Project Creation</h3>
+            <p>Create and manage company projects.</p>
+            <a asp-controller="ProjectMgm" asp-action="ProjectCreation" class="btn-module-action">
+                Open
+            </a>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">✅</div>
+            <h3>Tasks</h3>
+            <p>Assign and monitor project tasks.</p>
+            <a asp-controller="ProjectMgm" asp-action="AssignTask" class="btn-module-action">
+                Open
+            </a>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">📊</div>
+            <h3>Project Timeline</h3>
+            <p>Track project timeline visually.</p>
+            <a asp-controller="ProjectMgm" asp-action="ProjectTimeline" class="btn-module-action">
+                Open
+            </a>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">👥</div>
+            <h3>Resource Allocation</h3>
+            <p>Allocate employees and resources.</p>
+            <a asp-controller="ProjectMgm" asp-action="ResourceAllocation" class="btn-module-action">
+                Open
+            </a>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">⏱</div>
+            <h3>Timesheet</h3>
+            <p>Manage employee work hours.</p>
+            <a asp-controller="ProjectMgm" asp-action="Timesheet" class="btn-module-action">
+                Open
+            </a>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">💰</div>
+            <h3>Budget Tracking</h3>
+            <p>Monitor project expenses & budget.</p>
+            <a asp-controller="ProjectMgm" asp-action="BudgetTracking" class="btn-module-action">
+                Open
+            </a>
+        </div>
+
+        <div class="module-card">
+            <div class="icon">🎫</div>
+            <h3>Raise Enquiry</h3>
+            <p>Create support tickets and track issue status.</p>
+            <a asp-controller="ProjectMgm" asp-action="RaisedEnquiry" class="btn-module-action">
+                Open
+            </a>
+        </div>
+
+    </div>
+
+</div>

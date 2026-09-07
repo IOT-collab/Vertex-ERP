@@ -1,0 +1,56 @@
+@{
+    ViewData["Title"] = "Employee Location Tracking";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link href="~/css/LocationTracking.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="tracking-page">
+    <header class="tracking-header">
+        <div><span class="tracking-kicker">WORKFORCE OPERATIONS</span><h1>Employee Location Tracking</h1><p>Review live status and the route recorded between punch in and punch out.</p></div>
+        <div class="live-pill"><span></span> Live monitoring</div>
+    </header>
+
+    <section class="tracking-stats">
+        <article><small>Employees punched in</small><strong id="activeCount">1</strong><span class="positive">Active now</span></article>
+        <article><small>Currently tracking</small><strong id="trackingCount">1</strong><span>Location enabled</span></article>
+        <article><small>Distance travelled</small><strong id="distanceTotal">6.8 km</strong><span>Selected employee</span></article>
+        <article><small>Last update</small><strong id="lastUpdate">Just now</strong><span>Auto refresh enabled</span></article>
+    </section>
+
+    <section class="tracking-workspace">
+        <aside class="employee-list">
+            <div class="panel-title"><div><h2>Employees</h2><span>Today's field activity</span></div><button type="button" title="Filter"><i class="fa-solid fa-sliders"></i></button></div>
+            <label class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="search" placeholder="Search employee" /></label>
+            <button class="employee-row selected" type="button">
+                <span class="employee-avatar">AK</span><span class="employee-details"><strong>Arjun Kumar</strong><small><i></i> Tracking · Field Sales</small><em>09:12 AM punch in</em></span><span class="row-arrow">›</span>
+            </button>
+            <button class="employee-row" type="button">
+                <span class="employee-avatar violet">PS</span><span class="employee-details"><strong>Priya Sharma</strong><small class="offline"><i></i> Punched out · HR</small><em>06:04 PM punch out</em></span><span class="row-arrow">›</span>
+            </button>
+            <button class="employee-row" type="button">
+                <span class="employee-avatar amber">RM</span><span class="employee-details"><strong>Rohit Mehta</strong><small class="offline"><i></i> Not punched in · IT</small><em>No activity today</em></span><span class="row-arrow">›</span>
+            </button>
+        </aside>
+
+        <div class="map-panel">
+            <div class="map-toolbar">
+                <div><h2>Arjun Kumar's route</h2><span>7 Aug 2026 · 09:12 AM – Live</span></div>
+                <div class="map-actions"><input type="date" value="2026-08-07" /><button type="button"><i class="fa-solid fa-expand"></i></button></div>
+            </div>
+            <div id="employeeMap"></div>
+            <div class="map-legend"><span><i class="start"></i>Punch in</span><span><i class="route"></i>Travel route</span><span><i class="current"></i>Current location</span></div>
+        </div>
+
+        <aside class="route-details">
+            <div class="detail-profile"><span class="employee-avatar">AK</span><div><h2>Arjun Kumar</h2><span>EMP-1024 · Field Sales</span></div><span class="tracking-badge">Tracking</span></div>
+            <div class="session-grid"><div><small>Punch in</small><strong>09:12 AM</strong><span>Sector 62, Noida</span></div><div><small>Duration</small><strong id="sessionDuration">05h 26m</strong><span>Active session</span></div></div>
+            <div class="route-summary"><h3>Route summary</h3><div><span><i class="fa-solid fa-route"></i>Distance travelled</span><strong>6.8 km</strong></div><div><span><i class="fa-solid fa-location-dot"></i>Location points</span><strong>24</strong></div><div><span><i class="fa-regular fa-clock"></i>Last updated</span><strong>20 sec ago</strong></div></div>
+            <div class="location-timeline"><h3>Location timeline</h3><div class="timeline-item current"><i></i><div><strong>Current location</strong><span>Sector 18, Noida</span><small>02:38 PM</small></div></div><div class="timeline-item"><i></i><div><strong>Client visit</strong><span>Sector 16, Noida</span><small>12:45 PM · 38 min</small></div></div><div class="timeline-item start"><i></i><div><strong>Punched in</strong><span>Sector 62, Noida</span><small>09:12 AM</small></div></div></div>
+        </aside>
+    </section>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="~/js/location-tracking.js" asp-append-version="true"></script>

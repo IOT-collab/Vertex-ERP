@@ -1,0 +1,199 @@
+﻿@{
+    ViewData["Title"] = "Department Management";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+<link href="~/css/departmentmgm.css" rel="stylesheet" />
+
+<div class="department-page">
+
+    <!-- ================= HEADER ================= -->
+    <div class="page-header">
+
+        <div class="header-left">
+
+            <div class="header-content">
+                <h2>Department Management</h2>
+                <p>Create and manage departments, designations and teams.</p>
+            </div>
+
+        </div>
+
+        <button type="button" class="btn-primary">
+            <span class="plus-icon">+</span>
+            Add Department
+        </button>
+
+    </div>
+
+
+    <!-- ================= STATISTICS ================= -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <span>Total Departments</span>
+            <h3>--</h3>
+        </div>
+
+        <div class="stat-card">
+            <span>Total Designations</span>
+            <h3>--</h3>
+        </div>
+
+        <div class="stat-card">
+            <span>Total Teams</span>
+            <h3>--</h3>
+        </div>
+
+        <div class="stat-card">
+            <span>Total Employees</span>
+            <h3>--</h3>
+        </div>
+
+    </div>
+
+
+    <!-- ================= ADD DEPARTMENT ================= -->
+
+    <div class="card">
+
+        <h3>Add Department</h3>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Department Name</label>
+
+                <input type="text"
+                       placeholder="Enter department name" />
+            </div>
+
+
+            <div class="form-group">
+                <label>Department Code</label>
+
+                <input type="text"
+                       placeholder="Enter department code" />
+            </div>
+
+
+            <div class="form-group">
+                <label>Department Head</label>
+
+                <input type="text"
+                       placeholder="Select department head" />
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Status</label>
+
+                <select>
+                    <option value="">Select status</option>
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <div class="btn-area">
+
+            <button type="button" class="btn-primary">
+                Save Department
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= DEPARTMENT LIST ================= -->
+
+    <div class="card">
+
+        <div class="table-header">
+
+            <h3>Department List</h3>
+
+            <div class="search-box">
+
+                <span class="search-icon">&#128269;</span>
+
+                <input type="text"
+                       placeholder="Search department..." />
+
+            </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Department</th>
+                        <th>Code</th>
+                        <th>Department Head</th>
+                        <th>Employees</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+                    <!-- Department data will come from database -->
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <div class="empty-state">
+            No departments available.
+        </div>
+
+    </div>
+
+
+    <!-- ================= BOTTOM SECTION ================= -->
+
+    <div class="bottom-grid">
+
+
+        <!-- Designations -->
+
+        <div class="card bottom-card">
+
+            <h3>Designations</h3>
+
+            <div class="empty-state">
+                No designations available.
+            </div>
+
+        </div>
+
+
+        <!-- Teams -->
+
+        <div class="card bottom-card">
+
+            <h3>Teams</h3>
+
+            <div class="empty-state">
+                No teams available.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

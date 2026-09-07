@@ -1,0 +1,54 @@
+@model VertexERP.Models.ShipmentTrackingPageViewModel
+@{
+    ViewData["Title"] = "DTDC Shipment Tracking";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var shipment = Model.Shipment;
+}
+<style>
+    .tracking-page{--panel:#111c31;--panel2:#172641;--line:#2b3d5d;--muted:#9fb0c9;--ink:#eef5ff;width:min(1280px,100%);margin:auto;padding:clamp(12px,2.4vw,30px);color:var(--ink)}
+    .tracking-hero,.tracking-card{border:1px solid var(--line);border-radius:20px;background:linear-gradient(135deg,#111c31,#0c1629)}
+    .tracking-hero{padding:clamp(22px,4vw,42px);background:radial-gradient(circle at 86% 12%,#17428b80,transparent 38%),linear-gradient(135deg,#111c31,#0c1629)}
+    .tracking-hero h1{margin:0 0 8px;font-size:clamp(27px,4vw,40px)}.tracking-hero p{margin:0;color:var(--muted);line-height:1.55}
+    .tracking-form{display:flex;gap:10px;margin-top:24px;padding:8px;border-radius:14px;background:#f8fbff}.tracking-input{display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:0 13px;color:#64748b}.tracking-input input{width:100%;height:50px;border:0!important;outline:0;background:transparent!important;color:#172033!important;font-size:16px!important;box-shadow:none!important}.tracking-button,.official-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:180px;border:0;border-radius:10px;background:#3b82f6;color:#fff;font-weight:800;text-decoration:none;cursor:pointer}.tracking-button:hover,.official-link:hover{background:#2563eb;color:#fff}
+    .tracking-help{display:flex;gap:8px;margin-top:13px;color:var(--muted);font-size:13px}.tracking-alert{margin-top:18px;padding:14px 16px;border:1px solid #8e3448;border-radius:12px;background:#431b24;color:#fecdd3}.tracking-alert:empty{display:none}.tracking-setup{display:flex;align-items:center;justify-content:space-between;gap:16px;border-color:#806b26;background:#302913;color:#fde68a}.official-link{min-height:42px;padding:0 14px;white-space:nowrap}
+    .tracking-card{margin-top:20px;padding:clamp(18px,3vw,28px)}.tracking-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.awb-label{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}.awb{display:block;margin-top:5px;font-size:clamp(22px,3vw,31px);overflow-wrap:anywhere}.reference{display:block;margin-top:5px;color:var(--muted)}.status{padding:9px 14px;border-radius:999px;background:#dcfce7;color:#15803d;font-weight:800}
+    .tracking-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:22px}.tracking-stat{min-width:0;padding:16px;border-radius:13px;background:var(--panel2)}.tracking-stat i{color:#60a5fa}.tracking-stat small{display:block;margin:9px 0 5px;color:var(--muted)}.tracking-stat strong{display:block;overflow-wrap:anywhere}
+    .history{margin-top:20px;padding:clamp(18px,3vw,28px);border:1px solid var(--line);border-radius:20px;background:var(--panel)}.history h2{margin:0 0 20px}.scan-list{margin-left:10px;padding-left:26px;border-left:2px solid #304564}.scan{position:relative;padding:0 0 24px}.scan:last-child{padding-bottom:0}.scan:before{content:"";position:absolute;top:4px;left:-34px;width:13px;height:13px;border:3px solid #60a5fa;border-radius:50%;background:#111c31}.scan:first-child:before{background:#3b82f6;box-shadow:0 0 0 5px #3b82f625}.scan-head{display:flex;justify-content:space-between;gap:12px}.scan time,.scan p,.empty{color:var(--muted)}.scan p{margin:6px 0 0}.empty{margin:0}
+    @@media(max-width:850px){.tracking-grid{grid-template-columns:1fr 1fr}}@@media(max-width:600px){.tracking-page{padding:8px}.tracking-form{flex-direction:column;background:transparent;padding:0}.tracking-input{background:#fff;border-radius:11px}.tracking-button{width:100%;height:50px}.tracking-setup,.tracking-top,.scan-head{align-items:stretch;flex-direction:column}.official-link{width:100%}.tracking-grid{grid-template-columns:1fr}.scan time{white-space:normal}}
+</style>
+
+<section class="tracking-page">
+    <header class="tracking-hero">
+        <h1><i class="fa-solid fa-truck-fast"></i> DTDC Shipment Tracking</h1>
+        <p>Enter a DTDC shipment/AWB number for live ERP tracking. Reference numbers must be checked on DTDC's official tracker.</p>
+        <form asp-action="OrderTracking" method="post" class="tracking-form">
+            <div class="tracking-input"><i class="fa-solid fa-barcode"></i><input asp-for="TrackingNumber" placeholder="Enter DTDC shipment / AWB number" autocomplete="off" aria-label="DTDC shipment or AWB number" /></div>
+            <button class="tracking-button" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Track Shipment</button>
+        </form>
+        <span asp-validation-for="TrackingNumber" class="tracking-alert"></span>
+        <div class="tracking-help"><i class="fa-solid fa-circle-info"></i> This box accepts the DTDC shipment/AWB number, not the sender's reference number.</div>
+    </header>
+
+    @if (!Model.IsApiConfigured)
+    {
+        <div class="tracking-alert tracking-setup"><span><i class="fa-solid fa-key"></i> Live AWB tracking is inactive until the TrackingMore API key is configured.</span><a class="official-link" href="https://www.dtdc.com/track-your-shipment/" target="_blank" rel="noopener noreferrer">Track on DTDC Website</a></div>
+    }
+    <div class="tracking-alert tracking-setup"><span><i class="fa-solid fa-hashtag"></i> Have a DTDC reference number? DTDC requires selecting <strong>Reference Number</strong> and completing CAPTCHA on its official website.</span><a class="official-link" href="https://www.dtdc.com/track-your-shipment/" target="_blank" rel="noopener noreferrer">Track Reference Number</a></div>
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="tracking-alert"><i class="fa-solid fa-circle-exclamation"></i> @Model.ErrorMessage</div>
+    }
+    @if (shipment is not null)
+    {
+        <section class="tracking-card">
+            <div class="tracking-top"><div><span class="awb-label">DTDC AWB</span><strong class="awb">@shipment.Waybill</strong>@if(!string.IsNullOrWhiteSpace(shipment.ReferenceNumber)){<small class="reference">Reference: @shipment.ReferenceNumber</small>}</div><span class="status">@shipment.CurrentStatus</span></div>
+            <div class="tracking-grid">
+                <div class="tracking-stat"><i class="fa-solid fa-location-dot"></i><small>Current location</small><strong>@(string.IsNullOrWhiteSpace(shipment.CurrentLocation) ? "Not available" : shipment.CurrentLocation)</strong></div>
+                <div class="tracking-stat"><i class="fa-regular fa-clock"></i><small>Last updated</small><strong>@(shipment.StatusDateTime?.ToString("dd MMM yyyy, hh:mm tt") ?? "Not available")</strong></div>
+                <div class="tracking-stat"><i class="fa-solid fa-map-pin"></i><small>Origin</small><strong>@(string.IsNullOrWhiteSpace(shipment.Origin) ? "Not available" : shipment.Origin)</strong></div>
+                <div class="tracking-stat"><i class="fa-solid fa-flag-checkered"></i><small>Destination</small><strong>@(string.IsNullOrWhiteSpace(shipment.Destination) ? "Not available" : shipment.Destination)</strong></div>
+            </div>
+        </section>
+        <section class="history"><h2>Tracking History</h2>@if(shipment.Scans.Count == 0){<p class="empty">No detailed scan history was returned for this shipment.</p>}else{<div class="scan-list">@foreach(var scan in shipment.Scans){<article class="scan"><div class="scan-head"><strong>@scan.Status</strong><time>@(scan.DateTime?.ToString("dd MMM yyyy, hh:mm tt") ?? "Time unavailable")</time></div>@if(!string.IsNullOrWhiteSpace(scan.Location)){<p><i class="fa-solid fa-location-dot"></i> @scan.Location</p>}@if(!string.IsNullOrWhiteSpace(scan.Instructions)){<p>@scan.Instructions</p>}</article>}</div>}</section>
+    }
+</section>

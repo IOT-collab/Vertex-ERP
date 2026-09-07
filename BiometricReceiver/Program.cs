@@ -19,6 +19,8 @@ builder.Configuration.AddJsonFile("remoteattendance.json", optional: true, reloa
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.WebHost.ConfigureKestrel(options => options.ListenAnyIP(8082));
+var allowedSourceIps = builder.Configuration.GetSection("BiometricReceiverSecurity:AllowedSourceIps")
+    .Get<string[]>() ?? [];
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
@@ -28,6 +30,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IBiometricRepository, BiometricRepository>();
 builder.Services.AddScoped<IAttendanceSyncService, AttendanceSyncService>();
 builder.Services.Configure<RemoteAttendanceOptions>(builder.Configuration.GetSection(RemoteAttendanceOptions.SectionName));
+builder.Services.Configure<CloudAttendanceForwardingOptions>(builder.Configuration.GetSection(CloudAttendanceForwardingOptions.SectionName));
 builder.Services.AddHttpClient(RemoteAttendanceImportService.HttpClientName, client =>
 {
     client.Timeout = TimeSpan.FromSeconds(45);
@@ -37,7 +40,10 @@ builder.Services.AddHttpClient(RemoteAttendanceImportService.HttpClientName, cli
     CookieContainer = new System.Net.CookieContainer(),
     AllowAutoRedirect = true
 });
+builder.Services.AddHttpClient("CloudAttendanceForwarding", client => client.Timeout = TimeSpan.FromSeconds(30));
 builder.Services.AddHostedService<RemoteAttendanceImportService>();
+builder.Services.AddSingleton<CloudAttendanceForwarder>();
+builder.Services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<CloudAttendanceForwarder>());
 
 var app = builder.Build();
 var auditDirectory = Path.Combine(app.Environment.ContentRootPath, "logs");
@@ -78,7 +84,7 @@ app.MapGet("/health", () => Results.Ok(new
 
 app.MapGet("/iclock/cdata", async (HttpContext context, IAttendanceSyncService sync, ILogger<Program> logger, CancellationToken cancellationToken) =>
 {
-    if (!IsLanRequest(context)) return Results.Unauthorized();
+    if (!IsTrustedBiometricRequest(context, allowedSourceIps)) return Results.Unauthorized();
     var serial = GetSerial(context);
     logger.LogInformation("ADMS handshake from {Ip} serial {Serial}", GetSourceIp(context), serial);
     if (!await sync.RegisterHeartbeatAsync(serial, GetSourceIp(context), cancellationToken))
@@ -93,7 +99,7 @@ app.MapGet("/iclock/cdata", async (HttpContext context, IAttendanceSyncService s
 
 app.MapPost("/iclock/cdata", async (HttpContext context, IAttendanceSyncService sync, ILogger<Program> logger, CancellationToken cancellationToken) =>
 {
-    if (!IsLanRequest(context)) return Results.Unauthorized();
+    if (!IsTrustedBiometricRequest(context, allowedSourceIps)) return Results.Unauthorized();
     if (context.Request.ContentLength is > 1_048_576)
         return Results.Text("PAYLOAD TOO LARGE", "text/plain", statusCode: StatusCodes.Status413PayloadTooLarge);
 
@@ -104,6 +110,9 @@ app.MapPost("/iclock/cdata", async (HttpContext context, IAttendanceSyncService 
 
     var serial = GetSerial(context);
     var result = await sync.ReceiveAsync(serial, payload, GetSourceIp(context), cancellationToken);
+    if (result.Accepted)
+        await context.RequestServices.GetRequiredService<CloudAttendanceForwarder>()
+            .EnqueueAsync(serial, payload, cancellationToken);
     await AppendAuditAsync(auditLogPath,
         $"{DateTime.UtcNow:O}\tATTLOG\tSN={serial}\treceived={result.Received}\tsaved={result.Saved}\tunmapped={result.Unmapped}\taccepted={result.Accepted}");
     logger.LogInformation("ADMS ATTLOG from {Ip} serial {Serial}: received {Received}, saved {Saved}",
@@ -113,12 +122,12 @@ app.MapPost("/iclock/cdata", async (HttpContext context, IAttendanceSyncService 
         : Results.Text("UNKNOWN DEVICE", "text/plain", statusCode: StatusCodes.Status401Unauthorized);
 });
 
-app.MapMethods("/iclock/registry", [HttpMethods.Get, HttpMethods.Post], HandleHeartbeatAsync);
-app.MapMethods("/iclock/getrequest", [HttpMethods.Get], HandleHeartbeatAsync);
-app.MapMethods("/iclock/devicecmd", [HttpMethods.Get, HttpMethods.Post], HandleHeartbeatAsync);
+app.MapMethods("/iclock/registry", [HttpMethods.Get, HttpMethods.Post], (HttpContext context, IAttendanceSyncService sync, ILogger<Program> logger, CancellationToken cancellationToken) => HandleHeartbeatAsync(context, sync, logger, allowedSourceIps, cancellationToken));
+app.MapMethods("/iclock/getrequest", [HttpMethods.Get], (HttpContext context, IAttendanceSyncService sync, ILogger<Program> logger, CancellationToken cancellationToken) => HandleHeartbeatAsync(context, sync, logger, allowedSourceIps, cancellationToken));
+app.MapMethods("/iclock/devicecmd", [HttpMethods.Get, HttpMethods.Post], (HttpContext context, IAttendanceSyncService sync, ILogger<Program> logger, CancellationToken cancellationToken) => HandleHeartbeatAsync(context, sync, logger, allowedSourceIps, cancellationToken));
 app.MapMethods("/iclock/test", [HttpMethods.Get, HttpMethods.Post], async (HttpContext context, IAttendanceSyncService sync, CancellationToken cancellationToken) =>
 {
-    if (!IsLanRequest(context)) return Results.Unauthorized();
+    if (!IsTrustedBiometricRequest(context, allowedSourceIps)) return Results.Unauthorized();
     var serial = GetSerial(context);
     if (serial.Length > 0 && !await sync.RegisterHeartbeatAsync(serial, GetSourceIp(context), cancellationToken))
         return Results.Text("UNKNOWN DEVICE", "text/plain", statusCode: StatusCodes.Status401Unauthorized);
@@ -127,9 +136,9 @@ app.MapMethods("/iclock/test", [HttpMethods.Get, HttpMethods.Post], async (HttpC
 
 app.Run();
 
-static async Task<IResult> HandleHeartbeatAsync(HttpContext context, IAttendanceSyncService sync, ILogger<Program> logger, CancellationToken cancellationToken)
+static async Task<IResult> HandleHeartbeatAsync(HttpContext context, IAttendanceSyncService sync, ILogger<Program> logger, IReadOnlyCollection<string> allowedSourceIps, CancellationToken cancellationToken)
 {
-    if (!IsLanRequest(context)) return Results.Unauthorized();
+    if (!IsTrustedBiometricRequest(context, allowedSourceIps)) return Results.Unauthorized();
     var serial = GetSerial(context);
     logger.LogInformation("ADMS {Path} from {Ip} serial {Serial}", context.Request.Path, GetSourceIp(context), serial);
     return await sync.RegisterHeartbeatAsync(serial, GetSourceIp(context), cancellationToken)
@@ -146,18 +155,24 @@ static string? GetSourceIp(HttpContext context)
     return address?.ToString();
 }
 
-static bool IsLanRequest(HttpContext context)
+static bool IsTrustedBiometricRequest(HttpContext context, IReadOnlyCollection<string> allowedSourceIps)
 {
     var address = context.Connection.RemoteIpAddress;
     if (address?.IsIPv4MappedToIPv6 == true) address = address.MapToIPv4();
     if (address is null) return false;
     if (IPAddress.IsLoopback(address)) return true;
     var bytes = address.GetAddressBytes();
-    return address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork &&
-           (bytes[0] == 10 ||
-            (bytes[0] == 172 && bytes[1] is >= 16 and <= 31) ||
-            (bytes[0] == 192 && bytes[1] == 168) ||
-            (bytes[0] == 169 && bytes[1] == 254));
+    var isPrivateLan = address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork &&
+        (bytes[0] == 10 ||
+         (bytes[0] == 172 && bytes[1] is >= 16 and <= 31) ||
+         (bytes[0] == 192 && bytes[1] == 168) ||
+         (bytes[0] == 169 && bytes[1] == 254));
+    if (isPrivateLan) return true;
+
+    // Azure VM mode: the biometric machine reaches this listener through the
+    // office router's public IP. Public traffic is rejected unless that IP is
+    // explicitly configured on the receiver.
+    return allowedSourceIps.Any(value => IPAddress.TryParse(value.Trim(), out var allowed) && allowed.Equals(address));
 }
 
 static async Task AppendAuditAsync(string path, string message)

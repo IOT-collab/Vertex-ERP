@@ -1,0 +1,143 @@
+﻿@{
+    ViewData["Title"] = "Recruitment Management";
+}
+<link href="~/css/recuirement.css" rel="stylesheet" />
+
+<div class="recruitment-container">
+    <!-- Top Header -->
+    <div class="header-section">
+        <div class="header-left">
+            <div>
+                <h1 class="page-title">Recruitment Management</h1>
+                <p class="page-subtitle">Manage job openings, candidate pipelines & interviews</p>
+            </div>
+        </div>
+        <button class="btn-primary" id="postNewJobBtn">
+            <i class="fa-solid fa-plus"></i>
+            <span>Post New Job</span>
+        </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <span class="stat-title">Open Positions</span>
+                    <h3 class="stat-value" id="statOpenPositions">0</h3>
+                </div>
+                <div class="stat-icon icon-blue">
+                    <i class="fa-solid fa-briefcase"></i>
+                </div>
+            </div>
+            <p class="stat-meta" id="metaOpenPositions">Updated just now</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <span class="stat-title">Total Applicants</span>
+                    <h3 class="stat-value" id="statTotalApplicants">0</h3>
+                </div>
+                <div class="stat-icon icon-purple">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+            </div>
+            <p class="stat-meta" id="metaTotalApplicants">Updated just now</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <span class="stat-title">Interviews Today</span>
+                    <h3 class="stat-value" id="statInterviewsToday">0</h3>
+                </div>
+                <div class="stat-icon icon-orange">
+                    <i class="fa-solid fa-calendar-days"></i>
+                </div>
+            </div>
+            <p class="stat-meta" id="metaInterviewsToday">Scheduled for today</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <span class="stat-title">Hired (This Month)</span>
+                    <h3 class="stat-value" id="statHiredMonth">0</h3>
+                </div>
+                <div class="stat-icon icon-green">
+                    <i class="fa-solid fa-user-check"></i>
+                </div>
+            </div>
+            <p class="stat-meta" id="metaHiredTarget">Current cycle</p>
+        </div>
+    </div>
+
+    <!-- Main Content Panel -->
+    <div class="main-panel">
+        <!-- Controls & Navigation Bar -->
+        <div class="controls-bar">
+            <div class="tab-group">
+                <button class="tab-btn active" id="tabCandidates">Candidates</button>
+                <button class="tab-btn" id="tabJobs">Active Jobs</button>
+            </div>
+
+            <div class="action-group">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" placeholder="Search candidate or job..." id="searchInput" />
+                </div>
+                <button class="btn-secondary" id="filterBtn">
+                    <i class="fa-solid fa-filter"></i>
+                    <span class="hide-mobile">Filter</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Candidates Table Section -->
+        <div class="table-wrapper" id="candidatesSection">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Candidate</th>
+                        <th>Applied Role</th>
+                        <th>Current Stage</th>
+                        <th>Interview Date</th>
+                        <th>Status</th>
+                        <th class="text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="candidatesTableBody">
+                    <!-- Dynamically populated or empty state -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Active Jobs Section (Initially Hidden) -->
+        <div class="jobs-grid hidden" id="jobsSection">
+            <!-- Dynamically populated or empty state -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tab switching functionality
+    const tabCandidates = document.getElementById('tabCandidates');
+    const tabJobs = document.getElementById('tabJobs');
+    const candidatesSection = document.getElementById('candidatesSection');
+    const jobsSection = document.getElementById('jobsSection');
+
+    tabCandidates.addEventListener('click', () => {
+        tabCandidates.classList.add('active');
+        tabJobs.classList.remove('active');
+        candidatesSection.classList.remove('hidden');
+        jobsSection.classList.add('hidden');
+    });
+
+    tabJobs.addEventListener('click', () => {
+        tabJobs.classList.add('active');
+        tabCandidates.classList.remove('active');
+        jobsSection.classList.remove('hidden');
+        candidatesSection.classList.add('hidden');
+    });
+</script>

@@ -1,0 +1,164 @@
+@{
+    ViewData["Title"] = "Timesheet Management";
+    Layout = "_Layout";
+}
+
+<!-- FontAwesome Icons CDN Link -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link href="~/css/Timesheet.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="timesheet-container">
+    <!-- Header Section -->
+    <header class="page-header">
+        <div class="header-title-group">
+            <div class="icon-avatar">
+                <i class="fas fa-business-time"></i>
+            </div>
+            <div>
+                <h1>Timesheet Management</h1>
+                <p>Track, record, and manage employee effort percentage and project logs.</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="week-picker">
+                <button class="btn-icon-sm" title="Previous Week" type="button"><i class="fas fa-chevron-left"></i></button>
+                <span class="week-range"><i class="far fa-calendar-alt"></i> Jul 27 - Aug 02, 2026</span>
+                <button class="btn-icon-sm" title="Next Week" type="button"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <button class="btn btn-primary" type="button">
+                <i class="fas fa-paper-plane"></i> <span>Submit Week</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Top KPI Metrics -->
+    <section class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Total Allocation</span>
+                <span class="value">0% <small>logged</small></span>
+            </div>
+            <div class="metric-icon icon-blue">
+                <i class="fas fa-chart-pie"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Weekly Target</span>
+                <span class="value">100% <small>capacity</small></span>
+            </div>
+            <div class="metric-icon icon-purple">
+                <i class="fas fa-bullseye"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Billable Share</span>
+                <span class="value">0% <small>effort</small></span>
+            </div>
+            <div class="metric-icon icon-emerald">
+                <i class="fas fa-coins"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Sheet Status</span>
+                <span class="value status-pending-text">Draft / Pending</span>
+            </div>
+            <div class="metric-icon icon-amber">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Layout -->
+    <main class="main-content-grid">
+
+        <!-- Weekly Timesheet Grid -->
+        <div class="glass-card timesheet-card">
+            <div class="card-header flex-between">
+                <div>
+                    <h2>Weekly Effort Entry (%)</h2>
+                    <p class="subtitle">Log daily work effort share percentage against specific projects & tasks</p>
+                </div>
+                <button class="btn btn-outline btn-sm" type="button">
+                    <i class="fas fa-plus"></i> <span>Add Row</span>
+                </button>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="timesheet-table">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 200px;">Project</th>
+                                <th style="min-width: 180px;">Task / Activity</th>
+                                <th>Mon<br><small>27</small></th>
+                                <th>Tue<br><small>28</small></th>
+                                <th>Wed<br><small>29</small></th>
+                                <th>Thu<br><small>30</small></th>
+                                <th>Fri<br><small>31</small></th>
+                                <th>Sat<br><small>01</small></th>
+                                <th>Sun<br><small>02</small></th>
+                                <th>Avg Effort</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Empty State Row -->
+                            <tr class="empty-row-placeholder">
+                                <td colspan="11" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                                    <i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+                                    No timesheet entries found. Click "Add Row" to start logging your effort.
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="2"><strong>Day Total Effort</strong></td>
+                                <td><strong>0%</strong></td>
+                                <td><strong>0%</strong></td>
+                                <td><strong>0%</strong></td>
+                                <td><strong>0%</strong></td>
+                                <td><strong>0%</strong></td>
+                                <td><strong class="text-muted">0%</strong></td>
+                                <td><strong class="text-muted">0%</strong></td>
+                                <td><strong class="grand-total">0%</strong></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Submitted History Panel -->
+        <div class="glass-card history-panel">
+            <div class="card-header">
+                <h2>Recent Submissions</h2>
+                <p class="subtitle">Status of previously submitted timesheets</p>
+            </div>
+            <div class="card-body">
+                <div class="history-list">
+                    <div class="history-item empty-history" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <span>No submission history available.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    function goBack() {
+        if (document.referrer && document.referrer !== window.location.href) {
+            window.history.back();
+        } else {
+            window.location.href = '@Url.Action("Index", "Home")';
+        }
+    }
+</script>

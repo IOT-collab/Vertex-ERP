@@ -1,0 +1,56 @@
+@model VertexERP.Models.ClosedIssuesViewModel
+@{
+    ViewData["Title"] = "Closed Issues";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/WorkflowIssues.css" rel="stylesheet" asp-append-version="true" />
+
+<section class="issues-page">
+    <header class="issues-hero">
+        <div>
+            <span class="eyebrow"><i class="fa-solid fa-shield-check"></i> Resolution archive</span>
+            <h1>Closed Issues</h1>
+            <p>Complete history of resolved and closed employee queries.</p>
+        </div>
+        <span class="scope-chip"><i class="fa-solid @(Model.IsManagerView ? "fa-people-group" : "fa-building")"></i> @(Model.IsManagerView ? "My Team Only" : "All Departments")</span>
+    </header>
+
+    <div class="issue-stats">
+        <article><span>Total Archived</span><strong>@Model.Tickets.Count</strong><i class="fa-solid fa-box-archive"></i></article>
+        <article><span>Resolved</span><strong>@Model.ResolvedCount</strong><i class="fa-solid fa-circle-check resolved-icon"></i></article>
+        <article><span>Closed</span><strong>@Model.ClosedCount</strong><i class="fa-solid fa-lock closed-icon"></i></article>
+    </div>
+
+    <form method="get" class="issue-filters">
+        <label><i class="fa-solid fa-magnifying-glass"></i><input name="search" value="@Model.Search" placeholder="Employee, code or issue..." /></label>
+        <select name="department"><option value="">All Departments</option>@foreach (var item in Model.Departments){<option value="@item" selected="@(item == Model.Department)">@item</option>}</select>
+        <select name="status"><option value="">All Statuses</option><option value="Resolved" selected="@(Model.Status == "Resolved")">Resolved</option><option value="Closed" selected="@(Model.Status == "Closed")">Closed</option></select>
+        <button type="submit"><i class="fa-solid fa-filter"></i> Apply Filters</button>
+    </form>
+
+    <div class="issue-list">
+        @if (Model.Tickets.Count == 0)
+        {
+            <div class="issues-empty"><i class="fa-regular fa-folder-open"></i><h3>No closed issues found</h3><p>Resolved or closed issues will automatically appear here.</p></div>
+        }
+        else
+        {
+            @foreach (var ticket in Model.Tickets)
+            {
+                <article class="closed-ticket">
+                    <div class="ticket-top">
+                        <div><span class="ticket-number">#@ticket.Id · @ticket.Category</span><h2>@ticket.Subject</h2></div>
+                        <span class="status-pill @ticket.Status.ToLowerInvariant()"><i class="fa-solid @(ticket.Status == "Closed" ? "fa-lock" : "fa-circle-check")"></i> @ticket.Status</span>
+                    </div>
+                    <div class="ticket-people">
+                        <div><span class="avatar">@ticket.Employee.FullName.Substring(0, 1).ToUpperInvariant()</span><p><small>Raised by</small><strong>@ticket.Employee.FullName</strong><em>@ticket.Employee.EmployeeCode · @ticket.Employee.Department</em></p></div>
+                        <div><i class="fa-solid fa-user-tie"></i><p><small>Manager</small><strong>@(ticket.ReportingManager?.FullName ?? "Not assigned")</strong></p></div>
+                        <div><i class="fa-solid fa-user-check"></i><p><small>@ticket.Status by</small><strong>@(ticket.ResolvedByUser?.FullName ?? "Not recorded")</strong><em>@((ticket.UpdatedAtUtc ?? ticket.CreatedAtUtc).ToLocalTime().ToString("dd MMM yyyy, hh:mm tt"))</em></p></div>
+                    </div>
+                    <div class="ticket-content"><div><small>Employee's issue</small><p>@ticket.Description</p></div><div class="resolution-box"><small>Final response / resolution</small><p>@(string.IsNullOrWhiteSpace(ticket.Resolution) ? "No resolution note provided." : ticket.Resolution)</p></div></div>
+                    <footer>Raised on @ticket.CreatedAtUtc.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</footer>
+                </article>
+            }
+        }
+    </div>
+</section>

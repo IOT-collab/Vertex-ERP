@@ -1,0 +1,10 @@
+{
+  "RemoteAttendance": {
+    "Enabled": false,
+    "BaseUrl": "http://122.176.49.74:8082/",
+    "Username": "",
+    "Password": "",
+    "PollIntervalSeconds": 60,
+    "PageSize": 1000
+  }
+}

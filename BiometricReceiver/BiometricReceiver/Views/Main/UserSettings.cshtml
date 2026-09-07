@@ -1,0 +1,172 @@
+@using VertexERP.Models
+@{
+    ViewData["Title"] = "User Settings";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var users = ViewBag.Users as List<AppUser> ?? new List<AppUser>();
+    var activeUsers = users.Count(user => user.IsActive);
+}
+
+<link href="~/css/UserSettings.css" rel="stylesheet" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<div class="user-settings-page">
+
+    <!-- Header Section -->
+    <header class="page-header">
+        <div class="header-text">
+            <span class="badge-pill"><i class="fa-solid fa-user-gear"></i> Account Access Center</span>
+            <h2>User Login Settings</h2>
+            <p>Manage employee login IDs, roles, and security access controls for Vertex ERP.</p>
+        </div>
+
+        <div class="user-summary">
+            <strong>@activeUsers</strong>
+            <span>Active Logins</span>
+        </div>
+    </header>
+
+    <!-- Alert Notifications -->
+    @if (TempData["UserSettingMessage"] != null)
+    {
+        <div class="user-alert success">
+            <i class="fa-solid fa-circle-check"></i> @TempData["UserSettingMessage"]
+        </div>
+    }
+
+    @if (TempData["UserSettingError"] != null)
+    {
+        <div class="user-alert error">
+            <i class="fa-solid fa-circle-exclamation"></i> @TempData["UserSettingError"]
+        </div>
+    }
+
+    <!-- Setup Form & Policies Grid -->
+    <section class="user-settings-grid">
+        <div class="create-user-card">
+            <div class="section-title">
+                <h3><i class="fa-solid fa-user-plus"></i> Create Employee Login</h3>
+                <p>Use this when a new employee joins and needs system credentials.</p>
+            </div>
+
+            <form asp-action="CreateUser" asp-controller="Main" method="post" autocomplete="off" class="create-user-form">
+                <div class="form-group">
+                    <label for="username">Employee ID / Username</label>
+                    <input id="username" name="username" type="text" placeholder="e.g. VAS0180" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="fullName">Employee Name</label>
+                    <input id="fullName" name="fullName" type="text" placeholder="e.g. Krishna Sharma" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" minlength="10" autocomplete="new-password" placeholder="Minimum 10 characters" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="role">Assigned Role</label>
+                    <select id="role" name="role">
+                        <option value="Employee">Employee</option>
+                        <option value="Manager">Manager</option>
+                        <option value="HR">HR</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-create-user">
+                    <i class="fa-solid fa-key"></i> Generate Credentials
+                </button>
+            </form>
+        </div>
+
+        <div class="login-policy-card">
+            <div class="section-title">
+                <h3><i class="fa-solid fa-shield-halved"></i> Default Login Rules</h3>
+                <p>Standard policy rules generated during initial record imports.</p>
+            </div>
+
+            <div class="policy-list">
+                <div class="policy-item">
+                    <span>Username Format</span>
+                    <strong>Employee ID</strong>
+                </div>
+                <div class="policy-item">
+                    <span>Password Pattern</span>
+                    <strong>Unique temporary password</strong>
+                </div>
+                <div class="policy-item">
+                    <span>Sample Passphrase</span>
+                    <code>10+ mixed characters</code>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Employee Login Directory Section -->
+    <section class="users-table-card">
+        <div class="table-header-bar">
+            <div class="section-title">
+                <h3><i class="fa-solid fa-address-book"></i> Employee Directory</h3>
+                <p>Database passwords are encrypted. Displayed codes represent initial system-assigned credentials.</p>
+            </div>
+            <span class="status-pill"><i class="fa-solid fa-circle"></i> @activeUsers Active Accounts</span>
+        </div>
+
+        <div class="users-table-wrap">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Employee Name</th>
+                        <th>Role Access</th>
+                        <th>Account Status</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in users)
+                    {
+                        <tr class="user-row">
+                            <form asp-action="UpdateUser" asp-controller="Main" method="post">
+                                <input type="hidden" name="id" value="@user.Id" />
+
+                            <td>
+                                <strong class="user-id-code">@user.Username</strong>
+                            </td>
+
+                            <td>
+                                <input class="table-input" name="fullName" type="text" value="@user.FullName" required />
+                            </td>
+
+                            <td>
+                                <select class="table-select" name="role">
+                                    <option value="Employee" selected="@(user.Role == "Employee" || user.Role == "User")">Employee</option>
+                                    <option value="Manager" selected="@(user.Role == "Manager")">Manager</option>
+                                    <option value="HR" selected="@(user.Role == "HR")">HR</option>
+                                    <option value="Admin" selected="@(user.Role == "Admin")">Admin</option>
+                                </select>
+                            </td>
+
+
+                            <td>
+                                <select class="table-select status-select @(user.IsActive ? "is-active" : "is-inactive")" name="isActive">
+                                    <option value="true" selected="@user.IsActive">Active</option>
+                                    <option value="false" selected="@(!user.IsActive)">Inactive</option>
+                                </select>
+                            </td>
+
+                            <td class="text-center">
+                                <button type="submit" class="btn-table-save" title="Save Changes">
+                                    <i class="fa-solid fa-floppy-disk"></i> Update
+                                </button>
+                            </td>
+                            </form>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>

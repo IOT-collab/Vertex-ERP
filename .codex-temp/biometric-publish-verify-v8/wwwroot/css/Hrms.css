@@ -1,0 +1,563 @@
+﻿/* =====================================================
+   RESET
+===================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #f4f6fb;
+}
+
+
+/* =====================================================
+   HRMS PAGE
+===================================================== */
+
+.hrms-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 32px;
+    background: #f4f6fb;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+}
+
+
+    /* =====================================================
+   PAGE HEADER
+===================================================== */
+
+    .hrms-page .page-header {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 28px;
+    }
+
+
+    .hrms-page .header-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        min-width: 0;
+    }
+
+
+    .hrms-page .header-text {
+        min-width: 0;
+    }
+
+
+        .hrms-page .header-text h2 {
+            margin: 0;
+            color: #0f172a;
+            font-size: 28px;
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+
+        .hrms-page .header-text p {
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+
+    /* =====================================================
+   BACK BUTTON
+===================================================== */
+
+    .hrms-page .back-btn {
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0;
+        border: 1px solid #cbd5e1;
+        border-radius: 50%;
+        background: #e2e8f0;
+        color: #334155;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+
+        .hrms-page .back-btn span {
+            display: block;
+            font-size: 27px;
+            line-height: 1;
+            transform: translateY(-1px);
+        }
+
+
+        .hrms-page .back-btn:hover {
+            background: #cbd5e1;
+            border-color: #94a3b8;
+            transform: translateX(-2px);
+        }
+
+
+        .hrms-page .back-btn:active {
+            transform: scale(0.95);
+        }
+
+
+    /* =====================================================
+   ADD EMPLOYEE BUTTON
+===================================================== */
+
+    .hrms-page .btn-add {
+        min-height: 42px;
+        padding: 10px 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        background: #4f46e5;
+        color: #ffffff;
+        border: none;
+        border-radius: 9px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+
+        .hrms-page .btn-add:hover {
+            background: #4338ca;
+            color: #ffffff;
+        }
+
+
+        .hrms-page .btn-add:active {
+            transform: scale(0.98);
+        }
+
+
+    .hrms-page .plus-icon {
+        font-size: 20px;
+        line-height: 1;
+    }
+
+
+    /* =====================================================
+   SUMMARY GRID
+===================================================== */
+
+    .hrms-page .summary {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+        margin-bottom: 30px;
+    }
+
+
+    /* =====================================================
+   SUMMARY CARD
+===================================================== */
+
+    .hrms-page .summary-card {
+        min-width: 0;
+        min-height: 115px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 13px;
+        box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+
+        .hrms-page .summary-card:hover {
+            transform: translateY(-3px);
+            border-color: #cbd5e1;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.07);
+        }
+
+
+    .hrms-page .summary-icon {
+        width: 50px;
+        height: 50px;
+        flex: 0 0 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef2ff;
+        border-radius: 11px;
+        font-size: 25px;
+    }
+
+
+    .hrms-page .summary-content {
+        min-width: 0;
+    }
+
+
+        .hrms-page .summary-content p {
+            margin: 0 0 4px;
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+
+        .hrms-page .summary-content h2 {
+            margin: 0;
+            color: #0f172a;
+            font-size: 27px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+
+    /* =====================================================
+   MODULE GRID
+===================================================== */
+
+    .hrms-page .module-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+
+    /* =====================================================
+   MODULE CARD
+===================================================== */
+
+    .hrms-page .module-card {
+        min-width: 0;
+        min-height: 285px;
+        padding: 25px;
+        display: flex;
+        flex-direction: column;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-top: 4px solid #4f46e5;
+        border-radius: 14px;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+
+        .hrms-page .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.12);
+        }
+
+
+    .hrms-page .module-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+
+    /* =====================================================
+   MODULE ICON
+===================================================== */
+
+    .hrms-page .icon {
+        width: 65px;
+        height: 65px;
+        flex: 0 0 65px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 18px;
+        background: #eef2ff;
+        border-radius: 50%;
+        font-size: 31px;
+    }
+
+
+    /* =====================================================
+   MODULE TEXT
+===================================================== */
+
+    .hrms-page .module-card h3 {
+        margin: 0 0 9px;
+        color: #1e293b;
+        font-size: 17px;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+
+
+    .hrms-page .module-card p {
+        margin: 0;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+
+    /* =====================================================
+   MODULE BUTTON
+===================================================== */
+
+    .hrms-page .btn-module-action {
+        width: 100%;
+        min-height: 40px;
+        margin-top: 20px;
+        padding: 10px 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #4f46e5;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+
+        .hrms-page .btn-module-action:hover {
+            background: #4338ca;
+            color: #ffffff;
+        }
+
+
+        .hrms-page .btn-module-action:active {
+            transform: scale(0.98);
+        }
+
+
+/* =====================================================
+   MEDIUM DESKTOP / LAPTOP
+===================================================== */
+
+@media (max-width: 1300px) {
+
+    .hrms-page {
+        padding: 26px;
+    }
+
+
+        .hrms-page .module-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+}
+
+
+/* =====================================================
+   SMALL LAPTOP
+===================================================== */
+
+@media (max-width: 1050px) {
+
+    .hrms-page .summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+
+    .hrms-page .module-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 768px) {
+
+    .hrms-page {
+        padding: 18px;
+    }
+
+
+        .hrms-page .page-header {
+            margin-bottom: 22px;
+        }
+
+
+        .hrms-page .header-text h2 {
+            font-size: 23px;
+        }
+
+
+        .hrms-page .header-text p {
+            font-size: 13px;
+        }
+
+
+        .hrms-page .summary {
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+
+        .hrms-page .summary-card {
+            min-height: 100px;
+            padding: 16px;
+        }
+
+
+        .hrms-page .summary-icon {
+            width: 45px;
+            height: 45px;
+            flex-basis: 45px;
+            font-size: 22px;
+        }
+
+
+        .hrms-page .summary-content h2 {
+            font-size: 23px;
+        }
+
+
+        .hrms-page .module-grid {
+            gap: 15px;
+        }
+
+
+        .hrms-page .module-card {
+            min-height: 260px;
+            padding: 20px;
+        }
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 576px) {
+
+    .hrms-page {
+        padding: 14px;
+    }
+
+
+        .hrms-page .page-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 16px;
+        }
+
+
+        .hrms-page .header-left {
+            width: 100%;
+            align-items: flex-start;
+        }
+
+
+        .hrms-page .back-btn {
+            width: 38px;
+            height: 38px;
+            flex-basis: 38px;
+        }
+
+
+            .hrms-page .back-btn span {
+                font-size: 24px;
+            }
+
+
+        .hrms-page .header-text {
+            flex: 1;
+        }
+
+
+            .hrms-page .header-text h2 {
+                font-size: 21px;
+            }
+
+
+            .hrms-page .header-text p {
+                font-size: 12px;
+                line-height: 1.4;
+            }
+
+
+        .hrms-page .btn-add {
+            width: 100%;
+        }
+
+
+        .hrms-page .summary {
+            grid-template-columns: 1fr;
+        }
+
+
+        .hrms-page .summary-card {
+            min-height: 90px;
+        }
+
+
+        .hrms-page .module-grid {
+            grid-template-columns: 1fr;
+        }
+
+
+        .hrms-page .module-card {
+            min-height: auto;
+            padding: 22px;
+        }
+
+
+        .hrms-page .icon {
+            width: 60px;
+            height: 60px;
+            flex-basis: 60px;
+            font-size: 28px;
+        }
+}
+
+
+/* =====================================================
+   EXTRA SMALL MOBILE
+===================================================== */
+
+@media (max-width: 380px) {
+
+    .hrms-page {
+        padding: 10px;
+    }
+
+
+        .hrms-page .header-left {
+            gap: 10px;
+        }
+
+
+        .hrms-page .header-text h2 {
+            font-size: 19px;
+        }
+
+
+        .hrms-page .summary-card {
+            padding: 14px;
+        }
+
+
+        .hrms-page .module-card {
+            padding: 18px;
+        }
+}

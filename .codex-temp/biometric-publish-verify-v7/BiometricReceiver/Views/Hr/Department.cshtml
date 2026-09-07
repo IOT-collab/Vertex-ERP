@@ -1,0 +1,199 @@
+﻿@model dynamic
+@{
+    ViewData["Title"] = "HR Departments Overview";
+    ViewData["BackController"] = "Main";
+    ViewData["BackAction"] = "Hrms";
+    Layout = "_Layout";
+
+    // Dynamic metrics & statistics with fallbacks
+    var totalDepartments = Model.TotalDepartments;
+    var totalEmployees = Model.TotalEmployees;
+    var departmentHeadsCount = 0;
+    var openPositions = 0;
+
+    // FIX: Cast to IEnumerable<dynamic> so the compiler defers property checks to runtime
+    IEnumerable<dynamic> departmentsList = Model.Departments;
+
+    // Action URLs
+    var addDepartmentUrl = Url.Action("AddDepartment", "Hr");
+    var getDepartmentDetailsUrl = Url.Action("DepartmentDetails", "Hr");
+}
+<link href="~/css/department.css" rel="stylesheet" />
+
+<div class="hr-container">
+    @if (TempData["DepartmentMessage"] is string departmentMessage)
+    {
+        <div class="hr-department-message">@departmentMessage</div>
+    }
+    @if (TempData["DepartmentError"] is string departmentError)
+    {
+        <div class="hr-department-message hr-department-error">@departmentError</div>
+    }
+    <!-- Header Section -->
+    <div class="hr-header">
+        <div class="hr-header-main">
+            <div>
+                <h1 class="hr-title">Departments Overview</h1>
+                <p class="hr-subtitle">Manage company organization structure, teams, and designations</p>
+            </div>
+        </div>
+
+        <div class="hr-header-actions">
+            <a href="@addDepartmentUrl" class="hr-btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                <span>Add Department</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="hr-grid-stats">
+        <div class="hr-stat-card">
+            <div class="hr-stat-top">
+                <div>
+                    <span class="hr-stat-label">Total Departments</span>
+                    <h3 class="hr-stat-value">@totalDepartments</h3>
+                </div>
+                <div class="hr-icon-box icon-blue">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" /><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" /><path d="M10 6h4" /><path d="M10 10h4" /><path d="M10 14h4" /><path d="M10 18h4" /></svg>
+                </div>
+            </div>
+            <span class="hr-stat-sub text-emerald"><i class="dot"></i> Active Teams</span>
+        </div>
+
+        <div class="hr-stat-card">
+            <div class="hr-stat-top">
+                <div>
+                    <span class="hr-stat-label">Total Employees</span>
+                    <h3 class="hr-stat-value">@totalEmployees</h3>
+                </div>
+                <div class="hr-icon-box icon-purple">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                </div>
+            </div>
+            <span class="hr-stat-sub">Across Organization</span>
+        </div>
+
+        <div class="hr-stat-card">
+            <div class="hr-stat-top">
+                <div>
+                    <span class="hr-stat-label">Department Heads</span>
+                    <h3 class="hr-stat-value">@departmentHeadsCount</h3>
+                </div>
+                <div class="hr-icon-box icon-green">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                </div>
+            </div>
+            <span class="hr-stat-sub text-emerald">Assigned Leads</span>
+        </div>
+
+        <div class="hr-stat-card">
+            <div class="hr-stat-top">
+                <div>
+                    <span class="hr-stat-label">Open Positions</span>
+                    <h3 class="hr-stat-value">@openPositions</h3>
+                </div>
+                <div class="hr-icon-box icon-amber">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
+                </div>
+            </div>
+            <span class="hr-stat-sub text-amber">Active Hiring</span>
+        </div>
+    </div>
+
+    <!-- Main Content Panel -->
+    <div class="hr-main-panel">
+        <!-- Controls Header -->
+        <div class="hr-controls">
+            <div class="hr-search-box">
+                <svg class="hr-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                <input type="text" id="deptSearchInput" placeholder="Search department or head..." onkeyup="filterDepartments()" />
+            </div>
+
+            <select class="hr-select" id="statusFilterSelect" onchange="filterDepartments()">
+                <option value="All">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+        </div>
+
+        <!-- Cards View Grid -->
+        <div class="hr-dept-grid" id="deptGrid">
+            @if (departmentsList != null)
+            {
+                bool hasItems = false;
+                // FIX: explicitly declare 'dept' as dynamic
+                foreach (dynamic dept in departmentsList)
+                {
+                    if (dept == null) continue;
+                    hasItems = true;
+
+                    // Extracted cleanly to avoid null-binder exceptions at runtime
+                    var deptId = dept.Id != null ? dept.Id.ToString() : "";
+                    var deptName = dept.Name != null ? dept.Name.ToString() : "Unnamed Department";
+                    var deptSub = dept.Description != null ? dept.Description.ToString() : "Manage team and operations";
+                    var empCount = dept.EmployeeCount ?? 0;
+                    var deptHead = dept.ManagerName != null ? dept.ManagerName.ToString() : "Not Assigned";
+                    var deptStatus = dept.Status != null ? dept.Status.ToString() : "Active";
+                    var detailUrl = $"{getDepartmentDetailsUrl}/{deptId}";
+
+                    <div class="hr-dept-card" data-status="@deptStatus">
+                        <div class="hr-dept-icon-bg">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.8"><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M9 6h6" /><path d="M9 10h6" /><path d="M9 14h6" /><path d="M9 18h2" /></svg>
+                        </div>
+                        <h3 class="hr-dept-name">@deptName</h3>
+                        <span class="hr-dept-code">@dept.Code</span>
+                        <p class="hr-dept-sub">@deptSub</p>
+
+                        <div class="hr-dept-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">Employees</span>
+                                <span class="meta-val">@empCount Members</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Head</span>
+                                <span class="meta-val">@deptHead</span>
+                            </div>
+                        </div>
+
+                        <div class="hr-dept-actions">
+                            <a href="@detailUrl" class="hr-btn-open">Open</a>
+                            <a asp-controller="Hr" asp-action="EditDepartment" asp-route-id="@dept.Id" class="hr-btn-edit">Edit</a>
+                            <a asp-controller="Hr" asp-action="DeleteDepartment" asp-route-id="@dept.Id" class="hr-btn-delete">Delete</a>
+                        </div>
+                    </div>
+                }
+
+                if (!hasItems)
+                {
+                    <div class="hr-empty-state" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #64748b;">
+                        <p>No departments found.</p>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterDepartments() {
+        const searchValue = document.getElementById("deptSearchInput").value.toUpperCase();
+        const statusValue = document.getElementById("statusFilterSelect").value;
+        const cards = document.querySelectorAll(".hr-dept-card");
+
+        cards.forEach(card => {
+            const cardText = card.textContent || card.innerText;
+            const cardStatus = card.getAttribute("data-status");
+
+            const matchesSearch = cardText.toUpperCase().indexOf(searchValue) > -1;
+            const matchesStatus = (statusValue === "All" || cardStatus === statusValue);
+
+            if (matchesSearch && matchesStatus) {
+                card.style.display = "flex";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    }
+
+</script>

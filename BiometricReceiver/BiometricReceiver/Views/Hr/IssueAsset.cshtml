@@ -1,0 +1,19 @@
+@model VertexERP.Models.IssueAssetViewModel
+@{ ViewData["Title"] = "Issue Asset"; Layout = "_Layout"; }
+<link href="~/css/EmployeeSections.css" rel="stylesheet" asp-append-version="true" />
+<section class="employee-section">
+    <header><div><h1>Issue Asset</h1><p>This asset will be visible only to the selected employee and HR/Admin.</p></div><a asp-action="AssetManagement" class="btn btn-secondary">Back to Assets</a></header>
+    <form asp-action="IssueAsset" method="post" class="employee-panel" style="padding:24px">
+        <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+        <div class="leave-form">
+            <label>Employee<select asp-for="EmployeeId" class="form-select" required><option value="">Select employee</option>@foreach (var employee in Model.Employees) { <option value="@employee.Id">@employee.FullName (@employee.EmployeeCode)</option> }</select></label>
+            <label>Asset Tag<input asp-for="AssetTag" class="form-control" maxlength="100" required /></label>
+            <label>Asset Name<input asp-for="AssetName" class="form-control" maxlength="150" required /></label>
+            <label>Category<select asp-for="Category" class="form-select" required><option value="">Select category</option><option>Laptop</option><option>Workstation</option><option>Monitor</option><option>Accessories</option><option>Phone</option><option>Other</option></select></label>
+            <label>Serial Number<input asp-for="SerialNumber" class="form-control" maxlength="100" /></label>
+            <label>Issue Date<input asp-for="IssueDate" type="date" class="form-control" max="@DateTime.Today.ToString("yyyy-MM-dd")" required /></label>
+            <label class="wide">Notes<textarea asp-for="Notes" class="form-control" maxlength="500" rows="3"></textarea></label>
+            <button type="submit" class="btn btn-primary">Issue Asset</button>
+        </div>
+    </form>
+</section>
