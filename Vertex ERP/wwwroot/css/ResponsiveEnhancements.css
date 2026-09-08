@@ -1,0 +1,73 @@
+.biometric-sync-label {
+    display: block;
+    margin-top: 4px;
+    color: var(--app-muted, #94a3b8);
+}
+
+.attendance-history-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 13px;
+    padding: 9px;
+    border: 1px solid var(--app-border, #334155);
+    border-radius: 8px;
+    color: #93c5fd;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+img, svg, video, canvas { max-width: 100%; height: auto; }
+.page-content { min-width: 0; overflow-x: hidden; }
+.table-responsive, .table-wrapper, .table-container, .section-table, .clear-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+input, select, textarea, button { max-width: 100%; }
+
+@media (max-width: 768px) {
+    .page-content { padding-left: 12px !important; padding-right: 12px !important; }
+    .page-content > section, .page-content > div { max-width: 100%; }
+    .page-header, .card-header, .section-header, .toolbar, .filter-bar, .action-bar {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .form-row, .form-grid, .filters-grid { grid-template-columns: 1fr !important; }
+    .modal-content, dialog {
+        max-width: calc(100vw - 24px) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .employee-section { padding: 14px; }
+    .employee-section header { align-items: flex-start; }
+    .employee-panel { padding: 10px; }
+    .attendance-history thead { display: none; }
+    .attendance-history, .attendance-history tbody, .attendance-history tr, .attendance-history td {
+        display: block;
+        width: 100%;
+    }
+    .attendance-history tr {
+        padding: 9px 0;
+        border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    .attendance-history td {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 7px 5px;
+        border: 0;
+        text-align: right;
+    }
+    .attendance-history td::before {
+        content: attr(data-label);
+        color: var(--app-muted, #94a3b8);
+        font-weight: 700;
+        text-align: left;
+    }
+}

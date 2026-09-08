@@ -54,6 +54,7 @@ public class AttendancePageViewModel
     public int AbsentCount { get; init; }
     public int LeaveCount { get; init; }
     public int LateCount { get; init; }
+    public int IncompleteCount { get; init; }
     public string? SearchQuery { get; init; }
     public string? Department { get; init; }
     public DateOnly FilterDate { get; init; }

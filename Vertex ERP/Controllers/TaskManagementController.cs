@@ -206,6 +206,8 @@ public class TaskManagementController : ControllerBase
             return NotFound("Task not found.");
         if (User.IsInRole("Manager") && task.ManagerId != await GetCurrentEmployeeIdAsync(cancellationToken))
             return Forbid();
+        if (!task.Status.Equals("Completed", StringComparison.OrdinalIgnoreCase))
+            return Conflict(new { message = "Task can be deleted only after it is completed." });
 
         _db.WorkTasks.Remove(task);
         await _db.SaveChangesAsync(cancellationToken);

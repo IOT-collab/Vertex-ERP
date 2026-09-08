@@ -25,6 +25,9 @@
     var isEmployeePage = string.Equals(controller, "Employee", StringComparison.OrdinalIgnoreCase);
     var isEmployeeIndex = isEmployeePage && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase);
     var isHrPage = string.Equals(controller, "Hr", StringComparison.OrdinalIgnoreCase);
+    var isEmployeeSelfServicePage = (User.IsInRole("Employee") || User.IsInRole("User"))
+        && string.Equals(controller, "Main", StringComparison.OrdinalIgnoreCase)
+        && action is not "Employees" and not "EmployeeHome";
     var backController = isDepartmentPage
         ? (string.Equals(action, "Department", StringComparison.OrdinalIgnoreCase) ? "Main" : "Hr")
         : isEmployeeIndex ? "Main"
@@ -52,6 +55,11 @@
             backController = "Main";
             backAction = "Hrms";
         }
+    }
+    if (isEmployeeSelfServicePage && string.IsNullOrWhiteSpace(backController))
+    {
+        backController = "Main";
+        backAction = "Employees";
     }
     var hasExplicitBackRoute = !string.IsNullOrWhiteSpace(backController) && !string.IsNullOrWhiteSpace(backAction);
     var isActiveIssuesPage = string.Equals(controller, "Main", StringComparison.OrdinalIgnoreCase)

@@ -9,8 +9,10 @@ public static class SalarySlipPdfService
     private const double PageWidth = 597;
     private const double PageHeight = 600;
 
-    public static byte[] Create(Employee employee, EmployeeSalaryDetail salary, EmployeeBankDetail? bank, int year, int month)
+    public static byte[] Create(Employee employee, GeneratedSalarySlip salary, EmployeeBankDetail? bank)
     {
+        var year = salary.Year;
+        var month = salary.Month;
         var templatePath = new[]
         {
             Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "templates", "salary-slip-master.jpg"),
@@ -42,7 +44,7 @@ public static class SalarySlipPdfService
         content.Append($"1 1 1 rg BT /F2 12 Tf {CenteredX($"PAYSLIP FOR THE MONTH OF {label}", 12, true):0.##} 502 Td ({Escape($"PAYSLIP FOR THE MONTH OF {label}")}) Tj ET\n");
 
         var infoTop = 475d; var infoBottom = 380d; Box(left, infoBottom, width, infoTop - infoBottom); Line(303, infoBottom, 303, infoTop);
-        var leftInfo = new[] { ("Name", employee.FullName), ("Joining Date", employee.JoiningDate.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)), ("Designation", employee.Designation), ("Department", employee.Department), ("Effective Work Days", DateTime.DaysInMonth(year, month).ToString()), ("LOP", "0") };
+        var leftInfo = new[] { ("Name", employee.FullName), ("Joining Date", employee.JoiningDate.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)), ("Designation", employee.Designation), ("Department", employee.Department), ("Effective Work Days", DateTime.DaysInMonth(year, month).ToString()), ("LOP", salary.ApprovedLeaveDays.ToString("0.##")) };
         var rightInfo = new[] { ("Employee No.", employee.EmployeeCode), ("Bank Name", bank?.BankName ?? "--"), ("Bank Account No.", bank == null ? "--" : $"XXXX XXXX {bank.AccountLastFour}"), ("PAN Number", bank?.PanNumber ?? "--"), ("PF No.", salary.PfNumber ?? "--"), ("PF UAN", salary.PfUan ?? bank?.UanNumber ?? "--") };
         for (var i = 0; i < 6; i++) { var y = 464 - i * 15.7; Text(63, y, leftInfo[i].Item1); Text(159, y, leftInfo[i].Item2, 7.7, true); Text(309, y, rightInfo[i].Item1); Text(410, y, rightInfo[i].Item2, 7.7, true); }
 
@@ -51,7 +53,7 @@ public static class SalarySlipPdfService
         foreach (var x in columns.Skip(1).SkipLast(1)) Line(x, tableBottom, x, tableTop);
         for (var i = 1; i < 6; i++) Line(left, tableTop - rowH * i, right, tableTop - rowH * i);
         Text((columns[0] + columns[1]) / 2, 359, "EARNINGS", 8, true, "C"); Text((columns[1] + columns[2]) / 2, 359, "MASTER", 8, true, "C"); Text((columns[2] + columns[3]) / 2, 359, "ACTUAL", 8, true, "C"); Text((columns[3] + columns[4]) / 2, 359, "DEDUCTIONS", 8, true, "C"); Text((columns[4] + columns[5]) / 2, 359, "ACTUAL", 8, true, "C");
-        var rows = new[] { ("BASIC", salary.BasicSalary, "PROVIDENT FUND", salary.ProvidentFund), ("HRA", salary.HouseRentAllowance, "PROFESSIONAL TAX", salary.ProfessionalTax), ("CONVEYANCE ALLOWANCE", salary.ConveyanceAllowance, "TDS", salary.Tds), ("SPECIAL ALLOWANCE", salary.SpecialAllowance, "OTHER DEDUCTIONS", salary.OtherDeductions) };
+        var rows = new[] { ("BASIC", salary.BasicSalary, "PROVIDENT FUND", salary.ProvidentFund), ("HRA", salary.HouseRentAllowance, "PROFESSIONAL TAX", salary.ProfessionalTax), ("CONVEYANCE ALLOWANCE", salary.ConveyanceAllowance, "TDS", salary.Tds), ("SPECIAL ALLOWANCE", salary.SpecialAllowance, "OTHER / AMOUNT DED.", salary.OtherDeductions + salary.LeaveDeduction) };
         for (var i = 0; i < 4; i++) { var y = 339 - i * rowH; Text(64, y, rows[i].Item1, 7.2); Text(229, y, Money(rows[i].Item2), 7.2, false, "R"); Text(289, y, Money(rows[i].Item2), 7.2, false, "R"); Text(302, y, rows[i].Item3, 7.2); Text(531, y, Money(rows[i].Item4), 7.2, false, "R"); }
         Text(64, 261, "TOTAL EARNINGS: INR", 7.1, true); Text(229, 261, Money(salary.GrossSalary), 7.1, true, "R"); Text(289, 261, Money(salary.GrossSalary), 7.1, true, "R"); Text(302, 261, "TOTAL DEDUCTIONS: INR", 7.1, true); Text(531, 261, Money(salary.TotalDeductions), 7.1, true, "R");
 

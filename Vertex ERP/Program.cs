@@ -282,4 +282,37 @@ app.Lifetime.ApplicationStarted.Register(() =>
     }
 });
 
+// The biometric devices post punches to the lightweight receiver on port 8082.
+// Keep it available whenever the local ERP application is running; otherwise the
+// attendance screen correctly has no punches to show for the current day.
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    try
+    {
+        var receiverIsRunning = System.Net.NetworkInformation.IPGlobalProperties
+            .GetIPGlobalProperties().GetActiveTcpListeners().Any(endpoint => endpoint.Port == 8082);
+        if (receiverIsRunning) return;
+
+        var receiverPath = new[]
+        {
+            Path.Combine(builder.Environment.ContentRootPath, "BiometricReceiver", "BiometricReceiver.exe"),
+            Path.Combine(builder.Environment.ContentRootPath, ".codex-biometric-runtime", "BiometricReceiver.exe")
+        }.FirstOrDefault(File.Exists);
+        if (receiverPath == null) return;
+
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = receiverPath,
+            WorkingDirectory = Path.GetDirectoryName(receiverPath)!,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+        });
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Could not start biometric receiver: {ex.Message}");
+    }
+});
+
 app.Run();

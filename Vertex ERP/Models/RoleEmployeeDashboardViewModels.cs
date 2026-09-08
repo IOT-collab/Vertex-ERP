@@ -20,8 +20,10 @@ public sealed class WorkforceOverviewViewModel
     public IReadOnlyList<Employee> Employees { get; init; } = Array.Empty<Employee>();
     public IReadOnlyList<WorkTask> Tasks { get; init; } = Array.Empty<WorkTask>();
     public IReadOnlySet<int> PresentEmployeeIds { get; init; } = new HashSet<int>();
+    public IReadOnlySet<int> OnLeaveEmployeeIds { get; init; } = new HashSet<int>();
+    public bool IsWeeklyOff { get; init; }
     public int Present => PresentEmployeeIds.Count;
-    public int Absent => Math.Max(0, Employees.Count(employee => employee.IsActive) - Present);
+    public int Absent => IsWeeklyOff ? 0 : Employees.Count(employee => employee.IsActive && !PresentEmployeeIds.Contains(employee.Id) && !OnLeaveEmployeeIds.Contains(employee.Id));
 }
 
 public sealed class EmployeeTasksViewModel
@@ -34,7 +36,7 @@ public sealed class EmployeeTasksViewModel
     public int Pending => Tasks.Count - Completed - InProgress;
 }
 
-public sealed record EmployeeAttendanceDay(DateOnly Date, DateTime? CheckIn, DateTime? CheckOut, string Status);
+public sealed record EmployeeAttendanceDay(DateOnly Date, DateTime? CheckIn, DateTime? CheckOut, string Status, string Source);
 
 public sealed class EmployeeAttendanceViewModel
 {
@@ -42,7 +44,7 @@ public sealed class EmployeeAttendanceViewModel
     public DateOnly StartDate { get; init; }
     public DateOnly EndDate { get; init; }
     public IReadOnlyList<EmployeeAttendanceDay> Days { get; init; } = Array.Empty<EmployeeAttendanceDay>();
-    public int Present => Days.Count(day => day.Status == "Present");
+    public int Present => Days.Count(day => day.Status is "Present" or "Incomplete");
     public int Absent => Days.Count(day => day.Status == "Absent");
     public int OnLeave => Days.Count(day => day.Status == "On Leave");
 }
@@ -60,7 +62,7 @@ public sealed class EmployeeLeaveViewModel
     private int UsedDays(string type) => Requests.Where(request => request.Status.Equals("Approved", StringComparison.OrdinalIgnoreCase) && request.LeaveType.Equals(type, StringComparison.OrdinalIgnoreCase)).Sum(request => request.ToDate.DayNumber - request.FromDate.DayNumber + 1);
 }
 
-public sealed record EmployeeNotificationItem(string Title, string Detail, DateTime CreatedAt, string Type);
+public sealed record EmployeeNotificationItem(int SourceId, string Title, string Detail, DateTime CreatedAt, string Type);
 
 public sealed class EmployeeNotificationsViewModel
 {

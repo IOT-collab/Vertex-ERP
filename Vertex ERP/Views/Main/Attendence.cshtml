@@ -16,15 +16,16 @@
     <div class="dashboard-cards">
         <a asp-action="Attendence" asp-route-searchQuery="@Model.SearchQuery" asp-route-department="@Model.Department" asp-route-filterDate="@filterDateValue" asp-route-status="Present" class="card present @(Model.Status == "Present" ? "active-filter" : "")"><h3>@Model.PresentCount</h3><span>Present</span><small>Click to filter</small></a>
         <a asp-action="Attendence" asp-route-searchQuery="@Model.SearchQuery" asp-route-department="@Model.Department" asp-route-filterDate="@filterDateValue" asp-route-status="Absent" class="card absent @(Model.Status == "Absent" ? "active-filter" : "")"><h3>@Model.AbsentCount</h3><span>Absent</span><small>Click to filter</small></a>
-        <div class="card leave"><h3>@Model.LeaveCount</h3><span>On Leave</span></div>
+        <a asp-action="Attendence" asp-route-searchQuery="@Model.SearchQuery" asp-route-department="@Model.Department" asp-route-filterDate="@filterDateValue" asp-route-status="On Leave" class="card leave @(Model.Status == "On Leave" ? "active-filter" : "")"><h3>@Model.LeaveCount</h3><span>On Leave</span><small>Click to filter</small></a>
         <a asp-action="Attendence" asp-route-searchQuery="@Model.SearchQuery" asp-route-department="@Model.Department" asp-route-filterDate="@filterDateValue" asp-route-status="Late" class="card late @(Model.Status == "Late" ? "active-filter" : "")"><h3>@Model.LateCount</h3><span>Late Arrivals</span><small>Click to filter</small></a>
+        <a asp-action="Attendence" asp-route-searchQuery="@Model.SearchQuery" asp-route-department="@Model.Department" asp-route-filterDate="@filterDateValue" asp-route-status="Incomplete" class="card late @(Model.Status == "Incomplete" ? "active-filter" : "")"><h3>@Model.IncompleteCount</h3><span>Needs Review</span><small>Incomplete or invalid punches</small></a>
     </div>
     <form asp-action="Attendence" asp-controller="Main" method="get">
         <div class="filter-box">
             <div class="filter-field"><input type="text" name="searchQuery" value="@Model.SearchQuery" placeholder="Search Employee..."></div>
             <div class="filter-field"><select name="department"><option value="">All Departments</option>@foreach (var item in Model.Departments){<option value="@item" selected="@(item == Model.Department)">@item</option>}</select></div>
             <div class="filter-field"><input type="date" name="filterDate" value="@filterDateValue"></div>
-            <div class="filter-field"><select name="status"><option value="">All Statuses</option><option value="Present" selected="@(Model.Status == "Present")">Present</option><option value="Late" selected="@(Model.Status == "Late")">Late</option><option value="Absent" selected="@(Model.Status == "Absent")">Absent</option><option value="Unmapped" selected="@(Model.Status == "Unmapped")">Unmapped</option></select></div>
+            <div class="filter-field"><select name="status"><option value="">All Statuses</option><option value="Present" selected="@(Model.Status == "Present")">Present</option><option value="Late" selected="@(Model.Status == "Late")">Late</option><option value="Incomplete" selected="@(Model.Status == "Incomplete")">Incomplete</option><option value="Needs Review" selected="@(Model.Status == "Needs Review")">Needs Review</option><option value="On Leave" selected="@(Model.Status == "On Leave")">On Leave</option><option value="Sunday Off" selected="@(Model.Status == "Sunday Off")">Sunday Off</option><option value="Absent" selected="@(Model.Status == "Absent")">Absent</option><option value="Unmapped" selected="@(Model.Status == "Unmapped")">Unmapped</option></select></div>
             <div class="filter-field action-field"><button type="submit" class="btn-search">Apply Filter</button></div>
         </div>
     </form>
@@ -36,7 +37,7 @@
             {
                 @foreach (var item in Model.Records)
                 {
-                    <tr><td>@item.EmpId</td><td>@item.EmployeeName</td><td>@item.Department</td><td>@item.Date.ToString("yyyy-MM-dd")</td><td>@(item.CheckIn?.ToString("hh:mm tt") ?? "—")</td><td>@(item.CheckOut?.ToString("hh:mm tt") ?? "—")</td><td><span class="txt-late">@(item.Status == "Late" ? 1 : 0)</span></td><td><span class="status @(item.Status.ToLowerInvariant())-status">@item.Status</span></td><td><span title="Working hours: @item.WorkingHours.ToString(@"hh\:mm")">@item.PunchCount punches</span></td></tr>
+                    <tr><td>@item.EmpId</td><td>@item.EmployeeName</td><td>@item.Department</td><td>@item.Date.ToString("yyyy-MM-dd")</td><td>@(item.CheckIn?.ToString("hh:mm tt") ?? "—")</td><td>@(item.CheckOut?.ToString("hh:mm tt") ?? "—")</td><td><span class="txt-late">@(item.Status == "Late" ? 1 : 0)</span></td><td><span class="status @(item.Status.ToLowerInvariant().Replace(" ", "-"))-status">@item.Status</span></td><td><span title="Working hours: @item.WorkingHours.ToString(@"hh\:mm")">@item.PunchCount punches</span></td></tr>
                 }
             }
             else

@@ -36,9 +36,9 @@
             </label>
             <div class="custom-select-wrapper">
                 <select id="projectSelect" class="project-dropdown" onchange="onProjectChange(this.value)">
-                    @if (Model?.Projects != null && Model.Projects.Any())
+                    @if (Model?.Projects != null && Model!.Projects.Any())
                     {
-                        foreach (var project in Model.Projects)
+                        foreach (var project in Model!.Projects)
                         {
                             <option value="@project.Id" selected="@(project.Id == Model.SelectedProjectId)">
                                 @project.Name (@project.Code)
@@ -134,9 +134,9 @@
                 <i class="fas fa-users metric-icon icon-amber"></i>
             </div>
             <div class="avatar-group">
-                @if (Model?.CurrentProject?.TeamMembers != null && Model.CurrentProject.TeamMembers.Any())
+                @if (Model?.CurrentProject?.TeamMembers != null && Model!.CurrentProject!.TeamMembers.Any())
                 {
-                    foreach (var member in Model.CurrentProject.TeamMembers.Take(3))
+                    foreach (var member in Model!.CurrentProject!.TeamMembers.Take(3))
                     {
                         <div class="avatar @member.ColorClass" title="@member.FullName">@member.Initials</div>
                     }
@@ -181,9 +181,9 @@
 
                     <!-- Dynamic Phase Bars -->
                     <div class="gantt-rows">
-                        @if (Model?.CurrentProject?.Phases != null && Model.CurrentProject.Phases.Any())
+                        @if (Model?.CurrentProject?.Phases != null && Model!.CurrentProject!.Phases.Any())
                         {
-                            foreach (var phase in Model.CurrentProject.Phases)
+                            foreach (var phase in Model!.CurrentProject!.Phases)
                             {
                                 <div class="gantt-row">
                                     <span class="phase-name">@phase.Name</span>
@@ -218,9 +218,9 @@
             </div>
             <div class="card-body">
                 <div class="vertical-roadmap" id="milestoneList">
-                    @if (Model?.CurrentProject?.Milestones != null && Model.CurrentProject.Milestones.Any())
+                    @if (Model?.CurrentProject?.Milestones != null && Model!.CurrentProject!.Milestones.Any())
                     {
-                        foreach (var milestone in Model.CurrentProject.Milestones)
+                        foreach (var milestone in Model!.CurrentProject!.Milestones)
                         {
                             <div class="roadmap-card status-@milestone.Status.ToLower()" data-title="@milestone.Title">
                                 <div class="roadmap-node @(milestone.Status == "Active" ? "active-node" : "")">

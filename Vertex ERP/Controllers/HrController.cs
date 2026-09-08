@@ -7,6 +7,8 @@ using System.Text.Json;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
+using System.Globalization;
+using System.Security.Claims;
 
 namespace Vertex_ERP.Controllers
 {
@@ -65,6 +67,47 @@ namespace Vertex_ERP.Controllers
                     .Where(x => x.Year == selectedYear && x.Month == selectedMonth)
                     .OrderBy(x => x.WeekNumber).ThenBy(x => x.Department.DepartmentName).ToListAsync()
             });
+        }
+
+        public async Task<IActionResult> SalarySlips(int? year, int? month, string? department, int? employeeId)
+        {
+            var selectedYear = year is >= 2020 and <= 2100 ? year.Value : DateTime.Today.Year;
+            var selectedMonth = month is >= 1 and <= 12 ? month.Value : DateTime.Today.Month;
+            var periodStart = new DateOnly(selectedYear, selectedMonth, 1);
+            var periodEnd = periodStart.AddMonths(1).AddDays(-1);
+            var query = _dbContext.Employees.AsNoTracking().Where(x => x.IsActive);
+            if (!string.IsNullOrWhiteSpace(department)) query = query.Where(x => x.Department == department);
+            if (employeeId.HasValue) query = query.Where(x => x.Id == employeeId.Value);
+            var employees = await query.OrderBy(x => x.Department).ThenBy(x => x.FullName).ToListAsync();
+            var ids = employees.Select(x => x.Id).ToList();
+            var salaries = await _dbContext.EmployeeSalaryDetails.AsNoTracking().Where(x => ids.Contains(x.EmployeeId) && x.IsActive).ToDictionaryAsync(x => x.EmployeeId);
+            var slips = await _dbContext.GeneratedSalarySlips.AsNoTracking().Where(x => ids.Contains(x.EmployeeId) && x.Year == selectedYear && x.Month == selectedMonth).ToDictionaryAsync(x => x.EmployeeId);
+            var leaves = await _dbContext.LeaveRequests.AsNoTracking().Where(x => ids.Contains(x.EmployeeId) && x.Status == "Approved" && x.FromDate <= periodEnd && x.ToDate >= periodStart).ToListAsync();
+            decimal LeaveDays(int id) => leaves.Where(x => x.EmployeeId == id).Sum(x => (decimal)(x.ToDate < periodEnd ? x.ToDate : periodEnd).DayNumber - (x.FromDate > periodStart ? x.FromDate : periodStart).DayNumber + 1);
+            var rows = employees.Where(x => salaries.ContainsKey(x.Id)).Select(x => { var salary = salaries[x.Id]; slips.TryGetValue(x.Id, out var slip); return new SalarySlipAdminRow { EmployeeId=x.Id, EmployeeCode=x.EmployeeCode, EmployeeName=x.FullName, Department=x.Department, GrossSalary=salary.GrossSalary, StandardDeductions=salary.TotalDeductions, ApprovedLeaveDays=LeaveDays(x.Id), LeaveDeduction=slip?.LeaveDeduction ?? 0, DeductionNote=slip?.DeductionNote, IsGenerated=slip != null, GeneratedAtUtc=slip?.GeneratedAtUtc }; }).ToList();
+            return View(new SalarySlipAdminViewModel { Year=selectedYear, Month=selectedMonth, Department=department, EmployeeId=employeeId, Departments=await _dbContext.Employees.AsNoTracking().Where(x=>x.IsActive).Select(x=>x.Department).Distinct().OrderBy(x=>x).ToListAsync(), Employees=rows });
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> GenerateSalarySlips(int year, int month, List<int> employeeIds, string? department)
+        {
+            if (year is < 2020 or > 2100 || month is < 1 or > 12 || employeeIds.Count == 0) { TempData["SalaryError"] = "Select at least one employee and a valid month."; return RedirectToAction(nameof(SalarySlips), new { year, month, department }); }
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return Forbid();
+            var salaries = await _dbContext.EmployeeSalaryDetails.Where(x => employeeIds.Contains(x.EmployeeId) && x.IsActive).ToListAsync();
+            var existing = await _dbContext.GeneratedSalarySlips.Where(x => employeeIds.Contains(x.EmployeeId) && x.Year == year && x.Month == month).ToDictionaryAsync(x => x.EmployeeId);
+            foreach (var salary in salaries)
+            {
+                var deductionText = Request.Form[$"leaveDeduction_{salary.EmployeeId}"].FirstOrDefault();
+                decimal.TryParse(deductionText, NumberStyles.Number, CultureInfo.InvariantCulture, out var leaveDeduction);
+                leaveDeduction = Math.Max(0, Math.Min(leaveDeduction, salary.GrossSalary));
+                decimal.TryParse(Request.Form[$"leaveDays_{salary.EmployeeId}"].FirstOrDefault(), NumberStyles.Number, CultureInfo.InvariantCulture, out var leaveDays);
+                var note = Request.Form[$"deductionNote_{salary.EmployeeId}"].FirstOrDefault()?.Trim();
+                if (!existing.TryGetValue(salary.EmployeeId, out var slip)) { slip = new GeneratedSalarySlip { EmployeeId=salary.EmployeeId, Year=year, Month=month }; _dbContext.GeneratedSalarySlips.Add(slip); }
+                slip.BasicSalary=salary.BasicSalary; slip.HouseRentAllowance=salary.HouseRentAllowance; slip.ConveyanceAllowance=salary.ConveyanceAllowance; slip.SpecialAllowance=salary.SpecialAllowance; slip.ProvidentFund=salary.ProvidentFund; slip.ProfessionalTax=salary.ProfessionalTax; slip.Tds=salary.Tds; slip.OtherDeductions=salary.OtherDeductions; slip.PfNumber=salary.PfNumber; slip.PfUan=salary.PfUan; slip.LeaveDeduction=leaveDeduction; slip.ApprovedLeaveDays=Math.Max(0, leaveDays); slip.DeductionNote=string.IsNullOrWhiteSpace(note)?null:note[..Math.Min(note.Length,300)]; slip.GeneratedByUserId=userId; slip.GeneratedAtUtc=DateTime.UtcNow; slip.UpdatedAtUtc=DateTime.UtcNow;
+            }
+            await _dbContext.SaveChangesAsync();
+            TempData["SalaryMessage"] = $"{salaries.Count} salary slip(s) generated/updated. Employees can now view them.";
+            return RedirectToAction(nameof(SalarySlips), new { year, month, department });
         }
 
         [HttpPost, ValidateAntiForgeryToken]
@@ -788,7 +831,9 @@ namespace Vertex_ERP.Controllers
         public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
         {
             ApplyEmployeeExtraDrafts(model);
-            var employeeCode = model.EmployeeId.Trim();
+            // Canonical casing makes the database unique index reject IDs that
+            // differ only by upper/lower case.
+            var employeeCode = model.EmployeeId.Trim().ToUpperInvariant();
             var email = model.Email.Trim().ToLowerInvariant();
             var loginUsername = model.LoginUsername.Trim();
             // Passwords are exact, case-sensitive credentials. Never transform them after

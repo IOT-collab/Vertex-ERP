@@ -453,8 +453,8 @@ body > .container [class*="dialog-body"] {
         min-width: 0 !important;
     }
 
-    .page-content table:not(:is([class*="table-wrap"], [class*="table-container"], [class*="table-responsive"]) table),
-    body > .container table:not(:is([class*="table-wrap"], [class*="table-container"], [class*="table-responsive"]) table) {
+    .page-content table,
+    body > .container table {
         display: block;
         width: 100% !important;
         min-width: 0;

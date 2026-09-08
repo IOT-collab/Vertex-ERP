@@ -27,6 +27,8 @@ namespace VertexERP.Data
         public DbSet<EmployeeAsset> EmployeeAssets => Set<EmployeeAsset>();
         public DbSet<ExpenseClaim> ExpenseClaims => Set<ExpenseClaim>();
         public DbSet<RecruitmentHiringRecord> RecruitmentHiringRecords => Set<RecruitmentHiringRecord>();
+        public DbSet<GeneratedSalarySlip> GeneratedSalarySlips => Set<GeneratedSalarySlip>();
+        public DbSet<EmployeeNotificationDismissal> EmployeeNotificationDismissals => Set<EmployeeNotificationDismissal>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -116,6 +118,8 @@ namespace VertexERP.Data
             modelBuilder.Entity<EmployeeBankDetail>(entity => { entity.ToTable("EmployeeBankDetails"); entity.HasIndex(x => x.EmployeeId).IsUnique(); entity.HasOne(x => x.Employee).WithOne().HasForeignKey<EmployeeBankDetail>(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade); });
             modelBuilder.Entity<BankDetailUpdateRequest>(entity => { entity.ToTable("BankDetailUpdateRequests"); entity.HasIndex(x => new { x.EmployeeId, x.Status }); entity.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade); });
             modelBuilder.Entity<EmployeeSalaryDetail>(entity => { entity.ToTable("EmployeeSalaryDetails"); entity.HasIndex(x => x.EmployeeId).IsUnique(); entity.Property(x => x.BasicSalary).HasPrecision(18,2); entity.Property(x => x.HouseRentAllowance).HasPrecision(18,2); entity.Property(x => x.ConveyanceAllowance).HasPrecision(18,2); entity.Property(x => x.SpecialAllowance).HasPrecision(18,2); entity.Property(x => x.ProvidentFund).HasPrecision(18,2); entity.Property(x => x.ProfessionalTax).HasPrecision(18,2); entity.Property(x => x.Tds).HasPrecision(18,2); entity.Property(x => x.OtherDeductions).HasPrecision(18,2); entity.HasOne(x => x.Employee).WithOne().HasForeignKey<EmployeeSalaryDetail>(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade); });
+            modelBuilder.Entity<GeneratedSalarySlip>(entity => { entity.ToTable("GeneratedSalarySlips"); entity.HasIndex(x => new { x.EmployeeId, x.Year, x.Month }).IsUnique(); entity.Property(x => x.BasicSalary).HasPrecision(18,2); entity.Property(x => x.HouseRentAllowance).HasPrecision(18,2); entity.Property(x => x.ConveyanceAllowance).HasPrecision(18,2); entity.Property(x => x.SpecialAllowance).HasPrecision(18,2); entity.Property(x => x.ProvidentFund).HasPrecision(18,2); entity.Property(x => x.ProfessionalTax).HasPrecision(18,2); entity.Property(x => x.Tds).HasPrecision(18,2); entity.Property(x => x.OtherDeductions).HasPrecision(18,2); entity.Property(x => x.LeaveDeduction).HasPrecision(18,2); entity.Property(x => x.ApprovedLeaveDays).HasPrecision(8,2); entity.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade); entity.HasOne(x => x.GeneratedByUser).WithMany().HasForeignKey(x => x.GeneratedByUserId).OnDelete(DeleteBehavior.Restrict); });
+            modelBuilder.Entity<EmployeeNotificationDismissal>(entity => { entity.ToTable("EmployeeNotificationDismissals"); entity.HasIndex(x => new { x.EmployeeId, x.SourceType, x.SourceId }).IsUnique(); entity.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade); });
             modelBuilder.Entity<EmployeeDocument>(entity =>
             {
                 entity.ToTable("EmployeeDocuments");
@@ -166,7 +170,7 @@ namespace VertexERP.Data
             {
                 entity.ToTable("AttendanceLogs");
                 entity.HasIndex(log => log.UniqueHash).IsUnique();
-                entity.HasIndex(log => new { log.BiometricDeviceId, log.DeviceUserId, log.PunchTime });
+                entity.HasIndex(log => new { log.BiometricDeviceId, log.DeviceUserId, log.PunchTime }).IsUnique();
                 entity.HasIndex(log => new { log.EmployeeId, log.PunchTime });
                 entity.Property(log => log.PunchTime).HasColumnType("timestamp without time zone");
                 entity.Property(log => log.Latitude).HasPrecision(9, 6);

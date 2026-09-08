@@ -162,9 +162,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if (Model != null && Model.Tasks != null && Model.Tasks.Count > 0)
+                            @if (Model != null && Model!.Tasks != null && Model!.Tasks.Count > 0)
                             {
-                                foreach (var item in Model.Tasks)
+                                foreach (var item in Model!.Tasks)
                                 {
                                     <tr>
                                         <td data-label="Task">

@@ -543,7 +543,7 @@
 
 .dashboard .dashboard-week-grid {
     display: grid !important;
-    grid-template-columns: repeat(5, 1fr) !important;
+    grid-template-columns: repeat(6, 1fr) !important;
     align-items: end !important;
     gap: 18px !important;
     height: 190px !important;
@@ -620,7 +620,7 @@
 
 .dashboard .chart-labels {
     display: grid !important;
-    grid-template-columns: repeat(5, 1fr) !important;
+    grid-template-columns: repeat(6, 1fr) !important;
     gap: 10px !important;
     padding: 0 8px !important;
     color: var(--erp-text-muted) !important;

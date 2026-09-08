@@ -322,7 +322,7 @@ public class EmployeeController : Controller
 
     private void ValidateUniqueFields(EmployeeFormViewModel model)
     {
-        var code = model.EmployeeCode.Trim();
+        var code = model.EmployeeCode.Trim().ToUpperInvariant();
         var email = model.Email.Trim().ToLowerInvariant();
         var phoneNumber = model.PhoneNumber.Trim();
         if (_dbContext.Employees.Any(employee => employee.Id != model.Id && employee.EmployeeCode.ToLower() == code.ToLower()))
@@ -376,7 +376,7 @@ public class EmployeeController : Controller
     private static void ApplyForm(Employee employee, EmployeeFormViewModel model, bool preserveEmployeeCode = false)
     {
         if (!preserveEmployeeCode)
-            employee.EmployeeCode = model.EmployeeCode.Trim();
+            employee.EmployeeCode = model.EmployeeCode.Trim().ToUpperInvariant();
         employee.FirstName = model.FirstName.Trim();
         employee.LastName = Clean(model.LastName);
         employee.FullName = $"{employee.FirstName} {employee.LastName}".Trim();

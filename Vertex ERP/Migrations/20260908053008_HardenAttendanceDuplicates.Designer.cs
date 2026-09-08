@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VertexERP.Data;
@@ -11,9 +12,11 @@ using VertexERP.Data;
 namespace Vertex_ERP.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260908053008_HardenAttendanceDuplicates")]
+    partial class HardenAttendanceDuplicates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -734,36 +737,6 @@ namespace Vertex_ERP.Migrations
                     b.ToTable("EmployeeDocuments", (string)null);
                 });
 
-            modelBuilder.Entity("VertexERP.Models.EmployeeNotificationDismissal", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("DismissedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SourceId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("SourceType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId", "SourceType", "SourceId")
-                        .IsUnique();
-
-                    b.ToTable("EmployeeNotificationDismissals", (string)null);
-                });
-
             modelBuilder.Entity("VertexERP.Models.EmployeeSalaryDetail", b =>
                 {
                     b.Property<int>("Id")
@@ -919,94 +892,6 @@ namespace Vertex_ERP.Migrations
                     b.HasIndex("ReportingManagerId", "Status");
 
                     b.ToTable("ExpenseClaims", (string)null);
-                });
-
-            modelBuilder.Entity("VertexERP.Models.GeneratedSalarySlip", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("ApprovedLeaveDays")
-                        .HasPrecision(8, 2)
-                        .HasColumnType("numeric(8,2)");
-
-                    b.Property<decimal>("BasicSalary")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<decimal>("ConveyanceAllowance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<string>("DeductionNote")
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
-
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("GeneratedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("GeneratedByUserId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("HouseRentAllowance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<decimal>("LeaveDeduction")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<int>("Month")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("OtherDeductions")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<string>("PfNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("PfUan")
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
-
-                    b.Property<decimal>("ProfessionalTax")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<decimal>("ProvidentFund")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<decimal>("SpecialAllowance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<decimal>("Tds")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<DateTime>("UpdatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GeneratedByUserId");
-
-                    b.HasIndex("EmployeeId", "Year", "Month")
-                        .IsUnique();
-
-                    b.ToTable("GeneratedSalarySlips", (string)null);
                 });
 
             modelBuilder.Entity("VertexERP.Models.LeaveRequest", b =>
@@ -1391,17 +1276,6 @@ namespace Vertex_ERP.Migrations
                     b.Navigation("Employee");
                 });
 
-            modelBuilder.Entity("VertexERP.Models.EmployeeNotificationDismissal", b =>
-                {
-                    b.HasOne("VertexERP.Models.Employee", "Employee")
-                        .WithMany()
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
-                });
-
             modelBuilder.Entity("VertexERP.Models.EmployeeSalaryDetail", b =>
                 {
                     b.HasOne("VertexERP.Models.Employee", "Employee")
@@ -1436,25 +1310,6 @@ namespace Vertex_ERP.Migrations
                     b.Navigation("Employee");
 
                     b.Navigation("ReportingManager");
-                });
-
-            modelBuilder.Entity("VertexERP.Models.GeneratedSalarySlip", b =>
-                {
-                    b.HasOne("VertexERP.Models.Employee", "Employee")
-                        .WithMany()
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("VertexERP.Models.AppUser", "GeneratedByUser")
-                        .WithMany()
-                        .HasForeignKey("GeneratedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
-
-                    b.Navigation("GeneratedByUser");
                 });
 
             modelBuilder.Entity("VertexERP.Models.LeaveRequest", b =>

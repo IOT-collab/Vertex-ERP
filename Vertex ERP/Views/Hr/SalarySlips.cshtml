@@ -1,0 +1,25 @@
+@model VertexERP.Models.SalarySlipAdminViewModel
+@{ ViewData["Title"] = "Salary Slip Management"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
+<link href="~/css/HrSalarySlips.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/HrSalarySlipsTheme.css" rel="stylesheet" asp-append-version="true" />
+<section class="hr-salary-page">
+    <div class="hr-salary-header"><div><span>HR MANAGEMENT</span><h1>Salary Slip</h1><p>Employee ya department select karke salary slips generate karein. Employee ko sirf generated slip hi dikhegi.</p></div><</div>
+    @if (TempData["SalaryMessage"] != null) { <div class="salary-alert success">@TempData["SalaryMessage"]</div> }
+    @if (TempData["SalaryError"] != null) { <div class="salary-alert error">@TempData["SalaryError"]</div> }
+    <form method="get" class="salary-filters">
+        <label>Month<input type="month" id="salaryMonth" value="@($"{Model.Year}-{Model.Month:00}")" /></label>
+        <input type="hidden" name="year" id="year" value="@Model.Year" /><input type="hidden" name="month" id="month" value="@Model.Month" />
+        <label>Department<select name="department"><option value="">All departments</option>@foreach(var d in Model.Departments){<option value="@d" selected="@(d == Model.Department)">@d</option>}</select></label>
+        <label>Employee<select name="employeeId"><option value="">All employees</option>@foreach(var e in Model.Employees){<option value="@e.EmployeeId" selected="@(e.EmployeeId == Model.EmployeeId)">@e.EmployeeCode - @e.EmployeeName</option>}</select></label>
+        <button type="submit">Apply Filter</button>
+    </form>
+    <form asp-action="GenerateSalarySlips" method="post">
+        <input type="hidden" name="year" value="@Model.Year" /><input type="hidden" name="month" value="@Model.Month" /><input type="hidden" name="department" value="@Model.Department" />
+        <div class="salary-toolbar"><div><input type="checkbox" id="selectAll" /> <label for="selectAll">Select all shown employees</label></div><button type="submit">Generate / Update Selected Slips</button></div>
+        <div class="salary-table-wrap"><table><thead><tr><th></th><th>Employee</th><th>Department</th><th>Gross Salary</th><th>Approved Leave</th><th>Amount Deduction</th><th>Deduction Reason</th><th>Status</th></tr></thead><tbody>
+        @if(Model.Employees.Count == 0){<tr><td colspan="8" class="empty">No active employee with salary details found.</td></tr>}
+        @foreach(var row in Model.Employees){<tr><td><input class="employee-check" type="checkbox" name="employeeIds" value="@row.EmployeeId" /></td><td><strong>@row.EmployeeName</strong><small>@row.EmployeeCode</small></td><td>@row.Department</td><td>₹@row.GrossSalary.ToString("N2")<small>Regular deductions: ₹@row.StandardDeductions.ToString("N2")</small></td><td>@row.ApprovedLeaveDays.ToString("0.##") day(s)<input type="hidden" name="leaveDays_@row.EmployeeId" value="@row.ApprovedLeaveDays.ToString(System.Globalization.CultureInfo.InvariantCulture)" /></td><td><input type="number" min="0" max="@row.GrossSalary" step="0.01" name="leaveDeduction_@row.EmployeeId" value="@row.LeaveDeduction.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" /></td><td><input type="text" maxlength="300" name="deductionNote_@row.EmployeeId" value="@row.DeductionNote" placeholder="Optional reason" /></td><td>@if(row.IsGenerated){<span class="generated">Generated</span><small>@row.GeneratedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small>}else{<span class="pending">Not generated</span>}</td></tr>}
+        </tbody></table></div>
+    </form>
+</section>
+<script>document.getElementById('salaryMonth').addEventListener('change',function(){const p=this.value.split('-');document.getElementById('year').value=p[0];document.getElementById('month').value=p[1];});document.getElementById('selectAll').addEventListener('change',function(){document.querySelectorAll('.employee-check').forEach(x=>x.checked=this.checked);});</script>
