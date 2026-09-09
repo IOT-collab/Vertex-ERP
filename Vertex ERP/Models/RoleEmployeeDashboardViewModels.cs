@@ -44,9 +44,9 @@ public sealed class EmployeeAttendanceViewModel
     public DateOnly StartDate { get; init; }
     public DateOnly EndDate { get; init; }
     public IReadOnlyList<EmployeeAttendanceDay> Days { get; init; } = Array.Empty<EmployeeAttendanceDay>();
-    public int Present => Days.Count(day => day.Status is "Present" or "Incomplete");
+    public int Present => Days.Count(day => day.Status == "Present");
     public int Absent => Days.Count(day => day.Status == "Absent");
-    public int OnLeave => Days.Count(day => day.Status == "On Leave");
+    public int Late => Days.Count(day => day.Status == "Late");
 }
 
 public sealed class EmployeeLeaveViewModel

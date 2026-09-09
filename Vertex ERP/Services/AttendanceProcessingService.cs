@@ -20,14 +20,15 @@ public sealed class AttendanceProcessingService : IAttendanceProcessingService
         var from = date.ToDateTime(TimeOnly.MinValue); var to = from.AddDays(1);
         var logs = await _repository.GetAttendanceLogsAsync(from, to, cancellationToken);
         var employees = await _repository.GetActiveEmployeesAsync(cancellationToken);
-        var approvedLeaveEmployeeIds = await _repository.GetApprovedLeaveEmployeeIdsAsync(date, cancellationToken);
         var startTime = TimeOnly.TryParse(_options.WorkDayStart, out var parsedStart) ? parsedStart : new TimeOnly(9, 30);
         var records = logs.GroupBy(log => log.EmployeeId.HasValue ? $"employee:{log.EmployeeId.Value}" : $"device:{log.BiometricDeviceId}:{log.DeviceUserId}").Select(group =>
         {
             var firstLog = group.First(); var employee = firstLog.Employee;
             var paired = AttendanceRules.PairPunches(group.Select(log => (log.PunchTime, log.PunchState)));
             var late = paired.CheckIn.HasValue && TimeOnly.FromDateTime(paired.CheckIn.Value) > startTime;
-            var statusValue = employee is null ? "Unmapped" : paired.NeedsReview ? "Needs Review" : !paired.CheckOut.HasValue ? "Incomplete" : late ? "Late" : "Present";
+            var statusValue = paired.CheckIn.HasValue
+                ? late ? "Late" : "Present"
+                : "Absent";
             return new DailyAttendanceViewModel { EmployeeId = employee?.Id ?? 0, EmpId = employee?.EmployeeCode ?? $"BIO-{firstLog.DeviceUserId}", EmployeeName = FormatDisplayText(employee?.FullName ?? $"Unmapped User {firstLog.DeviceUserId}"), Department = FormatDisplayText(employee?.Department ?? "Unmapped"), Date = date, CheckIn = paired.CheckIn.HasValue ? TimeOnly.FromDateTime(paired.CheckIn.Value) : null, CheckOut = paired.CheckOut.HasValue ? TimeOnly.FromDateTime(paired.CheckOut.Value) : null, WorkingHours = paired.CheckIn.HasValue && paired.CheckOut.HasValue ? paired.CheckOut.Value - paired.CheckIn.Value : TimeSpan.Zero, PunchCount = group.Count(), Status = statusValue };
         }).ToList();
         var punchedEmployeeIds = records.Where(record => record.EmployeeId > 0).Select(record => record.EmployeeId).ToHashSet();
@@ -43,13 +44,13 @@ public sealed class AttendanceProcessingService : IAttendanceProcessingService
                 CheckOut = null,
                 WorkingHours = TimeSpan.Zero,
                 PunchCount = 0,
-                Status = approvedLeaveEmployeeIds.Contains(employee.Id) ? "On Leave" : AttendanceRules.IsWeeklyOff(date) ? "Sunday Off" : "Absent"
+                Status = "Absent"
             }));
         var presentCount = records.Count(record => record.Status == "Present");
         var lateCount = records.Count(record => record.Status == "Late");
         var absentCount = records.Count(record => record.Status == "Absent");
-        var leaveCount = records.Count(record => record.Status == "On Leave");
-        var incompleteCount = records.Count(record => record.Status is "Incomplete" or "Needs Review");
+        const int leaveCount = 0;
+        const int incompleteCount = 0;
         IEnumerable<DailyAttendanceViewModel> filtered = records;
         if (!string.IsNullOrWhiteSpace(search)) filtered = filtered.Where(record => record.EmployeeName.Contains(search, StringComparison.OrdinalIgnoreCase) || record.EmpId.Contains(search, StringComparison.OrdinalIgnoreCase));
         if (!string.IsNullOrWhiteSpace(department)) filtered = filtered.Where(record => string.Equals(record.Department, department, StringComparison.OrdinalIgnoreCase));

@@ -259,63 +259,84 @@ public class EmployeeController : Controller
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         string? photoPath = null;
+        var expenseReceiptPaths = new List<string>();
         var employeeFound = false;
         var executionStrategy = _dbContext.Database.CreateExecutionStrategy();
 
-        await executionStrategy.ExecuteAsync(async () =>
+        try
         {
-            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
-            var employee = await _dbContext.Employees.FirstOrDefaultAsync(item => item.Id == id);
-            if (employee == null) return;
-
-            employeeFound = true;
-            photoPath = employee.PhotoPath;
-            var directReports = await _dbContext.Employees
-                .Where(item => item.ReportingManagerId == id)
-                .ToListAsync();
-            foreach (var directReport in directReports)
+            await executionStrategy.ExecuteAsync(async () =>
             {
-                directReport.ReportingManagerId = null;
-                directReport.UpdatedDate = DateTime.UtcNow;
-            }
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+                var employee = await _dbContext.Employees.FirstOrDefaultAsync(item => item.Id == id);
+                if (employee == null) return;
 
-            var managedDepartments = await _dbContext.Departments
-                .Where(department => department.ManagerId == id)
-                .ToListAsync();
-            foreach (var department in managedDepartments)
-            {
-                department.ManagerId = null;
-                department.UpdatedDate = DateTime.UtcNow;
-            }
+                employeeFound = true;
+                photoPath = employee.PhotoPath;
+                var directReports = await _dbContext.Employees.Where(item => item.ReportingManagerId == id).ToListAsync();
+                foreach (var directReport in directReports)
+                {
+                    directReport.ReportingManagerId = null;
+                    directReport.UpdatedDate = DateTime.UtcNow;
+                }
 
-            // Remove every employee-owned record before deleting the employee.
-            // Several of these relationships intentionally use RESTRICT in the database.
-            var loginAccounts = await _dbContext.AppUsers
-                .Where(user => user.EmployeeId == id)
-                .ToListAsync();
-            var deviceMappings = await _dbContext.EmployeeDeviceMappings
-                .Where(mapping => mapping.EmployeeId == id)
-                .ToListAsync();
-            var attendanceLogs = await _dbContext.AttendanceLogs
-                .Where(log => log.EmployeeId == id)
-                .ToListAsync();
-            var employeeTasks = await _dbContext.WorkTasks
-                .Where(task => task.ManagerId == id || task.AssigneeId == id)
-                .ToListAsync();
+                var managedDepartments = await _dbContext.Departments.Where(department => department.ManagerId == id).ToListAsync();
+                foreach (var department in managedDepartments)
+                {
+                    department.ManagerId = null;
+                    department.UpdatedDate = DateTime.UtcNow;
+                }
 
-            _dbContext.AppUsers.RemoveRange(loginAccounts);
-            _dbContext.EmployeeDeviceMappings.RemoveRange(deviceMappings);
-            _dbContext.AttendanceLogs.RemoveRange(attendanceLogs);
-            _dbContext.WorkTasks.RemoveRange(employeeTasks);
+                var managedExpenses = await _dbContext.ExpenseClaims.Where(item => item.ReportingManagerId == id && item.EmployeeId != id).ToListAsync();
+                foreach (var expense in managedExpenses) expense.ReportingManagerId = null;
+                var managedQueries = await _dbContext.QueryTickets.Where(item => item.ReportingManagerId == id && item.EmployeeId != id).ToListAsync();
+                foreach (var ticket in managedQueries) ticket.ReportingManagerId = null;
+                var assignedLeaves = await _dbContext.LeaveRequests.Where(item => item.AssignedApproverEmployeeId == id && item.EmployeeId != id).ToListAsync();
+                foreach (var leave in assignedLeaves) leave.AssignedApproverEmployeeId = null;
 
-            await _dbContext.SaveChangesAsync();
-            _dbContext.Employees.Remove(employee);
-            await _dbContext.SaveChangesAsync();
-            await transaction.CommitAsync();
-        });
+                var loginAccounts = await _dbContext.AppUsers.Where(user => user.EmployeeId == id).ToListAsync();
+                foreach (var account in loginAccounts)
+                {
+                    account.EmployeeId = null;
+                    account.IsActive = false;
+                }
+
+                var deviceMappings = await _dbContext.EmployeeDeviceMappings.Where(mapping => mapping.EmployeeId == id).ToListAsync();
+                var attendanceLogs = await _dbContext.AttendanceLogs.Where(log => log.EmployeeId == id).ToListAsync();
+                var employeeTasks = await _dbContext.WorkTasks.Where(task => task.ManagerId == id || task.AssigneeId == id).ToListAsync();
+                var employeeAssets = await _dbContext.EmployeeAssets.Where(asset => asset.EmployeeId == id).ToListAsync();
+                var employeeLeaves = await _dbContext.LeaveRequests.Where(leave => leave.EmployeeId == id).ToListAsync();
+                var employeeQueries = await _dbContext.QueryTickets.Where(ticket => ticket.EmployeeId == id).ToListAsync();
+                var employeeExpenses = await _dbContext.ExpenseClaims.Where(expense => expense.EmployeeId == id).ToListAsync();
+                expenseReceiptPaths.AddRange(employeeExpenses.Select(expense => expense.StoredFileName));
+
+                _dbContext.EmployeeDeviceMappings.RemoveRange(deviceMappings);
+                _dbContext.AttendanceLogs.RemoveRange(attendanceLogs);
+                _dbContext.WorkTasks.RemoveRange(employeeTasks);
+                _dbContext.EmployeeAssets.RemoveRange(employeeAssets);
+                _dbContext.LeaveRequests.RemoveRange(employeeLeaves);
+                _dbContext.QueryTickets.RemoveRange(employeeQueries);
+                _dbContext.ExpenseClaims.RemoveRange(employeeExpenses);
+
+                await _dbContext.SaveChangesAsync();
+                _dbContext.Employees.Remove(employee);
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+            });
+        }
+        catch (DbUpdateException)
+        {
+            TempData["EmployeeError"] = "Employee could not be deleted because a linked record is still in use. Please try again or contact the administrator.";
+            return RedirectToAction(nameof(Index));
+        }
 
         if (!employeeFound) return NotFound();
         DeletePhotoIfPresent(photoPath);
+        foreach (var receipt in expenseReceiptPaths)
+        {
+            var receiptPath = Path.Combine(_environment.ContentRootPath, "App_Data", "ExpenseReceipts", Path.GetFileName(receipt));
+            if (System.IO.File.Exists(receiptPath)) System.IO.File.Delete(receiptPath);
+        }
         TempData["EmployeeMessage"] = "Employee deleted successfully.";
         return RedirectToAction(nameof(Index));
     }

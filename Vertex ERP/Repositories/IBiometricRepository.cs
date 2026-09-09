@@ -10,6 +10,7 @@ public interface IBiometricRepository
     Task AddDeviceAsync(BiometricDevice device, CancellationToken cancellationToken = default);
     void RemoveDevice(BiometricDevice device);
     Task<EmployeeDeviceMapping?> GetMappingAsync(int deviceId, string deviceUserId, CancellationToken cancellationToken = default);
+    Task<Employee?> GetActiveEmployeeByCodeAsync(string employeeCode, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<EmployeeDeviceMapping>> GetMappingsAsync(int deviceId, CancellationToken cancellationToken = default);
     Task AddOrUpdateMappingAsync(EmployeeDeviceMapping mapping, CancellationToken cancellationToken = default);
     Task<bool> AttendanceHashExistsAsync(string hash, CancellationToken cancellationToken = default);

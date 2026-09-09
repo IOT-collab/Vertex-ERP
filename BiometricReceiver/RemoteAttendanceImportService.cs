@@ -188,9 +188,9 @@ public sealed class RemoteAttendanceImportService : BackgroundService
         var serials = valid.Select(item => item.Item.TerminalSerial.Trim().ToUpperInvariant()).Distinct().ToList();
         var devices = await db.BiometricDevices.Where(item => serials.Contains(item.SerialNumber) && item.IsActive)
             .ToDictionaryAsync(item => item.SerialNumber, StringComparer.OrdinalIgnoreCase, cancellationToken);
-        var employeeCodes = valid.Select(item => item.Item.EmployeeCode.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-        var employees = await db.Employees.Where(item => employeeCodes.Contains(item.EmployeeCode))
-            .ToDictionaryAsync(item => item.EmployeeCode, StringComparer.OrdinalIgnoreCase, cancellationToken);
+        var employeeCodes = valid.Select(item => item.Item.EmployeeCode.Trim().ToUpperInvariant()).Distinct().ToList();
+        var employees = await db.Employees.Where(item => item.IsActive && employeeCodes.Contains(item.EmployeeCode.ToUpper()))
+            .ToDictionaryAsync(item => item.EmployeeCode.Trim().ToUpperInvariant(), StringComparer.Ordinal, cancellationToken);
         var deviceIds = devices.Values.Select(item => item.Id).ToList();
         var mappings = await db.EmployeeDeviceMappings.Where(item => deviceIds.Contains(item.BiometricDeviceId) && item.IsActive)
             .ToListAsync(cancellationToken);
@@ -198,9 +198,10 @@ public sealed class RemoteAttendanceImportService : BackgroundService
 
         foreach (var item in valid)
         {
-            if (!devices.TryGetValue(item.Item.TerminalSerial.Trim(), out var device) || !employees.TryGetValue(item.Item.EmployeeCode.Trim(), out var employee)) continue;
-            var key = $"{device.Id}|{item.Item.EmployeeCode.Trim()}";
-            if (mappingKeys.Add(key)) db.EmployeeDeviceMappings.Add(new EmployeeDeviceMapping { BiometricDeviceId = device.Id, EmployeeId = employee.Id, DeviceUserId = item.Item.EmployeeCode.Trim(), IsActive = true });
+            var employeeCode = item.Item.EmployeeCode.Trim().ToUpperInvariant();
+            if (!devices.TryGetValue(item.Item.TerminalSerial.Trim(), out var device) || !employees.TryGetValue(employeeCode, out var employee)) continue;
+            var key = $"{device.Id}|{employeeCode}";
+            if (mappingKeys.Add(key)) db.EmployeeDeviceMappings.Add(new EmployeeDeviceMapping { BiometricDeviceId = device.Id, EmployeeId = employee.Id, DeviceUserId = employeeCode, IsActive = true });
         }
         await db.SaveChangesAsync(cancellationToken);
 
@@ -215,12 +216,13 @@ public sealed class RemoteAttendanceImportService : BackgroundService
             if (!devices.TryGetValue(parsed.Item.TerminalSerial.Trim(), out var device)) continue;
             var hash = ComputeHash(device.Id, parsed.Item.Id);
             if (!existingHashes.Add(hash)) continue;
-            mappingLookup.TryGetValue($"{device.Id}|{parsed.Item.EmployeeCode.Trim()}", out var mapping);
+            var employeeCode = parsed.Item.EmployeeCode.Trim().ToUpperInvariant();
+            mappingLookup.TryGetValue($"{device.Id}|{employeeCode}", out var mapping);
             db.AttendanceLogs.Add(new AttendanceLog
             {
                 BiometricDeviceId = device.Id,
                 EmployeeId = mapping?.EmployeeId,
-                DeviceUserId = parsed.Item.EmployeeCode.Trim(),
+                DeviceUserId = employeeCode,
                 PunchTime = parsed.PunchTime,
                 PunchState = Limit(parsed.Item.PunchState, 30),
                 VerificationMode = parsed.Item.VerifyType.ToString(CultureInfo.InvariantCulture),

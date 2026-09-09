@@ -35,7 +35,7 @@ public sealed class AttendanceSyncService : IAttendanceSyncService
             if (await _repository.AttendanceHashExistsAsync(hash, cancellationToken) ||
                 await _repository.AttendancePunchExistsAsync(device.Id, punch.DeviceUserId, punch.PunchTime, cancellationToken) ||
                 logs.Any(log => log.UniqueHash == hash || (log.DeviceUserId == punch.DeviceUserId && log.PunchTime == punch.PunchTime))) continue;
-            var mapping = await _repository.GetMappingAsync(device.Id, punch.DeviceUserId, cancellationToken);
+            var mapping = await ResolveMappingAsync(device.Id, punch.DeviceUserId, cancellationToken);
             if (mapping is null) unmapped++;
             logs.Add(new AttendanceLog { BiometricDeviceId = device.Id, EmployeeId = mapping?.EmployeeId, DeviceUserId = punch.DeviceUserId, PunchTime = punch.PunchTime, PunchState = punch.PunchState, VerificationMode = punch.VerificationMode, WorkCode = punch.WorkCode, UniqueHash = hash, RawPayload = row, SourceIpAddress = sourceIp, ReceivedAtUtc = DateTime.UtcNow });
         }
@@ -60,7 +60,7 @@ public sealed class AttendanceSyncService : IAttendanceSyncService
             if (await _repository.AttendanceHashExistsAsync(hash, cancellationToken) ||
                 await _repository.AttendancePunchExistsAsync(device.Id, userId, time, cancellationToken) ||
                 logs.Any(log => log.UniqueHash == hash || (log.DeviceUserId == userId && log.PunchTime == time))) continue;
-            var mapping = await _repository.GetMappingAsync(device.Id, userId, cancellationToken);
+            var mapping = await ResolveMappingAsync(device.Id, userId, cancellationToken);
             if (mapping is null) unmapped++;
             logs.Add(new AttendanceLog { BiometricDeviceId = device.Id, EmployeeId = mapping?.EmployeeId, DeviceUserId = userId, PunchTime = time, PunchState = Limit(punch.PunchState, 30), VerificationMode = Limit(punch.VerificationMode, 30), WorkCode = Limit(punch.WorkCode, 50), UniqueHash = hash, RawPayload = raw, SourceIpAddress = sourceIp, ReceivedAtUtc = DateTime.UtcNow });
         }
@@ -70,6 +70,27 @@ public sealed class AttendanceSyncService : IAttendanceSyncService
     }
 
     private async Task<BiometricDevice?> FindActiveDeviceAsync(string serial, CancellationToken cancellationToken) => string.IsNullOrWhiteSpace(serial) ? null : (await _repository.GetDeviceBySerialAsync(serial.Trim().ToUpperInvariant(), cancellationToken)) is { IsActive: true } device ? device : null;
+    private async Task<EmployeeDeviceMapping?> ResolveMappingAsync(int deviceId, string deviceUserId, CancellationToken cancellationToken)
+    {
+        var mapping = await _repository.GetMappingAsync(deviceId, deviceUserId, cancellationToken);
+        if (mapping is not null) return mapping;
+
+        // HR Employee ID and biometric machine user code are the shared identity.
+        // As soon as the first thumb punch arrives, create the mapping automatically.
+        var employee = await _repository.GetActiveEmployeeByCodeAsync(deviceUserId, cancellationToken);
+        if (employee is null) return null;
+
+        mapping = new EmployeeDeviceMapping
+        {
+            BiometricDeviceId = deviceId,
+            EmployeeId = employee.Id,
+            DeviceUserId = deviceUserId.Trim(),
+            IsActive = true
+        };
+        await _repository.AddOrUpdateMappingAsync(mapping, cancellationToken);
+        await _repository.SaveChangesAsync(cancellationToken);
+        return await _repository.GetMappingAsync(deviceId, deviceUserId.Trim(), cancellationToken);
+    }
     private static void Touch(BiometricDevice device, string? sourceIp, bool synced) { device.LastSeenUtc = DateTime.UtcNow; device.LastKnownIpAddress = sourceIp; if (synced) device.LastSyncUtc = DateTime.UtcNow; }
 
     private static bool TryParsePunch(string row, out ParsedPunch punch)

@@ -22,6 +22,8 @@ public sealed class BiometricRepository : IBiometricRepository
     public void RemoveDevice(BiometricDevice device) => _db.BiometricDevices.Remove(device);
     public Task<EmployeeDeviceMapping?> GetMappingAsync(int deviceId, string deviceUserId, CancellationToken cancellationToken = default) =>
         _db.EmployeeDeviceMappings.SingleOrDefaultAsync(mapping => mapping.BiometricDeviceId == deviceId && mapping.DeviceUserId == deviceUserId && mapping.IsActive, cancellationToken);
+    public Task<Employee?> GetActiveEmployeeByCodeAsync(string employeeCode, CancellationToken cancellationToken = default) =>
+        _db.Employees.SingleOrDefaultAsync(employee => employee.IsActive && employee.EmployeeCode.ToLower() == employeeCode.Trim().ToLower(), cancellationToken);
     public async Task<IReadOnlyList<EmployeeDeviceMapping>> GetMappingsAsync(int deviceId, CancellationToken cancellationToken = default) =>
         await _db.EmployeeDeviceMappings.AsNoTracking().Include(mapping => mapping.Employee).Where(mapping => mapping.BiometricDeviceId == deviceId).OrderBy(mapping => mapping.DeviceUserId).ToListAsync(cancellationToken);
     public async Task AddOrUpdateMappingAsync(EmployeeDeviceMapping mapping, CancellationToken cancellationToken = default)

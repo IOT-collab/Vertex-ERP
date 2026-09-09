@@ -618,10 +618,6 @@ hr,
     color: var(--app-text-soft) !important;
 }
 
-body.employee-self-service-only .common-back-nav {
-    display: none !important;
-}
-
 /* Compatibility layer for legacy views that still use generic light-panel
    class names. Specific page styles can retain semantic status colours, but
    normal content surfaces now always inherit the application dark theme. */

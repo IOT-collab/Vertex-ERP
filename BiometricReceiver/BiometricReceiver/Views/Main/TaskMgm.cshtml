@@ -307,7 +307,9 @@
             <td>${escapeHtml(task.priority)}</td><td>${escapeHtml(task.status)}</td><td>${formatDate(task.dueDate)}</td>
             <td>
                 <button type="button" class="btn-action-update" title="Edit Task" onclick="openUpdateTaskModal(${task.id})"><i class="fas fa-edit"></i> Update</button>
-                <button type="button" class="btn-action-delete" title="Delete Task" onclick="deleteTask(${task.id})"><i class="fas fa-trash"></i> Delete</button>
+                ${task.status === 'Completed'
+                    ? `<button type="button" class="btn-action-delete" title="Delete completed task" onclick="deleteTask(${task.id})"><i class="fas fa-trash"></i> Delete</button>`
+                    : `<button type="button" class="btn-action-delete" title="Complete the task before deleting" disabled><i class="fas fa-lock"></i> Complete first</button>`}
             </td>
         </tr>`).join('');
         document.getElementById('tableEmptyState').style.display = tasks.length ? 'none' : 'flex';

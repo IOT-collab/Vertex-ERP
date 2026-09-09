@@ -43,6 +43,13 @@
 
 	</ItemGroup>
 
+	<!-- Compile the EasyTime remote importer into the ERP assembly so Azure
+	     runs biometric synchronization inside the single web application. -->
+	<ItemGroup>
+		<Compile Include="..\BiometricReceiver\RemoteAttendanceImportService.cs"
+				 Link="Services\RemoteAttendanceImportService.cs" />
+	</ItemGroup>
+
 
 	<!-- ============================================================
        BIOMETRIC RECEIVER CONFIGURATION
@@ -79,7 +86,7 @@
 	<Target
 	  Name="BuildAndBundleBiometricReceiver"
 	  AfterTargets="Publish"
-	  Condition="Exists('$(BiometricReceiverProject)') And '$(IsBiometricReceiverBundleBuild)' != 'true'">
+	  Condition="Exists('$(BiometricReceiverProject)') And '$(IsBiometricReceiverBundleBuild)' != 'true' And '$(WebPublishMethod)' != 'MSDeploy' And '$(PublishProvider)' != 'AzureWebSite'">
 
 		<!-- Show information in Visual Studio Output window -->
 

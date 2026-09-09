@@ -4,7 +4,7 @@
 <link href="~/css/ResponsiveEnhancements.css" rel="stylesheet" asp-append-version="true" />
 <section class="employee-section">
 <header><div><h1>My Attendance</h1><p>@Model.Employee.FullName (@Model.Employee.EmployeeCode) · Last 30 days</p><p>@Model.StartDate.ToString("dd MMM yyyy") – @Model.EndDate.ToString("dd MMM yyyy")</p></div></header>
-<div class="employee-summary"><article><small>Total Days</small><strong>@Model.Days.Count</strong></article><article><small>Present</small><strong>@Model.Present</strong></article><article><small>Absent</small><strong>@Model.Absent</strong></article><article><small>On Leave</small><strong>@Model.OnLeave</strong></article></div>
+<div class="employee-summary"><article><small>Total Days</small><strong>@Model.Days.Count</strong></article><article><small>Present</small><strong>@Model.Present</strong></article><article><small>Absent</small><strong>@Model.Absent</strong></article><article><small>Late</small><strong>@Model.Late</strong></article></div>
 <div class="employee-panel"><table class="employee-table attendance-history"><thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Source</th><th>Status</th></tr></thead><tbody>
 @foreach (var day in Model.Days)
 {

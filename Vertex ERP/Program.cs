@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
@@ -68,6 +70,28 @@ builder.Services.AddScoped<IBiometricDeviceService, BiometricDeviceService>();
 builder.Services.AddScoped<IAttendanceSyncService, AttendanceSyncService>();
 builder.Services.AddScoped<IAttendanceProcessingService, AttendanceProcessingService>();
 
+// EasyTime Pro remote API synchronization runs inside the ERP process. This
+// is compatible with Azure App Service, where a second executable/port cannot
+// be relied upon to stay running beside the web application.
+builder.Services.Configure<RemoteAttendanceOptions>(
+    builder.Configuration.GetSection(RemoteAttendanceOptions.SectionName)
+);
+
+builder.Services
+    .AddHttpClient(RemoteAttendanceImportService.HttpClientName, client =>
+    {
+        client.Timeout = TimeSpan.FromMinutes(5);
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("VertexERP-AttendanceSync/1.0");
+    })
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+    {
+        UseCookies = true,
+        CookieContainer = new System.Net.CookieContainer(),
+        AllowAutoRedirect = true
+    });
+
+builder.Services.AddHostedService<RemoteAttendanceImportService>();
+
 // ============================================================
 // DTDC / SHIPMENT TRACKING
 // ============================================================
@@ -136,6 +160,51 @@ builder.Services
 
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
+
+        // Keep the authenticated profile synchronized with the database. If an
+        // administrator changes a user's role, name, username, or active state,
+        // the old cookie must not continue granting the previous profile.
+        options.Events.OnValidatePrincipal = async context =>
+        {
+            var userIdValue = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdValue, out var userId))
+            {
+                context.RejectPrincipal();
+                return;
+            }
+
+            var db = context.HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+            var currentUser = await db.AppUsers.AsNoTracking()
+                .SingleOrDefaultAsync(user => user.Id == userId && user.IsActive);
+            var currentRole = AccountRoleService.Normalize(currentUser?.Role);
+            if (currentUser == null || currentRole == null)
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return;
+            }
+
+            var cookieRole = context.Principal?.FindFirstValue(ClaimTypes.Role);
+            var cookieName = context.Principal?.FindFirstValue(ClaimTypes.Name);
+            var cookieUsername = context.Principal?.FindFirstValue("username");
+            if (cookieRole == currentRole && cookieName == currentUser.FullName && cookieUsername == currentUser.Username)
+                return;
+
+            var refreshedClaims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, currentUser.Id.ToString()),
+                new(ClaimTypes.Name, currentUser.FullName),
+                new(ClaimTypes.Role, currentRole),
+                new("username", currentUser.Username)
+            };
+            context.ReplacePrincipal(new ClaimsPrincipal(
+                new ClaimsIdentity(refreshedClaims, CookieAuthenticationDefaults.AuthenticationScheme)));
+            context.ShouldRenew = true;
+            context.HttpContext.Session.SetString("email", currentUser.Username);
+            context.HttpContext.Session.SetString("username", currentUser.Username);
+            context.HttpContext.Session.SetString("role", currentRole);
+            context.HttpContext.Session.SetString("fullName", currentUser.FullName);
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -261,58 +330,66 @@ app.MapControllerRoute(
 // ============================================================
 
 var appUrl = "http://localhost:5000";
+var isAzureAppService =
+    !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("WEBSITE_INSTANCE_ID"));
 
-app.Lifetime.ApplicationStarted.Register(() =>
+if (!isAzureAppService)
 {
-    try
+    app.Lifetime.ApplicationStarted.Register(() =>
     {
-        System.Diagnostics.Process.Start(
-            new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = appUrl + "/Main/Start",
-                UseShellExecute = true
-            }
-        );
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(
-            $"Could not open browser automatically: {ex.Message}"
-        );
-    }
-});
+        try
+        {
+            System.Diagnostics.Process.Start(
+                new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = appUrl + "/Main/Start",
+                    UseShellExecute = true
+                }
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(
+                $"Could not open browser automatically: {ex.Message}"
+            );
+        }
+    });
+}
 
 // The biometric devices post punches to the lightweight receiver on port 8082.
 // Keep it available whenever the local ERP application is running; otherwise the
 // attendance screen correctly has no punches to show for the current day.
-app.Lifetime.ApplicationStarted.Register(() =>
+if (!isAzureAppService)
 {
-    try
+    app.Lifetime.ApplicationStarted.Register(() =>
     {
-        var receiverIsRunning = System.Net.NetworkInformation.IPGlobalProperties
-            .GetIPGlobalProperties().GetActiveTcpListeners().Any(endpoint => endpoint.Port == 8082);
-        if (receiverIsRunning) return;
-
-        var receiverPath = new[]
+        try
         {
-            Path.Combine(builder.Environment.ContentRootPath, "BiometricReceiver", "BiometricReceiver.exe"),
-            Path.Combine(builder.Environment.ContentRootPath, ".codex-biometric-runtime", "BiometricReceiver.exe")
-        }.FirstOrDefault(File.Exists);
-        if (receiverPath == null) return;
+            var receiverIsRunning = System.Net.NetworkInformation.IPGlobalProperties
+                .GetIPGlobalProperties().GetActiveTcpListeners().Any(endpoint => endpoint.Port == 8082);
+            if (receiverIsRunning) return;
 
-        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            var receiverPath = new[]
+            {
+                Path.Combine(builder.Environment.ContentRootPath, "BiometricReceiver", "BiometricReceiver.exe"),
+                Path.Combine(builder.Environment.ContentRootPath, ".codex-biometric-runtime", "BiometricReceiver.exe")
+            }.FirstOrDefault(File.Exists);
+            if (receiverPath == null) return;
+
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = receiverPath,
+                WorkingDirectory = Path.GetDirectoryName(receiverPath)!,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+            });
+        }
+        catch (Exception ex)
         {
-            FileName = receiverPath,
-            WorkingDirectory = Path.GetDirectoryName(receiverPath)!,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
-        });
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Could not start biometric receiver: {ex.Message}");
-    }
-});
+            Console.WriteLine($"Could not start biometric receiver: {ex.Message}");
+        }
+    });
+}
 
 app.Run();

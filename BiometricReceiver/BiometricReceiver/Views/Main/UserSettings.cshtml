@@ -56,7 +56,7 @@
 
                 <div class="form-group">
                     <label for="fullName">Employee Name</label>
-                    <input id="fullName" name="fullName" type="text" placeholder="e.g. Krishna Sharma" required />
+                    <input id="fullName" name="fullName" type="text" placeholder="Enter employee name" required />
                 </div>
 
                 <div class="form-group">
@@ -117,8 +117,9 @@
             <table class="users-table">
                 <thead>
                     <tr>
-                        <th>Employee ID</th>
+                        <th>Username</th>
                         <th>Employee Name</th>
+                        <th>New Password</th>
                         <th>Role Access</th>
                         <th>Account Status</th>
                         <th class="text-center">Action</th>
@@ -128,19 +129,20 @@
                     @foreach (var user in users)
                     {
                         <tr class="user-row">
-                            <form asp-action="UpdateUser" asp-controller="Main" method="post">
-                                <input type="hidden" name="id" value="@user.Id" />
-
                             <td>
-                                <strong class="user-id-code">@user.Username</strong>
+                                <input class="table-input user-id-code" form="update-user-@user.Id" name="username" type="text" value="@user.Username" maxlength="50" required />
                             </td>
 
                             <td>
-                                <input class="table-input" name="fullName" type="text" value="@user.FullName" required />
+                                <input class="table-input" form="update-user-@user.Id" name="fullName" type="text" value="@user.FullName" required />
                             </td>
 
                             <td>
-                                <select class="table-select" name="role">
+                                <input class="table-input" form="update-user-@user.Id" name="newPassword" type="password" minlength="10" autocomplete="new-password" placeholder="Leave blank to keep" />
+                            </td>
+
+                            <td>
+                                <select class="table-select" form="update-user-@user.Id" name="role">
                                     <option value="Employee" selected="@(user.Role == "Employee" || user.Role == "User")">Employee</option>
                                     <option value="Manager" selected="@(user.Role == "Manager")">Manager</option>
                                     <option value="HR" selected="@(user.Role == "HR")">HR</option>
@@ -150,18 +152,20 @@
 
 
                             <td>
-                                <select class="table-select status-select @(user.IsActive ? "is-active" : "is-inactive")" name="isActive">
+                                <select class="table-select status-select @(user.IsActive ? "is-active" : "is-inactive")" form="update-user-@user.Id" name="isActive">
                                     <option value="true" selected="@user.IsActive">Active</option>
                                     <option value="false" selected="@(!user.IsActive)">Inactive</option>
                                 </select>
                             </td>
 
                             <td class="text-center">
-                                <button type="submit" class="btn-table-save" title="Save Changes">
+                                <form id="update-user-@user.Id" asp-action="UpdateUser" asp-controller="Main" method="post">
+                                    <input type="hidden" name="id" value="@user.Id" />
+                                </form>
+                                <button type="submit" form="update-user-@user.Id" class="btn-table-save" title="Save Changes">
                                     <i class="fa-solid fa-floppy-disk"></i> Update
                                 </button>
                             </td>
-                            </form>
                         </tr>
                     }
                 </tbody>

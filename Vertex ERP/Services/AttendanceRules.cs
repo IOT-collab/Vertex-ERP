@@ -23,15 +23,13 @@ public static class AttendanceRules
         var ordered = punches.OrderBy(punch => punch.Time).ToList();
         if (ordered.Count == 0) return (null, null, false);
 
-        var normalized = ordered.Select(punch => (punch.Time, Action: NormalizePunchAction(punch.State))).ToList();
-        if (normalized.All(punch => punch.Action is null))
-            return (ordered[0].Time, ordered.Count > 1 ? ordered[^1].Time : null, false);
-
-        var checkIn = normalized.FirstOrDefault(punch => punch.Action == "Check In");
-        if (checkIn == default)
-            return (null, null, true);
-
-        var checkOut = normalized.LastOrDefault(punch => punch.Action == "Check Out" && punch.Time > checkIn.Time);
-        return (checkIn.Time, checkOut == default ? null : checkOut.Time, false);
+        // Attendance uses chronological punches because several biometric
+        // terminals send unreliable IN/OUT state values. The first punch is
+        // check-in and the last distinct punch is check-out.
+        var checkIn = ordered[0].Time;
+        var checkOut = ordered.Count > 1 && ordered[^1].Time > checkIn
+            ? ordered[^1].Time
+            : (DateTime?)null;
+        return (checkIn, checkOut, false);
     }
 }

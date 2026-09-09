@@ -595,3 +595,51 @@ input:checked + .slider {
         justify-content: center;
     }
 }
+
+/* Dark ERP theme consistency */
+.admin-control-page {
+    --bg-main: transparent;
+    --card-bg: #1d293d;
+    --text-primary: #f1f5f9;
+    --text-secondary: #a8b3cf;
+    --border-color: #334155;
+    --shadow-sm: 0 10px 28px rgba(0, 0, 0, .2);
+    --shadow-hover: 0 16px 34px rgba(0, 0, 0, .3);
+    background: transparent;
+}
+
+.admin-control-page .metric-card,
+.admin-control-page .module-card {
+    background: linear-gradient(145deg, #202b40, #1a2436);
+}
+
+.admin-control-page .search-box input,
+.admin-control-page .btn-secondary,
+.admin-control-page .btn-quick-config,
+.admin-control-page .quick-links,
+.admin-control-page .btn-action {
+    background: #111d31;
+    border-color: #334155;
+    color: #dbe7fb;
+}
+
+.admin-control-page .search-box input {
+    color: #f8fafc;
+}
+
+.admin-control-page .search-box input::placeholder {
+    color: #7f8ca5;
+}
+
+.admin-control-page .quick-links a {
+    color: #8ab8ff;
+}
+
+.admin-control-page .module-footer {
+    border-top-color: #334155;
+}
+
+.admin-control-page .badge-active {
+    background: rgba(16, 185, 129, .14);
+    color: #86efac;
+}

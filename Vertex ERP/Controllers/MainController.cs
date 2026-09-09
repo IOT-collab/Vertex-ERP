@@ -310,7 +310,7 @@ namespace VertexERP.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,HR")]
-        public IActionResult UpdateUser(int id, string fullName, string role, bool isActive)
+        public IActionResult UpdateUser(int id, string username, string fullName, string role, bool isActive, string? newPassword)
         {
             var user = _dbContext.AppUsers.FirstOrDefault(appUser => appUser.Id == id);
 
@@ -320,19 +320,66 @@ namespace VertexERP.Controllers
                 return RedirectToAction("UserSettings");
             }
 
-            if (string.IsNullOrWhiteSpace(fullName))
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(fullName))
             {
-                TempData["UserSettingError"] = "Employee name is required.";
+                TempData["UserSettingError"] = "Username and employee name are required.";
+                return RedirectToAction("UserSettings");
+            }
+
+            username = username.Trim();
+            if (username.Length > 50)
+            {
+                TempData["UserSettingError"] = "Username cannot exceed 50 characters.";
+                return RedirectToAction("UserSettings");
+            }
+
+            var normalizedUsername = DatabaseInitializer.NormalizeUsername(username);
+            if (_dbContext.AppUsers.Any(appUser => appUser.Id != id && appUser.NormalizedUsername == normalizedUsername))
+            {
+                TempData["UserSettingError"] = "This username is already assigned to another account.";
+                return RedirectToAction("UserSettings");
+            }
+
+            if (!string.IsNullOrWhiteSpace(newPassword) && newPassword.Length < 10)
+            {
+                TempData["UserSettingError"] = "The new password must contain at least 10 characters.";
                 return RedirectToAction("UserSettings");
             }
 
             var allowedRoles = new[] { AccountRoleService.Employee, AccountRoleService.Manager, AccountRoleService.HR, AccountRoleService.Admin };
+            var usernameChanged = !string.Equals(user.NormalizedUsername, normalizedUsername, StringComparison.Ordinal);
+            var passwordChanged = !string.IsNullOrWhiteSpace(newPassword);
+            if (usernameChanged)
+            {
+                user.Username = username;
+                user.NormalizedUsername = normalizedUsername;
+            }
             user.FullName = fullName.Trim();
-            user.Role = allowedRoles.Contains(role) ? role : "User";
+            user.Role = allowedRoles.Contains(role) ? role : AccountRoleService.Employee;
             user.IsActive = isActive;
+            if (passwordChanged)
+            {
+                user.PasswordHash = PasswordHashService.HashPassword(newPassword!);
+                user.MustChangePassword = false;
+            }
+
+            if (user.EmployeeId.HasValue)
+            {
+                var employee = _dbContext.Employees.FirstOrDefault(item => item.Id == user.EmployeeId.Value);
+                if (employee != null)
+                {
+                    employee.FullName = user.FullName;
+                    var nameParts = user.FullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                    employee.FirstName = nameParts.ElementAtOrDefault(0) ?? user.FullName;
+                    employee.LastName = nameParts.ElementAtOrDefault(1);
+                    employee.UpdatedDate = DateTime.UtcNow;
+                }
+            }
 
             _dbContext.SaveChanges();
-            TempData["UserSettingMessage"] = "Employee profile updated successfully.";
+            TempData["UserSettingMessage"] = usernameChanged || passwordChanged
+                ? "Employee credentials, role and access settings updated successfully."
+                : "Employee role updated successfully. Existing username and password remain valid.";
             return RedirectToAction("UserSettings");
         }
 
@@ -434,19 +481,8 @@ namespace VertexERP.Controllers
         [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Employee,User")]
         public async Task<IActionResult> DeleteMyTask(int id)
         {
-            var employee = await LoadLoggedInEmployeeAsync();
-            if (employee == null) return RedirectToAction(nameof(AccessDenied));
-            var task = await _dbContext.WorkTasks.FirstOrDefaultAsync(x => x.Id == id && x.AssigneeId == employee.Id);
-            if (task == null) return NotFound();
-            if (!task.Status.Equals("Completed", StringComparison.OrdinalIgnoreCase))
-            {
-                TempData["TaskError"] = "Task can be deleted only after it is completed.";
-                return RedirectToAction(nameof(EmployeeTasks));
-            }
-            _dbContext.WorkTasks.Remove(task);
-            await _dbContext.SaveChangesAsync();
-            TempData["TaskMessage"] = "Completed task deleted successfully.";
-            return RedirectToAction(nameof(EmployeeTasks));
+            await Task.CompletedTask;
+            return Forbid();
         }
 
         [Authorize(Roles = "Employee,User,Manager,HR")]
@@ -462,15 +498,12 @@ namespace VertexERP.Controllers
                 .OrderBy(log => log.PunchTime)
                 .Select(log => new { log.PunchTime, log.PunchState, log.VerificationMode, log.BiometricDevice.CommunicationMode })
                 .ToListAsync();
-            var leaves = await _dbContext.LeaveRequests.AsNoTracking()
-                .Where(request => request.EmployeeId == employee.Id && request.Status == "Approved" && request.ToDate >= DateOnly.FromDateTime(start) && request.FromDate < DateOnly.FromDateTime(end)).ToListAsync();
             var lastDay = end.AddDays(-1) < now ? end.AddDays(-1) : now;
             var days = new List<EmployeeAttendanceDay>();
             for (var date = start; date <= lastDay; date = date.AddDays(1))
             {
                 var punches = logs.Where(log => log.PunchTime.Date == date.Date).ToList();
                 var dateOnly = DateOnly.FromDateTime(date);
-                var onLeave = leaves.Any(leave => leave.FromDate <= dateOnly && leave.ToDate >= dateOnly);
                 var paired = AttendanceRules.PairPunches(punches.Select(punch => (punch.PunchTime, punch.PunchState)));
                 var source = punches.Count == 0
                     ? "--"
@@ -479,9 +512,9 @@ namespace VertexERP.Controllers
                         : punches.All(punch => string.Equals(punch.VerificationMode, "Manual Approved", StringComparison.OrdinalIgnoreCase))
                             ? "Manual Approved"
                             : "Biometric / Thumb";
-                var attendanceStatus = punches.Count == 0
-                    ? onLeave ? "On Leave" : AttendanceRules.IsWeeklyOff(dateOnly) ? "Sunday Off" : "Absent"
-                    : paired.NeedsReview ? "Needs Review" : !paired.CheckOut.HasValue ? "Incomplete" : "Present";
+                var attendanceStatus = paired.CheckIn.HasValue
+                    ? TimeOnly.FromDateTime(paired.CheckIn.Value) > new TimeOnly(9, 30) ? "Late" : "Present"
+                    : "Absent";
                 days.Add(new EmployeeAttendanceDay(dateOnly, paired.CheckIn, paired.CheckOut, attendanceStatus, source));
             }
             return View(new EmployeeAttendanceViewModel { Employee = employee, StartDate = DateOnly.FromDateTime(start), EndDate = DateOnly.FromDateTime(now), Days = days.OrderByDescending(day => day.Date).ToList() });
@@ -867,22 +900,12 @@ namespace VertexERP.Controllers
             Employee? employee;
             if (User.IsInRole("Employee") || User.IsInRole("User"))
             {
-                var userIdText = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var linkedEmployeeId = int.TryParse(userIdText, out var userId)
-                    ? await _dbContext.AppUsers.AsNoTracking()
-                        .Where(user => user.Id == userId)
-                        .Select(user => user.EmployeeId)
-                        .FirstOrDefaultAsync()
+                var linkedEmployeeId = await GetLoggedInEmployeeIdAsync();
+                employee = linkedEmployeeId.HasValue
+                    ? await _dbContext.Employees.AsNoTracking()
+                        .Include(item => item.ReportingManager)
+                        .FirstOrDefaultAsync(item => item.Id == linkedEmployeeId.Value && item.IsActive)
                     : null;
-                var username = (User.FindFirstValue("username") ?? User.Identity?.Name ?? string.Empty).Trim().ToLowerInvariant();
-                var fullName = (User.FindFirstValue(ClaimTypes.Name) ?? string.Empty).Trim().ToLowerInvariant();
-                employee = await _dbContext.Employees.AsNoTracking()
-                    .Include(item => item.ReportingManager)
-                    .FirstOrDefaultAsync(item =>
-                        (linkedEmployeeId.HasValue && item.Id == linkedEmployeeId.Value) ||
-                        item.Email.ToLower() == username ||
-                        item.EmployeeCode.ToLower() == username ||
-                        item.FullName.ToLower() == fullName);
             }
             else
             {
@@ -932,7 +955,9 @@ namespace VertexERP.Controllers
             {
                 checkIn = pairedPunches.CheckIn?.ToString("hh:mm tt"),
                 checkOut = pairedPunches.CheckOut?.ToString("hh:mm tt"),
-                status = pairedPunches.NeedsReview ? "Needs Review" : pairedPunches.CheckIn.HasValue ? pairedPunches.CheckOut.HasValue ? "Present" : "Incomplete" : AttendanceRules.IsWeeklyOff(DateOnly.FromDateTime(today)) ? "Sunday Off" : "Absent"
+                status = pairedPunches.CheckIn.HasValue
+                    ? TimeOnly.FromDateTime(pairedPunches.CheckIn.Value) > new TimeOnly(9, 30) ? "Late" : "Present"
+                    : "Absent"
             });
         }
 
@@ -1025,8 +1050,8 @@ namespace VertexERP.Controllers
                 foreach (var day in dates)
                 {
                     var item = byDate[day];
-                    var style = item.Status is "Present" ? "Present" : item.Status is "Late" or "On Leave" or "Incomplete" or "Needs Review" ? "Late" : item.Status == "Sunday Off" ? "Text" : "Absent";
-                    var code = item.Status switch { "Present" => "P", "Late" => "L", "On Leave" => "LV", "Sunday Off" => "OFF", "Incomplete" => "INC", "Needs Review" => "REV", "Unmapped" => "UNM", _ => "A" };
+                    var style = item.Status == "Present" ? "Present" : item.Status == "Late" ? "Late" : "Absent";
+                    var code = item.Status == "Present" ? "P" : item.Status == "Late" ? "L" : "A";
                     var timing = item.CheckIn.HasValue ? $"&#10;{item.CheckIn:hh:mm tt}-{(item.CheckOut.HasValue ? item.CheckOut.Value.ToString("hh:mm tt") : "—")}" : string.Empty;
                     xml.Append($"<Cell ss:StyleID=\"{style}\"><Data ss:Type=\"String\">{code}{timing}</Data></Cell>");
                 }
@@ -1120,9 +1145,19 @@ namespace VertexERP.Controllers
         }
 
         [Authorize(Roles = "Admin,HR")]
-        public IActionResult Reports()
+        public async Task<IActionResult> Reports(string? reportType, int? departmentId, int? employeeId, int? managerId, DateOnly? date, string? month, DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken)
         {
-            return View();
+            return View(await AdminReportBuilder.BuildAsync(_dbContext, reportType, departmentId, employeeId, managerId, date, month, fromDate, toDate, cancellationToken));
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DownloadAdminReport(string reportType, int? departmentId, int? employeeId, int? managerId, DateOnly? date, string? month, DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken)
+        {
+            if (!AdminReportTypes.All.Any(item => item.Value == reportType)) return BadRequest("Select a valid report type.");
+            var report = await AdminReportBuilder.BuildAsync(_dbContext, reportType, departmentId, employeeId, managerId, date, month, fromDate, toDate, cancellationToken);
+            var fileName = $"{reportType}-{DateTime.Now:yyyyMMdd-HHmmss}.pdf";
+            return File(AdminReportPdfService.Create(report), "application/pdf", fileName);
         }
 
         [Authorize(Roles = "Admin,HR")]
@@ -1615,11 +1650,8 @@ namespace VertexERP.Controllers
 
         public IActionResult AccessDenied()
         {
-            if (User.IsInRole("Manager"))
-                return RedirectToAction("Manager", "Main");
-            return User.IsInRole("Employee") || User.IsInRole("User")
-                ? RedirectToAction("EmployeeHome", "Main")
-                : Forbid();
+            var role = AccountRoleService.Normalize(User.FindFirstValue(ClaimTypes.Role));
+            return role == null ? Forbid() : RedirectToRoleHome(role);
         }
 
         private IActionResult RedirectToRoleHome(string? role = null)
