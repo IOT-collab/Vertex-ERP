@@ -316,8 +316,8 @@
             <div class="radial-chart">
 
                 @{ var completion = Model.TaskProgressPercentage; }
-                <div class="radial-ring" style="--progress:@completion">
-                    <span>@completion%</span>
+                <div class="radial-ring" id="taskHealthRing" data-url="@Url.Action("TaskHealth", "Main")" style="--progress:@completion">
+                    <span id="taskHealthProgress">@completion%</span>
                 </div>
 
 
@@ -325,7 +325,7 @@
 
                     <div>
 
-                        <strong>@Model.CompletedTasks</strong>
+                        <strong id="taskHealthClosed">@Model.CompletedTasks</strong>
 
                         <span>
                             Closed
@@ -336,7 +336,7 @@
 
                     <div>
 
-                        <strong>@Model.OpenTasks</strong>
+                        <strong id="taskHealthOpen">@Model.OpenTasks</strong>
 
                         <span>
                             Open
@@ -347,7 +347,7 @@
 
                     <div>
 
-                        <strong>@Model.OverdueTasks</strong>
+                        <strong id="taskHealthOverdue">@Model.OverdueTasks</strong>
 
                         <span>
                             Overdue
@@ -357,7 +357,9 @@
 
                 </div>
 
-                <div class="task-health-open">Open Task Management <i class="fa-solid fa-arrow-right"></i></div>
+                <p id="taskHealthLiveStatus" class="sub-text" role="status">Live · refreshes every 5 seconds</p>
+                <a asp-controller="Main" asp-action="TaskMgm" class="task-health-open">Open Task Management <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                <script src="~/js/task-health.js" asp-append-version="true"></script>
 
             </div>
 
@@ -629,6 +631,8 @@
              SYSTEM AUDIT LOG
         ====================== -->
 
+        @if (User.IsInRole("Admin"))
+        {
         <div class="activity-box">
 
 
@@ -638,7 +642,7 @@
                     <i class="fa-solid fa-file-shield section-icon" aria-hidden="true"></i> System Audit & Logs
                 </h3>
 
-                <a href="#"
+                <a asp-controller="Audit" asp-action="Index"
                    class="link-more">
 
                     View All Logs →
@@ -648,7 +652,8 @@
             </div>
 
 
-            <div class="timeline-container">
+            <p id="adminAuditStatus" class="sub-text" role="status">Loading live activity…</p>
+            <div class="timeline-container" id="adminAuditTimeline" data-url="@Url.Action("Recent", "Audit")" style="max-height:480px;overflow-y:auto">
 
                 @foreach (var item in Model.RecentActivity)
                 {
@@ -658,8 +663,8 @@
             </div>
 
         </div>
-
-
+        <script src="~/js/admin-audit.js" asp-append-version="true"></script>
+        }
         <!-- =====================
              QUICK OPERATIONS
         ====================== -->

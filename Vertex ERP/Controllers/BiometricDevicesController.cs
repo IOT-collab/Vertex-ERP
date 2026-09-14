@@ -20,7 +20,14 @@ public class BiometricDevicesController : Controller
     public BiometricDevicesController(IBiometricDeviceService deviceService, IBiometricRepository repository, ApplicationDbContext db, ILogger<BiometricDevicesController> logger)
     { _deviceService = deviceService; _repository = repository; _db = db; _logger = logger; }
 
-    public async Task<IActionResult> Index(CancellationToken cancellationToken) => View(await _deviceService.GetAllAsync(cancellationToken));
+    public async Task<IActionResult> Index(CancellationToken cancellationToken)
+    {
+        ViewBag.RemoteSync = HttpContext.RequestServices.GetRequiredService<RemoteAttendanceImportService>().Status;
+        return View(await _deviceService.GetAllAsync(cancellationToken));
+    }
+
+    [HttpGet]
+    public IActionResult SyncStatus() => Ok(HttpContext.RequestServices.GetRequiredService<RemoteAttendanceImportService>().Status);
     public IActionResult Setup()
     {
         ViewBag.ServerAddresses = NetworkInterface.GetAllNetworkInterfaces()

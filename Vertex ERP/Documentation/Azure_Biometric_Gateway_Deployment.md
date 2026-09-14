@@ -1,5 +1,10 @@
 # Azure biometric deployment
 
+This guide covers optional ADMS gateway forwarding only. The current ERP also
+imports EasyTime transactions directly when RemoteAttendance is enabled. For
+that path on an Azure VM, use [Azure VM attendance](Azure_VM_Attendance.md).
+Do not enable forwarding solely because the independent remote importer fails.
+
 The biometric machine is on the office LAN, while Azure App Service is on the public internet. Therefore the `BiometricReceiver` must stay running on a computer on the same LAN as the machine. Do **not** deploy the receiver as an Azure WebJob: it cannot listen on the office LAN or reach a machine using a private IP address.
 
 ## Data flow

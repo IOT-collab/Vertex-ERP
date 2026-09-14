@@ -1,0 +1,22 @@
+@model VertexERP.Models.ErpProject
+@{ ViewData["Title"] = "Project Creation"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
+<link href="~/css/AdminReports.css" rel="stylesheet" asp-append-version="true" />
+<div class="admin-reports">
+    <header class="reports-heading"><div><span class="reports-eyebrow">PROJECT MANAGEMENT</span><h1>Create a project</h1><p>Save project details for your team and administration reports.</p></div></header>
+    @if (TempData["ProjectMessage"] is string message) { <p role="status">@message</p> }
+    <form asp-action="ProjectCreation" method="post" class="reports-filters">
+        <div asp-validation-summary="All" style="grid-column:1/-1;color:#ffb3b3"></div>
+        <div><label asp-for="ProjectCode">Project code</label><input asp-for="ProjectCode" maxlength="40" required /></div>
+        <div><label asp-for="ProjectName">Project name</label><input asp-for="ProjectName" maxlength="160" required /></div>
+        <div><label asp-for="DepartmentId">Department</label><select asp-for="DepartmentId" asp-items="ViewBag.Departments"><option value="">Not assigned</option></select></div>
+        <div><label asp-for="ManagerId">Manager</label><select asp-for="ManagerId" asp-items="ViewBag.Managers"><option value="">Not assigned</option></select></div>
+        <div><label asp-for="StartDate">Start date</label><input asp-for="StartDate" type="date" /></div>
+        <div><label asp-for="EndDate">End date</label><input asp-for="EndDate" type="date" /></div>
+        <div><label asp-for="Status">Status</label><select asp-for="Status"><option>Planning</option><option>Active</option><option>On Hold</option><option>Completed</option><option>Cancelled</option></select></div>
+        <div class="report-type-field"><label asp-for="Description">Description</label><input asp-for="Description" maxlength="2000" /></div>
+        <div class="reports-form-actions"><button class="report-primary" type="submit">Save project</button></div>
+    </form>
+    <section class="reports-results"><h2>Saved projects</h2><div class="reports-table-scroll"><table><thead><tr><th>Code</th><th>Project</th><th>Manager</th><th>Dates</th><th>Status</th></tr></thead><tbody>
+    @foreach (VertexERP.Models.ErpProject project in ViewBag.Projects) { <tr><td>@project.ProjectCode</td><td>@project.ProjectName</td><td>@(project.Manager?.FullName ?? "Not assigned")</td><td>@project.StartDate.ToString("dd MMM yyyy") – @project.EndDate.ToString("dd MMM yyyy")</td><td>@project.Status</td></tr> }
+    </tbody></table></div></section>
+</div>

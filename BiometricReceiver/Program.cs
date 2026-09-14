@@ -41,7 +41,8 @@ builder.Services.AddHttpClient(RemoteAttendanceImportService.HttpClientName, cli
     AllowAutoRedirect = true
 });
 builder.Services.AddHttpClient("CloudAttendanceForwarding", client => client.Timeout = TimeSpan.FromSeconds(30));
-builder.Services.AddHostedService<RemoteAttendanceImportService>();
+builder.Services.AddSingleton<RemoteAttendanceImportService>();
+builder.Services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<RemoteAttendanceImportService>());
 builder.Services.AddSingleton<CloudAttendanceForwarder>();
 builder.Services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<CloudAttendanceForwarder>());
 

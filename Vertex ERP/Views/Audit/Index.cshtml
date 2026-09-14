@@ -1,0 +1,70 @@
+@model VertexERP.Models.AuditLogList
+@{
+    ViewData["Title"] = "Audit Logs";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var from = Model.From?.ToString("yyyy-MM-dd");
+    var to = Model.To?.ToString("yyyy-MM-dd");
+}
+<link rel="stylesheet" href="~/css/AdminReports.css" asp-append-version="true" />
+<div class="admin-reports">
+    <header class="reports-heading"><div><h1>Audit Logs</h1><p>Complete saved history · Admin only · @Model.Total matching logs</p></div><a asp-action="Index" class="report-secondary">All logs</a></header>
+    @if (TempData["AuditMessage"] is string message) { <p role="status">@message</p> }
+    <form method="get" asp-action="Index" class="reports-filters">
+        <div><label for="from">From date (UTC)</label><input type="date" id="from" name="from" value="@from" /></div>
+        <div><label for="to">To date (UTC)</label><input type="date" id="to" name="to" value="@to" /></div>
+        <div class="reports-form-actions"><button class="report-primary" type="submit">Apply dates</button><a asp-action="Download" asp-route-from="@from" asp-route-to="@to" class="report-secondary">Download PDF</a></div>
+        <p class="reports-filter-note">PDF includes all records for the applied dates, across every page. Without dates, it includes all saved logs.</p>
+    </form>
+    <section class="reports-results">
+        <h2>Delete audit logs</h2>
+        <form method="post" asp-action="Delete" class="reports-filters" id="deleteDateRange" data-confirm="Delete logs in the selected date range?">
+            <input type="hidden" name="maxId" value="@Model.MaxId" />
+            <div><label for="deleteFrom">Delete from (UTC)</label><input type="date" id="deleteFrom" name="from" value="@from" required /></div>
+            <div><label for="deleteTo">Delete through (UTC)</label><input type="date" id="deleteTo" name="to" value="@to" required /></div>
+            <div class="reports-form-actions"><button type="submit" class="report-secondary">Delete Selected Date Range</button></div>
+            <p class="reports-filter-note">Choose both dates here and delete directly. Includes both dates and every page.</p>
+        </form>
+        <form method="post" asp-action="DeleteAll" data-confirm="Permanently delete ALL audit logs across ALL dates and pages, ignoring the current filters? This cannot be undone.">
+            <button type="submit" class="report-primary" style="background:#a52b3a;border-color:#c64353">Delete All Logs</button>
+        </form>
+        <p class="reports-applied">Deleted entries are removed from the database and dashboard. New activity after deletion will create new logs. Previously downloaded PDFs are unaffected.</p>
+    </section>
+    <section class="reports-results">
+        <div class="reports-table-scroll"><table>
+            <thead><tr><th>Time (UTC)</th><th>User</th><th>Role</th><th>Action</th><th>Details</th><th>Delete</th></tr></thead>
+            <tbody>
+            @foreach (var log in Model.Logs)
+            {
+                <tr><td>@log.OccurredAtUtc.ToString("dd MMM yyyy HH:mm:ss")</td><td>@log.ActorName</td><td>@log.ActorRole</td><td>@log.Action</td><td>@log.Detail</td><td>
+                    <form method="post" asp-action="Delete" data-confirm="Permanently delete this audit entry? This cannot be undone.">
+                        <input type="hidden" name="id" value="@log.Id" /><input type="hidden" name="from" value="@from" /><input type="hidden" name="to" value="@to" />
+                        <button type="submit" class="report-secondary" aria-label="Delete log @log.Id">Delete</button>
+                    </form>
+                </td></tr>
+            }
+            @if (Model.Total == 0) { <tr><td colspan="6">No logs match these dates.</td></tr> }
+            </tbody>
+        </table></div>
+        <p class="reports-applied">Page @Model.Page of @Model.Pages · @Model.Total logs · Up to 100 per page</p>
+        <div class="reports-downloads">
+            @if (Model.Page > 1) { <a asp-action="Index" asp-route-from="@from" asp-route-to="@to" asp-route-page="@(Model.Page - 1)" class="report-secondary">Previous</a> }
+            @if (Model.Page < Model.Pages) { <a asp-action="Index" asp-route-from="@from" asp-route-to="@to" asp-route-page="@(Model.Page + 1)" class="report-secondary">Next</a> }
+        </div>
+    </section>
+</div>
+<script>
+    document.querySelectorAll('form[data-confirm]').forEach(form => form.addEventListener('submit', event => {
+        let message = form.dataset.confirm;
+        if (form.id === 'deleteDateRange') {
+            const from = document.getElementById('deleteFrom').value;
+            const to = document.getElementById('deleteTo').value;
+            if (!from || !to || to < from) {
+                event.preventDefault();
+                window.alert('Choose both dates. The end date must be on or after the start date.');
+                return;
+            }
+            message = `Permanently delete logs from ${from} through ${to} (UTC), across every page? This cannot be undone.`;
+        }
+        if (!window.confirm(message)) event.preventDefault();
+    }));
+</script>

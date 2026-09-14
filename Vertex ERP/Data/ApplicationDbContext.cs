@@ -5,9 +5,37 @@ namespace VertexERP.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        private readonly IHttpContextAccessor? _httpContextAccessor;
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IHttpContextAccessor? httpContextAccessor = null)
             : base(options)
         {
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
+        private List<AuditLog> CaptureAuditLogs()
+        {
+            ChangeTracker.DetectChanges();
+            var logs = ChangeTracker.Entries().ToList()
+                .Select(entry => VertexERP.Services.AuditLogFactory.Create(entry, _httpContextAccessor?.HttpContext?.User))
+                .OfType<AuditLog>().ToList();
+            AuditLogs.AddRange(logs);
+            return logs;
+        }
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            var logs = CaptureAuditLogs();
+            try { return base.SaveChanges(acceptAllChangesOnSuccess); }
+            catch { foreach (var log in logs) Entry(log).State = EntityState.Detached; throw; }
+        }
+
+        public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        {
+            var logs = CaptureAuditLogs();
+            try { return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken); }
+            catch { foreach (var log in logs) Entry(log).State = EntityState.Detached; throw; }
         }
 
         public DbSet<AppUser> AppUsers => Set<AppUser>();
@@ -18,6 +46,7 @@ namespace VertexERP.Data
         public DbSet<AttendanceLog> AttendanceLogs => Set<AttendanceLog>();
         public DbSet<EmployeeDeviceMapping> EmployeeDeviceMappings => Set<EmployeeDeviceMapping>();
         public DbSet<WorkTask> WorkTasks => Set<WorkTask>();
+        public DbSet<ErpProject> Projects => Set<ErpProject>();
         public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
         public DbSet<QueryTicket> QueryTickets => Set<QueryTicket>();
         public DbSet<EmployeeBankDetail> EmployeeBankDetails => Set<EmployeeBankDetail>();
@@ -33,6 +62,13 @@ namespace VertexERP.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<AuditLog>().HasIndex(log => new { log.OccurredAtUtc, log.Id });
+            modelBuilder.Entity<ErpProject>(entity =>
+            {
+                entity.HasIndex(item => item.ProjectCode).IsUnique();
+                entity.HasOne(item => item.Department).WithMany().HasForeignKey(item => item.DepartmentId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(item => item.Manager).WithMany().HasForeignKey(item => item.ManagerId).OnDelete(DeleteBehavior.Restrict);
+            });
             modelBuilder.HasSequence<long>("EmployeeCodeSequence");
             modelBuilder.Entity<EmployeeAsset>(entity =>
             {

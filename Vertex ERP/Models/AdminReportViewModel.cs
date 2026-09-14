@@ -7,6 +7,10 @@ public sealed class AdminReportViewModel
     public int? DepartmentId { get; init; }
     public int? EmployeeId { get; init; }
     public int? ManagerId { get; init; }
+    public int? ProjectId { get; init; }
+    public string? Status { get; init; }
+    public string FilterSummary { get; init; } = "All records";
+    public IReadOnlyList<ErpProject> Projects { get; init; } = [];
     public DateOnly? Date { get; init; }
     public string? Month { get; init; }
     public DateOnly FromDate { get; init; }
@@ -27,11 +31,14 @@ public static class AdminReportTypes
     public static readonly IReadOnlyList<(string Value, string Label)> All =
     [
         ("department-details", "Department Details"),
+        ("project-details", "Project Details"),
+        ("leave-report", "Employee Leave Report"),
+        ("manager-report", "Manager Team and Progress Report"),
         ("department-manager", "Department Manager"),
         ("employee-list", "Total Employees and Complete Employee List"),
         ("employee-designation", "Employee Designation"),
         ("employee-tasks", "Employee-wise Assigned Tasks and Status"),
-        ("manager-projects", "Manager-wise Projects and Status"),
+        ("manager-projects", "Manager-wise Tasks and Status"),
         ("employee-attendance", "Employee-wise Attendance"),
         ("department-attendance", "Department-wise Attendance"),
         ("daily-attendance", "Selected Date Attendance Report"),

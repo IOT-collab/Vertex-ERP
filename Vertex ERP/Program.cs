@@ -9,6 +9,10 @@ using VertexERP.Services;
 using PdfSharp.Fonts;
 
 var builder = WebApplication.CreateBuilder(args);
+// Local SMS credentials are ignored by Git; hosted deployments use environment settings.
+builder.Configuration.AddJsonFile("App_Data/sms-secrets.json", optional: true, reloadOnChange: false);
+builder.Configuration.AddJsonFile("App_Data/remoteattendance.json", optional: true, reloadOnChange: false);
+builder.Configuration.AddEnvironmentVariables();
 
 // ============================================================
 // DOCUMENT TEMPLATES / PDF FONTS
@@ -45,6 +49,7 @@ var connectionString =
 // ============================================================
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
 
 // ============================================================
 // ANTIFORGERY
@@ -90,7 +95,8 @@ builder.Services
         AllowAutoRedirect = true
     });
 
-builder.Services.AddHostedService<RemoteAttendanceImportService>();
+builder.Services.AddSingleton<RemoteAttendanceImportService>();
+builder.Services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<RemoteAttendanceImportService>());
 
 // ============================================================
 // DTDC / SHIPMENT TRACKING
@@ -128,7 +134,9 @@ builder.Services
     .SetApplicationName("VertexERP");
 
 builder.Services.AddScoped<BankAccountProtectionService>();
-builder.Services.AddScoped<IPasswordResetEmailService, PasswordResetEmailService>();
+builder.Services.AddHttpClient<IPasswordResetSmsService, PasswordResetSmsService>(client =>
+    client.Timeout = TimeSpan.FromSeconds(15))
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 
 // ============================================================
 // SESSION

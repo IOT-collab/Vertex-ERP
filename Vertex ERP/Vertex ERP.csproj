@@ -36,6 +36,10 @@
 		<!-- Generated receiver bundles must not become ERP source content. -->
 		<None Remove="BiometricReceiver\**\*" />
 		<Content Remove="BiometricReceiver\**\*" />
+		<!-- Per-server attendance credentials must survive deployment and stay out of packages. -->
+		<Content Update="App_Data\remoteattendance.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
+		<Content Remove="remote-attendance-checkpoint.json" />
+		<None Remove="remote-attendance-checkpoint.json" />
 
 		<Content Include="DocumentTemplates\**\*"
 				 CopyToOutputDirectory="PreserveNewest"

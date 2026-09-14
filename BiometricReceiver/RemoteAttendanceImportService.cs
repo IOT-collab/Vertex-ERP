@@ -27,6 +27,8 @@ public sealed class RemoteAttendanceOptions
 
 public sealed class RemoteAttendanceImportService : BackgroundService
 {
+    public RemoteAttendanceSyncSnapshot Status => Volatile.Read(ref _status);
+    private RemoteAttendanceSyncSnapshot _status = new("Starting", "Waiting for the first attendance sync.", null, null, 0);
     public const string HttpClientName = "RemoteAttendance";
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
     private static readonly string[] DateFormats = ["yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm"];
@@ -34,7 +36,6 @@ public sealed class RemoteAttendanceImportService : BackgroundService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly RemoteAttendanceOptions _options;
     private readonly ILogger<RemoteAttendanceImportService> _logger;
-    private readonly string _checkpointPath = Path.Combine(AppContext.BaseDirectory, "remote-attendance-checkpoint.json");
 
     public RemoteAttendanceImportService(
         IServiceScopeFactory scopeFactory,
@@ -50,22 +51,51 @@ public sealed class RemoteAttendanceImportService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        if (!_options.Enabled) return;
+        if (!_options.Enabled)
+        {
+            SetStatus("Disabled", "Remote attendance import is disabled in this server's configuration.");
+            return;
+        }
+        if (!Uri.TryCreate(_options.BaseUrl, UriKind.Absolute, out var source) ||
+            (source.Scheme != Uri.UriSchemeHttp && source.Scheme != Uri.UriSchemeHttps))
+        {
+            SetStatus("Configuration error", "Set a valid HTTP or HTTPS remote attendance server address.");
+            return;
+        }
         if (string.IsNullOrWhiteSpace(_options.Username) || string.IsNullOrWhiteSpace(_options.Password))
         {
+            SetStatus("Configuration error", "Remote attendance login credentials are missing on this server.");
             _logger.LogError("Remote attendance is enabled but its credentials are missing.");
             return;
         }
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            try { await ImportAsync(stoppingToken); }
+            try
+            {
+                _status = Status with { State = "Syncing", Message = "Connecting to the attendance server.", LastAttemptUtc = DateTime.UtcNow };
+                await ImportAsync(stoppingToken);
+            }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
-            catch (Exception exception) { _logger.LogError(exception, "Remote attendance import failed; it will be retried."); }
+            catch (Exception exception)
+            {
+                var message = exception switch
+                {
+                    HttpRequestException http when http.StatusCode.HasValue => $"Attendance server returned HTTP {(int)http.StatusCode.Value}. Check server access and login permissions.",
+                    HttpRequestException => "Cannot reach the attendance server. Check this server's outbound network access, DNS and the source firewall.",
+                    OperationCanceledException => "Attendance server request timed out. Check network access from this server.",
+                    _ => $"Sync failed during: {Status.Message} Check the server log for details."
+                };
+                SetStatus("Failed", message);
+                _logger.LogError(exception, "Remote attendance import failed; it will be retried.");
+            }
 
             await Task.Delay(TimeSpan.FromSeconds(Math.Max(15, _options.PollIntervalSeconds)), stoppingToken);
         }
     }
+
+    private void SetStatus(string state, string message) =>
+        Volatile.Write(ref _status, Status with { State = state, Message = message });
 
     private async Task ImportAsync(CancellationToken cancellationToken)
     {
@@ -73,17 +103,18 @@ public sealed class RemoteAttendanceImportService : BackgroundService
         var client = _httpClientFactory.CreateClient(HttpClientName);
         await LoginAsync(client, baseUri, cancellationToken);
 
+        SetStatus("Syncing", "Loading devices and saving their registration.");
         var terminals = await GetTerminalsAsync(client, baseUri, cancellationToken);
         await EnsureDevicesAsync(terminals, cancellationToken);
 
         var checkpoint = await LoadCheckpointAsync(cancellationToken);
+        SetStatus("Syncing", "Loading punches and saving attendance to this ERP database.");
         var transactionUri = new Uri(baseUri, "iclock/api/transactions/");
         var query = $"page_size={Math.Clamp(_options.PageSize, 1, 1000)}&ordering=punch_time%2Cid";
         if (checkpoint is not null)
             query += $"&start_time={Uri.EscapeDataString(checkpoint.PunchTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture))}";
         var next = new UriBuilder(transactionUri) { Query = query }.Uri;
         var imported = 0;
-        var maxCheckpoint = checkpoint;
 
         while (next is not null)
         {
@@ -93,17 +124,10 @@ public sealed class RemoteAttendanceImportService : BackgroundService
                 ?? throw new InvalidOperationException("Remote transaction API returned an empty response.");
             imported += await ImportPageAsync(page.Data, cancellationToken);
 
-            foreach (var item in page.Data)
-            {
-                if (!TryParseDate(item.PunchTime, out var time)) continue;
-                if (maxCheckpoint is null || time > maxCheckpoint.PunchTime || (time == maxCheckpoint.PunchTime && item.Id > maxCheckpoint.TransactionId))
-                    maxCheckpoint = new ImportCheckpoint(time, item.Id);
-            }
-
             next = ValidateNextUri(baseUri, page.Next);
         }
 
-        if (maxCheckpoint is not null) await SaveCheckpointAsync(maxCheckpoint, cancellationToken);
+        Volatile.Write(ref _status, Status with { State = "Connected", Message = "Attendance sync completed.", LastSuccessUtc = DateTime.UtcNow, LastImportedCount = imported });
         _logger.LogInformation("Remote attendance sync completed: {Imported} new punches imported.", imported);
     }
 
@@ -240,16 +264,15 @@ public sealed class RemoteAttendanceImportService : BackgroundService
 
     private async Task<ImportCheckpoint?> LoadCheckpointAsync(CancellationToken cancellationToken)
     {
-        if (!File.Exists(_checkpointPath)) return null;
-        await using var stream = File.OpenRead(_checkpointPath);
-        return await JsonSerializer.DeserializeAsync<ImportCheckpoint>(stream, JsonOptions, cancellationToken);
-    }
-
-    private async Task SaveCheckpointAsync(ImportCheckpoint checkpoint, CancellationToken cancellationToken)
-    {
-        var temporaryPath = _checkpointPath + ".tmp";
-        await using (var stream = File.Create(temporaryPath)) await JsonSerializer.SerializeAsync(stream, checkpoint, JsonOptions, cancellationToken);
-        File.Move(temporaryPath, _checkpointPath, true);
+        // Derive progress from the destination database, never a file copied from
+        // another installation. A one-day overlap also recovers delayed punches.
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var sourceHost = new Uri(_options.BaseUrl).Host;
+        var latest = await db.AttendanceLogs.AsNoTracking()
+            .Where(item => item.RawPayload != null && item.RawPayload.StartsWith("REMOTE|") && item.SourceIpAddress == sourceHost)
+            .MaxAsync(item => (DateTime?)item.PunchTime, cancellationToken);
+        return latest.HasValue ? new ImportCheckpoint(latest.Value.AddDays(-1), 0) : null;
     }
 
     private static Uri? ValidateNextUri(Uri baseUri, string? next)
@@ -285,3 +308,6 @@ public sealed class RemoteAttendanceImportService : BackgroundService
         [property: JsonPropertyName("work_code")] string? WorkCode,
         [property: JsonPropertyName("terminal_sn")] string TerminalSerial);
 }
+
+public sealed record RemoteAttendanceSyncSnapshot(string State, string Message,
+    DateTime? LastAttemptUtc, DateTime? LastSuccessUtc, int LastImportedCount);
