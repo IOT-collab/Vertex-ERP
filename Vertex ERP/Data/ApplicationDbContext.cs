@@ -12,6 +12,7 @@ namespace VertexERP.Data
             _httpContextAccessor = httpContextAccessor;
         }
 
+        public DbSet<ModuleState> ModuleStates => Set<ModuleState>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
         private List<AuditLog> CaptureAuditLogs()

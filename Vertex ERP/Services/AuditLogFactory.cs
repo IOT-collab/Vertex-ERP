@@ -17,7 +17,12 @@ public static class AuditLogFactory
         var detail = entry.IsKeySet
             ? $"{type} #{string.Join(",", entry.Properties.Where(p => p.Metadata.IsPrimaryKey()).Select(p => p.CurrentValue))}"
             : $"New {type}";
-        if (entry.Entity is WorkTask task)
+        if (entry.Entity is ModuleState module)
+        {
+            action = module.IsActive ? "activated" : "deactivated";
+            detail = $"Module: {module.Id} · {(module.IsActive ? "Active" : "Inactive")}";
+        }
+        else if (entry.Entity is WorkTask task)
         {
             detail = $"Task: {task.Title} · Assigned to employee #{task.AssigneeId} · Manager #{task.ManagerId}";
             action = entry.State == EntityState.Added ? "assigned" : action;

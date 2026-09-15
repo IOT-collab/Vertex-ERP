@@ -1369,9 +1369,10 @@ namespace VertexERP.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public IActionResult AdminPanel()
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        public async Task<IActionResult> AdminPanel()
         {
-            return View();
+            return View(await _dbContext.ModuleStates.AsNoTracking().ToListAsync());
         }
 
         [Authorize(Roles = "Admin")]
@@ -1888,8 +1889,3 @@ namespace VertexERP.Controllers
         private static string? CleanProfileValue(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 }
-
-
-
-
-

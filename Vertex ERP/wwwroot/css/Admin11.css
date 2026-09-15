@@ -643,3 +643,14 @@ input:checked + .slider {
     background: rgba(16, 185, 129, .14);
     color: #86efac;
 }
+
+.admin-control-page .dashboard-header { position: static; height: auto; }
+.admin-control-page .module-toggle { width: 52px; height: 30px; border-radius: 20px; border: 2px solid #64748b; background: #64748b; padding: 3px; cursor: pointer; }
+.admin-control-page .module-toggle span { display: block; width: 20px; height: 20px; background: white; border-radius: 50%; }
+.admin-control-page .module-toggle.is-active { background: #059669; border-color: #059669; }
+.admin-control-page .module-toggle.is-active span { margin-left: auto; }
+.admin-control-page .module-toggle:focus-visible { outline: 3px solid #60a5fa; outline-offset: 3px; }
+.admin-control-page .module-toggle:disabled { opacity: .5; cursor: wait; }
+.admin-control-page .badge-inactive { background: #475569; color: white; }
+.admin-control-page .module-notice { padding: 16px; border: 1px solid #60a5fa; border-radius: 10px; }
+.admin-control-page [hidden] { display: none !important; }

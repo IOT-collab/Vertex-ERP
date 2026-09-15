@@ -48,7 +48,8 @@ var connectionString =
 // MVC
 // ============================================================
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<ModuleAccessService>();
+builder.Services.AddControllersWithViews(options => options.Filters.Add<ModuleAccessFilter>());
 builder.Services.AddHttpContextAccessor();
 
 // ============================================================
