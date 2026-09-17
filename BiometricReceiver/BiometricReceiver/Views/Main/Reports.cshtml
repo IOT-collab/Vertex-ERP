@@ -1,156 +1,92 @@
+@model VertexERP.Models.AdminReportViewModel
+@using VertexERP.Models
 @{
-    ViewData["Title"] = "Reports Dashboard";
+    ViewData["Title"] = "Admin Reports";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var routes = new Dictionary<string, string> {
+        ["reportType"] = Model.ReportType ?? "", ["departmentId"] = Model.DepartmentId?.ToString() ?? "",
+        ["employeeId"] = Model.EmployeeId?.ToString() ?? "", ["managerId"] = Model.ManagerId?.ToString() ?? "",
+        ["projectId"] = Model.ProjectId?.ToString() ?? "", ["status"] = Model.Status ?? "",
+        ["date"] = Model.Date?.ToString("yyyy-MM-dd") ?? "", ["month"] = Model.Month ?? "",
+        ["fromDate"] = Model.FromDate.ToString("yyyy-MM-dd"), ["toDate"] = Model.ToDate.ToString("yyyy-MM-dd")
+    };
 }
-<link href="~/css/Report.css" rel="stylesheet" asp-append-version="true" />
-
-<!-- FontAwesome Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
-<div class="report-container">
-
-    <!-- Page Header Section -->
-    <header class="report-header">
-        <div class="header-text">
-            <h2><i class="fa-solid fa-chart-pie text-primary-icon"></i> Reports Dashboard</h2>
-            <p>View, filter, and generate real-time ERP analytics & reports.</p>
-        </div>
-
-        <div class="header-buttons">
-            <button type="button" class="btn-primary">
-                <i class="fa-solid fa-plus"></i> Generate Report
-            </button>
-            <button type="button" class="btn-secondary">
-                <i class="fa-solid fa-file-excel"></i> Export Excel
-            </button>
-        </div>
+<link rel="stylesheet" href="~/css/AdminReports.css" asp-append-version="true" />
+<div class="admin-reports">
+    <header class="reports-heading">
+        <div><span class="reports-eyebrow">ADMIN WORKSPACE</span><h1>Reports</h1><p>Select a report, refine the details and download the records you need.</p></div>
+        <span class="reports-access"><i class="fa-solid fa-lock"></i> Admin only</span>
     </header>
-
-    <!-- Dynamic Dynamic Metrics / Summary KPI Row -->
-    <section class="report-cards">
-        <div class="report-card blue">
-            <h3>@(ViewBag.TotalReports ?? "0")</h3>
-            <p><i class="fa-solid fa-folder-open"></i> Total Reports</p>
-        </div>
-
-        <div class="report-card green">
-            <h3>@(ViewBag.TodayReports ?? "0")</h3>
-            <p><i class="fa-solid fa-calendar-day"></i> Today's Reports</p>
-        </div>
-
-        <div class="report-card orange">
-            <h3>@(ViewBag.PendingReports ?? "0")</h3>
-            <p><i class="fa-solid fa-clock"></i> Pending Reports</p>
-        </div>
-
-        <div class="report-card red">
-            <h3>@(ViewBag.FailedReports ?? "0")</h3>
-            <p><i class="fa-solid fa-circle-exclamation"></i> Failed Reports</p>
+    <section class="reports-catalog" aria-labelledby="all-reports-title">
+        <h2 id="all-reports-title">All reports <span>(@AdminReportTypes.All.Count)</span></h2>
+        <p>Open any report to choose filters, or download it directly. Direct downloads include all departments and employees; dated reports use today, and monthly attendance uses the current month.</p>
+        <div class="reports-catalog-grid">
+            @foreach (var option in AdminReportTypes.All)
+            {
+                <article class="reports-catalog-card">
+                    <h3>@option.Label</h3>
+                    <div class="reports-downloads">
+                        <a asp-action="Reports" asp-route-reportType="@option.Value" asp-fragment="reportsForm" class="report-primary" aria-label="Preview @option.Label">Preview</a>
+                        <a asp-action="DownloadAdminReport" asp-route-reportType="@option.Value" asp-route-format="xlsx" class="report-secondary" aria-label="Download @option.Label as Excel">Excel</a>
+                        <a asp-action="DownloadAdminReport" asp-route-reportType="@option.Value" asp-route-format="pdf" class="report-secondary" aria-label="Download @option.Label as PDF">PDF</a>
+                    </div>
+                </article>
+            }
         </div>
     </section>
-
-    <!-- Dynamic Query Filter Consolidation Panel -->
-    <form method="get" asp-action="Index" class="filter-panel">
-        <div class="filter-field">
-            <label class="filter-label"><i class="fa-solid fa-magnifying-glass"></i> Search</label>
-            <input type="text" name="searchQuery" value="@ViewBag.SearchQuery" placeholder="Search by name or ID..." />
-        </div>
-
-        <div class="filter-field">
-            <label class="filter-label"><i class="fa-solid fa-filter"></i> Module Type</label>
-            <select name="reportType" asp-items="ViewBag.ReportTypes">
-                <option value="">All Categories</option>
+    <form asp-action="Reports" method="get" class="reports-filters" id="reportsForm">
+        <div class="report-type-field"><label for="reportType">Report type</label>
+            <select id="reportType" name="reportType" required>
+                <option value="">Choose a report</option>
+                @foreach (var option in AdminReportTypes.All) { <option value="@option.Value" selected="@(Model.ReportType == option.Value)">@option.Label</option> }
             </select>
         </div>
-
-        <div class="filter-field">
-            <label class="filter-label"><i class="fa-solid fa-calendar-alt"></i> From Date</label>
-            <input type="date" name="fromDate" value="@ViewBag.FromDate" />
-        </div>
-
-        <div class="filter-field">
-            <label class="filter-label"><i class="fa-solid fa-calendar-alt"></i> To Date</label>
-            <input type="date" name="toDate" value="@ViewBag.ToDate" />
-        </div>
-
-        <div class="filter-field action-field">
-            <button type="submit" class="btn-search">
-                <i class="fa-solid fa-filter"></i> Apply Filters
-            </button>
-        </div>
+        <div data-filter="department"><label for="departmentId">Department</label><select id="departmentId" name="departmentId">
+            <option value="">All departments</option>
+            @foreach (var d in Model.Departments) { <option value="@d.Id" selected="@(Model.DepartmentId == d.Id)">@d.DepartmentName</option> }
+        </select></div>
+        <div data-filter="employee"><label for="employeeId">Employee</label><select id="employeeId" name="employeeId">
+            <option value="">All employees</option>
+            @foreach (var e in Model.Employees) { <option value="@e.Id" selected="@(Model.EmployeeId == e.Id)">@e.EmployeeCode — @e.FullName</option> }
+        </select></div>
+        <div data-filter="manager"><label for="managerId">Manager</label><select id="managerId" name="managerId">
+            <option value="">All managers</option>
+            @foreach (var m in Model.Managers) { <option value="@m.Id" selected="@(Model.ManagerId == m.Id)">@m.FullName</option> }
+        </select></div>
+        <div data-filter="project"><label for="projectId">Project</label><select id="projectId" name="projectId">
+            <option value="">All projects</option>
+            @foreach (var p in Model.Projects) { <option value="@p.Id" selected="@(Model.ProjectId == p.Id)">@p.ProjectCode — @p.ProjectName</option> }
+        </select></div>
+        <div data-filter="date"><label for="date">Attendance date</label><input id="date" name="date" type="date" value="@((Model.Date ?? Model.FromDate).ToString("yyyy-MM-dd"))" /></div>
+        <div data-filter="month"><label for="month">Attendance month</label><input id="month" name="month" type="month" value="@(Model.Month ?? Model.FromDate.ToString("yyyy-MM"))" /></div>
+        <div data-filter="range"><label for="fromDate">From date</label><input id="fromDate" name="fromDate" type="date" value="@Model.FromDate.ToString("yyyy-MM-dd")" /></div>
+        <div data-filter="range"><label for="toDate">To date</label><input id="toDate" name="toDate" type="date" value="@Model.ToDate.ToString("yyyy-MM-dd")" /></div>
+        <div data-filter="status"><label for="status">Status</label><select id="status" name="status" data-selected="@Model.Status"><option value="">All statuses</option></select></div>
+        <div class="reports-form-actions"><button type="submit" class="report-primary">Preview report</button><a asp-action="Reports" class="report-secondary">Reset filters</a></div>
+        <p class="reports-filter-note" id="reportHelp">Choose a report to view available filters. Date ranges support up to 366 days.</p>
     </form>
-
-    <!-- Report Categories Matrix -->
-    <section class="category-grid">
-        @if (ViewBag.Categories != null)
-        {
-            foreach (var cat in ViewBag.Categories)
-            {
-                <a href="@cat.Url" class="category-card">
-                    <div class="cat-icon-box">
-                        <i class="@(cat.IconClass ?? "fa-solid fa-file-lines")"></i>
-                    </div>
-                    <div>
-                        <h4>@cat.Title</h4>
-                        <p>@cat.Description</p>
-                    </div>
-                </a>
-            }
-        }
-    </section>
-
-    <!-- Dynamic Database Log / Data Table -->
-    <section class="table-box">
-        <table class="modern-table">
-            <thead>
-                <tr>
-                    <th>Report Name</th>
-                    <th>Module</th>
-                    <th>Generated By</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null)
-                {
-                    foreach (var item in Model)
-                    {
-                        <tr>
-                            <td><strong>@item.ReportName</strong></td>
-                            <td>@item.ModuleName</td>
-                            <td>@item.GeneratedBy</td>
-                            <td>@item.CreatedDate?.ToString("dd-MMM-yyyy")</td>
-                            <td>
-                                <span class="status @item.StatusClass">
-                                    @item.Status
-                                </span>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <a asp-action="ViewReport" asp-route-id="@item.Id" class="view-btn" title="View Details">
-                                        <i class="fa-solid fa-eye"></i> View
-                                    </a>
-                                    <a asp-action="Download" asp-route-id="@item.Id" class="download-btn" title="Download Document">
-                                        <i class="fa-solid fa-download"></i> Download
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="6" class="no-data-cell">
-                            <i class="fa-solid fa-inbox no-data-icon"></i>
-                            <p>No report records found.</p>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </section>
-
+    @if (!Model.HasSelection)
+    {
+        <section class="reports-empty"><i class="fa-regular fa-file-lines"></i><h2>Your reports, in one place</h2><p>Department, employee, project, attendance, leave and manager reports are available above.</p></section>
+    }
+    else
+    {
+        <section class="reports-results">
+            <div class="reports-result-heading"><div><span class="reports-eyebrow">REPORT PREVIEW</span><h2>@Model.ReportTitle</h2><p>@Model.Rows.Count records · @Model.FromDate.ToString("dd MMM yyyy") – @Model.ToDate.ToString("dd MMM yyyy")</p></div>
+                <div class="reports-downloads">
+                    <a asp-action="DownloadAdminReport" asp-all-route-data="routes" asp-route-format="xlsx" class="report-secondary"><i class="fa-solid fa-file-excel"></i> Download Excel</a>
+                    <a asp-action="DownloadAdminReport" asp-all-route-data="routes" asp-route-format="pdf" class="report-primary"><i class="fa-solid fa-file-pdf"></i> Download PDF</a>
+                </div>
+            </div>
+            <p class="reports-applied">@Model.FilterSummary</p>
+            <div class="reports-table-scroll"><table><thead><tr>@foreach (var column in Model.Columns) { <th scope="col">@column</th> }</tr></thead>
+                <tbody>
+                @foreach (var row in Model.Rows.Take(200)) { <tr>@foreach (var cell in row) { <td>@cell</td> }</tr> }
+                @if (Model.Rows.Count == 0) { <tr><td colspan="@Math.Max(1, Model.Columns.Count)" class="reports-no-rows">No records match these filters.</td></tr> }
+                </tbody>
+            </table></div>
+            @if (Model.Rows.Count > 200) { <p class="reports-applied">Showing the first 200 records. Downloads include all @Model.Rows.Count matching records.</p> }
+        </section>
+    }
 </div>
+<script src="~/js/admin-reports.js" asp-append-version="true"></script>

@@ -173,6 +173,9 @@ public class EmployeeController : Controller
         var employee = _dbContext.Employees.Find(id);
         if (employee == null) return NotFound();
         var model = ToForm(employee);
+        var loginAccount = _dbContext.AppUsers.AsNoTracking().FirstOrDefault(user => user.EmployeeId == id);
+        model.LoginUsername = loginAccount?.Username;
+        model.HasExistingAccount = loginAccount != null;
         var bank = _dbContext.EmployeeBankDetails.AsNoTracking().FirstOrDefault(item => item.EmployeeId == id);
         if (bank != null)
         {
@@ -196,6 +199,19 @@ public class EmployeeController : Controller
 
         ValidateUniqueFields(model);
         var photoExtension = await ValidatePhotoAsync(model.EmployeePhoto);
+        var loginAccount = await _dbContext.AppUsers.FirstOrDefaultAsync(user => user.EmployeeId == id);
+        model.HasExistingAccount = loginAccount != null;
+        var updateCredentials = loginAccount != null || !string.IsNullOrWhiteSpace(model.LoginUsername) || !string.IsNullOrEmpty(model.TemporaryPassword);
+        if (updateCredentials)
+        {
+            if (string.IsNullOrWhiteSpace(model.LoginUsername))
+                ModelState.AddModelError(nameof(model.LoginUsername), "Enter or generate a username.");
+            if (loginAccount == null && string.IsNullOrEmpty(model.TemporaryPassword))
+                ModelState.AddModelError(nameof(model.TemporaryPassword), "Enter or generate a password to create login access.");
+            var normalized = DatabaseInitializer.NormalizeUsername(model.LoginUsername ?? string.Empty);
+            if (await _dbContext.AppUsers.AnyAsync(user => user.EmployeeId != id && user.NormalizedUsername == normalized))
+                ModelState.AddModelError(nameof(model.LoginUsername), "Login username already exists.");
+        }
         if (!ModelState.IsValid)
             return View("~/Views/Main/AddEmpHrm.cshtml", PopulateManagers(model));
 
@@ -208,6 +224,16 @@ public class EmployeeController : Controller
         }
         ApplyForm(employee, model, preserveEmployeeCode: false);
         employee.UpdatedDate = DateTime.UtcNow;
+
+        if (updateCredentials)
+        {
+            if (loginAccount == null)
+            {
+                loginAccount = new AppUser { IsActive = employee.IsActive, CreatedAt = DateTime.UtcNow };
+                _dbContext.AppUsers.Add(loginAccount);
+            }
+            EmployeeCredentialService.Apply(loginAccount, employee, model.LoginUsername!, model.TemporaryPassword);
+        }
 
         if (!TrySave("The employee could not be updated because the data conflicts with an existing record."))
         {
@@ -403,6 +429,7 @@ public class EmployeeController : Controller
         employee.FullName = $"{employee.FirstName} {employee.LastName}".Trim();
         employee.Email = model.Email.Trim().ToLowerInvariant();
         employee.PhoneNumber = model.PhoneNumber.Trim();
+        employee.AadhaarNumber = Clean(model.AadhaarNumber);
         employee.DateOfBirth = model.DateOfBirth;
         employee.Gender = Clean(model.Gender);
         employee.MaritalStatus = Clean(model.MaritalStatus);
@@ -429,6 +456,7 @@ public class EmployeeController : Controller
         LastName = employee.LastName ?? string.Empty,
         Email = employee.Email,
         PhoneNumber = employee.PhoneNumber,
+        AadhaarNumber = employee.AadhaarNumber,
         DateOfBirth = employee.DateOfBirth,
         DateOfBirthText = employee.DateOfBirth?.ToString("dd/MM/yyyy"),
         Gender = employee.Gender,

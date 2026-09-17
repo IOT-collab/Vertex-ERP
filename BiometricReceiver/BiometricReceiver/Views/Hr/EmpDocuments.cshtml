@@ -1,645 +1,98 @@
-@model dynamic
+@model VertexERP.Models.EmployeeDocumentRepositoryViewModel
 @{
-    ViewData["Title"] = Model?.Title ?? "Employee Documents";
+    ViewData["Title"] = "Employee Documents";
     Layout = "_Layout";
-
-    // Dynamic metrics & statistics with fallbacks
-    var totalDocuments = Model?.TotalDocuments ?? 0;
-    var pendingReview = Model?.PendingReview ?? 0;
-    var expiringSoon = Model?.ExpiringSoon ?? 0;
-    var verifiedRate = Model?.VerifiedRate ?? "0%";
-
-    // Dynamic documents from backend
-    IEnumerable<dynamic> documentsList = Model?.Documents ?? new List<dynamic>();
-
-    // Action URLs
-    // These routes belong to the page, not to the anonymous data model.
-    // Keeping them out of dynamic binding prevents RuntimeBinderException.
-    var uploadUrl = Url.Action("UploadDocument", "Hr");
-    var generateUrl = Url.Action("GenerateDocument", "Hr");
-    var getDocumentUrl = Url.Action("ViewDocument", "Hr");
-    var backUrl = Url.Action("Index", "Dashboard");
+    var employee = Model.Employee;
+    var types = VertexERP.Models.EmployeeDocumentUploadViewModel.DocumentTypes;
 }
-
 <link rel="stylesheet" href="~/css/EmpDocuments.css" asp-append-version="true" />
-
-<!-- FontAwesome CDN for modern icons -->
-<link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
 <div class="emp-docs-container">
-
-    <!-- Header -->
+    @if (TempData["DocumentMessage"] is string message) { <p role="status">@message</p> }
     <div class="header-section">
-
         <div class="header-left">
-
-            <button type="button"
-                    class="btn-back"
-                    onclick="goBack()"
-                    title="Go Back"
-                    aria-label="Go Back">
-                <i class="fa-solid fa-arrow-left"></i>
-            </button>
-
+            <a asp-action="@(employee == null ? "EmployeeDashboard" : "EmpDocuments")" class="btn-back" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></a>
             <div class="page-heading">
-                <span class="page-eyebrow">
-                    <i class="fa-solid fa-folder-open"></i>
-                    HR DOCUMENT MANAGEMENT
-                </span>
-
-                <h1 class="page-title">Employee Documents</h1>
-
-                <p class="page-subtitle">
-                    Manage, generate, verify, and store employee records & compliance files
-                </p>
+                <span class="page-eyebrow">HR DOCUMENT MANAGEMENT</span>
+                <h1 class="page-title">@(employee == null ? "Employee Documents" : employee.FullName)</h1>
+                <p class="page-subtitle">@(employee == null ? "Select an employee to see uploaded and missing documents." : $"{employee.EmployeeCode} · {employee.Department} · {employee.Designation}")</p>
             </div>
-
         </div>
-
         <div class="header-actions">
-
-            <a href="@generateUrl" class="btn-primary btn-generate">
-                <i class="fa-solid fa-file-circle-plus"></i>
-                <span>Generate Document</span>
-            </a>
-
-            <a href="@uploadUrl" class="btn-secondary">
-                <i class="fa-solid fa-cloud-arrow-up"></i>
-                <span>Upload Document</span>
-            </a>
-
+            <a asp-action="GenerateDocument" asp-route-employeeId="@employee?.Id" class="btn-primary"><i class="fa-solid fa-file-circle-plus"></i> Generate Document</a>
+            <a asp-action="UploadDocument" asp-route-employeeId="@employee?.Id" class="btn-secondary"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Document</a>
         </div>
-
     </div>
-
-    <!-- Stats -->
-    <div class="stats-grid">
-
-        <div class="stat-card">
-            <div class="stat-content">
-                <div>
-                    <span class="stat-title">Total Documents</span>
-                    <h3 class="stat-value">@totalDocuments</h3>
-                </div>
-
-                <div class="stat-icon icon-blue">
-                    <i class="fa-solid fa-folder-closed"></i>
-                </div>
+    @if (employee == null)
+    {
+        <div class="main-panel">
+            <div class="panel-header"><h2 class="panel-title">Employees</h2><span class="repository-count">@Model.Employees.Count Employees</span></div>
+            <div class="controls-bar"><div class="search-box"><i class="fa-solid fa-magnifying-glass search-icon"></i><input id="documentEmployeeSearch" type="search" placeholder="Search employee name, ID or department" aria-label="Search employees" /></div></div>
+            <div class="document-employee-grid">
+                @foreach (var item in Model.Employees)
+                {
+                    <a asp-action="EmpDocuments" asp-route-employeeId="@item.Id" class="document-employee-card" data-employee-search="@($"{item.Name} {item.EmployeeCode} {item.Department}")">
+                        <span class="employee-avatar"><i class="fa-solid fa-user"></i></span>
+                        <span><strong>@item.Name</strong><small>@item.EmployeeCode · @item.Department</small><small>@item.DocumentCount document(s) uploaded</small></span>
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+                }
             </div>
-
-            <p class="stat-meta text-emerald">
-                <i class="fa-solid fa-database"></i>
-                Active Repository
-            </p>
+            <p id="noDocumentEmployees" hidden>No matching employees found.</p>
+            @if (Model.Employees.Count == 0) { <p>No employees found.</p> }
         </div>
-
-        <div class="stat-card">
-            <div class="stat-content">
-                <div>
-                    <span class="stat-title">Pending Review</span>
-                    <h3 class="stat-value">@pendingReview</h3>
-                </div>
-
-                <div class="stat-icon icon-amber">
-                    <i class="fa-solid fa-clock"></i>
-                </div>
-            </div>
-
-            <p class="stat-meta text-amber">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                Requires verification
-            </p>
+    }
+    else
+    {
+        <div class="stats-grid document-summary">
+            <div class="stat-card"><span class="stat-title">Uploaded Files</span><h3 class="stat-value">@Model.Documents.Count</h3></div>
+            <div class="stat-card"><span class="stat-title">Uploaded Types</span><h3 class="stat-value">@Model.UploadedTypeCount</h3></div>
+            <div class="stat-card"><span class="stat-title">Not Uploaded Types</span><h3 class="stat-value">@(types.Count - Model.UploadedTypeCount)</h3></div>
         </div>
-
-        <div class="stat-card">
-            <div class="stat-content">
-                <div>
-                    <span class="stat-title">Expiring Soon</span>
-                    <h3 class="stat-value">@expiringSoon</h3>
-                </div>
-
-                <div class="stat-icon icon-orange">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
+        <div class="main-panel">
+            <div class="panel-header"><div><h2 class="panel-title">Document Checklist</h2><p class="panel-subtitle">Uploaded and not uploaded status for every document type.</p></div></div>
+            <div class="document-type-grid">
+                @foreach (var type in types)
+                {
+                    var count = Model.Documents.Count(document => document.DocumentType == type);
+                    <div class="document-type-card">
+                        <strong>@type</strong>
+                        <span class="badge @(count > 0 ? "badge-green" : "badge-amber")">@(count > 0 ? $"Uploaded ({count})" : "Not uploaded")</span>
+                        @if (count == 0) { <a asp-action="UploadDocument" asp-route-employeeId="@employee.Id" asp-route-documentType="@type" class="upload-back">Upload</a> }
+                    </div>
+                }
             </div>
-
-            <p class="stat-meta text-orange">
-                <i class="fa-regular fa-calendar"></i>
-                Action required &lt;30 days
-            </p>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-content">
-                <div>
-                    <span class="stat-title">Verified Rate</span>
-                    <h3 class="stat-value">@verifiedRate</h3>
-                </div>
-
-                <div class="stat-icon icon-green">
-                    <i class="fa-solid fa-shield-halved"></i>
-                </div>
-            </div>
-
-            <p class="stat-meta text-emerald">
-                <i class="fa-solid fa-circle-check"></i>
-                Compliance compliant
-            </p>
-        </div>
-
-    </div>
-
-    <!-- Main Repository Panel -->
-    <div class="main-panel">
-
-        <!-- Panel Header -->
-        <div class="panel-header">
-            <div>
-                <h2 class="panel-title">
-                    <i class="fa-solid fa-file-lines"></i>
-                    Document Repository
-                </h2>
-
-                <p class="panel-subtitle">
-                    Search and manage employee documents
-                </p>
-            </div>
-
-            <div class="repository-count">
-                <i class="fa-solid fa-layer-group"></i>
-                <span>@totalDocuments Documents</span>
-            </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="controls-bar">
-
-            <div class="filter-left">
-
-                <!-- Employee ID -->
-                <div class="employee-id-box">
-                    <i class="fa-solid fa-id-card"></i>
-
-                    <input type="text"
-                           id="employeeIdInput"
-                           placeholder="Employee ID"
-                           autocomplete="off"
-                           oninput="filterTable()" />
-                </div>
-
-                <!-- Search -->
-                <div class="search-box">
-                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
-
-                    <input type="text"
-                           id="searchInput"
-                           placeholder="Search document or employee..."
-                           autocomplete="off"
-                           oninput="filterTable()" />
-                </div>
-
-                <!-- Clear Filters -->
-                <button type="button"
-                        class="btn-clear"
-                        id="clearFilters"
-                        onclick="clearFilters()"
-                        title="Clear filters">
-                    <i class="fa-solid fa-rotate-left"></i>
-                    <span>Clear</span>
-                </button>
-
-            </div>
-
-            <div class="filter-group">
-
-                <select class="custom-select"
-                        id="categoryFilter"
-                        onchange="filterTable()"
-                        aria-label="Filter by category">
-
-                    <option value="All">All Categories</option>
-                    <option value="Contracts">Contracts & Agreements</option>
-                    <option value="KYC">KYC & Identification</option>
-                    <option value="Tax">Tax & Financial</option>
-                    <option value="Certifications">Certifications</option>
-                    <option value="Generated">Generated Documents</option>
-                    <option value="General">General</option>
-
-                </select>
-
-                <select class="custom-select"
-                        id="statusFilter"
-                        onchange="filterTable()"
-                        aria-label="Filter by status">
-
-                    <option value="All">All Statuses</option>
-                    <option value="Verified">Verified</option>
-                    <option value="Pending">Pending Review</option>
-                    <option value="Expiring">Expiring Soon</option>
-
-                </select>
-
-            </div>
-
-        </div>
-
-        <!-- Active Filter Info -->
-        <div class="filter-info" id="filterInfo" aria-live="polite">
-            <span>
-                <i class="fa-solid fa-filter"></i>
-                Showing all documents
-            </span>
-        </div>
-
-        <!-- Table -->
-        <div class="table-wrapper">
-
-            <table class="data-table" id="docsTable">
-
-                <thead>
-                    <tr>
-                        <th>Document</th>
-                        <th>Employee</th>
-                        <th>Category</th>
-                        <th>Upload Date</th>
-                        <th>Expiry Date</th>
-                        <th>Status</th>
-                        <th class="text-right">Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    @if (documentsList != null && documentsList.Any())
-                    {
-                        foreach (dynamic doc in documentsList)
+            <div class="panel-header"><h2 class="panel-title">Uploaded Documents</h2></div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>Document Type</th><th>Document Title</th><th>File Name</th><th>Upload Date</th><th class="text-right">Actions</th></tr></thead>
+                    <tbody>
+                        @foreach (var document in Model.Documents)
                         {
-                            if (doc == null)
-                            {
-                                continue;
-                            }
-
-                            var docId = doc.Id?.ToString() ?? "";
-                            var docName = doc.Name?.ToString() ?? "Untitled Document";
-                            var docCode = doc.Code?.ToString() ?? "DOC-000";
-                            var fileSize = doc.FileSize?.ToString() ?? "1.0 MB";
-                            var fileExtension = (doc.Extension?.ToString() ?? "pdf").ToLower();
-
-                            var empName = doc.EmployeeName?.ToString() ?? "Unknown Employee";
-                            var empId = doc.EmployeeId?.ToString() ?? "";
-                            var empDepartment = doc.Department?.ToString() ?? "General";
-                            var empDesignation = doc.Designation?.ToString() ?? "";
-
-                            var category = doc.Category?.ToString() ?? "General";
-                            var uploadDate = doc.UploadDate?.ToString() ?? "—";
-                            var expiryDate = doc.ExpiryDate?.ToString() ?? "—";
-                            var status = doc.Status?.ToString() ?? "Verified";
-
-                            string badgeClass = "badge-green";
-                            string statusIcon = "fa-circle-check";
-
-                            if (status.Contains("Pending", StringComparison.OrdinalIgnoreCase))
-                            {
-                                badgeClass = "badge-amber";
-                                statusIcon = "fa-clock";
-                            }
-                            else if (status.Contains("Expiring", StringComparison.OrdinalIgnoreCase))
-                            {
-                                badgeClass = "badge-orange";
-                                statusIcon = "fa-triangle-exclamation";
-                            }
-
-                            string iconClass =
-                            fileExtension == "docx" || fileExtension == "doc"
-                            ? "fa-file-word word"
-                            : fileExtension == "xlsx" || fileExtension == "xls"
-                            ? "fa-file-excel excel"
-                            : "fa-file-pdf pdf";
-
-                            string viewUrl = $"{getDocumentUrl}/{docId}";
-
-                            <tr data-category="@category"
-                                data-status="@status"
-                                data-employee-id="@empId">
-
-                                <td>
-                                    <div class="doc-title-cell">
-                                        <div class="doc-file-icon">
-                                            <i class="fa-solid @iconClass doc-type-icon"></i>
-                                        </div>
-
-                                        <div class="doc-info">
-                                            <span class="doc-name">@docName</span>
-                                            <span class="doc-sub">
-                                                @docCode
-                                                <span class="dot-separator">•</span>
-                                                @fileSize
-                                            </span>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <td>
-                                    <div class="employee-cell">
-                                        <div class="employee-avatar">
-                                            <i class="fa-solid fa-user"></i>
-                                        </div>
-
-                                        <div class="employee-info">
-                                            <div class="emp-name">@empName</div>
-
-                                            <div class="emp-sub">
-                                                @if (!string.IsNullOrWhiteSpace(empId))
-                                                {
-                                                    <span class="employee-id-badge">
-                                                        <i class="fa-solid fa-id-badge"></i>
-                                                        @empId
-                                                    </span>
-                                                }
-
-                                                @if (!string.IsNullOrWhiteSpace(empDesignation))
-                                                {
-                                                    <span class="employee-designation">
-                                                        @empDesignation
-                                                    </span>
-                                                }
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <td>
-                                    <span class="category-chip">
-                                        @category
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <span class="date-value">@uploadDate</span>
-                                </td>
-
-                                <td>
-                                    <span class="date-value @(status.Contains("Expiring", StringComparison.OrdinalIgnoreCase) ? "text-orange" : "")">
-                                        @expiryDate
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <span class="badge @badgeClass">
-                                        <i class="fa-solid @statusIcon"></i>
-                                        @status
-                                    </span>
-                                </td>
-
-                                <td class="text-right">
-                                    <div class="action-buttons">
-
-                                        <a href="@viewUrl"
-                                           class="btn-action"
-                                           title="View Document"
-                                           aria-label="View Document">
-                                            <i class="fa-regular fa-eye"></i>
-                                        </a>
-
-                                        <a href="@viewUrl?download=true"
-                                           class="btn-action"
-                                           title="Download"
-                                           aria-label="Download Document">
-                                            <i class="fa-solid fa-download"></i>
-                                        </a>
-
-                                    </div>
-                                </td>
-
+                            <tr>
+                                <td>@document.DocumentType</td><td>@document.DocumentName</td><td class="document-file-name">@document.OriginalFileName</td><td>@document.UploadedAtUtc.ToLocalTime().ToString("dd MMM yyyy")</td>
+                                <td><div class="action-buttons document-row-actions">
+                                    <a asp-action="ViewDocument" asp-route-id="@document.Id" target="_blank" rel="noopener" class="btn-secondary btn-small"><i class="fa-regular fa-eye"></i> View</a>
+                                    <a asp-action="UpdateDocument" asp-route-id="@document.Id" class="btn-secondary btn-small"><i class="fa-solid fa-pen"></i> Update</a>
+                                    <form asp-action="DeleteDocument" asp-route-id="@document.Id" method="post" onsubmit="return confirm('Delete this document? This cannot be undone.');"><button type="submit" class="btn-secondary btn-small"><i class="fa-solid fa-trash"></i> Delete</button></form>
+                                </div></td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr class="no-data-row">
-                            <td colspan="7">
-                                <div class="empty-state">
-                                    <div class="empty-icon-wrap">
-                                        <i class="fa-solid fa-folder-open empty-icon"></i>
-                                    </div>
-
-                                    <h3>No documents found</h3>
-
-                                    <p>
-                                        No employee documents are available in the system yet.
-                                    </p>
-
-                                    <div class="empty-actions">
-                                        <a href="@generateUrl" class="btn-primary btn-small">
-                                            <i class="fa-solid fa-file-circle-plus"></i>
-                                            Generate Document
-                                        </a>
-
-                                        <a href="@uploadUrl" class="btn-secondary btn-small">
-                                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                                            Upload Document
-                                        </a>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-        <!-- No Search Result -->
-        <div class="no-filter-result" id="noFilterResult">
-            <div class="empty-icon-wrap small">
-                <i class="fa-solid fa-magnifying-glass empty-icon"></i>
+                        @if (Model.Documents.Count == 0) { <tr><td colspan="5"><div class="empty-state"><h3>No documents uploaded</h3><p>Use Upload beside a missing document type to add a file.</p></div></td></tr> }
+                    </tbody>
+                </table>
             </div>
-
-            <h3>No matching documents</h3>
-
-            <p>
-                Try changing the Employee ID, search text, category, or status filter.
-            </p>
-
-            <button type="button"
-                    class="btn-primary btn-small"
-                    onclick="clearFilters()">
-                <i class="fa-solid fa-rotate-left"></i>
-                Clear Filters
-            </button>
         </div>
-
-    </div>
-
+    }
 </div>
-
 <script>
-    function filterTable() {
-
-        const searchInput =
-            document.getElementById("searchInput");
-
-        const employeeIdInput =
-            document.getElementById("employeeIdInput");
-
-        const categoryFilter =
-            document.getElementById("categoryFilter");
-
-        const statusFilter =
-            document.getElementById("statusFilter");
-
-        const table =
-            document.getElementById("docsTable");
-
-        const noFilterResult =
-            document.getElementById("noFilterResult");
-
-        const filterInfo =
-            document.getElementById("filterInfo");
-
-        const searchValue =
-            (searchInput?.value || "").trim().toUpperCase();
-
-        const employeeIdValue =
-            (employeeIdInput?.value || "").trim().toUpperCase();
-
-        const selectedCategory =
-            categoryFilter?.value || "All";
-
-        const selectedStatus =
-            statusFilter?.value || "All";
-
-        if (!table) {
-            return;
-        }
-
-        const rows =
-            table.querySelectorAll("tbody tr:not(.no-data-row)");
-
-        let visibleCount = 0;
-
-        rows.forEach(function (row) {
-
-            const rowText =
-                (row.textContent || "").toUpperCase();
-
-            const rowCategory =
-                (row.getAttribute("data-category") || "").toUpperCase();
-
-            const rowStatus =
-                (row.getAttribute("data-status") || "").toUpperCase();
-
-            const rowEmployeeId =
-                (row.getAttribute("data-employee-id") || "").toUpperCase();
-
-            const matchesSearch =
-                searchValue === "" ||
-                rowText.includes(searchValue);
-
-            const matchesEmployeeId =
-                employeeIdValue === "" ||
-                rowEmployeeId.includes(employeeIdValue) ||
-                rowText.includes(employeeIdValue);
-
-            const matchesCategory =
-                selectedCategory === "All" ||
-                rowCategory === selectedCategory.toUpperCase();
-
-            const matchesStatus =
-                selectedStatus === "All" ||
-                rowStatus.includes(selectedStatus.toUpperCase());
-
-            const shouldShow =
-                matchesSearch &&
-                matchesEmployeeId &&
-                matchesCategory &&
-                matchesStatus;
-
-            row.style.display =
-                shouldShow ? "" : "none";
-
-            if (shouldShow) {
-                visibleCount++;
-            }
-        });
-
-        const hasActiveFilter =
-            searchValue !== "" ||
-            employeeIdValue !== "" ||
-            selectedCategory !== "All" ||
-            selectedStatus !== "All";
-
-        if (noFilterResult) {
-            noFilterResult.style.display =
-                hasActiveFilter && visibleCount === 0
-                    ? "flex"
-                    : "none";
-        }
-
-        if (filterInfo) {
-
-            if (!hasActiveFilter) {
-                filterInfo.innerHTML =
-                    '<span><i class="fa-solid fa-filter"></i> Showing all documents</span>';
-            }
-            else {
-                filterInfo.innerHTML =
-                    '<span><i class="fa-solid fa-filter"></i> ' +
-                    visibleCount +
-                    ' matching document' +
-                    (visibleCount === 1 ? '' : 's') +
-                    '</span>';
-            }
-        }
-    }
-
-    function clearFilters() {
-
-        const searchInput =
-            document.getElementById("searchInput");
-
-        const employeeIdInput =
-            document.getElementById("employeeIdInput");
-
-        const categoryFilter =
-            document.getElementById("categoryFilter");
-
-        const statusFilter =
-            document.getElementById("statusFilter");
-
-        if (searchInput) {
-            searchInput.value = "";
-        }
-
-        if (employeeIdInput) {
-            employeeIdInput.value = "";
-        }
-
-        if (categoryFilter) {
-            categoryFilter.value = "All";
-        }
-
-        if (statusFilter) {
-            statusFilter.value = "All";
-        }
-
-        filterTable();
-    }
-
-    function goBack() {
-
-        if (window.history.length > 1 && document.referrer !== "") {
-            window.history.back();
-        }
-        else {
-            window.location.href = '@backUrl';
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        filterTable();
+(() => {
+    const search = document.getElementById('documentEmployeeSearch');
+    if (!search) return;
+    search.addEventListener('input', () => {
+        const query = search.value.trim().toLowerCase();
+        const cards = [...document.querySelectorAll('[data-employee-search]')];
+        cards.forEach(card => card.hidden = !card.dataset.employeeSearch.toLowerCase().includes(query));
+        document.getElementById('noDocumentEmployees').hidden = cards.some(card => !card.hidden) || !query;
     });
+})();
 </script>

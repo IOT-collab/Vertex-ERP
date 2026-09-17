@@ -71,6 +71,10 @@ public class DailyAttendanceViewModel
     public TimeOnly? CheckIn { get; init; }
     public TimeOnly? CheckOut { get; init; }
     public TimeSpan WorkingHours { get; init; }
+    public bool IsLate { get; init; }
+    public string Remark { get; init; } = string.Empty;
+    public string TotalHoursDisplay => CheckIn.HasValue && CheckOut.HasValue
+        ? VertexERP.Services.AttendanceRules.FormatHours(WorkingHours) : "—";
     public int PunchCount { get; init; }
     public string Status { get; init; } = string.Empty;
 }

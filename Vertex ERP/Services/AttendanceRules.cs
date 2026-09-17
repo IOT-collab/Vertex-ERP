@@ -7,6 +7,18 @@ public static class AttendanceRules
 
     public static bool IsWeeklyOff(DateOnly date) => date.DayOfWeek == DayOfWeek.Sunday;
 
+    public static (string Status, string Remark, bool IsLate, TimeSpan Hours) EvaluateDay(
+        DateTime? checkIn, DateTime? checkOut, DateOnly date, DateOnly today, TimeOnly startTime)
+    {
+        if (!checkIn.HasValue) return ("Absent", "No punches recorded", false, TimeSpan.Zero);
+        var late = TimeOnly.FromDateTime(checkIn.Value) > new TimeOnly(9, 30);
+        var hours = checkOut.HasValue && checkOut.Value > checkIn.Value
+            ? checkOut.Value - checkIn.Value : TimeSpan.Zero;
+        return (late ? "Late" : "Present", late ? "Late arrival" : "On time", late, hours);
+    }
+
+    public static string FormatHours(TimeSpan hours) => $"{(int)hours.TotalHours}h {hours.Minutes:D2}m";
+
     public static string? NormalizePunchAction(string? value)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;

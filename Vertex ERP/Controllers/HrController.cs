@@ -136,25 +136,28 @@ namespace Vertex_ERP.Controllers
             TempData["RecruitmentMessage"] = "Hiring record deleted."; return RedirectToAction(nameof(Recuirement), new { year, month });
         }
 
-        public async Task<IActionResult> EmpDocuments()
+        public async Task<IActionResult> EmpDocuments(int? employeeId)
         {
-            var documents = await _dbContext.EmployeeDocuments.AsNoTracking().Include(item => item.Employee)
-                .OrderByDescending(item => item.UploadedAtUtc).Select(item => new
-                {
-                    item.Id, Name = item.DocumentName, Code = "DOC-" + item.Id.ToString("D5"),
-                    FileSize = item.FileSize < 1024 * 1024 ? $"{item.FileSize / 1024d:F0} KB" : $"{item.FileSize / 1024d / 1024d:F1} MB",
-                    Extension = Path.GetExtension(item.OriginalFileName).TrimStart('.'), EmployeeName = item.Employee.FullName,
-                    EmployeeId = item.Employee.EmployeeCode, item.Employee.Department, item.Employee.Designation,
-                    Category = item.DocumentType, UploadDate = item.UploadedAtUtc.ToLocalTime().ToString("dd MMM yyyy"),
-                    ExpiryDate = item.ExpiryDate.HasValue ? item.ExpiryDate.Value.ToString("dd MMM yyyy") : "—",
-                    Status = item.ExpiryDate.HasValue && item.ExpiryDate.Value <= DateOnly.FromDateTime(DateTime.Today.AddDays(30)) ? "Expiring Soon" : "Verified"
-                }).ToListAsync();
-            return View(new
+            var model = new EmployeeDocumentRepositoryViewModel();
+            if (employeeId.HasValue)
             {
-                Title = "Employee Documents", Documents = documents, TotalDocuments = documents.Count,
-                PendingReview = 0, ExpiringSoon = documents.Count(item => item.Status == "Expiring Soon"),
-                VerifiedRate = documents.Count == 0 ? "0%" : $"{documents.Count(item => item.Status == "Verified") * 100 / documents.Count}%"
-            });
+                model.Employee = await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(employee => employee.Id == employeeId.Value);
+                if (model.Employee == null) return NotFound();
+                model.Documents = await _dbContext.EmployeeDocuments.AsNoTracking()
+                    .Where(document => document.EmployeeId == employeeId.Value)
+                    .OrderByDescending(document => document.UploadedAtUtc).ToListAsync();
+            }
+            else
+            {
+                model.Employees = await _dbContext.Employees.AsNoTracking().OrderBy(employee => employee.FullName)
+                    .Select(employee => new EmployeeDocumentDirectoryItem
+                    {
+                        Id = employee.Id, Name = employee.FullName, EmployeeCode = employee.EmployeeCode,
+                        Department = employee.Department,
+                        DocumentCount = _dbContext.EmployeeDocuments.Count(document => document.EmployeeId == employee.Id)
+                    }).ToListAsync();
+            }
+            return View(model);
         }
 
         [HttpGet]
@@ -472,9 +475,25 @@ namespace Vertex_ERP.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> UploadDocument()
+        public async Task<IActionResult> UploadDocument(int? employeeId, string? documentType)
         {
-            var model = new EmployeeDocumentUploadViewModel(); await PopulateUploadEmployeesAsync(model); return View(model);
+            if (employeeId.HasValue && !await _dbContext.Employees.AnyAsync(employee => employee.Id == employeeId.Value)) return NotFound();
+            var model = new EmployeeDocumentUploadViewModel { EmployeeId = employeeId, DocumentType = EmployeeDocumentUploadViewModel.DocumentTypes.Contains(documentType ?? "") ? documentType! : "" };
+            await PopulateUploadEmployeesAsync(model); return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UpdateDocument(int id)
+        {
+            var document = await _dbContext.EmployeeDocuments.AsNoTracking().FirstOrDefaultAsync(item => item.Id == id);
+            if (document == null) return NotFound();
+            var model = new EmployeeDocumentUploadViewModel
+            {
+                DocumentId = document.Id, EmployeeId = document.EmployeeId, DocumentType = document.DocumentType,
+                DocumentName = document.DocumentName, Notes = document.Notes, CurrentFileName = document.OriginalFileName
+            };
+            await PopulateUploadEmployeesAsync(model);
+            return View("UploadDocument", model);
         }
 
         [HttpPost]
@@ -482,35 +501,58 @@ namespace Vertex_ERP.Controllers
         [RequestSizeLimit(16 * 1024 * 1024)]
         public async Task<IActionResult> UploadDocument(EmployeeDocumentUploadViewModel model)
         {
-            var allowedTypes = new[] { "Aadhaar Card", "PAN Card", "10th Certificate", "12th Certificate", "Graduation", "Post Graduation", "Employee Photo", "Previous Company Documents", "UAN Passbook", "Other" };
-            if (!allowedTypes.Contains(model.DocumentType)) ModelState.AddModelError(nameof(model.DocumentType), "Select a valid document type.");
-            var employee = model.EmployeeId.HasValue ? await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(item => item.Id == model.EmployeeId.Value && item.IsActive) : null;
-            if (employee == null) ModelState.AddModelError(nameof(model.EmployeeId), "Select a valid active employee.");
-            if (model.File == null || model.File.Length == 0 || model.File.Length > 15 * 1024 * 1024) ModelState.AddModelError(nameof(model.File), "Choose a file up to 15 MB.");
+            var document = model.DocumentId.HasValue
+                ? await _dbContext.EmployeeDocuments.FirstOrDefaultAsync(item => item.Id == model.DocumentId.Value) : null;
+            if (model.DocumentId.HasValue && document == null) return NotFound();
+            if (document != null && document.EmployeeId != model.EmployeeId) return BadRequest();
+            model.CurrentFileName = document?.OriginalFileName;
+            if (!EmployeeDocumentUploadViewModel.DocumentTypes.Contains(model.DocumentType)) ModelState.AddModelError(nameof(model.DocumentType), "Select a valid document type.");
+            var employee = model.EmployeeId.HasValue ? await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(item => item.Id == model.EmployeeId.Value) : null;
+            if (employee == null) ModelState.AddModelError(nameof(model.EmployeeId), "Select a valid employee.");
+            if ((document == null && model.File == null) || model.File?.Length == 0) ModelState.AddModelError(nameof(model.File), "Choose a non-empty file.");
             var extension = model.File == null ? string.Empty : Path.GetExtension(model.File.FileName).ToLowerInvariant();
-            if (!new[] { ".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx" }.Contains(extension)) ModelState.AddModelError(nameof(model.File), "Allowed formats: PDF, JPG, PNG, DOC and DOCX.");
+            if (model.File != null && !new[] { ".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx" }.Contains(extension)) ModelState.AddModelError(nameof(model.File), "Allowed formats: PDF, JPG, PNG, DOC and DOCX.");
             if (!ModelState.IsValid) { await PopulateUploadEmployeesAsync(model); return View(model); }
 
-            var storedName = $"{Guid.NewGuid():N}{extension}"; var directory = Path.Combine(_environment.ContentRootPath, "App_Data", "EmployeeDocuments"); Directory.CreateDirectory(directory);
-            var targetPath = Path.Combine(directory, storedName);
+            var updating = document != null;
+            var oldStoredName = document?.StoredFileName;
+            var directory = Path.Combine(_environment.ContentRootPath, "App_Data", "EmployeeDocuments");
+            string? targetPath = null;
+            document ??= new EmployeeDocument { EmployeeId = employee!.Id };
             try
             {
-                await using (var target = new FileStream(targetPath, FileMode.CreateNew)) await model.File!.CopyToAsync(target);
-                _dbContext.EmployeeDocuments.Add(new EmployeeDocument
+                if (model.File != null)
                 {
-                    EmployeeId = employee!.Id, DocumentType = model.DocumentType, DocumentName = model.DocumentName.Trim(),
-                    OriginalFileName = Path.GetFileName(model.File.FileName), StoredFileName = storedName,
-                    ContentType = extension switch { ".pdf" => "application/pdf", ".jpg" or ".jpeg" => "image/jpeg", ".png" => "image/png", ".doc" => "application/msword", ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document", _ => "application/octet-stream" },
-                    FileSize = model.File.Length, ExpiryDate = model.ExpiryDate, Notes = string.IsNullOrWhiteSpace(model.Notes) ? null : model.Notes.Trim(),
-                    UploadedBy = User.Identity?.Name ?? "HR", UploadedAtUtc = DateTime.UtcNow
-                });
+                    Directory.CreateDirectory(directory);
+                    var storedName = $"{Guid.NewGuid():N}{extension}";
+                    targetPath = Path.Combine(directory, storedName);
+                    await using (var target = new FileStream(targetPath, FileMode.CreateNew)) await model.File.CopyToAsync(target);
+                    document.StoredFileName = storedName;
+                    document.OriginalFileName = Path.GetFileName(model.File.FileName);
+                    document.ContentType = extension switch { ".pdf" => "application/pdf", ".jpg" or ".jpeg" => "image/jpeg", ".png" => "image/png", ".doc" => "application/msword", ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document", _ => "application/octet-stream" };
+                    document.FileSize = model.File.Length;
+                    document.UploadedBy = User.Identity?.Name ?? "HR";
+                    document.UploadedAtUtc = DateTime.UtcNow;
+                }
+                document.DocumentType = model.DocumentType;
+                document.DocumentName = model.DocumentName.Trim();
+                document.Notes = string.IsNullOrWhiteSpace(model.Notes) ? null : model.Notes.Trim();
+                if (!updating) _dbContext.EmployeeDocuments.Add(document);
                 await _dbContext.SaveChangesAsync();
             }
             catch
             {
-                if (System.IO.File.Exists(targetPath)) System.IO.File.Delete(targetPath); throw;
+                if (targetPath != null && System.IO.File.Exists(targetPath)) System.IO.File.Delete(targetPath);
+                throw;
             }
-            TempData["DocumentMessage"] = $"{model.DocumentName} uploaded for {employee.FullName}."; return RedirectToAction(nameof(EmpDocuments));
+            if (model.File != null && oldStoredName != null)
+            {
+                try { System.IO.File.Delete(Path.Combine(directory, Path.GetFileName(oldStoredName))); }
+                catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+                { _logger.LogError(exception, "Unable to remove replaced file for document {DocumentId}", document.Id); }
+            }
+            TempData["DocumentMessage"] = $"{model.DocumentName} {(updating ? "updated" : "uploaded")} for {employee!.FullName}.";
+            return RedirectToAction(nameof(EmpDocuments), new { employeeId = employee.Id });
         }
 
         [HttpGet]
@@ -519,6 +561,27 @@ namespace Vertex_ERP.Controllers
             var document = await _dbContext.EmployeeDocuments.AsNoTracking().FirstOrDefaultAsync(item => item.Id == id); if (document == null) return NotFound();
             var path = Path.Combine(_environment.ContentRootPath, "App_Data", "EmployeeDocuments", document.StoredFileName); if (!System.IO.File.Exists(path)) return NotFound();
             return PhysicalFile(path, document.ContentType, download ? document.OriginalFileName : null, enableRangeProcessing: true);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteDocument(int id)
+        {
+            var document = await _dbContext.EmployeeDocuments.FindAsync(id);
+            if (document == null) return NotFound();
+            var path = Path.Combine(_environment.ContentRootPath, "App_Data", "EmployeeDocuments", Path.GetFileName(document.StoredFileName));
+            _dbContext.EmployeeDocuments.Remove(document);
+            await _dbContext.SaveChangesAsync();
+            try
+            {
+                System.IO.File.Delete(path);
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogError(exception, "Unable to remove stored file for deleted employee document {DocumentId}", id);
+            }
+            TempData["DocumentMessage"] = "Document deleted successfully.";
+            return RedirectToAction(nameof(EmpDocuments), new { employeeId = document.EmployeeId });
         }
 
         public IActionResult Holiday()
@@ -549,7 +612,7 @@ namespace Vertex_ERP.Controllers
 
         private async Task PopulateUploadEmployeesAsync(EmployeeDocumentUploadViewModel model)
         {
-            model.Employees = await _dbContext.Employees.AsNoTracking().Include(item => item.ReportingManager).Where(item => item.IsActive).OrderBy(item => item.FullName)
+            model.Employees = await _dbContext.Employees.AsNoTracking().Include(item => item.ReportingManager).OrderBy(item => item.FullName)
                 .Select(item => new EmployeeDocumentEmployeeOption { Id = item.Id, EmployeeCode = item.EmployeeCode, Name = item.FullName, Designation = item.Designation, Department = item.Department, Email = item.Email, Mobile = item.PhoneNumber, ManagerName = item.ReportingManager != null ? item.ReportingManager.FullName : "Not assigned" }).ToListAsync();
         }
         public async Task<IActionResult> Department()
@@ -910,6 +973,7 @@ public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
                     FullName = $"{firstName} {lastName}".Trim(),
                     Email = email,
                     PhoneNumber = model.Phone.Trim(),
+                    AadhaarNumber = Clean(model.AadhaarNumber),
                     DateOfBirth = model.DateOfBirth,
                     Gender = Clean(model.Gender),
                     MaritalStatus = Clean(model.MaritalStatus),
@@ -937,7 +1001,6 @@ public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
                 {
                     Username = loginUsername,
                     NormalizedUsername = normalizedUsername,
-                    PasswordHash = CreateVerifiedPasswordHash(loginPassword),
                     Role = accountRole,
                     FullName = employee.FullName,
                     IsActive = true,
@@ -947,6 +1010,7 @@ public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
                     MustChangePassword = false,
                     CreatedAt = DateTime.UtcNow
                 };
+                EmployeeCredentialService.Apply(loginAccount, employee, loginUsername, loginPassword);
                 _dbContext.AppUsers.Add(loginAccount);
                 if (!string.IsNullOrWhiteSpace(model.BankAccountNumber) && !string.IsNullOrWhiteSpace(model.BankName) && !string.IsNullOrWhiteSpace(model.BankAccountHolderName) && !string.IsNullOrWhiteSpace(model.BankIfscCode))
                 {
@@ -958,6 +1022,7 @@ public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
                     _dbContext.EmployeeSalaryDetails.Add(new EmployeeSalaryDetail { Employee = employee, BasicSalary = model.BasicSalary, HouseRentAllowance = model.HouseRentAllowance, ConveyanceAllowance = model.ConveyanceAllowance, SpecialAllowance = model.SpecialAllowance, ProvidentFund = model.ProvidentFund, ProfessionalTax = model.ProfessionalTax, Tds = model.Tds, OtherDeductions = model.OtherDeductions, PfNumber = Clean(model.PfNumber), PfUan = Clean(model.PfUan), EffectiveFrom = model.SalaryEffectiveFrom, IsActive = true, UpdatedAtUtc = DateTime.UtcNow });
                     }
                 await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
                 TempData["EmployeeMessage"] = $"{accountRole} and login account '{loginUsername}' added successfully.";
                 TempData["CreatedLoginUsername"] = loginUsername;
                 TempData["CreatedLoginPassword"] = loginPassword;
@@ -1021,14 +1086,6 @@ public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
                 .OrderBy(department => department.DepartmentName)
                 .ToListAsync();
             return model;
-        }
-
-        private static string CreateVerifiedPasswordHash(string password)
-        {
-            var passwordHash = PasswordHashService.HashPassword(password);
-            if (!PasswordHashService.VerifyPassword(password, passwordHash))
-                throw new InvalidOperationException("Unable to create a valid employee login password.");
-            return passwordHash;
         }
 
         private async Task<AddDepartmentViewModel> PopulateDepartmentManagersAsync(AddDepartmentViewModel model)

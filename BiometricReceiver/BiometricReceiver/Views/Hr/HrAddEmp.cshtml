@@ -176,6 +176,20 @@
                 </div>
 
 
+                <!-- Aadhaar Number -->
+                <div class="form-group">
+                    <label asp-for="AadhaarNumber">Aadhaar Number <span>*</span></label>
+                    <input asp-for="AadhaarNumber"
+                           type="text"
+                           inputmode="numeric"
+                           maxlength="12"
+                           pattern="[0-9]{12}"
+                           autocomplete="off"
+                           placeholder="Enter 12-digit Aadhaar number"
+                           required />
+                    <span asp-validation-for="AadhaarNumber" class="field-validation"></span>
+                </div>
+
                 <!-- Date Of Birth -->
                 <div class="form-group">
 
@@ -592,7 +606,7 @@
                 <div class="form-group">
                     <label asp-for="LoginUsername">Login Username <span>*</span></label>
                     <div class="credential-input-row">
-                        <input asp-for="LoginUsername" type="text" autocomplete="off" placeholder="Enter username" required />
+                        <input asp-for="LoginUsername" type="text" autocomplete="off" placeholder="Generate or enter username" />
                     </div>
                     <span asp-validation-for="LoginUsername" class="field-validation"></span>
                 </div>
@@ -600,7 +614,7 @@
                 <div class="form-group">
                     <label asp-for="TemporaryPassword">Password <span>*</span></label>
                     <div class="credential-input-row">
-                        <input asp-for="TemporaryPassword" type="password" autocomplete="new-password" placeholder="Enter password exactly as it should be saved" required />
+                        <input asp-for="TemporaryPassword" type="password" autocomplete="new-password" placeholder="Generate or enter password" />
                         <button type="button" class="credential-generate-btn" id="togglePassword" aria-label="Show password"><i class="fa-solid fa-eye"></i></button>
                     </div>
                     <span asp-validation-for="TemporaryPassword" class="field-validation"></span>
@@ -610,7 +624,7 @@
                     <button type="button" class="credential-generate-btn credential-generate-all-btn" onclick="generateCredentials()"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate</button>
                 </div>
                 <div class="form-group account-option-group full-width">
-                    <small>The exact username and password shown here are saved as this employee's login credentials. Generated credentials stay unchanged.</small>
+                    <small id="credentialNotice" role="status" aria-live="polite">Generate credentials here, or leave them blank to generate when saving. Credentials are shown after successful creation.</small>
                 </div>
             </div>
         </div>
@@ -775,33 +789,36 @@
 </script>
 
 <script>
-    function generateCredentials() {
-        const usernameInput = document.getElementById('LoginUsername');
-        const passwordInput = document.getElementById('TemporaryPassword');
-        const generateButton = document.querySelector('.credential-generate-all-btn');
-        if (usernameInput.dataset.credentialsLocked === 'true') return;
-        const firstName = document.getElementById('FirstName').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-        const lastName = document.getElementById('LastName').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-
-        // Never replace credentials that HR has already entered. Generate only a missing value.
-        if (!usernameInput.value.trim()) {
-            const randomSuffix = Math.floor(100 + Math.random() * 900);
-            usernameInput.value = `${[firstName, lastName].filter(Boolean).join('.') || 'employee'}${randomSuffix}`;
+    async function generateCredentials() {
+        const username = document.getElementById('LoginUsername');
+        const password = document.getElementById('TemporaryPassword');
+        const button = document.querySelector('.credential-generate-all-btn');
+        const notice = document.getElementById('credentialNotice');
+        if (username.value.trim() && password.value) {
+            notice.textContent = 'Credentials are ready. You can edit them before saving.';
+            return;
         }
-
-        if (!passwordInput.value) {
-            const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!\u0040#$%';
-            const randomBytes = new Uint32Array(12);
-            crypto.getRandomValues(randomBytes);
-            passwordInput.value = Array.from(randomBytes, value => characters[value % characters.length]).join('');
-            passwordInput.type = 'text';
+        button.disabled = true;
+        notice.textContent = 'Generating secure credentials…';
+        try {
+            const data = new FormData();
+            data.append('firstName', document.getElementById('FirstName').value);
+            data.append('lastName', document.getElementById('LastName').value);
+            data.append('__RequestVerificationToken', document.querySelector('.employee-form input[name="__RequestVerificationToken"]').value);
+            const response = await fetch('@Url.Action("GenerateEmployeeCredentials", "Hr")', {
+                method: 'POST', body: data, credentials: 'same-origin', headers: { 'Accept': 'application/json' }
+            });
+            if (!response.ok) throw new Error('generation failed');
+            const result = await response.json();
+            if (!result.username || !result.password) throw new Error('invalid response');
+            if (!username.value.trim()) username.value = result.username;
+            if (!password.value) password.value = result.password;
+            notice.textContent = 'Credentials generated. Save the employee to activate this login.';
+        } catch {
+            notice.textContent = 'Could not generate credentials. Retry, enter them manually, or leave both blank to generate when saving.';
+        } finally {
+            button.disabled = false;
         }
-
-        usernameInput.readOnly = true;
-        passwordInput.readOnly = true;
-        usernameInput.dataset.credentialsLocked = 'true';
-        generateButton.disabled = true;
-        generateButton.innerHTML = '<i class="fa-solid fa-lock"></i> Generated';
     }
 
     document.getElementById('togglePassword').addEventListener('click', function () {

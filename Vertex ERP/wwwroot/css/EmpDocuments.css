@@ -555,6 +555,17 @@ body {
         }
 }
 
+.emp-docs-container .action-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.emp-docs-container .action-buttons form {
+    margin: 0;
+}
+
 /* Shared app form rules are more specific; keep repository icons in a fixed
    leading slot so they can never overlap the entered text or placeholder. */
 .page-content .emp-docs-container .employee-id-box input,
@@ -568,4 +579,24 @@ body {
     left: 17px !important;
     width: 18px;
     text-align: center;
+}
+
+.document-employee-grid, .document-type-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.document-employee-card, .document-type-card { padding: 20px; background: #111f36; border: 1px solid #334155; border-radius: 12px; color: #f1f5f9; }
+.document-employee-card { display: flex; align-items: center; gap: 16px; text-decoration: none; }
+.document-employee-card:hover, .document-employee-card:focus-visible { border-color: #3b82f6; background: #132b50; }
+.document-employee-card[hidden] { display: none; }
+.document-employee-card strong, .document-employee-card small { display: block; overflow-wrap: anywhere; }
+.document-employee-card small { color: #aab8cf; margin-top: 6px; }
+.document-employee-card > .fa-chevron-right { margin-left: auto; }
+.document-type-card { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.document-type-card > strong { flex: 1; }
+.document-type-card a { color: #93c5fd; }
+.document-type-grid { margin-bottom: 28px; }
+.stats-grid.document-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.document-file-name { overflow-wrap: anywhere; max-width: 260px; }
+.document-row-actions { flex-wrap: wrap; }
+.document-row-actions .btn-small { white-space: nowrap; }
+@media (max-width: 700px) {
+    .document-employee-grid, .document-type-grid, .stats-grid.document-summary { grid-template-columns: 1fr; }
 }

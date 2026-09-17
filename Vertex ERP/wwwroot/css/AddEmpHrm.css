@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    Container Workspace & Base System Configurations
    ========================================================================== */
 .hrms-page {
@@ -100,6 +100,7 @@
     }
 
     .form-group input[type="text"],
+    .form-group input[type="password"],
     .form-group input[type="email"],
     .form-group input[type="tel"],
     .form-group input[type="date"],
@@ -340,3 +341,29 @@
         padding: 13px;
     }
 }
+
+/* Keep the visibility control inside the edit password field on all screen sizes. */
+.edit-password-input { position: relative; width: 100%; min-width: 0; }
+.form-group .edit-password-input input {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding-right: 48px;
+}
+.edit-password-toggle {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+.edit-password-toggle:focus-visible { outline: 2px solid #3b82f6; }

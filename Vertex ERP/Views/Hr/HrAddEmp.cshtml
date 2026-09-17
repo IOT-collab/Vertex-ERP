@@ -176,6 +176,20 @@
                 </div>
 
 
+                <!-- Aadhaar Number -->
+                <div class="form-group">
+                    <label asp-for="AadhaarNumber">Aadhaar Number <span>*</span></label>
+                    <input asp-for="AadhaarNumber"
+                           type="text"
+                           inputmode="numeric"
+                           maxlength="12"
+                           pattern="[0-9]{12}"
+                           autocomplete="off"
+                           placeholder="Enter 12-digit Aadhaar number"
+                           required />
+                    <span asp-validation-for="AadhaarNumber" class="field-validation"></span>
+                </div>
+
                 <!-- Date Of Birth -->
                 <div class="form-group">
 

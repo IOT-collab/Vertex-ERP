@@ -89,6 +89,12 @@ public class EmployeeLoginAccessViewModel
 
 public class EmployeeFormViewModel : IValidatableObject
 {
+    [Required(ErrorMessage = "Aadhaar Number is required.")]
+    [StringLength(12)]
+    [RegularExpression(@"^[0-9]{12}$", ErrorMessage = "Aadhaar Number must contain exactly 12 digits.")]
+    [Display(Name = "Aadhaar Number")]
+    public string? AadhaarNumber { get; set; }
+
     public int Id { get; set; }
 
     [Required(ErrorMessage = "Employee ID is required."), StringLength(30, ErrorMessage = "Employee ID cannot exceed 30 characters.")]
@@ -199,6 +205,16 @@ public class EmployeeFormViewModel : IValidatableObject
     [Display(Name="Salary Effective From")] public DateOnly SalaryEffectiveFrom { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     public bool HasSalaryDetails { get; set; }
 
+    [StringLength(50, MinimumLength = 3)]
+    [RegularExpression(@"^[A-Za-z0-9._-]+$", ErrorMessage = "Username can contain letters, numbers, dot, underscore and hyphen only.")]
+    [Display(Name = "Username")]
+    public string? LoginUsername { get; set; }
+
+    [StringLength(100, MinimumLength = 8), DataType(DataType.Password)]
+    [Display(Name = "Password")]
+    public string? TemporaryPassword { get; set; }
+    public bool HasExistingAccount { get; set; }
+
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         var today = DateOnly.FromDateTime(DateTime.Today);
@@ -264,6 +280,12 @@ public class EmployeeSalaryDraft
 
 public class HrAddEmployeeViewModel : IValidatableObject
 {
+    [Required(ErrorMessage = "Aadhaar Number is required.")]
+    [StringLength(12)]
+    [RegularExpression(@"^[0-9]{12}$", ErrorMessage = "Aadhaar Number must contain exactly 12 digits.")]
+    [Display(Name = "Aadhaar Number")]
+    public string? AadhaarNumber { get; set; }
+
     [Required(ErrorMessage = "Employee ID is required."), StringLength(30, ErrorMessage = "Employee ID cannot exceed 30 characters.")]
     [Display(Name = "Employee ID")]
     public string EmployeeId { get; set; } = string.Empty;

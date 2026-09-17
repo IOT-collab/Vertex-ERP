@@ -1067,14 +1067,14 @@ namespace VertexERP.Controllers
             }
             var monthlySummary = exportRecords.GroupBy(item => item.EmployeeId).ToDictionary(group => group.Key, group => new
             {
-                Present = group.Count(item => item.Status is "Present" or "Late"),
+                Present = group.Count(item => item.CheckIn.HasValue),
                 Absent = group.Count(item => item.Status == "Absent"),
-                Late = group.Count(item => item.Status == "Late"),
+                Late = group.Count(item => item.IsLate),
                 Work = TimeSpan.FromTicks(group.Sum(item => item.WorkingHours.Ticks))
             });
             if (isMonthlyExport)
                 return BuildMonthlyAttendanceWorkbook(exportRecords, dates, monthlySummary.ToDictionary(x => x.Key, x => (x.Value.Present, x.Value.Absent, x.Value.Late, x.Value.Work)));
-            csv.AppendLine("Emp ID,Employee Name,Department,Date,Day,Check In,Check Out,Working Hours,Punch Count,Status,Month Present Days,Month Absent Days,Month Late Days,Month Total Hours");
+            csv.AppendLine("Emp ID,Employee Name,Department,Date,Day,Check In,Check Out,Total Hours,Punch Count,Status,Remark,Late Arrival,Month Present Days,Month Absent Days,Month Late Days,Month Total Hours");
             foreach (var item in exportRecords.OrderBy(item => item.EmployeeName).ThenBy(item => item.EmpId).ThenBy(item => item.Date))
             {
                 var summary = monthlySummary[item.EmployeeId];
@@ -1082,7 +1082,7 @@ namespace VertexERP.Controllers
                 {
                     Csv(item.EmpId), Csv(item.EmployeeName), Csv(item.Department), Csv(item.Date.ToString("dd-MMM-yyyy")), Csv(item.Date.DayOfWeek.ToString()),
                     Csv(item.CheckIn?.ToString("hh:mm tt") ?? string.Empty), Csv(item.CheckOut?.ToString("hh:mm tt") ?? string.Empty),
-                    Csv(item.WorkingHours.ToString(@"hh\:mm")), item.PunchCount.ToString(), Csv(item.Status),
+                    Csv(item.TotalHoursDisplay), item.PunchCount.ToString(), Csv(item.Status), Csv(item.Remark), Csv(item.IsLate ? "Yes" : "No"),
                     summary.Present.ToString(), summary.Absent.ToString(), summary.Late.ToString(), Csv($"{(int)summary.Work.TotalHours:D2}:{summary.Work.Minutes:D2}")
                 }));
             }
@@ -1110,14 +1110,14 @@ namespace VertexERP.Controllers
             foreach (var employee in records.GroupBy(x => x.EmployeeId).OrderBy(x => x.First().EmployeeName))
             {
                 var first = employee.First(); var summary = summaries[employee.Key]; var byDate = employee.ToDictionary(x => x.Date);
-                xml.Append($"<Row ss:Height=\"34\"><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.EmpId)}</Data></Cell><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.EmployeeName)}</Data></Cell><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.Department)}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Present}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Absent}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Late}</Data></Cell><Cell><Data ss:Type=\"String\">{(int)summary.Work.TotalHours:D2}:{summary.Work.Minutes:D2}</Data></Cell>");
+                xml.Append($"<Row ss:Height=\"75\"><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.EmpId)}</Data></Cell><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.EmployeeName)}</Data></Cell><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.Department)}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Present}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Absent}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Late}</Data></Cell><Cell><Data ss:Type=\"String\">{(int)summary.Work.TotalHours:D2}:{summary.Work.Minutes:D2}</Data></Cell>");
                 foreach (var day in dates)
                 {
                     var item = byDate[day];
-                    var style = item.Status == "Present" ? "Present" : item.Status == "Late" ? "Late" : "Absent";
-                    var code = item.Status == "Present" ? "P" : item.Status == "Late" ? "L" : "A";
+                    var style = item.Status == "Present" ? "Present" : item.Status == "Absent" ? "Absent" : "Late";
+                    var code = X(item.Status);
                     var timing = item.CheckIn.HasValue ? $"&#10;{item.CheckIn:hh:mm tt}-{(item.CheckOut.HasValue ? item.CheckOut.Value.ToString("hh:mm tt") : "—")}" : string.Empty;
-                    xml.Append($"<Cell ss:StyleID=\"{style}\"><Data ss:Type=\"String\">{code}{timing}</Data></Cell>");
+                    xml.Append($"<Cell ss:StyleID=\"{style}\"><Data ss:Type=\"String\">{code}{timing}&#10;{X(item.TotalHoursDisplay)}&#10;{X(item.Remark)}</Data></Cell>");
                 }
                 xml.Append("</Row>");
             }

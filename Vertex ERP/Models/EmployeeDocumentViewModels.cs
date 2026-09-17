@@ -59,13 +59,40 @@ public sealed class EmployeeDocumentEmployeeOption
     public string ManagerName { get; init; } = string.Empty;
 }
 
-public sealed class EmployeeDocumentUploadViewModel
+public sealed class EmployeeDocumentUploadViewModel : IValidatableObject
 {
+    public static IReadOnlyList<string> DocumentTypes { get; } = Array.AsReadOnly(new[] { "Aadhaar Card", "PAN Card", "10th Certificate", "12th Certificate", "Graduation", "Post Graduation", "Employee Photo", "Previous Company Documents", "UAN Passbook", "Other" });
+    public int? DocumentId { get; set; }
+    public string? CurrentFileName { get; set; }
+    public const long MaximumFileSize = 3 * 1024 * 1024;
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if ((!DocumentId.HasValue && File == null) || File?.Length == 0)
+            yield return new ValidationResult("Choose a non-empty file to upload.", new[] { nameof(File) });
+        if (File?.Length > MaximumFileSize)
+            yield return new ValidationResult("The file exceeds the 3 MB limit. Choose a file of 3 MB or less.", new[] { nameof(File) });
+    }
     [Required] public int? EmployeeId { get; set; }
     [Required, StringLength(80)] public string DocumentType { get; set; } = string.Empty;
     [Required, StringLength(160)] public string DocumentName { get; set; } = string.Empty;
-    [Required] public IFormFile? File { get; set; }
-    [DataType(DataType.Date)] public DateOnly? ExpiryDate { get; set; }
+    public IFormFile? File { get; set; }
     [StringLength(500)] public string? Notes { get; set; }
     public IReadOnlyList<EmployeeDocumentEmployeeOption> Employees { get; set; } = Array.Empty<EmployeeDocumentEmployeeOption>();
+}
+
+public sealed class EmployeeDocumentRepositoryViewModel
+{
+    public Employee? Employee { get; set; }
+    public IReadOnlyList<EmployeeDocumentDirectoryItem> Employees { get; set; } = Array.Empty<EmployeeDocumentDirectoryItem>();
+    public IReadOnlyList<EmployeeDocument> Documents { get; set; } = Array.Empty<EmployeeDocument>();
+    public int UploadedTypeCount => EmployeeDocumentUploadViewModel.DocumentTypes.Count(type => Documents.Any(document => document.DocumentType == type));
+}
+
+public sealed class EmployeeDocumentDirectoryItem
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string EmployeeCode { get; set; } = string.Empty;
+    public string Department { get; set; } = string.Empty;
+    public int DocumentCount { get; set; }
 }

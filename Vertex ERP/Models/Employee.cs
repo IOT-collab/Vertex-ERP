@@ -24,6 +24,9 @@ public class Employee
     [Required, Phone, MaxLength(20)]
     public string PhoneNumber { get; set; } = string.Empty;
 
+    [MaxLength(12)]
+    public string? AadhaarNumber { get; set; }
+
     public DateOnly? DateOfBirth { get; set; }
 
     [MaxLength(20)]
