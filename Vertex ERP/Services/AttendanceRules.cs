@@ -5,13 +5,17 @@ public static class AttendanceRules
     public const string FieldCommunicationMode = "Field";
     public const string FieldVerificationMode = "GPS Field";
 
+    // The complete 09:30 minute is on time; late starts at 09:31:00.
+    public static bool IsLateArrival(DateTime checkIn) =>
+        TimeOnly.FromDateTime(checkIn) >= new TimeOnly(9, 31);
+
     public static bool IsWeeklyOff(DateOnly date) => date.DayOfWeek == DayOfWeek.Sunday;
 
     public static (string Status, string Remark, bool IsLate, TimeSpan Hours) EvaluateDay(
         DateTime? checkIn, DateTime? checkOut, DateOnly date, DateOnly today, TimeOnly startTime)
     {
         if (!checkIn.HasValue) return ("Absent", "No punches recorded", false, TimeSpan.Zero);
-        var late = TimeOnly.FromDateTime(checkIn.Value) > new TimeOnly(9, 30);
+        var late = IsLateArrival(checkIn.Value);
         var hours = checkOut.HasValue && checkOut.Value > checkIn.Value
             ? checkOut.Value - checkIn.Value : TimeSpan.Zero;
         return (late ? "Late" : "Present", late ? "Late arrival" : "On time", late, hours);

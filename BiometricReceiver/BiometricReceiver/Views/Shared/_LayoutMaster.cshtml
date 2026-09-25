@@ -71,14 +71,6 @@
                     <li><a href="/Main/TaskMgm"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Task Management</span></a></li>
                     <li><a href="/Main/ManagerProjects"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Project Management</span></a></li>
                     <li><a href="/Main/OrderTracking"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i><span>Shipment Tracking</span></a></li>
-                    <li class="manager-self-label"><span>MY SELF SERVICE</span></li>
-                    <li><a href="/Main/EmployeeAttendance"><i class="fa-regular fa-clock" aria-hidden="true"></i><span>My Attendance</span></a></li>
-                    <li><a href="/Main/FieldAttendance"><i class="fa-solid fa-location-dot" aria-hidden="true"></i><span>Mark Attendance</span></a></li>
-                    <li><a href="/Main/EmployeeLeaves"><i class="fa-regular fa-calendar-check" aria-hidden="true"></i><span>My Leave</span></a></li>
-                    <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user" aria-hidden="true"></i><span>My Profile</span></a></li>
-                    <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Salary Slip</span></a></li>
-                    <li><a asp-controller="Expense" asp-action="Index" asp-route-view="self"><i class="fa-solid fa-receipt" aria-hidden="true"></i><span>My Expense Claims</span></a></li>
-                    <li><a href="/Main/EmployeeAssets"><i class="fa-solid fa-laptop" aria-hidden="true"></i><span>Assets</span></a></li><li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns" aria-hidden="true"></i><span>My Bank Details</span></a></li>
                 }
                 else
                 {
@@ -100,16 +92,9 @@
                     <li><a href="/Main/UserSettings"><i class="fa-solid fa-user-gear" aria-hidden="true"></i><span>User Setting</span></a></li>
                     <li><a href="/Main/Reports"><i class="fa-solid fa-chart-column" aria-hidden="true"></i><span>Reports</span></a></li>
                     }
-                    <li><a href="/Main/Settings"><i class="fa-solid fa-gear" aria-hidden="true"></i><span>Settings</span></a></li>
                     @if (isHr)
                     {
-                        <li class="manager-self-label"><span>MY SELF SERVICE</span></li>
-                        <li><a href="/Main/EmployeeAttendance"><i class="fa-regular fa-clock"></i><span>My Attendance</span></a></li>
-                        <li><a href="/Main/EmployeeLeaves"><i class="fa-regular fa-calendar-check"></i><span>My Leave</span></a></li>
-                        <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user"></i><span>My Profile</span></a></li>
-                        <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar"></i><span>Salary Slip</span></a></li>
                         <li><a asp-controller="Expense" asp-action="Index"><i class="fa-solid fa-receipt" aria-hidden="true"></i><span>Expense Audit</span></a></li>
-                        <li><a href="/Main/EmployeeAssets"><i class="fa-solid fa-laptop" aria-hidden="true"></i><span>Assets</span></a></li><li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns"></i><span>My Bank Details</span></a></li>
                         <li><a href="/Main/BankUpdateRequests"><i class="fa-solid fa-building-circle-check"></i><span>Bank Update Requests</span>@if(pendingBankRequestCount>0){<b style="margin-left:auto;background:#ef4444;color:#fff;border-radius:999px;padding:3px 7px;font-size:11px">@pendingBankRequestCount</b>}</a></li>
                     }
                 }

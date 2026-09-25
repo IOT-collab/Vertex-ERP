@@ -16,6 +16,7 @@ public sealed class GeneratedSalarySlip
     public decimal Tds { get; set; }
     public decimal OtherDeductions { get; set; }
     public decimal LeaveDeduction { get; set; }
+    public decimal? SalaryDays { get; set; }
     public decimal ApprovedLeaveDays { get; set; }
     [MaxLength(300)] public string? DeductionNote { get; set; }
     [MaxLength(50)] public string? PfNumber { get; set; }

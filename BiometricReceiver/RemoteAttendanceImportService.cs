@@ -259,6 +259,9 @@ public sealed class RemoteAttendanceImportService : BackgroundService
             added++;
         }
         await db.SaveChangesAsync(cancellationToken);
+        // Resolve new biometric identities before this import page is reported complete.
+        // The background reconciler remains a retry path for delayed/unlinked punches.
+        await VertexERP.Services.BiometricEmployeeReconciliationService.ReconcileAsync(db, cancellationToken);
         return added;
     }
 

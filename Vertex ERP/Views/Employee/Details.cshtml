@@ -6,8 +6,21 @@
 <link href="~/css/AddEmpHrm.css" rel="stylesheet" asp-append-version="true" />
 
 <div class="hrms-page">
-    <div class="page-header"><div class="header-text"><h2>@Model.FullName</h2><p>@Model.EmployeeCode · @Model.Designation · @Model.Department</p></div></div>
+    <div class="page-header">
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+            @if (!string.IsNullOrWhiteSpace(Model.PhotoPath))
+            {
+                <img src="@Url.Content(Model.PhotoPath)" alt="@Model.FullName profile photo" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #334155;" />
+            }
+            <div class="header-text"><h2>@Model.FullName</h2><p>@Model.EmployeeCode · @Model.Designation · @Model.Department</p></div>
+        </div>
+    </div>
     <div class="form-container-wrapper">
+        @if (Model.IsBiometricProfilePending)
+        {
+            <p>Imported from biometric attendance. Employee details are pending.</p>
+            <a asp-controller="Hr" asp-action="HrAddEmp" asp-route-biometricEmployeeId="@Model.Id" class="btn-submit">Complete Profile</a>
+        }
         <div class="form-grid">
             <div class="form-main-section">
                 <div class="section-divider"><span>Personal Details</span></div>

@@ -96,6 +96,7 @@ builder.Services
         AllowAutoRedirect = true
     });
 
+builder.Services.AddHostedService<BiometricEmployeeReconciliationService>();
 builder.Services.AddSingleton<RemoteAttendanceImportService>();
 builder.Services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<RemoteAttendanceImportService>());
 

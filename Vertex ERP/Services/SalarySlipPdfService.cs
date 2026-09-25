@@ -23,8 +23,8 @@ public static class SalarySlipPdfService
         var label = new DateTime(year, month, 1).ToString("MMMM yyyy", CultureInfo.InvariantCulture).ToUpperInvariant();
         var content = new StringBuilder();
 
-        // The approved Aug Salary PDF is the full-page visual master.
-        if (template.Length > 0) content.Append("q 597 0 0 600 0 0 cm /Im1 Do Q\n");
+        // Keep only the company header from the reference image; exclude its sample body and CIN footer.
+        if (template.Length > 0) content.Append("q 0 525 597 75 re W n 597 0 0 600 0 0 cm /Im1 Do Q\n");
         void Fill(double x, double y, double w, double h, string colour = "1 1 1") => content.Append($"{colour} rg {x} {y} {w} {h} re f\n");
         void Text(double x, double y, string value, double size = 7.5, bool bold = false, string align = "L")
         {
@@ -36,15 +36,15 @@ public static class SalarySlipPdfService
         void Box(double x, double y, double w, double h) { Line(x, y, x + w, y); Line(x, y + h, x + w, y + h); Line(x, y, x, y + h); Line(x + w, y, x + w, y + h); }
 
         // Remove every sample value baked into the approved reference. Only its branded
-        // company header and CIN footer remain; the complete payslip body is drawn live.
-        Fill(0, 34, PageWidth, 491);
+        // company header remains; the complete payslip body is drawn live with no bottom CIN footer.
+        Fill(0, 0, PageWidth, 525);
 
         const double left = 56.7, right = 540.3, width = right - left;
         content.Append("0.027 0.063 0.184 rg 56.7 491 483.6 32 re f\n");
         content.Append($"1 1 1 rg BT /F2 12 Tf {CenteredX($"PAYSLIP FOR THE MONTH OF {label}", 12, true):0.##} 502 Td ({Escape($"PAYSLIP FOR THE MONTH OF {label}")}) Tj ET\n");
 
         var infoTop = 475d; var infoBottom = 380d; Box(left, infoBottom, width, infoTop - infoBottom); Line(303, infoBottom, 303, infoTop);
-        var leftInfo = new[] { ("Name", employee.FullName), ("Joining Date", employee.JoiningDate.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)), ("Designation", employee.Designation), ("Department", employee.Department), ("Effective Work Days", DateTime.DaysInMonth(year, month).ToString()), ("LOP", salary.ApprovedLeaveDays.ToString("0.##")) };
+        var leftInfo = new[] { ("Name", employee.FullName), ("Joining Date", employee.JoiningDate.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture)), ("Designation", employee.Designation), ("Department", employee.Department), ("Salary Days", salary.SalaryDays?.ToString("0.##", CultureInfo.InvariantCulture) ?? "Not recorded"), ("LOP", salary.ApprovedLeaveDays.ToString("0.##")) };
         var rightInfo = new[] { ("Employee No.", employee.EmployeeCode), ("Bank Name", bank?.BankName ?? "--"), ("Bank Account No.", bank == null ? "--" : $"XXXX XXXX {bank.AccountLastFour}"), ("PAN Number", bank?.PanNumber ?? "--"), ("PF No.", salary.PfNumber ?? "--"), ("PF UAN", salary.PfUan ?? bank?.UanNumber ?? "--") };
         for (var i = 0; i < 6; i++) { var y = 464 - i * 15.7; Text(63, y, leftInfo[i].Item1); Text(159, y, leftInfo[i].Item2, 7.7, true); Text(309, y, rightInfo[i].Item1); Text(410, y, rightInfo[i].Item2, 7.7, true); }
 
@@ -53,7 +53,7 @@ public static class SalarySlipPdfService
         foreach (var x in columns.Skip(1).SkipLast(1)) Line(x, tableBottom, x, tableTop);
         for (var i = 1; i < 6; i++) Line(left, tableTop - rowH * i, right, tableTop - rowH * i);
         Text((columns[0] + columns[1]) / 2, 359, "EARNINGS", 8, true, "C"); Text((columns[1] + columns[2]) / 2, 359, "MASTER", 8, true, "C"); Text((columns[2] + columns[3]) / 2, 359, "ACTUAL", 8, true, "C"); Text((columns[3] + columns[4]) / 2, 359, "DEDUCTIONS", 8, true, "C"); Text((columns[4] + columns[5]) / 2, 359, "ACTUAL", 8, true, "C");
-        var rows = new[] { ("BASIC", salary.BasicSalary, "PROVIDENT FUND", salary.ProvidentFund), ("HRA", salary.HouseRentAllowance, "PROFESSIONAL TAX", salary.ProfessionalTax), ("CONVEYANCE ALLOWANCE", salary.ConveyanceAllowance, "TDS", salary.Tds), ("SPECIAL ALLOWANCE", salary.SpecialAllowance, "OTHER / AMOUNT DED.", salary.OtherDeductions + salary.LeaveDeduction) };
+        var rows = new[] { ("BASIC", salary.BasicSalary, "PROVIDENT FUND", salary.ProvidentFund), ("HRA", salary.HouseRentAllowance, "ESIC", salary.ProfessionalTax), ("CONVEYANCE ALLOWANCE", salary.ConveyanceAllowance, "TDS", salary.Tds), ("SPECIAL ALLOWANCE", salary.SpecialAllowance, "OTHER / AMOUNT DED.", salary.OtherDeductions + salary.LeaveDeduction) };
         for (var i = 0; i < 4; i++) { var y = 339 - i * rowH; Text(64, y, rows[i].Item1, 7.2); Text(229, y, Money(rows[i].Item2), 7.2, false, "R"); Text(289, y, Money(rows[i].Item2), 7.2, false, "R"); Text(302, y, rows[i].Item3, 7.2); Text(531, y, Money(rows[i].Item4), 7.2, false, "R"); }
         Text(64, 261, "TOTAL EARNINGS: INR", 7.1, true); Text(229, 261, Money(salary.GrossSalary), 7.1, true, "R"); Text(289, 261, Money(salary.GrossSalary), 7.1, true, "R"); Text(302, 261, "TOTAL DEDUCTIONS: INR", 7.1, true); Text(531, 261, Money(salary.TotalDeductions), 7.1, true, "R");
 

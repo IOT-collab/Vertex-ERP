@@ -5,7 +5,9 @@
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 
     var s = Model.SelectedEmployee;
-    var date = Context.Request.Query["date"].ToString();
+    var date = Model.SelectedDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+    string Coordinates(decimal? latitude, decimal? longitude) =>
+        FormattableString.Invariant($"{latitude:F6},{longitude:F6}");
 }
 
 <style>
@@ -635,6 +637,25 @@
         color: #ffffff !important;
     }
 
+    /* These cards use the dark ERP shell; keep saved attendance readable. */
+    .location-page .punch-value,
+    .location-page .map-card-title,
+    .location-page .profile-name,
+    .location-page .punch-title {
+        color: #f1f5f9 !important;
+    }
+
+    .location-page .punch-label,
+    .location-page .profile-description,
+    .location-page .profile-contact,
+    .location-page .no-checkout {
+        color: #cbd5e1 !important;
+    }
+
+    .location-page .map-link { color: #93c5fd !important; }
+    .location-page .punch-value { min-width: 0; overflow-wrap: anywhere; }
+    .location-page .punch-row { font-size: 14px; line-height: 1.6; }
+
     .location-page .location-title {
         color: #ffffff !important;
     }
@@ -689,8 +710,9 @@
         </div>
 
         <p class="location-subtitle">
-            HR/Admin can see all employees and their field attendance location,
-            time, accuracy and selfie.
+            @(Model.IsManagerView ? "Your reporting team’s field attendance records." : "Field attendance records for all employees.")
+            View the site name, recorded GPS location, time (IST), accuracy and optional selfie.
+            Locations are captured at check-in and check-out, not continuously.
         </p>
 
     </div>
@@ -703,6 +725,7 @@
         <aside class="location-card employee-sidebar">
 
             <form class="date-form" method="get">
+                <input type="hidden" name="employeeId" value="@s?.EmployeeId" />
 
                 <input type="date"
                        name="date"
@@ -903,6 +926,7 @@
                             <div class="punch-body">
 
                                 <div class="punch-details">
+                                    <div class="punch-row"><span class="punch-label">Site:</span><span class="punch-value">@(s.CheckInSiteName ?? "Not provided")</span></div>
 
                                     <div class="punch-row">
 
@@ -947,7 +971,7 @@
 
                             <a class="map-link"
                                target="_blank"
-                               href="https://www.google.com/maps?q=@s.CheckInLatitude,@s.CheckInLongitude">
+                               rel="noopener noreferrer" href="https://www.google.com/maps?q=@Coordinates(s.CheckInLatitude,s.CheckInLongitude)">
 
                                 📍 Open location on map
 
@@ -1012,6 +1036,7 @@
                             <div class="punch-body">
 
                                 <div class="punch-details">
+                                    <div class="punch-row"><span class="punch-label">Site:</span><span class="punch-value">@(s.CheckOutSiteName ?? "Not provided")</span></div>
 
                                     <div class="punch-row">
 
@@ -1056,7 +1081,7 @@
 
                             <a class="map-link"
                                target="_blank"
-                               href="https://www.google.com/maps?q=@s.CheckOutLatitude,@s.CheckOutLongitude">
+                               rel="noopener noreferrer" href="https://www.google.com/maps?q=@Coordinates(s.CheckOutLatitude,s.CheckOutLongitude)">
 
                                 📍 Open location on map
 
@@ -1098,14 +1123,14 @@
                                 🗺️
                             </span>
 
-                            Location Map
+                            Recorded check-in location
 
                         </div>
 
 
                         <div class="map-wrapper">
 
-                            <iframe src="https://www.google.com/maps?q=@s.CheckInLatitude,@s.CheckInLongitude&output=embed"
+                            <iframe title="Recorded check-in location" src="https://www.google.com/maps?q=@Coordinates(s.CheckInLatitude,s.CheckInLongitude)&output=embed"
                                     loading="lazy"
                                     allowfullscreen>
                             </iframe>

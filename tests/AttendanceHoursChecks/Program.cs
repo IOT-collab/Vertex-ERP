@@ -35,5 +35,10 @@ Check("lunch included in total elapsed time", paired.CheckIn, paired.CheckOut, t
     "Late", true, "Late arrival", 510);
 
 Check("exact cutoff without checkout", At(9, 30), null, today, "Present", false, "On time", 0);
-Check("one second after cutoff", At(9, 30).AddSeconds(1), null, today, "Late", true, "Late arrival", 0);
+Check("09:30:01 remains present", At(9, 30).AddSeconds(1), null, today, "Present", false, "On time", 0);
+Check("last tick before 09:31 remains present", At(9, 31).AddTicks(-1), null, today, "Present", false, "On time", 0);
+Check("09:31:00 is late", At(9, 31), null, today, "Late", true, "Late arrival", 0);
+Check("09:31:01 is late", At(9, 31).AddSeconds(1), null, today, "Late", true, "Late arrival", 0);
+var onTimePunches = AttendanceRules.PairPunches(new[] { (At(9, 30).AddSeconds(59), (string?)"IN"), (At(18, 0), (string?)"OUT") });
+Check("evening checkout does not make an on-time employee late", onTimePunches.CheckIn, onTimePunches.CheckOut, today, "Present", false, "On time", (At(18, 0) - At(9, 30).AddSeconds(59)).TotalMinutes);
 Check("short attendance still present", At(9, 0), At(9, 1), today, "Present", false, "On time", 1);

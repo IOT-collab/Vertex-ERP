@@ -1,0 +1,90 @@
+@model VertexERP.Models.TeamProjectOverview
+@{
+    ViewData["Title"] = "Manager & Project Overview";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    ViewData["BackController"] = "Main";
+    ViewData["BackAction"] = "Hrms";
+    var projectsById = Model.Projects.ToDictionary(x => x.Id);
+    var employeesById = Model.Employees.ToDictionary(x => x.Id);
+    var assignmentsByEmployee = Model.Assignments.ToLookup(x => x.EmployeeId);
+    var assignmentsByProject = Model.Assignments.ToLookup(x => x.ProjectId);
+    var filteredEmployees = Model.Employees.Where(x => string.IsNullOrEmpty(Model.Department) || x.Department == Model.Department).ToList();
+}
+<link href="~/css/EmployeeDashboard.css" rel="stylesheet" asp-append-version="true" />
+<style>
+.team-overview details { padding:20px; border:1px solid #334155; border-radius:12px; background:#111827; margin-bottom:16px; }
+.team-overview summary {cursor:pointer;font-size:18px;font-weight:600;color:#e2e8f0;}
+.team-overview .team-meta {color:#94a3b8;margin:10px 0 18px;}
+.team-overview .team-actions {display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
+.team-overview .team-picker {display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;max-height:240px;overflow:auto;margin:16px 0;}
+.team-overview .team-picker label {display:flex;gap:8px;align-items:center;}
+.team-overview .team-tabs {display:flex;gap:12px;flex-wrap:wrap;}
+.team-overview .team-tabs a {text-decoration:none;}
+.team-overview .team-tabs [aria-current="page"] {outline:2px solid #60a5fa;}
+.team-overview .modern-table {min-width:650px;}
+</style>
+<div class="employee-dashboard-wrapper team-overview">
+    <div class="dashboard-header-card"><div><h2>Manager &amp; Project Overview</h2><p>Explore reporting teams and project assignments, including inactive employees.</p></div><a asp-controller="ProjectMgm" asp-action="ProjectCreation" class="btn-secondary">Create / View Projects</a></div>
+    @if (TempData["TeamMessage"] is string message) { <div class="employee-message" role="status">@message</div> }
+    <nav class="team-tabs" aria-label="Overview sections">
+        <a asp-action="Index" asp-route-tab="managers" class="btn-secondary" aria-current="@(Model.Tab == "managers" ? "page" : null)">Manager-wise Employees</a>
+        <a asp-action="Index" asp-route-tab="projects" class="btn-secondary" aria-current="@(Model.Tab == "projects" ? "page" : null)">Project-wise Employees</a>
+    </nav>
+    <form method="get" asp-action="Index" class="team-actions">
+        <input type="hidden" name="tab" value="@Model.Tab" />
+        <select name="managerId" class="employee-filter" aria-label="Manager"><option value="">All managers</option>@foreach(var manager in Model.Managers){<option value="@manager.Id" selected="@(Model.ManagerId == manager.Id)">@manager.FullName (@manager.EmployeeCode)</option>}</select>
+        <select name="projectId" class="employee-filter" aria-label="Project"><option value="">All projects</option>@foreach(var project in Model.Projects){<option value="@project.Id" selected="@(Model.ProjectId == project.Id)">@project.ProjectName (@project.ProjectCode)</option>}</select>
+        <select name="department" class="employee-filter" aria-label="Employee department"><option value="">All employee departments</option>@foreach(var department in Model.Employees.Select(x=>x.Department).Distinct().OrderBy(x=>x)){<option selected="@(Model.Department == department)">@department</option>}</select>
+        <button class="btn-secondary" type="submit">Filter</button><a asp-action="Index" asp-route-tab="@Model.Tab" class="btn-secondary">Clear</a>
+    </form>
+    @if (Model.Tab == "managers")
+    {
+        <p class="team-meta">Teams use each employee's Reporting Manager. Click a manager to see their team. Project filters show matching team members.</p>
+        var managers = Model.Managers.Where(x => !Model.ManagerId.HasValue || x.Id == Model.ManagerId).ToList();
+        @if (managers.Count == 0) { <p>No managers found.</p> }
+        @foreach (var manager in managers)
+        {
+            var wholeTeam = Model.Employees.Where(x=>x.ReportingManagerId == manager.Id).ToList();
+            var team = filteredEmployees.Where(x=>x.ReportingManagerId == manager.Id && (!Model.ProjectId.HasValue || assignmentsByEmployee[x.Id].Any(a=>a.ProjectId == Model.ProjectId))).ToList();
+            <details open="@(Model.ManagerId.HasValue)"><summary>@manager.FullName · @manager.EmployeeCode — @wholeTeam.Count employees</summary>
+            <p class="team-meta">@team.Count shown · @wholeTeam.Count(x=>x.IsActive) active · @wholeTeam.Count(x=>!x.IsActive) inactive</p>
+            <div class="table-responsive"><table class="modern-table"><thead><tr><th>Employee ID</th><th>Employee</th><th>Department</th><th>Status</th><th>Assigned Projects</th></tr></thead><tbody>
+                @foreach(var employee in team) {
+                    <tr><td>@employee.EmployeeCode</td><td><a asp-controller="Employee" asp-action="Details" asp-route-id="@employee.Id">@employee.FullName</a></td><td>@employee.Department</td><td>@(employee.IsActive ? "Active" : "Inactive")</td><td>
+                    @if(!assignmentsByEmployee[employee.Id].Any()){<span>Project not assigned</span>}
+                    @foreach(var assignment in assignmentsByEmployee[employee.Id]) { var project = projectsById[assignment.ProjectId]; <div><a asp-action="Index" asp-route-tab="projects" asp-route-projectId="@project.Id">@project.ProjectName (@project.ProjectCode)</a> · @project.Status</div> }
+                    </td></tr>
+                }
+                @if(team.Count == 0){<tr><td colspan="5">No employees match these filters.</td></tr>}
+            </tbody></table></div></details>
+        }
+        @if(!Model.ManagerId.HasValue){
+            var unassigned = filteredEmployees.Where(x=>!x.ReportingManagerId.HasValue && (!Model.ProjectId.HasValue || assignmentsByEmployee[x.Id].Any(a=>a.ProjectId == Model.ProjectId))).ToList();
+            <details><summary>Manager not assigned — @unassigned.Count employees</summary>@foreach(var employee in unassigned){<p><a asp-controller="Employee" asp-action="Edit" asp-route-id="@employee.Id">@employee.FullName · @employee.EmployeeCode</a> · @employee.Department</p>}</details>
+        }
+    }
+    else
+    {
+        <p class="team-meta">Manager filter selects the project's manager. Assignments are explicit; employees can belong to multiple projects.</p>
+        var projects = Model.Projects.Where(x=>(!Model.ProjectId.HasValue || x.Id == Model.ProjectId) && (!Model.ManagerId.HasValue || x.ManagerId == Model.ManagerId)).ToList();
+        @if(projects.Count == 0){<p>No projects match these filters.</p>}
+        @foreach(var project in projects){
+            var assignedIds = assignmentsByProject[project.Id].Select(x=>x.EmployeeId).ToHashSet();
+            var members = filteredEmployees.Where(x=>assignedIds.Contains(x.Id)).ToList();
+            <details open="@(Model.ProjectId.HasValue)"><summary>@project.ProjectName · @project.ProjectCode — @assignedIds.Count employees</summary>
+                <p class="team-meta">Manager: @(project.Manager?.FullName ?? "Not assigned") · @project.Status · @members.Count employees shown</p>
+                <div class="table-responsive"><table class="modern-table"><thead><tr><th>Employee ID</th><th>Employee</th><th>Department</th><th>Reporting Manager</th><th>Status</th><th>Assignment</th></tr></thead><tbody>
+                @foreach(var employee in members){
+                    <tr><td>@employee.EmployeeCode</td><td><a asp-controller="Employee" asp-action="Details" asp-route-id="@employee.Id">@employee.FullName</a></td><td>@employee.Department</td><td>@(employee.ReportingManagerId.HasValue && employeesById.TryGetValue(employee.ReportingManagerId.Value, out var manager) ? manager.FullName : "Not assigned")</td><td>@(employee.IsActive ? "Active" : "Inactive")</td><td><form method="post" asp-action="Remove"><input type="hidden" name="projectId" value="@project.Id"/><input type="hidden" name="employeeId" value="@employee.Id"/><button class="btn-secondary" type="submit">Remove</button></form></td></tr>
+                }
+                @if(members.Count == 0){<tr><td colspan="6">No assigned employees match these filters.</td></tr>}
+                </tbody></table></div>
+                <details><summary>Assign employees to this project</summary><form method="post" asp-action="Assign"><input type="hidden" name="projectId" value="@project.Id"/>
+                    <div class="team-picker">@foreach(var employee in Model.Employees.Where(x=>x.IsActive && !assignedIds.Contains(x.Id))){<label><input type="checkbox" name="employeeIds" value="@employee.Id"/> @employee.FullName · @employee.EmployeeCode · @employee.Department</label>}</div><button class="btn-primary-glow" type="submit">Assign Selected Employees</button>
+                </form></details>
+            </details>
+        }
+        var unassigned = filteredEmployees.Where(x=>!assignmentsByEmployee[x.Id].Any() && (!Model.ManagerId.HasValue || x.ReportingManagerId == Model.ManagerId)).ToList();
+        <details><summary>Project not assigned — @unassigned.Count employees</summary>@foreach(var employee in unassigned){<p>@employee.FullName · @employee.EmployeeCode · @employee.Department</p>}</details>
+    }
+</div>

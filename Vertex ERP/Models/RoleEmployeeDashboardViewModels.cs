@@ -53,13 +53,12 @@ public sealed class EmployeeLeaveViewModel
 {
     public Employee Employee { get; init; } = null!;
     public IReadOnlyList<LeaveRequest> Requests { get; init; } = Array.Empty<LeaveRequest>();
-    public int CasualUsed => UsedDays("Casual Leave");
-    public int SickUsed => UsedDays("Sick Leave");
-    public int EarnedUsed => UsedDays("Earned Leave");
-    public int CasualRemaining => Math.Max(0, 12 - CasualUsed);
-    public int SickRemaining => Math.Max(0, 8 - SickUsed);
-    public int EarnedRemaining => Math.Max(0, 12 - EarnedUsed);
-    private int UsedDays(string type) => Requests.Where(request => request.Status.Equals("Approved", StringComparison.OrdinalIgnoreCase) && request.LeaveType.Equals(type, StringComparison.OrdinalIgnoreCase)).Sum(request => request.ToDate.DayNumber - request.FromDate.DayNumber + 1);
+    public int Year { get; init; } = DateTime.Today.Year;
+    public IReadOnlyList<ManualLeaveBalance> Balances { get; init; } = Array.Empty<ManualLeaveBalance>();
+    public decimal TotalDays => Balances.Sum(x => x.TotalDays);
+    public decimal UsedDays => Balances.Sum(x => x.UsedDays);
+    public decimal PendingDays => VertexERP.Services.LeaveBalanceCalculator.Days(Requests, Year, "Pending");
+    public decimal RemainingDays => Balances.Sum(x => x.AvailableDays);
 }
 
 public sealed record EmployeeNotificationItem(int SourceId, string Title, string Detail, DateTime CreatedAt, string Type);
@@ -144,6 +143,8 @@ public sealed class ChangePasswordViewModel
 
 public sealed class FieldAttendanceViewModel
 {
+    public string? CheckInSiteName { get; init; }
+    public string? CheckOutSiteName { get; init; }
     public bool HasCheckedIn { get; init; }
     public bool HasCheckedOut { get; init; }
     public DateTime? CheckInTime { get; init; }
@@ -158,6 +159,8 @@ public sealed class FieldAttendanceViewModel
 
 public sealed class FieldAttendanceRequest
 {
+    [Required, StringLength(160)]
+    public string SiteName { get; set; } = string.Empty;
     [Required]
     public string Action { get; set; } = string.Empty;
     [Required, Range(-90, 90)]
@@ -173,6 +176,7 @@ public sealed class FieldAttendanceRequest
 
 public sealed class SiteEmployeeLocationViewModel
 {
+    public DateOnly SelectedDate { get; init; }
     public IReadOnlyList<SiteEmployeeLocationItem> Employees { get; init; } = Array.Empty<SiteEmployeeLocationItem>();
     public SiteEmployeeLocationItem? SelectedEmployee { get; init; }
     public bool IsManagerView { get; init; }
@@ -180,6 +184,8 @@ public sealed class SiteEmployeeLocationViewModel
 
 public sealed class SiteEmployeeLocationItem
 {
+    public string? CheckInSiteName { get; init; }
+    public string? CheckOutSiteName { get; init; }
     public int EmployeeId { get; init; }
     public string EmployeeName { get; init; } = string.Empty;
     public string EmployeeCode { get; init; } = string.Empty;

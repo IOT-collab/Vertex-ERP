@@ -24,9 +24,11 @@ public static class ModuleCatalog
         if (c is "biometricapi" or "zkadms") return null;
         if (c == "biometricdevices") return "attendance";
         if (c == "expense") return "expenses";
+        if (c == "leavebalances") return "leave";
+        if (c == "salarysliprevision") return "payroll";
         if (c == "taskmanagement") return "tasks";
         if (c == "projectmgm") return "projects";
-        if (c is "employee" or "employeedetails") return "hr";
+        if (c is "employee" or "employeedetails" or "teamoverview") return "hr";
         if (c is not ("main" or "hr")) return null;
         if (a.Contains("salary") || a.Contains("bank")) return "payroll";
         if (a.Contains("attendance") || a == "attendence" || a.Contains("locationtracking")) return "attendance";

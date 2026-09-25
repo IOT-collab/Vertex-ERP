@@ -15,17 +15,21 @@ public sealed class SalarySlipAdminViewModel
     public string? Department { get; init; }
     public int? EmployeeId { get; init; }
     public IReadOnlyList<string> Departments { get; init; } = Array.Empty<string>();
+    public bool CanGenerate { get; init; }
+    public IReadOnlyList<SalarySlipAdminRow> EmployeeOptions { get; init; } = Array.Empty<SalarySlipAdminRow>();
     public IReadOnlyList<SalarySlipAdminRow> Employees { get; init; } = Array.Empty<SalarySlipAdminRow>();
 }
 
 public sealed class SalarySlipAdminRow
 {
+    public int? SlipId { get; init; }
     public int EmployeeId { get; init; }
     public string EmployeeCode { get; init; } = string.Empty;
     public string EmployeeName { get; init; } = string.Empty;
     public string Department { get; init; } = string.Empty;
     public decimal GrossSalary { get; init; }
     public decimal StandardDeductions { get; init; }
+    public decimal? SalaryDays { get; init; }
     public decimal ApprovedLeaveDays { get; init; }
     public decimal LeaveDeduction { get; init; }
     public string? DeductionNote { get; init; }

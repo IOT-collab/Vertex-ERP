@@ -1,6 +1,8 @@
 @{
     ViewData["Title"] = "HRMS";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    ViewData["BackController"] = "Main";
+    ViewData["BackAction"] = "Dashboard";
 }
 
 <link href="~/css/Hrms.css" rel="stylesheet" asp-append-version="true" />
@@ -78,6 +80,13 @@
     <!-- ================= HR MODULES ================= -->
 
     <div class="module-grid">
+        @if (User.IsInRole("HR") || User.IsInRole("Admin"))
+        {
+            <div class="module-card">
+                <div class="module-content"><div class="icon">👥</div><h3>Manager &amp; Project Overview</h3><p>View every manager's team and project employee assignments.</p></div>
+                <a asp-controller="TeamOverview" asp-action="Index" class="btn-module-action">Open</a>
+            </div>
+        }
 
 
         <!-- Employee Management -->

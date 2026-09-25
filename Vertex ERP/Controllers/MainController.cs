@@ -577,7 +577,7 @@ namespace VertexERP.Controllers
                             ? "Manual Approved"
                             : "Biometric / Thumb";
                 var attendanceStatus = paired.CheckIn.HasValue
-                    ? TimeOnly.FromDateTime(paired.CheckIn.Value) > new TimeOnly(9, 30) ? "Late" : "Present"
+                    ? AttendanceRules.IsLateArrival(paired.CheckIn.Value) ? "Late" : "Present"
                     : "Absent";
                 days.Add(new EmployeeAttendanceDay(dateOnly, paired.CheckIn, paired.CheckOut, attendanceStatus, source));
             }
@@ -602,7 +602,7 @@ namespace VertexERP.Controllers
         {
             var employee = await LoadLoggedInEmployeeAsync();
             if (employee == null) return RedirectToAction(nameof(AccessDenied));
-            var today = DateTime.Today;
+            var today = FieldAttendanceClock.Now.Date;
             var logs = await _dbContext.AttendanceLogs.AsNoTracking()
                 .Where(log => log.EmployeeId == employee.Id && log.PunchTime >= today && log.PunchTime < today.AddDays(1)
                     && log.BiometricDevice.CommunicationMode == "Field")
@@ -613,6 +613,8 @@ namespace VertexERP.Controllers
             return View("FieldAttendanceLive", new FieldAttendanceViewModel
             {
                 HasCheckedIn = checkIn != null,
+                CheckInSiteName = checkIn?.FieldSiteName,
+                CheckOutSiteName = checkOut?.FieldSiteName,
                 HasCheckedOut = checkOut != null,
                 CheckInTime = checkIn?.PunchTime,
                 CheckOutTime = checkOut?.PunchTime,
@@ -630,6 +632,9 @@ namespace VertexERP.Controllers
         [Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> SubmitFieldAttendance([FromBody] FieldAttendanceRequest request)
         {
+            if (request == null) return BadRequest(new { message = "Attendance details are required." });
+            if (string.IsNullOrWhiteSpace(request.SiteName) || request.SiteName.Trim().Length > 160)
+                return BadRequest(new { message = "Enter the site or customer name (up to 160 characters)." });
             if (request.Action is not ("Check In" or "Check Out"))
                 return BadRequest(new { message = "Choose Check In or Check Out." });
             if (!request.Latitude.HasValue || !request.Longitude.HasValue || !request.AccuracyMetres.HasValue)
@@ -644,7 +649,8 @@ namespace VertexERP.Controllers
 
             var employee = await LoadLoggedInEmployeeAsync();
             if (employee == null) return Unauthorized();
-            var now = DateTime.Now;
+            var receivedAtUtc = DateTimeOffset.UtcNow;
+            var now = FieldAttendanceClock.IndiaTime(receivedAtUtc);
             var today = now.Date;
             var existingActions = await _dbContext.AttendanceLogs.AsNoTracking()
                 .Where(log => log.EmployeeId == employee.Id && log.PunchTime >= today && log.PunchTime < today.AddDays(1)
@@ -681,13 +687,17 @@ namespace VertexERP.Controllers
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
                 AccuracyMetres = request.AccuracyMetres,
+                FieldSiteName = request.SiteName.Trim(),
+                LocationCapturedAtUtc = request.CapturedAtUtc.Value.ToUniversalTime(),
+                ReceivedAtUtc = receivedAtUtc.UtcDateTime,
                 SelfiePath = selfiePath
             });
             await _dbContext.SaveChangesAsync();
             return Ok(new
             {
                 message = $"{request.Action} recorded with GPS at {now:dd MMM yyyy, hh:mm tt}.",
-                time = now.ToString("dd MMM yyyy, hh:mm tt"),
+                time = now.ToString("dd MMM yyyy, hh:mm tt") + " IST",
+                siteName = request.SiteName.Trim(),
                 latitude = request.Latitude.Value.ToString("F6"),
                 longitude = request.Longitude.Value.ToString("F6"),
                 accuracyMetres = request.AccuracyMetres.Value.ToString("F0"),
@@ -696,12 +706,15 @@ namespace VertexERP.Controllers
         }
 
         [Authorize(Roles = "Employee,User,Manager,HR")]
-        public async Task<IActionResult> EmployeeLeaves()
+        public async Task<IActionResult> EmployeeLeaves(int? year = null)
         {
+            var selectedYear = year ?? DateTime.Today.Year;
+            if (selectedYear is < 2000 or > 2100) return BadRequest();
             var employee = await LoadLoggedInEmployeeAsync();
             if (employee == null) return RedirectToAction(nameof(AccessDenied));
             var requests = await _dbContext.LeaveRequests.AsNoTracking().Where(request => request.EmployeeId == employee.Id).OrderByDescending(request => request.AppliedAtUtc).ToListAsync();
-            return View(new EmployeeLeaveViewModel { Employee = employee, Requests = requests });
+            var balances = await _dbContext.ManualLeaveBalances.AsNoTracking().Where(x => x.EmployeeId == employee.Id && x.Year == selectedYear).OrderBy(x => x.Category).ToListAsync();
+            return View(new EmployeeLeaveViewModel { Employee = employee, Requests = requests, Balances = balances, Year = selectedYear });
         }
 
         [Authorize(Roles = "Employee,User,Manager,HR")]
@@ -836,7 +849,7 @@ namespace VertexERP.Controllers
         [Authorize(Roles = "Admin,HR,Manager")]
         public async Task<IActionResult> LocationTracking(DateOnly? date, int? employeeId)
         {
-            var selectedDate = date ?? DateOnly.FromDateTime(DateTime.Today);
+            var selectedDate = date ?? DateOnly.FromDateTime(FieldAttendanceClock.Now);
             var start = selectedDate.ToDateTime(TimeOnly.MinValue);
             var end = start.AddDays(1);
             var employeesQuery = _dbContext.Employees.AsNoTracking().Where(employee => employee.IsActive);
@@ -872,6 +885,7 @@ namespace VertexERP.Controllers
                 {
                     EmployeeId = employee.Id, EmployeeName = employee.FullName, EmployeeCode = employee.EmployeeCode,
                     Department = employee.Department, Designation = employee.Designation,
+                    CheckInSiteName = checkIn?.FieldSiteName, CheckOutSiteName = checkOut?.FieldSiteName,
                     CheckInTime = checkIn?.PunchTime, CheckInLatitude = checkIn?.Latitude, CheckInLongitude = checkIn?.Longitude,
                     CheckInAccuracyMetres = checkIn?.AccuracyMetres, CheckInSelfiePath = checkIn?.SelfiePath,
                     CheckOutTime = checkOut?.PunchTime, CheckOutLatitude = checkOut?.Latitude, CheckOutLongitude = checkOut?.Longitude,
@@ -883,6 +897,7 @@ namespace VertexERP.Controllers
             return View("LocationTrackingLive", new SiteEmployeeLocationViewModel
             {
                 Employees = items,
+                SelectedDate = selectedDate,
                 SelectedEmployee = selected,
                 IsManagerView = isManagerOnlyView
             });
@@ -1020,7 +1035,7 @@ namespace VertexERP.Controllers
                 checkIn = pairedPunches.CheckIn?.ToString("hh:mm tt"),
                 checkOut = pairedPunches.CheckOut?.ToString("hh:mm tt"),
                 status = pairedPunches.CheckIn.HasValue
-                    ? TimeOnly.FromDateTime(pairedPunches.CheckIn.Value) > new TimeOnly(9, 30) ? "Late" : "Present"
+                    ? AttendanceRules.IsLateArrival(pairedPunches.CheckIn.Value) ? "Late" : "Present"
                     : "Absent"
             });
         }

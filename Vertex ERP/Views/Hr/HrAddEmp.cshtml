@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Add Employee";
+    ViewData["Title"] = Model.PendingBiometricEmployeeId.HasValue ? "Complete Employee Profile" : "Add Employee";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
 }
 
@@ -16,8 +16,8 @@
     <div class="page-header">
 
         <div class="header-content">
-            <h2>Add Employee</h2>
-            <p>Create a new employee profile and add employment details.</p>
+            <h2>@ViewData["Title"]</h2>
+            <p>@(Model.PendingBiometricEmployeeId.HasValue ? "Complete this biometric employee's details. Existing punches stay linked to this employee." : "Create a new employee profile and add employment details.")</p>
         </div>
 
     </div>
@@ -33,6 +33,7 @@
           enctype="multipart/form-data">
 
         @Html.AntiForgeryToken()
+        <input asp-for="PendingBiometricEmployeeId" type="hidden" />
         <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
 
 
@@ -140,6 +141,9 @@
                            placeholder="Enter employee ID (e.g. Vertex-22)"
                            required />
                     <span asp-validation-for="EmployeeId" class="field-validation"></span>
+                    <button type="button" id="checkEmployeeId" class="btn-cancel">Check Employee ID</button>
+                    <p id="employeeLookupNotice" role="status" aria-live="polite">Enter the same Employee ID used on the biometric machine, then check it to complete its profile.</p>
+                    <a id="existingEmployeeEdit" hidden>Edit Profile</a>
 
                 </div>
 
@@ -703,11 +707,12 @@
 
             const allowedTypes = [
                 "image/jpeg",
+                "image/jpg",
                 "image/png"
             ];
 
 
-            if (!allowedTypes.includes(file.type)) {
+            if (file.type && file.type !== "application/octet-stream" && !allowedTypes.includes(file.type)) {
 
                 alert(
                     "Please select a JPG, JPEG or PNG image."
@@ -835,4 +840,64 @@
         username.value = username.value.trim();
     });
 </script>
-```
+
+<script>
+(() => {
+    const code = document.getElementById('EmployeeId');
+    const pending = document.getElementById('PendingBiometricEmployeeId');
+    const notice = document.getElementById('employeeLookupNotice');
+    const edit = document.getElementById('existingEmployeeEdit');
+    const check = document.getElementById('checkEmployeeId');
+    const save = document.querySelector('.employee-form .btn-save');
+    let revision = 0;
+    code.addEventListener('input', () => {
+        revision++;
+        pending.value = '';
+        edit.hidden = true;
+        save.disabled = false;
+        save.textContent = 'Add Employee';
+        notice.textContent = 'Check Employee ID to find an existing biometric profile.';
+    });
+    async function lookup() {
+        const value = code.value.trim();
+        const current = ++revision;
+        pending.value = '';
+        edit.hidden = true;
+        if (!value) {
+            save.disabled = false;
+            save.textContent = 'Add Employee';
+            notice.textContent = 'Enter an Employee ID before checking.';
+            return;
+        }
+        save.disabled = true;
+        notice.textContent = 'Checking Employee ID…';
+        try {
+            const response = await fetch('@Url.Action("LookupEmployeeForOnboarding", "Hr")?employeeCode=' + encodeURIComponent(value), { credentials: 'same-origin', cache: 'no-store' });
+            if (!response.ok) throw new Error('Lookup failed');
+            const result = await response.json();
+            if (current !== revision) return;
+            notice.textContent = result.message;
+            save.disabled = result.status === 'existing' || result.status === 'ambiguous';
+            save.textContent = result.status === 'pending' ? 'Complete Employee Profile' : 'Add Employee';
+            if (result.status === 'pending') {
+                pending.value = result.employeeId;
+                code.value = result.employeeCode;
+            }
+            if (result.status === 'existing') {
+                edit.href = '@Url.Action("Edit", "Employee")?id=' + encodeURIComponent(result.employeeId);
+                edit.hidden = false;
+            }
+        } catch {
+            if (current !== revision) return;
+            notice.textContent = 'Could not check Employee ID. Please retry before saving.';
+            save.disabled = true;
+        }
+    }
+    check.addEventListener('click', lookup);
+    code.addEventListener('change', lookup);
+    if (pending.value) {
+        notice.textContent = 'Complete this biometric employee profile. Existing attendance will remain linked.';
+        save.textContent = 'Complete Employee Profile';
+    }
+})();
+</script>

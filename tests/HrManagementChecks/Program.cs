@@ -7,6 +7,17 @@ using VertexERP.Services;
 using VertexERP.Controllers;
 using Vertex_ERP.Controllers;
 
+if (args.Length == 2 && args[0] == "--leave-roster")
+{
+    await LeaveRosterCheck.Run(args[1]);
+    return;
+}
+if (args.Length == 2 && args[0] == "--field-web")
+{
+    await FieldAttendanceWebChecks.Run(args[1]);
+    return;
+}
+
 int passed = 0;
 void Check(bool condition, string name) { if (!condition) throw new Exception(name); Console.WriteLine("PASS " + name); passed++; }
 foreach (long size in new long[] { 3 * 1024 * 1024 - 1, 3 * 1024 * 1024, 3 * 1024 * 1024 + 1, 16 * 1024 * 1024 })
@@ -58,4 +69,6 @@ Check(typeof(HrController).GetMethod("DeleteDocument")!.IsDefined(typeof(HttpPos
 Check(typeof(HrController).GetMethod("DeleteDocument")!.IsDefined(typeof(ValidateAntiForgeryTokenAttribute), true), "Document deletion requires antiforgery token");
 foreach (var controller in new[] { typeof(HrController), typeof(EmployeeController) })
     Check(controller.GetCustomAttributes(typeof(AuthorizeAttribute), true).Cast<AuthorizeAttribute>().Any(attribute => attribute.Roles == "Admin,HR"), $"{controller.Name} restricted to HR/Admin");
+if (args.Length > 0) await EmployeeCreationChecks.Run(args[0], Check);
+await FieldAttendanceChecks.Run(args.Length > 0 ? args[0] : null, Check);
 Console.WriteLine($"{passed} checks passed.");

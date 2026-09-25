@@ -1,0 +1,55 @@
+{
+  "year": 2026,
+  "status": "Awaiting balance basis, blank-cell meanings and employee-ID matching; not applied",
+  "columns": ["Name", "EL", "CL", "ML", "EW"],
+  "companies": [
+    {
+      "name": "Vertex Power Controls Pvt Ltd",
+      "rows": [
+        ["Ashwani Yadav", "9", "4", "4", ""],
+        ["Bhram Singh", "10", "0", "NA", ""],
+        ["Dashrath Yadav", "18", "2", "NA", ""],
+        ["Dhnaveer Yadav", "9", "4", "NA", ""],
+        ["Gaurav Kashyap", "12", "2", "NA", ""],
+        ["Kapil", "17", "1", "NA", ""],
+        ["Kuldeep", "21", "1", "NA", ""],
+        ["Manoj Pantry", "19", "2", "NA", ""],
+        ["Naveen Chauhan", "23", "1", "4", ""],
+        ["Nihal", "10", "2", "NA", ""],
+        ["Prempal", "8", "1", "NA", ""],
+        ["Rahul Welder", "21", "4", "NA", ""],
+        ["Ranveer Yadav", "12", "4", "NA", ""],
+        ["Sakshi Katariya", "12", "1", "NA", ""],
+        ["Sanoj", "16", "0", "NA", ""],
+        ["Sonali Kushwaha", "6", "0", "NA", ""],
+        ["Sonu", "13", "1", "NA", ""],
+        ["Sushil Kumar Tyagi", "52", "1", "2", ""],
+        ["Updesh", "9", "0", "NA", ""],
+        ["Yuvraj Singh", "19", "1", "NA", ""]
+      ]
+    },
+    {
+      "name": "Vertex Automation System Pvt Ltd",
+      "rows": [
+        ["Amit Bhati", "28", "3", "NA", "0"],
+        ["Bani Singh", "17", "", "NA", "0"],
+        ["Chandra Bhan Singh", "50", "2", "NA", "0"],
+        ["Chetan Sharma", "6", "1", "NA", "0"],
+        ["Gaurav Anand", "33", "2", "5", "0"],
+        ["Krishna", "8", "1", "5", "0"],
+        ["Kush", "14", "1", "NA", "0"],
+        ["Pankaj Awasthi", "22", "1", "NA", "0"],
+        ["Rajkumar", "10", "3", "NA", "0"],
+        ["Rajkumar Sales", "14", "1", "NA", "0"],
+        ["Rishabh", "16", "2", "NA", "0"],
+        ["Sanjeev", "8", "0", "NA", "0"],
+        ["Sarvesh", "12", "0", "NA", "0"],
+        ["Sattya", "26", "1", "NA", "0"],
+        ["Shreeram Sharma", "10", "0", "NA", "0"],
+        ["Tej Pratap", "11", "2", "NA", "0"],
+        ["Vikram", "9", "2", "NA", "0"],
+        ["Wasimuddin", "4", "0", "2", "0"]
+      ]
+    }
+  ]
+}

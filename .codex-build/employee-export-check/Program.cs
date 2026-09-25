@@ -1,0 +1,10 @@
+using System.Text;
+using VertexERP.Models;
+using VertexERP.Services;
+var slip=new GeneratedSalarySlip { Year=2026,Month=9,BasicSalary=20000,ProvidentFund=1000,ProfessionalTax=150,Tds=200,OtherDeductions=50 };
+var employee=new Employee { FullName="Salary Check",EmployeeCode="TEST",Department="Test",Designation="Test",JoiningDate=new DateOnly(2026,1,1) };
+var pdf=SalarySlipPdfService.Create(employee,slip,null);
+var text=Encoding.Latin1.GetString(pdf);
+if(!text.Contains("(ESIC)") || text.Contains("PROFESSIONAL TAX"))throw new Exception("Deduction label is incorrect");
+if(!text.Contains("(150.00)") || slip.TotalDeductions!=1400 || slip.NetSalary!=18600)throw new Exception("Deduction amount or net pay changed");
+Console.WriteLine("PASS: downloaded PDF uses ESIC, amount is 150.00, deduction total/net salary remain correct.");

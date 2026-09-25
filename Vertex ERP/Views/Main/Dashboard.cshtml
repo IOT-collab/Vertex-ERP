@@ -1,4 +1,4 @@
-﻿@*
+@*
     ASP.NET Core MVC ERP Master Dashboard View
 *@
 
@@ -247,17 +247,6 @@
                     }
                 </div>
 
-                <div class="chart-labels">
-
-                    <span>Mon</span>
-                    <span>Tue</span>
-                    <span>Wed</span>
-                    <span>Thu</span>
-                    <span>Fri</span>
-                    <span>Sat</span>
-
-                </div>
-
             </div>
 
         </div>
@@ -281,15 +270,21 @@
             </div>
 
 
-            <div class="bar-chart"
+            <div class="department-load-list"
                  aria-label="Department workload bar chart">
-
+                @{ var maximumDepartmentCount = Math.Max(1, Model.Departments.Select(item => item.Count).DefaultIfEmpty(0).Max()); }
                 @foreach (var department in Model.Departments)
                 {
-                    var height = Model.TotalWorkforce == 0 ? 4 : Math.Max(4, department.Count * 100 / Model.TotalWorkforce);
-                    <div class="bar-item" style="--bar-color:#3b82f6;--bar-height:@height%"><span class="bar-value">@department.Count</span><span class="bar-fill"></span><small title="@department.Name">@department.Name</small></div>
+                    var width = department.Count * 100 / maximumDepartmentCount;
+                    <div class="department-load-item">
+                        <div class="department-load-heading"><span>@department.Name</span><strong>@department.Count</strong></div>
+                        <div class="department-load-track" aria-hidden="true"><span style="width:@width%"></span></div>
+                    </div>
                 }
-
+                @if (!Model.Departments.Any())
+                {
+                    <p class="sub-text">No departments available.</p>
+                }
             </div>
 
         </div>
@@ -624,6 +619,8 @@
          BOTTOM MANAGEMENT
     ========================== -->
 
+    @if (User.IsInRole("Admin"))
+    {
     <section class="bottom-row">
 
 
@@ -665,103 +662,12 @@
         </div>
         <script src="~/js/admin-audit.js" asp-append-version="true"></script>
         }
-        <!-- =====================
-             QUICK OPERATIONS
-        ====================== -->
-
-        <div class="quick-box">
-
-            <h3>
-                <i class="fa-solid fa-bolt section-icon" aria-hidden="true"></i> Instant ERP Operations
-            </h3>
-
-            <p class="sub-text">
-                Frequent enterprise shortcuts
-            </p>
 
 
-            <div class="action-flex">
 
-
-                <button type="button"
-                        class="btn-neo-primary">
-
-                    <span class="btn-icon">
-                        <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
-                    </span>
-
-                    Create Employee
-
-                </button>
-
-
-                <button type="button"
-                        class="btn-neo-secondary">
-
-                    <span class="btn-icon">
-                        <i class="fa-solid fa-stopwatch" aria-hidden="true"></i>
-                    </span>
-
-                    Log Attendance
-
-                </button>
-
-
-                <button type="button"
-                        class="btn-neo-secondary">
-
-                    <span class="btn-icon">
-                        <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i>
-                    </span>
-
-                    Raise PO Request
-
-                </button>
-
-
-                <button type="button"
-                        class="btn-neo-secondary">
-
-                    <span class="btn-icon">
-                        <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
-                    </span>
-
-                    Rebuild Payroll
-
-                </button>
-
-
-                <button type="button"
-                        class="btn-neo-secondary">
-
-                    <span class="btn-icon">
-                        <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
-                    </span>
-
-                    Generate Report
-
-                </button>
-
-
-                <button type="button"
-                        class="btn-neo-secondary">
-
-                    <span class="btn-icon">
-                        <i class="fa-solid fa-download" aria-hidden="true"></i>
-                    </span>
-
-                    Export Schema
-
-                </button>
-
-
-            </div>
-
-        </div>
 
     </section>
-
-
+    }
     <!-- =========================
          VERTEX AI ASSISTANT
     ========================== -->

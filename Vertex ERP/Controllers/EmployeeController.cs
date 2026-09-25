@@ -48,6 +48,8 @@ public class EmployeeController : Controller
             query = query.Where(employee => employee.IsActive);
         else if (string.Equals(status, "inactive", StringComparison.OrdinalIgnoreCase))
             query = query.Where(employee => !employee.IsActive);
+        else if (string.Equals(status, "pending", StringComparison.OrdinalIgnoreCase))
+            query = query.Where(employee => employee.IsBiometricProfilePending);
 
         var model = new EmployeeDirectoryViewModel
         {
@@ -63,6 +65,19 @@ public class EmployeeController : Controller
         };
 
         return View("~/Views/Hr/EmployeeDashboard.cshtml", model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DownloadEmployeeList()
+    {
+        var employees = await _dbContext.Employees.AsNoTracking()
+            .Include(employee => employee.ReportingManager)
+            .OrderBy(employee => employee.FirstName).ThenBy(employee => employee.LastName)
+            .ThenBy(employee => employee.EmployeeCode).ToListAsync();
+
+        return File(AdminReportExcelService.CreateEmployeeList(employees),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            $"Employee-List-{DateTime.Today:yyyy-MM-dd}.xlsx");
     }
 
     [HttpGet]
@@ -150,18 +165,24 @@ public class EmployeeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(EmployeeFormViewModel model)
+    public async Task<IActionResult> Create(EmployeeFormViewModel model)
     {
         ValidateUniqueFields(model);
+        var photoExtension = await ValidatePhotoAsync(model.EmployeePhoto);
         if (!ModelState.IsValid)
             return View("~/Views/Main/AddEmpHrm.cshtml", PopulateManagers(model));
 
         var employee = new Employee();
         ApplyForm(employee, model);
+        if (model.EmployeePhoto != null && photoExtension != null)
+            employee.PhotoPath = await SavePhotoAsync(model.EmployeePhoto, photoExtension);
         _dbContext.Employees.Add(employee);
 
         if (!TrySave("The employee could not be created because the data conflicts with an existing record."))
+        {
+            DeletePhotoIfPresent(employee.PhotoPath);
             return View("~/Views/Main/AddEmpHrm.cshtml", PopulateManagers(model));
+        }
 
         TempData["EmployeeMessage"] = "Employee created successfully.";
         return RedirectToAction(nameof(Index));
@@ -198,6 +219,7 @@ public class EmployeeController : Controller
         if (employee == null) return NotFound();
 
         ValidateUniqueFields(model);
+        model.PhotoPath = employee.PhotoPath;
         var photoExtension = await ValidatePhotoAsync(model.EmployeePhoto);
         var loginAccount = await _dbContext.AppUsers.FirstOrDefaultAsync(user => user.EmployeeId == id);
         model.HasExistingAccount = loginAccount != null;
@@ -223,6 +245,7 @@ public class EmployeeController : Controller
             employee.PhotoPath = newPhotoPath;
         }
         ApplyForm(employee, model, preserveEmployeeCode: false);
+        employee.IsBiometricProfilePending = false;
         employee.UpdatedDate = DateTime.UtcNow;
 
         if (updateCredentials)
@@ -294,6 +317,7 @@ public class EmployeeController : Controller
             await executionStrategy.ExecuteAsync(async () =>
             {
                 await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+                await _dbContext.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock({BiometricEmployeeReconciliationService.LockId})");
                 var employee = await _dbContext.Employees.FirstOrDefaultAsync(item => item.Id == id);
                 if (employee == null) return;
 
@@ -328,6 +352,9 @@ public class EmployeeController : Controller
                 }
 
                 var deviceMappings = await _dbContext.EmployeeDeviceMappings.Where(mapping => mapping.EmployeeId == id).ToListAsync();
+                foreach (var code in deviceMappings.Select(x => x.DeviceUserId.Trim().ToUpperInvariant()).Distinct())
+                    if (!await _dbContext.BiometricEmployeeExclusions.AnyAsync(x => x.DeviceUserCode == code))
+                        _dbContext.BiometricEmployeeExclusions.Add(new BiometricEmployeeExclusion { DeviceUserCode = code });
                 var attendanceLogs = await _dbContext.AttendanceLogs.Where(log => log.EmployeeId == id).ToListAsync();
                 var employeeTasks = await _dbContext.WorkTasks.Where(task => task.ManagerId == id || task.AssigneeId == id).ToListAsync();
                 var employeeAssets = await _dbContext.EmployeeAssets.Where(asset => asset.EmployeeId == id).ToListAsync();
@@ -502,7 +529,7 @@ public class EmployeeController : Controller
         }
         var header = new byte[8];
         await using var stream = photo.OpenReadStream();
-        var count = await stream.ReadAsync(header.AsMemory(0, header.Length));
+        var count = await stream.ReadAtLeastAsync(header.AsMemory(), header.Length, throwOnEndOfStream: false);
         var jpeg = count >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF;
         var png = count >= 8 && header.SequenceEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A });
         if (jpeg) return ".jpg";

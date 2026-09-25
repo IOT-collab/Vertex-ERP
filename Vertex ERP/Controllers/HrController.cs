@@ -41,7 +41,7 @@ namespace Vertex_ERP.Controllers
 
         public IActionResult EmpLeaveManagement()
         {
-            return View();
+            return RedirectToAction("Index", "LeaveBalances");
         }
 
         public IActionResult EmpPayroll()
@@ -71,43 +71,117 @@ namespace Vertex_ERP.Controllers
 
         public async Task<IActionResult> SalarySlips(int? year, int? month, string? department, int? employeeId)
         {
-            var selectedYear = year is >= 2020 and <= 2100 ? year.Value : DateTime.Today.Year;
-            var selectedMonth = month is >= 1 and <= 12 ? month.Value : DateTime.Today.Month;
+            var previous = DateTime.Today.AddMonths(-1);
+            var selectedYear = year is >= 2020 and <= 2100 ? year.Value : previous.Year;
+            var selectedMonth = month is >= 1 and <= 12 ? month.Value : previous.Month;
             var periodStart = new DateOnly(selectedYear, selectedMonth, 1);
             var periodEnd = periodStart.AddMonths(1).AddDays(-1);
             var query = _dbContext.Employees.AsNoTracking().Where(x => x.IsActive);
             if (!string.IsNullOrWhiteSpace(department)) query = query.Where(x => x.Department == department);
-            if (employeeId.HasValue) query = query.Where(x => x.Id == employeeId.Value);
             var employees = await query.OrderBy(x => x.Department).ThenBy(x => x.FullName).ToListAsync();
             var ids = employees.Select(x => x.Id).ToList();
             var salaries = await _dbContext.EmployeeSalaryDetails.AsNoTracking().Where(x => ids.Contains(x.EmployeeId) && x.IsActive).ToDictionaryAsync(x => x.EmployeeId);
             var slips = await _dbContext.GeneratedSalarySlips.AsNoTracking().Where(x => ids.Contains(x.EmployeeId) && x.Year == selectedYear && x.Month == selectedMonth).ToDictionaryAsync(x => x.EmployeeId);
             var leaves = await _dbContext.LeaveRequests.AsNoTracking().Where(x => ids.Contains(x.EmployeeId) && x.Status == "Approved" && x.FromDate <= periodEnd && x.ToDate >= periodStart).ToListAsync();
-            decimal LeaveDays(int id) => leaves.Where(x => x.EmployeeId == id).Sum(x => (decimal)(x.ToDate < periodEnd ? x.ToDate : periodEnd).DayNumber - (x.FromDate > periodStart ? x.FromDate : periodStart).DayNumber + 1);
-            var rows = employees.Where(x => salaries.ContainsKey(x.Id)).Select(x => { var salary = salaries[x.Id]; slips.TryGetValue(x.Id, out var slip); return new SalarySlipAdminRow { EmployeeId=x.Id, EmployeeCode=x.EmployeeCode, EmployeeName=x.FullName, Department=x.Department, GrossSalary=salary.GrossSalary, StandardDeductions=salary.TotalDeductions, ApprovedLeaveDays=LeaveDays(x.Id), LeaveDeduction=slip?.LeaveDeduction ?? 0, DeductionNote=slip?.DeductionNote, IsGenerated=slip != null, GeneratedAtUtc=slip?.GeneratedAtUtc }; }).ToList();
-            return View(new SalarySlipAdminViewModel { Year=selectedYear, Month=selectedMonth, Department=department, EmployeeId=employeeId, Departments=await _dbContext.Employees.AsNoTracking().Where(x=>x.IsActive).Select(x=>x.Department).Distinct().OrderBy(x=>x).ToListAsync(), Employees=rows });
+            var rows = employees.Where(x => salaries.ContainsKey(x.Id) || slips.ContainsKey(x.Id)).Select(x =>
+            {
+                salaries.TryGetValue(x.Id, out var salary);
+                slips.TryGetValue(x.Id, out var slip);
+                return new SalarySlipAdminRow
+                {
+                    EmployeeId = x.Id, EmployeeCode = x.EmployeeCode, EmployeeName = x.FullName, Department = x.Department,
+                    GrossSalary = slip?.GrossSalary ?? salary!.GrossSalary,
+                    StandardDeductions = slip != null ? slip.TotalDeductions - slip.LeaveDeduction : salary!.TotalDeductions,
+                    ApprovedLeaveDays = slip?.ApprovedLeaveDays ?? leaves.Where(l => l.EmployeeId == x.Id).Sum(l => (decimal)(l.ToDate < periodEnd ? l.ToDate : periodEnd).DayNumber - (l.FromDate > periodStart ? l.FromDate : periodStart).DayNumber + 1),
+                    SalaryDays = slip != null ? slip.SalaryDays : null,
+                    LeaveDeduction = slip?.LeaveDeduction ?? 0, DeductionNote = slip?.DeductionNote,
+                    SlipId = slip?.Id, IsGenerated = slip != null, GeneratedAtUtc = slip?.GeneratedAtUtc
+                };
+            }).ToList();
+            return View(new SalarySlipAdminViewModel
+            {
+                Year = selectedYear, Month = selectedMonth, Department = department, EmployeeId = employeeId,
+                CanGenerate = selectedYear == previous.Year && selectedMonth == previous.Month,
+                Departments = await _dbContext.Employees.AsNoTracking().Where(x => x.IsActive).Select(x => x.Department).Distinct().OrderBy(x => x).ToListAsync(),
+                EmployeeOptions = rows,
+                Employees = rows.Where(x => !employeeId.HasValue || x.EmployeeId == employeeId).ToList()
+            });
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> GenerateSalarySlips(int year, int month, List<int> employeeIds, string? department)
+        public async Task<IActionResult> GenerateSalarySlips(int year, int month, List<int> employeeIds, string? department, int? employeeId = null, int? singleEmployeeId = null)
         {
-            if (year is < 2020 or > 2100 || month is < 1 or > 12 || employeeIds.Count == 0) { TempData["SalaryError"] = "Select at least one employee and a valid month."; return RedirectToAction(nameof(SalarySlips), new { year, month, department }); }
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return Forbid();
-            var salaries = await _dbContext.EmployeeSalaryDetails.Where(x => employeeIds.Contains(x.EmployeeId) && x.IsActive).ToListAsync();
-            var existing = await _dbContext.GeneratedSalarySlips.Where(x => employeeIds.Contains(x.EmployeeId) && x.Year == year && x.Month == month).ToDictionaryAsync(x => x.EmployeeId);
-            foreach (var salary in salaries)
+            IActionResult Back() => RedirectToAction(nameof(SalarySlips), new { year, month, department, employeeId });
+            var previous = DateTime.Today.AddMonths(-1);
+            if (year != previous.Year || month != previous.Month)
             {
-                var deductionText = Request.Form[$"leaveDeduction_{salary.EmployeeId}"].FirstOrDefault();
-                decimal.TryParse(deductionText, NumberStyles.Number, CultureInfo.InvariantCulture, out var leaveDeduction);
-                leaveDeduction = Math.Max(0, Math.Min(leaveDeduction, salary.GrossSalary));
-                decimal.TryParse(Request.Form[$"leaveDays_{salary.EmployeeId}"].FirstOrDefault(), NumberStyles.Number, CultureInfo.InvariantCulture, out var leaveDays);
-                var note = Request.Form[$"deductionNote_{salary.EmployeeId}"].FirstOrDefault()?.Trim();
-                if (!existing.TryGetValue(salary.EmployeeId, out var slip)) { slip = new GeneratedSalarySlip { EmployeeId=salary.EmployeeId, Year=year, Month=month }; _dbContext.GeneratedSalarySlips.Add(slip); }
-                slip.BasicSalary=salary.BasicSalary; slip.HouseRentAllowance=salary.HouseRentAllowance; slip.ConveyanceAllowance=salary.ConveyanceAllowance; slip.SpecialAllowance=salary.SpecialAllowance; slip.ProvidentFund=salary.ProvidentFund; slip.ProfessionalTax=salary.ProfessionalTax; slip.Tds=salary.Tds; slip.OtherDeductions=salary.OtherDeductions; slip.PfNumber=salary.PfNumber; slip.PfUan=salary.PfUan; slip.LeaveDeduction=leaveDeduction; slip.ApprovedLeaveDays=Math.Max(0, leaveDays); slip.DeductionNote=string.IsNullOrWhiteSpace(note)?null:note[..Math.Min(note.Length,300)]; slip.GeneratedByUserId=userId; slip.GeneratedAtUtc=DateTime.UtcNow; slip.UpdatedAtUtc=DateTime.UtcNow;
+                TempData["SalaryError"] = "Salary slips can only be generated for the previous month.";
+                return Back();
             }
-            await _dbContext.SaveChangesAsync();
-            TempData["SalaryMessage"] = $"{salaries.Count} salary slip(s) generated/updated. Employees can now view them.";
-            return RedirectToAction(nameof(SalarySlips), new { year, month, department });
+            if (singleEmployeeId.HasValue) employeeIds = new List<int> { singleEmployeeId.Value };
+            if (!ModelState.IsValid || employeeIds.Count == 0)
+            {
+                TempData["SalaryError"] = "Select at least one employee and enter valid values.";
+                return Back();
+            }
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return Forbid();
+            var ids = employeeIds.Distinct().ToList();
+            var salaries = await _dbContext.EmployeeSalaryDetails.Include(x => x.Employee)
+                .Where(x => ids.Contains(x.EmployeeId) && x.IsActive && x.Employee.IsActive
+                    && (department == null || department == "" || x.Employee.Department == department)
+                    && (!employeeId.HasValue || x.EmployeeId == employeeId.Value)).ToListAsync();
+            if (salaries.Count != ids.Count)
+            {
+                TempData["SalaryError"] = "The selection contains employees outside the filter or without active salary details. Refresh and select again.";
+                return Back();
+            }
+            var existing = await _dbContext.GeneratedSalarySlips.AsNoTracking()
+                .Where(x => ids.Contains(x.EmployeeId) && x.Year == year && x.Month == month).Select(x => x.EmployeeId).ToListAsync();
+            var start = new DateOnly(year, month, 1);
+            var end = start.AddMonths(1).AddDays(-1);
+            var leaves = await _dbContext.LeaveRequests.AsNoTracking().Where(x => ids.Contains(x.EmployeeId) && x.Status == "Approved" && x.FromDate <= end && x.ToDate >= start).ToListAsync();
+            var pending = new List<GeneratedSalarySlip>();
+            foreach (var salary in salaries.Where(x => !existing.Contains(x.EmployeeId)))
+            {
+                bool Number(string key, out decimal value) => decimal.TryParse(Request.Form[key].FirstOrDefault(), NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out value);
+                var note = Request.Form[$"deductionNote_{salary.EmployeeId}"].FirstOrDefault()?.Trim();
+                if (!Number($"salaryDays_{salary.EmployeeId}", out var days) || days < 0 || days > end.Day || decimal.Round(days, 2) != days
+                    || !Number($"leaveDeduction_{salary.EmployeeId}", out var deduction) || deduction < 0 || deduction > salary.GrossSalary || decimal.Round(deduction, 2) != deduction
+                    || note?.Length > 300)
+                {
+                    TempData["SalaryError"] = $"Enter valid salary days (0–{end.Day}) and deduction for {salary.Employee.FullName}. No slips were generated.";
+                    return Back();
+                }
+                pending.Add(new GeneratedSalarySlip
+                {
+                    EmployeeId = salary.EmployeeId, Year = year, Month = month, SalaryDays = days,
+                    BasicSalary = salary.BasicSalary, HouseRentAllowance = salary.HouseRentAllowance,
+                    ConveyanceAllowance = salary.ConveyanceAllowance, SpecialAllowance = salary.SpecialAllowance,
+                    ProvidentFund = salary.ProvidentFund, ProfessionalTax = salary.ProfessionalTax,
+                    Tds = salary.Tds, OtherDeductions = salary.OtherDeductions, PfNumber = salary.PfNumber, PfUan = salary.PfUan,
+                    LeaveDeduction = deduction, DeductionNote = string.IsNullOrWhiteSpace(note) ? null : note,
+                    ApprovedLeaveDays = leaves.Where(x => x.EmployeeId == salary.EmployeeId).Sum(x => (decimal)(x.ToDate < end ? x.ToDate : end).DayNumber - (x.FromDate > start ? x.FromDate : start).DayNumber + 1),
+                    GeneratedByUserId = userId, GeneratedAtUtc = DateTime.UtcNow, UpdatedAtUtc = DateTime.UtcNow
+                });
+            }
+            if (pending.Count == 0)
+            {
+                TempData["SalaryError"] = "The selected salary slips already exist. Use Revise to correct a generated slip.";
+                return Back();
+            }
+            _dbContext.GeneratedSalarySlips.AddRange(pending);
+            try
+            {
+                // A single atomic save plus the employee/year/month unique index prevents duplicate generation.
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException exception) when (exception.InnerException is Npgsql.PostgresException { SqlState: "23505" })
+            {
+                TempData["SalaryError"] = "A selected slip was generated by another request. Refresh and select the remaining employees. Existing slips were not changed.";
+                return Back();
+            }
+            TempData["SalaryMessage"] = $"{pending.Count} salary slip(s) generated. {existing.Count} already generated slip(s) left unchanged.";
+            return Back();
         }
 
         [HttpPost, ValidateAntiForgeryToken]
@@ -404,7 +478,7 @@ namespace Vertex_ERP.Controllers
                 continuation.DrawString("COMPENSATION STRUCTURE", titleFont, ink, new XRect(left, pageY, right - left, 22), XStringFormats.TopCenter);
                 pageY += 38;
                 var earnings = new[] { ("Basic", model.BasicSalary ?? 0m), ("HRA", model.HouseRentAllowance ?? 0m), ("Conveyance Allowance", model.ConveyanceAllowance ?? 0m), ("Special Allowance", model.SpecialAllowance ?? 0m) };
-                var deductions = new[] { ("Provident Fund", model.ProvidentFund ?? 0m), ("Professional Tax", model.ProfessionalTax ?? 0m), ("TDS", model.Tds ?? 0m), ("Other Deductions", model.OtherDeductions ?? 0m) };
+                var deductions = new[] { ("Provident Fund", model.ProvidentFund ?? 0m), ("ESIC", model.ProfessionalTax ?? 0m), ("TDS", model.Tds ?? 0m), ("Other Deductions", model.OtherDeductions ?? 0m) };
                 var totalSalary = earnings.Sum(row => row.Item2) - deductions.Sum(row => row.Item2);
                 DrawSalaryTable(left, pageY, 235, "EARNINGS", earnings, null);
                 DrawSalaryTable(left + 246, pageY, 235, "DEDUCTIONS", deductions, "TOTAL DEDUCTIONS");
@@ -850,11 +924,48 @@ namespace Vertex_ERP.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> HrAddEmp()
+        public async Task<IActionResult> HrAddEmp(int? biometricEmployeeId = null)
         {
             var model = new HrAddEmployeeViewModel();
+            if (biometricEmployeeId.HasValue)
+            {
+                var employee = await _dbContext.Employees.SingleOrDefaultAsync(x => x.Id == biometricEmployeeId.Value);
+                if (employee == null) return NotFound();
+                if (!await CanCompleteBiometricProfileAsync(employee))
+                    return RedirectToAction("Edit", "Employee", new { id = employee.Id });
+                model.PendingBiometricEmployeeId = employee.Id;
+                model.EmployeeId = employee.EmployeeCode;
+                model.JoiningDate = employee.JoiningDate;
+            }
             ApplyEmployeeExtraDrafts(model);
             return View(await PopulateManagersAsync(model));
+        }
+
+        private async Task<List<Employee>> FindEmployeeByBiometricCodeAsync(string code) =>
+            await _dbContext.Employees.Where(x => x.EmployeeCode.ToUpper() == code ||
+                _dbContext.EmployeeDeviceMappings.Any(m => m.EmployeeId == x.Id && m.DeviceUserId.ToUpper() == code))
+                .Take(2).ToListAsync();
+
+        private async Task<bool> CanCompleteBiometricProfileAsync(Employee employee) =>
+            employee.IsBiometricProfilePending && employee.IsActive &&
+            !await _dbContext.AppUsers.AnyAsync(x => x.EmployeeId == employee.Id) &&
+            !await _dbContext.EmployeeBankDetails.AnyAsync(x => x.EmployeeId == employee.Id) &&
+            !await _dbContext.EmployeeSalaryDetails.AnyAsync(x => x.EmployeeId == employee.Id);
+
+        [HttpGet]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        public async Task<IActionResult> LookupEmployeeForOnboarding(string? employeeCode)
+        {
+            var code = employeeCode?.Trim().ToUpperInvariant();
+            if (string.IsNullOrEmpty(code) || code.Length > 50) return BadRequest();
+            var matches = await FindEmployeeByBiometricCodeAsync(code);
+            if (matches.Count > 1) return Json(new { status = "ambiguous", message = "This biometric ID matches multiple profiles. Use Employee Management to select the correct employee." });
+            var employee = matches.SingleOrDefault();
+            if (employee == null) return Json(new { status = "new", message = "No ERP profile found. You can add this employee; biometric punches will link by Employee ID." });
+            if (!await CanCompleteBiometricProfileAsync(employee))
+                return Json(new { status = "existing", message = "Employee already exists. Use Edit Profile to update details.", employeeId = employee.Id });
+            return Json(new { status = "pending", employeeId = employee.Id, employeeCode = employee.EmployeeCode,
+                message = "Biometric profile found. Complete the details below; existing attendance will remain linked." });
         }
 
         [HttpGet]
@@ -906,7 +1017,7 @@ namespace Vertex_ERP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
+        public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
         {
             ApplyEmployeeExtraDrafts(model);
             // Also support submission when browser generation is unavailable.
@@ -923,8 +1034,8 @@ public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
             }
             // Canonical casing makes the database unique index reject IDs that
             // differ only by upper/lower case.
-            var employeeCode = model.EmployeeId.Trim().ToUpperInvariant();
-            var email = model.Email.Trim().ToLowerInvariant();
+            var employeeCode = (model.EmployeeId ?? string.Empty).Trim().ToUpperInvariant();
+            var email = (model.Email ?? string.Empty).Trim().ToLowerInvariant();
             var loginUsername = model.LoginUsername.Trim();
             // Passwords are exact, case-sensitive credentials. Never transform them after
             // HR has generated/entered the value shown on screen.
@@ -936,12 +1047,21 @@ public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
 
             if (await _dbContext.AppUsers.AnyAsync(user => user.NormalizedUsername == normalizedUsername))
                 ModelState.AddModelError(nameof(model.LoginUsername), "Login username already exists.");
-            if (await _dbContext.Employees.AnyAsync(employee => employee.EmployeeCode.ToLower() == employeeCode.ToLower()))
-                ModelState.AddModelError(nameof(model.EmployeeId), "Employee ID already exists.");
-            if (await _dbContext.Employees.AnyAsync(employee => employee.Email == email))
+            var matches = await FindEmployeeByBiometricCodeAsync(employeeCode);
+            var pendingEmployee = matches.Count == 1 ? matches[0] : null;
+            if (matches.Count > 1 || (pendingEmployee != null && !await CanCompleteBiometricProfileAsync(pendingEmployee)))
+                ModelState.AddModelError(nameof(model.EmployeeId), "Employee already exists. Use Employee Management > Edit Profile.");
+            if (pendingEmployee != null && model.PendingBiometricEmployeeId != pendingEmployee.Id)
+                ModelState.AddModelError(nameof(model.EmployeeId), "Check Employee ID first to confirm the biometric profile to complete.");
+            if (pendingEmployee == null && model.PendingBiometricEmployeeId.HasValue)
+                ModelState.AddModelError(nameof(model.EmployeeId), "Employee ID changed or profile is unavailable. Check Employee ID again.");
+            var existingId = pendingEmployee?.Id ?? 0;
+            if (await _dbContext.Employees.AnyAsync(employee => employee.Id != existingId && employee.Email == email))
                 ModelState.AddModelError(nameof(model.Email), "Email address already exists.");
-            if (await _dbContext.Employees.AnyAsync(employee => employee.PhoneNumber == model.Phone.Trim()))
+            if (await _dbContext.Employees.AnyAsync(employee => employee.Id != existingId && employee.PhoneNumber == (model.Phone ?? "").Trim()))
                 ModelState.AddModelError(nameof(model.Phone), "Mobile Number already exists.");
+            if (existingId != 0 && model.ReportingManagerId == existingId)
+                ModelState.AddModelError(nameof(model.ReportingManagerId), "An employee cannot report to themselves.");
             if (model.ReportingManagerId.HasValue &&
                 !await _dbContext.Employees.AnyAsync(employee => employee.Id == model.ReportingManagerId.Value && employee.IsActive))
                 ModelState.AddModelError(nameof(model.ReportingManagerId), "Please select an active reporting manager.");
@@ -957,7 +1077,6 @@ public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
                 return View(await PopulateManagersAsync(model));
 
             string? photoPath = null;
-            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
             try
             {
                 if (model.EmployeePhoto != null && photoExtension != null)
@@ -995,7 +1114,19 @@ public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
                     CreatedDate = DateTime.UtcNow
                 };
 
-                _dbContext.Employees.Add(employee);
+                if (pendingEmployee == null)
+                    _dbContext.Employees.Add(employee);
+                else
+                {
+                    // Update the existing row so device mappings and attendance keep the same key.
+                    employee.Id = pendingEmployee.Id;
+                    employee.EmployeeCode = pendingEmployee.EmployeeCode;
+                    employee.CreatedDate = pendingEmployee.CreatedDate;
+                    employee.PhotoPath ??= pendingEmployee.PhotoPath;
+                    employee.UpdatedDate = DateTime.UtcNow;
+                    _dbContext.Entry(pendingEmployee).CurrentValues.SetValues(employee);
+                    employee = pendingEmployee;
+                }
 
                 var loginAccount = new AppUser
                 {
@@ -1021,8 +1152,9 @@ public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
                 {
                     _dbContext.EmployeeSalaryDetails.Add(new EmployeeSalaryDetail { Employee = employee, BasicSalary = model.BasicSalary, HouseRentAllowance = model.HouseRentAllowance, ConveyanceAllowance = model.ConveyanceAllowance, SpecialAllowance = model.SpecialAllowance, ProvidentFund = model.ProvidentFund, ProfessionalTax = model.ProfessionalTax, Tds = model.Tds, OtherDeductions = model.OtherDeductions, PfNumber = Clean(model.PfNumber), PfUan = Clean(model.PfUan), EffectiveFrom = model.SalaryEffectiveFrom, IsActive = true, UpdatedAtUtc = DateTime.UtcNow });
                     }
+                // One SaveChanges keeps the employee, login, bank and salary records
+                // atomic and works with the configured retrying execution strategy.
                 await _dbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
                 TempData["EmployeeMessage"] = $"{accountRole} and login account '{loginUsername}' added successfully.";
                 TempData["CreatedLoginUsername"] = loginUsername;
                 TempData["CreatedLoginPassword"] = loginPassword;
@@ -1030,6 +1162,12 @@ public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
                 HttpContext.Session.Remove("AddEmployeeBankDraft");
                 HttpContext.Session.Remove("AddEmployeeSalaryDraft");
                 return RedirectToAction("Index", "Employee");
+            }
+            catch (DbUpdateConcurrencyException exception)
+            {
+                DeletePhotoIfPresent(photoPath);
+                _logger.LogWarning(exception, "Biometric profile was completed or changed by another request.");
+                ModelState.AddModelError(string.Empty, "This profile changed while you were saving. Reload and use Edit Profile if it has already been completed.");
             }
             catch (DbUpdateException exception)
             {
@@ -1109,12 +1247,12 @@ public async Task<IActionResult> HrAddEmp(HrAddEmployeeViewModel model)
 
             var header = new byte[8];
             await using var stream = photo.OpenReadStream();
-            var bytesRead = await stream.ReadAsync(header.AsMemory(0, header.Length));
+            var bytesRead = await stream.ReadAtLeastAsync(header.AsMemory(), header.Length, throwOnEndOfStream: false);
             var isJpeg = bytesRead >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF;
             var isPng = bytesRead >= 8 && header.SequenceEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A });
 
-            if (isJpeg && photo.ContentType is "image/jpeg" or "image/jpg") return ".jpg";
-            if (isPng && photo.ContentType == "image/png") return ".png";
+            if (isJpeg) return ".jpg";
+            if (isPng) return ".png";
 
             ModelState.AddModelError(nameof(HrAddEmployeeViewModel.EmployeePhoto), "Please select a valid JPG, JPEG or PNG image.");
             return null;

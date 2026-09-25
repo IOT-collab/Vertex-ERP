@@ -20,6 +20,8 @@ public class AttendanceLog
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }
     public decimal? AccuracyMetres { get; set; }
+    [MaxLength(160)] public string? FieldSiteName { get; set; }
+    public DateTimeOffset? LocationCapturedAtUtc { get; set; }
     [MaxLength(300)] public string? SelfiePath { get; set; }
     public DateTime ReceivedAtUtc { get; set; } = DateTime.UtcNow;
 }

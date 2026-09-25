@@ -1,0 +1,26 @@
+using System.IO.Compression;
+using System.Xml.Linq;
+using VertexERP.Models;
+using VertexERP.Services;
+var employees = new[] {
+ new Employee { EmployeeCode = "001", FullName = "=Example & Test", PhoneNumber = "0123456789", AadhaarNumber = "012345678901", Department = "HR", ReportingManager = new Employee { FullName = "Manager" } },
+ new Employee { EmployeeCode = "002", FullName = "Inactive Employee", IsActive = false }
+};
+XNamespace s = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+void Verify(Employee[] input) {
+ using var stream = new MemoryStream(AdminReportExcelService.CreateEmployeeList(input));
+ using var zip = new ZipArchive(stream);
+ using var xml = zip.GetEntry("xl/worksheets/sheet1.xml")!.Open();
+ var doc = XDocument.Load(xml);
+ var rows = doc.Descendants(s + "row").ToArray();
+ if (rows.Length != input.Length + 1) throw new Exception("Missing employees");
+ if (rows[0].Descendants(s + "t").Count() != 6) throw new Exception("Incorrect headers");
+ if (doc.Descendants(s + "f").Any()) throw new Exception("Formula present");
+ if (input.Length > 0) {
+  var values = rows[1].Descendants(s + "t").Select(x => x.Value).ToArray();
+  if (!values.SequenceEqual(new[] { "001", "=Example & Test", "0123456789", "012345678901", "HR", "Manager" })) throw new Exception("Incorrect values");
+ }
+}
+Verify(employees);
+Verify(Array.Empty<Employee>());
+Console.WriteLine("PASS: active/inactive employees, six columns, manager, leading zeros, formula-safe text, empty directory.");

@@ -197,7 +197,7 @@ public class EmployeeFormViewModel : IValidatableObject
     [Range(0, 100000000), Display(Name="Conveyance Allowance")] public decimal ConveyanceAllowance { get; set; }
     [Range(0, 100000000), Display(Name="Special Allowance")] public decimal SpecialAllowance { get; set; }
     [Range(0, 100000000), Display(Name="Provident Fund Deduction")] public decimal ProvidentFund { get; set; }
-    [Range(0, 100000000), Display(Name="Professional Tax")] public decimal ProfessionalTax { get; set; }
+    [Range(0, 100000000), Display(Name="ESIC")] public decimal ProfessionalTax { get; set; }
     [Range(0, 100000000), Display(Name="TDS")] public decimal Tds { get; set; }
     [Range(0, 100000000), Display(Name="Other Deductions")] public decimal OtherDeductions { get; set; }
     [StringLength(50), Display(Name="PF Number")] public string? PfNumber { get; set; }
@@ -280,6 +280,7 @@ public class EmployeeSalaryDraft
 
 public class HrAddEmployeeViewModel : IValidatableObject
 {
+    public int? PendingBiometricEmployeeId { get; set; }
     [Required(ErrorMessage = "Aadhaar Number is required.")]
     [StringLength(12)]
     [RegularExpression(@"^[0-9]{12}$", ErrorMessage = "Aadhaar Number must contain exactly 12 digits.")]

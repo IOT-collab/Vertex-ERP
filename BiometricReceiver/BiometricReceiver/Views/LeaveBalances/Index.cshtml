@@ -1,0 +1,53 @@
+@model VertexERP.Models.ManualLeavePage
+@using VertexERP.Models
+@using System.Globalization
+@{
+    ViewData["Title"] = "Employee Leave Balances";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    ViewData["BackController"] = "Main";
+    ViewData["BackAction"] = "Hrms";
+    var saved = Model.Balances.ToDictionary(x => (x.EmployeeId, x.Category));
+    string N(decimal? value) => value?.ToString("0.##", CultureInfo.InvariantCulture) ?? "";
+}
+<link href="~/css/LeaveBalances.css" rel="stylesheet" asp-append-version="true" />
+<section class="manual-leave-page">
+<header><h1>Employee Leave Balances</h1><p>Select an employee below and enter their Used and Available leaves. These exact balances appear in their login.</p></header>
+@if(TempData["LeaveMessage"] is string message){<p class="manual-notice" role="status">@message</p>}
+<div asp-validation-summary="All" class="manual-error" role="alert"></div>
+<section class="manual-card">
+<div class="manual-list-heading"><h2>All Employees <small>(@Model.Employees.Count)</small></h2><form asp-action="Index" method="get" class="manual-filters"><label>Year<input type="number" name="year" value="@Model.Year" min="2000" max="2100" required/></label><label>Employee<input name="search" value="@Model.Search" placeholder="Name or employee ID"/></label><button type="submit">Search</button><a asp-action="Index" asp-route-year="@Model.Year">Clear</a></form></div>
+<div class="manual-table"><table><thead><tr><th>Employee</th><th>EL</th><th>CL</th><th>ML</th><th>EW</th><th>Update</th></tr></thead><tbody>
+@foreach(var employee in Model.Employees){
+    var draft = Model.Draft?.EmployeeId == employee.Id ? Model.Draft : null;
+    <tr><td><strong>@employee.FullName</strong><small>@employee.EmployeeCode · @employee.Department</small>@if(!employee.IsActive){<small>Inactive</small>}</td>
+    @foreach(var category in ManualLeavePage.Categories){
+        var balance = saved.GetValueOrDefault((employee.Id, category));
+        <td>@if(balance == null){<span class="manual-unfilled">Not filled</span>}else{<div>Used <strong>@N(balance.UsedDays)</strong></div><div class="manual-available">Available <strong>@N(balance.AvailableDays)</strong></div>}</td>
+    }
+    <td><button type="button" data-edit="edit-@employee.Id" aria-controls="edit-@employee.Id" aria-expanded="@(draft != null ? "true" : "false")">Fill / Edit</button></td></tr>
+    <tr id="edit-@employee.Id" hidden="@(draft == null)"><td colspan="6">
+    <form asp-action="Save" method="post" class="manual-employee-form">
+        <input type="hidden" name="EmployeeId" value="@employee.Id"/><input type="hidden" name="Year" value="@Model.Year"/>
+        <h3>@employee.FullName — @Model.Year</h3><div class="manual-category-grid">
+        @for(var i=0; i<ManualLeavePage.Categories.Length; i++){
+            var category = ManualLeavePage.Categories[i];
+            var balance = saved.GetValueOrDefault((employee.Id, category));
+            var entry = draft?.Categories.FirstOrDefault(x=>x.Category==category);
+            var used = draft == null ? balance?.UsedDays : entry?.UsedDays;
+            var available = draft == null ? balance?.AvailableDays : entry?.AvailableDays;
+            <fieldset><legend>@category</legend><input type="hidden" name="Categories[@i].Category" value="@category"/><input type="hidden" name="Categories[@i].Revision" value="@(entry?.Revision ?? balance?.Revision ?? 0)"/>
+            <label>Used leaves<input type="number" name="Categories[@i].UsedDays" value="@N(used)" min="0" max="3660" step="0.5" placeholder="Not filled"/></label><label>Available leaves<input type="number" name="Categories[@i].AvailableDays" value="@N(available)" min="0" max="3660" step="0.5" placeholder="Not filled"/></label></fieldset>
+        }
+        </div><p class="manual-help">Fill both values for a category. Leave both blank if not entered. To delete a category balance, clear both fields and save. 0 means zero days; blank means not filled.</p>
+        <div class="manual-actions"><button type="submit">Save Leaves</button><button type="button" data-edit="edit-@employee.Id" class="manual-cancel">Close</button></div>
+    </form></td></tr>
+}
+@if(Model.Employees.Count == 0){<tr><td colspan="6" class="manual-empty">No employees match your search.</td></tr>}
+</tbody></table></div></section></section>
+<script>
+document.querySelectorAll('[data-edit]').forEach(button=>button.addEventListener('click',()=>{
+ const row=document.getElementById(button.dataset.edit); row.hidden=!row.hidden;
+ document.querySelectorAll(`[data-edit="${button.dataset.edit}"]`).forEach(toggle=>toggle.setAttribute('aria-expanded',String(!row.hidden)));
+ if(!row.hidden) row.querySelector('input[type=number]')?.focus();
+}));
+</script>

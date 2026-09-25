@@ -1,9 +1,24 @@
 @model VertexERP.Models.EmployeeLeaveViewModel
-@{ ViewData["Title"]="Leave Management"; Layout="~/Views/Shared/_LayoutMaster.cshtml"; }
+@{ ViewData["Title"]="My Leave Balance"; Layout="~/Views/Shared/_LayoutMaster.cshtml"; }
 <link href="~/css/EmployeeSections.css" rel="stylesheet" asp-append-version="true" />
-<style>
-    .leave-balance > small { display:block !important; font-size:14px !important; line-height:1.35; }
-    .leave-balance > strong { display:block !important; margin-top:10px !important; font-size:24px !important; line-height:1.25; }
-    .leave-balance > div { margin-top:16px !important; font-size:14px; }
-</style>
-<section class="employee-section"><header><div><h1>Leave Management</h1><p>Leave balance, usage and requests for @Model.Employee.FullName</p></div></header><div class="leave-grid"><article class="employee-panel leave-balance"><small>Casual Leave</small><strong>@Model.CasualRemaining days left</strong><div><span>Used</span><b>@Model.CasualUsed / 12</b></div></article><article class="employee-panel leave-balance"><small>Sick Leave</small><strong>@Model.SickRemaining days left</strong><div><span>Used</span><b>@Model.SickUsed / 8</b></div></article><article class="employee-panel leave-balance"><small>Earned Leave</small><strong>@Model.EarnedRemaining days left</strong><div><span>Used</span><b>@Model.EarnedUsed / 12</b></div></article></div><div class="employee-panel"><h3>Apply Leave</h3>@if(TempData["LeaveMessage"]!=null){<p class="present">@TempData["LeaveMessage"]</p>}@if(TempData["LeaveError"]!=null){<p class="absent">@TempData["LeaveError"]</p>}<form asp-action="ApplyLeave" method="post" class="leave-form"><label>Leave Type<select name="leaveType" required><option value="">Select type</option><option>Casual Leave</option><option>Sick Leave</option><option>Earned Leave</option><option>Unpaid Leave</option></select></label><label>From Date<input type="date" name="fromDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" required/></label><label>To Date<input type="date" name="toDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" required/></label><label class="wide">Reason<textarea name="reason" rows="3" required></textarea></label><button class="btn btn-primary" type="submit">Submit Leave Request</button></form><h3>Leave History</h3>@if(Model.Requests.Count==0){<div class="employee-empty">No leave requests.</div>}else{<table class="employee-table"><thead><tr><th>Type</th><th>Dates</th><th>Reason</th><th>Status</th></tr></thead><tbody>@foreach(var leave in Model.Requests){<tr><td>@leave.LeaveType</td><td>@leave.FromDate.ToString("dd MMM") - @leave.ToDate.ToString("dd MMM yyyy")</td><td>@leave.Reason</td><td><span class="employee-badge @leave.Status.ToLowerInvariant()">@leave.Status</span></td></tr>}</tbody></table>}</div></section>
+<style>.manual-category-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:20px 0}.manual-category-cards article{padding:22px}.manual-category-cards h3{margin-top:0}.manual-category-cards dl{display:grid;grid-template-columns:1fr auto;gap:12px}.manual-category-cards dd{margin:0;font-weight:700}.manual-category-cards .available{color:#86efac}.manual-category-cards p{color:#94a3b8}.my-leave-year{display:flex;gap:10px;align-items:center}.my-leave-year input{padding:9px;background:#0f172a;color:#fff;border:1px solid #475569;border-radius:6px;width:100px}</style>
+<section class="employee-section">
+<header><div><h1>My Leave Balance</h1><p>@Model.Employee.FullName · @Model.Employee.EmployeeCode</p></div><form method="get" asp-action="EmployeeLeaves" class="my-leave-year"><label for="balance-year">Year</label><input id="balance-year" name="year" type="number" min="2000" max="2100" value="@Model.Year" required/><button class="btn btn-primary" type="submit">View</button></form></header>
+<p>Balances below are entered and updated by HR. Leave applications and approvals do not automatically change these figures.</p>
+<div class="manual-category-cards">
+@foreach(var category in new[]{"EL","CL","ML","EW"}){
+    var balance=Model.Balances.FirstOrDefault(x=>x.Category==category);
+    <article class="employee-panel"><h3>@category · @Model.Year</h3>
+    @if(balance == null){<p>Not entered by HR yet.</p>}
+    else{<dl><dt>Total</dt><dd>@balance.TotalDays.ToString("0.##") days</dd><dt>Used</dt><dd>@balance.UsedDays.ToString("0.##") days</dd><dt class="available">Available</dt><dd class="available">@balance.AvailableDays.ToString("0.##") days</dd></dl>@if(!string.IsNullOrWhiteSpace(balance.Notes)){<p>@balance.Notes</p>}}
+    </article>
+}
+</div>
+<div class="employee-panel"><h3>Apply Leave</h3>
+@if(TempData["LeaveMessage"]!=null){<p class="present">@TempData["LeaveMessage"]</p>}
+@if(TempData["LeaveError"]!=null){<p class="absent">@TempData["LeaveError"]</p>}
+<form asp-action="ApplyLeave" method="post" class="leave-form"><label>Leave Type<select name="leaveType" required><option value="">Select type</option><option>EL</option><option>CL</option><option>ML</option><option>EW</option></select></label><label>From Date<input type="date" name="fromDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" required/></label><label>To Date<input type="date" name="toDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" required/></label><label class="wide">Reason<textarea name="reason" rows="3" required></textarea></label><button class="btn btn-primary" type="submit">Submit Leave Request</button></form>
+<h3>Leave Request History</h3>
+@if(Model.Requests.Count==0){<div class="employee-empty">No leave requests.</div>}
+else{<table class="employee-table"><thead><tr><th>Type</th><th>Dates</th><th>Reason</th><th>Status</th></tr></thead><tbody>@foreach(var leave in Model.Requests){<tr><td>@leave.LeaveType</td><td>@leave.FromDate.ToString("dd MMM yyyy") – @leave.ToDate.ToString("dd MMM yyyy")</td><td>@leave.Reason</td><td><span class="employee-badge @leave.Status.ToLowerInvariant()">@leave.Status</span></td></tr>}</tbody></table>}
+</div></section>

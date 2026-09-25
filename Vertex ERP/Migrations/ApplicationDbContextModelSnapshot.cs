@@ -104,9 +104,16 @@ namespace Vertex_ERP.Migrations
                     b.Property<int?>("EmployeeId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("FieldSiteName")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
                     b.Property<decimal?>("Latitude")
                         .HasPrecision(9, 6)
                         .HasColumnType("numeric(9,6)");
+
+                    b.Property<DateTimeOffset?>("LocationCapturedAtUtc")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal?>("Longitude")
                         .HasPrecision(9, 6)
@@ -370,6 +377,20 @@ namespace Vertex_ERP.Migrations
                     b.ToTable("BiometricDevices", (string)null);
                 });
 
+            modelBuilder.Entity("VertexERP.Models.BiometricEmployeeExclusion", b =>
+                {
+                    b.Property<string>("DeviceUserCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("DeletedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("DeviceUserCode");
+
+                    b.ToTable("BiometricEmployeeExclusions");
+                });
+
             modelBuilder.Entity("VertexERP.Models.Department", b =>
                 {
                     b.Property<int>("Id")
@@ -499,6 +520,10 @@ namespace Vertex_ERP.Migrations
                         .HasColumnType("character varying(20)");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsBiometricProfilePending")
+                        .IsConcurrencyToken()
                         .HasColumnType("boolean");
 
                     b.Property<DateOnly>("JoiningDate")
@@ -783,6 +808,31 @@ namespace Vertex_ERP.Migrations
                     b.HasIndex("EmployeeId", "DocumentType");
 
                     b.ToTable("EmployeeDocuments", (string)null);
+                });
+
+            modelBuilder.Entity("VertexERP.Models.EmployeeLeaveBalance", b =>
+                {
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TotalDays")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<decimal>("UsedAdjustment")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.HasKey("EmployeeId", "Year");
+
+                    b.ToTable("EmployeeLeaveBalances");
                 });
 
             modelBuilder.Entity("VertexERP.Models.EmployeeNotificationDismissal", b =>
@@ -1087,6 +1137,10 @@ namespace Vertex_ERP.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
+                    b.Property<decimal?>("SalaryDays")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
                     b.Property<decimal>("SpecialAllowance")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
@@ -1177,6 +1231,52 @@ namespace Vertex_ERP.Migrations
                     b.ToTable("LeaveRequests", (string)null);
                 });
 
+            modelBuilder.Entity("VertexERP.Models.ManualLeaveBalance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TotalDays")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("UsedDays")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId", "Year", "Category")
+                        .IsUnique();
+
+                    b.ToTable("ManualLeaveBalances");
+                });
+
             modelBuilder.Entity("VertexERP.Models.ModuleState", b =>
                 {
                     b.Property<string>("Id")
@@ -1228,6 +1328,21 @@ namespace Vertex_ERP.Migrations
                     b.HasIndex("AppUserId", "ExpiresAtUtc");
 
                     b.ToTable("PasswordResetTokens", (string)null);
+                });
+
+            modelBuilder.Entity("VertexERP.Models.ProjectEmployee", b =>
+                {
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ProjectId", "EmployeeId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("ProjectEmployees");
                 });
 
             modelBuilder.Entity("VertexERP.Models.QueryTicket", b =>
@@ -1511,6 +1626,17 @@ namespace Vertex_ERP.Migrations
                     b.Navigation("Employee");
                 });
 
+            modelBuilder.Entity("VertexERP.Models.EmployeeLeaveBalance", b =>
+                {
+                    b.HasOne("VertexERP.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("VertexERP.Models.EmployeeNotificationDismissal", b =>
                 {
                     b.HasOne("VertexERP.Models.Employee", "Employee")
@@ -1619,6 +1745,17 @@ namespace Vertex_ERP.Migrations
                     b.Navigation("Employee");
                 });
 
+            modelBuilder.Entity("VertexERP.Models.ManualLeaveBalance", b =>
+                {
+                    b.HasOne("VertexERP.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("VertexERP.Models.PasswordResetToken", b =>
                 {
                     b.HasOne("VertexERP.Models.AppUser", "AppUser")
@@ -1628,6 +1765,25 @@ namespace Vertex_ERP.Migrations
                         .IsRequired();
 
                     b.Navigation("AppUser");
+                });
+
+            modelBuilder.Entity("VertexERP.Models.ProjectEmployee", b =>
+                {
+                    b.HasOne("VertexERP.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VertexERP.Models.ErpProject", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("VertexERP.Models.QueryTicket", b =>

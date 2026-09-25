@@ -9,14 +9,15 @@
     <div class="dashboard-header-card">
         <div class="header-left"><div><h2>Employee Management</h2><p>Manage employees, departments and system users efficiently.</p></div></div>
         <div class="header-right">
+            <a asp-controller="Employee" asp-action="DownloadEmployeeList" class="btn-secondary" id="downloadEmployeeListBtn"><i class="fa-solid fa-file-excel" aria-hidden="true"></i> Download Employee List in Excel</a>
             <a asp-controller="Hr" asp-action="HrAddEmp" class="btn-primary-glow" id="addEmployeeBtn"><i class="fa-solid fa-user-plus"></i> Add Employee</a>
         </div>
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card"><div class="stat-icon total-icon"><i class="fa-solid fa-users"></i></div><div class="stat-details"><span class="stat-value">@Model.TotalEmployees</span><span class="stat-label">Total Employees</span></div></div>
-        <div class="stat-card"><div class="stat-icon active-icon"><i class="fa-solid fa-user-check"></i></div><div class="stat-details"><span class="stat-value">@Model.ActiveEmployees</span><span class="stat-label">Active</span></div></div>
-        <div class="stat-card"><div class="stat-icon inactive-icon"><i class="fa-solid fa-user-xmark"></i></div><div class="stat-details"><span class="stat-value">@Model.InactiveEmployees</span><span class="stat-label">Inactive</span></div></div>
+        <a asp-controller="Employee" asp-action="Index" asp-route-status="" class="stat-card stat-filter"><div class="stat-icon total-icon"><i class="fa-solid fa-users"></i></div><div class="stat-details"><span class="stat-value">@Model.TotalEmployees</span><span class="stat-label">Total Employees</span></div></a>
+        <a asp-controller="Employee" asp-action="Index" asp-route-status="active" class="stat-card stat-filter"><div class="stat-icon active-icon"><i class="fa-solid fa-user-check"></i></div><div class="stat-details"><span class="stat-value">@Model.ActiveEmployees</span><span class="stat-label">Active</span></div></a>
+        <a asp-controller="Employee" asp-action="Index" asp-route-status="inactive" class="stat-card stat-filter"><div class="stat-icon inactive-icon"><i class="fa-solid fa-user-xmark"></i></div><div class="stat-details"><span class="stat-value">@Model.InactiveEmployees</span><span class="stat-label">Inactive</span></div></a>
         <div class="stat-card"><div class="stat-icon dept-icon"><i class="fa-solid fa-briefcase"></i></div><div class="stat-details"><span class="stat-value">@Model.TotalDepartments</span><span class="stat-label">Departments</span></div></div>
     </div>
 
@@ -58,6 +59,7 @@
             <option value="">All statuses</option>
             <option value="active" selected="@(Model.Status == "active")">Active</option>
             <option value="inactive" selected="@(Model.Status == "inactive")">Inactive</option>
+            <option value="pending" selected="@(Model.Status == "pending")">Biometric — details pending</option>
         </select>
         <button type="submit" class="btn-secondary"><i class="fa-solid fa-filter"></i> Filter</button>
     </form>
@@ -74,13 +76,24 @@
                     {
                         <tr>
                             <td><span class="code-text">@employee.EmployeeCode</span></td>
-                            <td class="fw-semibold">@employee.FullName</td>
-                            <td>@employee.Email</td>
+                            <td class="fw-semibold">
+                                @if (employee.IsBiometricProfilePending)
+                                {
+                                    <a asp-controller="Hr" asp-action="HrAddEmp" asp-route-biometricEmployeeId="@employee.Id">@employee.FullName</a>
+                                    <small style="display:block;color:#fbbf24">Biometric · Details pending</small>
+                                }
+                                else { @employee.FullName }
+                            </td>
+                            <td>@(employee.IsBiometricProfilePending ? "Not provided" : employee.Email)</td>
                             <td>@employee.Department</td>
                             <td>@employee.Designation</td>
                             <td><span class="status-badge @(employee.IsActive ? "badge-active" : "badge-inactive")">@employee.EmployeeStatus</span></td>
                             <td class="text-end">
                                 <div class="action-buttons">
+                                    @if (employee.IsBiometricProfilePending)
+                                    {
+                                        <a asp-controller="Hr" asp-action="HrAddEmp" asp-route-biometricEmployeeId="@employee.Id" class="btn-secondary" title="Complete this biometric employee's full details">Complete Profile</a>
+                                    }
                                     <a asp-controller="Employee" asp-action="Details" asp-route-id="@employee.Id" class="action-btn" title="View employee"><i class="fa-solid fa-eye"></i></a>
                                     <a asp-controller="Main" asp-action="Employees" asp-route-id="@employee.Id" class="action-btn" title="Open employee self-service profile"><i class="fa-solid fa-id-card"></i></a>
                                     <a asp-controller="Employee" asp-action="LoginAccess" asp-route-id="@employee.Id" class="action-btn" title="Update username or reset password"><i class="fa-solid fa-key"></i></a>

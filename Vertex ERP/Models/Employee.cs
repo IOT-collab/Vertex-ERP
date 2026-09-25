@@ -6,6 +6,9 @@ public class Employee
 {
     public int Id { get; set; }
 
+    [ConcurrencyCheck]
+    public bool IsBiometricProfilePending { get; set; }
+
     [Required, MaxLength(30)]
     public string EmployeeCode { get; set; } = string.Empty;
 

@@ -22,7 +22,16 @@
 </style>
 
 <section class="field-attendance">
-    <header class="field-heading"><h1>Field Attendance</h1><p>Site check-in and check-out save your current GPS location with the server time. Selfie is optional.</p></header>
+    <header class="field-heading"><h1>Field Attendance</h1><p>Check-in and check-out record your current GPS location and time (IST). HR, Admin and your reporting manager can view these records. Selfie is optional.</p></header>
+    <div style="margin-bottom:18px"><label for="siteName">Site / customer name</label><input id="siteName" type="text" maxlength="160" required value="@Model.CheckInSiteName" placeholder="e.g. Customer name, project or site" style="display:block;width:100%;margin-top:8px;padding:12px;border:1px solid #4b6b99;border-radius:8px;background:#172641;color:#edf4ff" /><small>The site name is entered by you; GPS records where you mark attendance.</small></div>
+    @if (Model.HasCheckedIn)
+    {
+        <p>Check-in site: @(Model.CheckInSiteName ?? "Not provided") · @Model.CheckInTime?.ToString("dd MMM yyyy, hh:mm tt") IST</p>
+    }
+    @if (Model.HasCheckedOut)
+    {
+        <p>Check-out site: @(Model.CheckOutSiteName ?? "Not provided") · @Model.CheckOutTime?.ToString("dd MMM yyyy, hh:mm tt") IST</p>
+    }
     <div class="field-actions">
         <button id="in" type="button" class="field-button" @(Model.HasCheckedIn ? "disabled" : "")>Check In</button>
         <button id="out" type="button" class="field-button out" @(!Model.HasCheckedIn || Model.HasCheckedOut ? "disabled" : "")>Check Out</button>
@@ -47,6 +56,7 @@
     const stopCamera = () => { if (stream) stream.getTracks().forEach(track => track.stop()); stream = null; video.srcObject = null; cam.classList.remove('open'); };
     const clearPending = () => { pendingAction = null; pendingLocation = null; ready.classList.remove('open'); submit.disabled = false; };
     const getLocation = () => new Promise((resolve, reject) => {
+        if (!window.isSecureContext) return reject(new Error('Open this page over HTTPS to allow GPS location access.'));
         if (!navigator.geolocation) return reject(new Error('This device does not support location services.'));
         let best = null, finished = false, watchId = null, timer = null;
         const finish = (callback, value) => { if (finished) return; finished = true; if (watchId !== null) navigator.geolocation.clearWatch(watchId); if (timer !== null) clearTimeout(timer); callback(value); };
@@ -58,6 +68,7 @@
         timer = setTimeout(() => finish(reject, new Error(best ? `GPS accuracy is only ±${Math.round(best.coords.accuracy)} m. Attendance needs accuracy within 50 m. Move outdoors or near a window and retry.` : 'No GPS position received. Turn on GPS/precise location and retry.')), 32000);
     });
     async function selectAction(action) {
+        if (!document.getElementById('siteName').value.trim()) { say('Enter the site or customer name first.', true); document.getElementById('siteName').focus(); return; }
         clearPending(); selfie = null; preview.style.display = 'none'; document.getElementById('selfieNote').textContent = 'Optional selfie for the selected action.';
         const button = actionButton(action); button.disabled = true; say('Getting your current GPS location...');
         try {
@@ -78,12 +89,15 @@
     };
     submit.onclick = async () => {
         if (!pendingAction || !pendingLocation) { say('Select an attendance action and capture location first.', true); return; }
-        if ((Date.now() - Date.parse(pendingLocation.capturedAtUtc)) > 120000) { clearPending(); say('GPS reading expired. Select the action again to capture a fresh precise location.', true); return; }
-        submit.disabled = true; say('Saving attendance...');
+        const siteName = document.getElementById('siteName').value.trim();
+        if (!siteName) { say('Enter the site or customer name first.', true); return; }
+        submit.disabled = true; say('Refreshing your current GPS location before saving...');
         try {
-            const response = await fetch('@Url.Action("SubmitFieldAttendance", "Main")', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('input[name="__RequestVerificationToken"]').value }, body: JSON.stringify({ action: pendingAction, ...pendingLocation, selfieDataUrl: selfie }) });
+            const position = await getLocation();
+            pendingLocation = { latitude: position.coords.latitude, longitude: position.coords.longitude, accuracyMetres: position.coords.accuracy, capturedAtUtc: new Date(position.timestamp).toISOString() };
+            const response = await fetch('@Url.Action("SubmitFieldAttendance", "Main")', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('input[name="__RequestVerificationToken"]').value }, body: JSON.stringify({ action: pendingAction, siteName, ...pendingLocation, selfieDataUrl: selfie }) });
             const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.message || 'Could not save attendance.');
-            const prefix = pendingAction === 'Check In' ? 'in' : 'out'; document.getElementById(`${prefix}Time`).textContent = data.time; document.getElementById(`${prefix}Location`).textContent = `${data.latitude}, ${data.longitude}  •  ±${data.accuracyMetres} m`;
+            const prefix = pendingAction === 'Check In' ? 'in' : 'out'; document.getElementById(`${prefix}Time`).textContent = data.time; document.getElementById(`${prefix}Location`).textContent = `${data.siteName} • ${data.latitude}, ${data.longitude}  •  ±${data.accuracyMetres} m`;
             say(data.message); actionButton(pendingAction).disabled = true; if (pendingAction === 'Check In') document.getElementById('out').disabled = false; clearPending(); selfie = null; preview.style.display = 'none'; document.getElementById('selfieNote').textContent = 'Optional selfie for the selected action.';
         } catch (error) { submit.disabled = false; say(error.message, true); }
     };

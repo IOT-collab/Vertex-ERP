@@ -134,7 +134,7 @@ public static class AdminReportBuilder
             var punches = logs.Where(item => item.EmployeeId == employee.Id && DateOnly.FromDateTime(item.PunchTime) == day).OrderBy(item => item.PunchTime).ToList();
             var first = punches.FirstOrDefault()?.PunchTime; var last = punches.Count > 1 ? punches[^1].PunchTime : (DateTime?)null;
             if (!first.HasValue && (!employee.IsActive || day > DateOnly.FromDateTime(DateTime.Today) || day < employee.JoiningDate)) continue;
-            var status = !first.HasValue ? AttendanceRules.IsWeeklyOff(day) ? "Weekly Off" : approvedLeaves.Any(x => x.EmployeeId == employee.Id && x.FromDate <= day && x.ToDate >= day) ? "Leave" : "Absent" : TimeOnly.FromDateTime(first.Value) > new TimeOnly(9, 30) ? "Late" : "Present";
+            var status = !first.HasValue ? AttendanceRules.IsWeeklyOff(day) ? "Weekly Off" : approvedLeaves.Any(x => x.EmployeeId == employee.Id && x.FromDate <= day && x.ToDate >= day) ? "Leave" : "Absent" : AttendanceRules.IsLateArrival(first.Value) ? "Late" : "Present";
             result.Add((day, first?.ToString("hh:mm tt") ?? "--", last?.ToString("hh:mm tt") ?? "--", punches.Count, status));
         }
         return result;
