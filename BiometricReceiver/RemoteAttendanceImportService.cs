@@ -212,22 +212,7 @@ public sealed class RemoteAttendanceImportService : BackgroundService
         var serials = valid.Select(item => item.Item.TerminalSerial.Trim().ToUpperInvariant()).Distinct().ToList();
         var devices = await db.BiometricDevices.Where(item => serials.Contains(item.SerialNumber) && item.IsActive)
             .ToDictionaryAsync(item => item.SerialNumber, StringComparer.OrdinalIgnoreCase, cancellationToken);
-        var employeeCodes = valid.Select(item => item.Item.EmployeeCode.Trim().ToUpperInvariant()).Distinct().ToList();
-        var employees = await db.Employees.Where(item => item.IsActive && employeeCodes.Contains(item.EmployeeCode.ToUpper()))
-            .ToDictionaryAsync(item => item.EmployeeCode.Trim().ToUpperInvariant(), StringComparer.Ordinal, cancellationToken);
         var deviceIds = devices.Values.Select(item => item.Id).ToList();
-        var mappings = await db.EmployeeDeviceMappings.Where(item => deviceIds.Contains(item.BiometricDeviceId) && item.IsActive)
-            .ToListAsync(cancellationToken);
-        var mappingKeys = mappings.Select(item => $"{item.BiometricDeviceId}|{item.DeviceUserId}").ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var item in valid)
-        {
-            var employeeCode = item.Item.EmployeeCode.Trim().ToUpperInvariant();
-            if (!devices.TryGetValue(item.Item.TerminalSerial.Trim(), out var device) || !employees.TryGetValue(employeeCode, out var employee)) continue;
-            var key = $"{device.Id}|{employeeCode}";
-            if (mappingKeys.Add(key)) db.EmployeeDeviceMappings.Add(new EmployeeDeviceMapping { BiometricDeviceId = device.Id, EmployeeId = employee.Id, DeviceUserId = employeeCode, IsActive = true });
-        }
-        await db.SaveChangesAsync(cancellationToken);
 
         var hashes = valid.Where(item => devices.ContainsKey(item.Item.TerminalSerial.Trim())).Select(item => ComputeHash(devices[item.Item.TerminalSerial.Trim()].Id, item.Item.Id)).ToList();
         var existingHashList = await db.AttendanceLogs.Where(item => hashes.Contains(item.UniqueHash)).Select(item => item.UniqueHash).ToListAsync(cancellationToken);
@@ -240,7 +225,7 @@ public sealed class RemoteAttendanceImportService : BackgroundService
             if (!devices.TryGetValue(parsed.Item.TerminalSerial.Trim(), out var device)) continue;
             var hash = ComputeHash(device.Id, parsed.Item.Id);
             if (!existingHashes.Add(hash)) continue;
-            var employeeCode = parsed.Item.EmployeeCode.Trim().ToUpperInvariant();
+            var employeeCode = parsed.Item.EmployeeCode.Trim();
             mappingLookup.TryGetValue($"{device.Id}|{employeeCode}", out var mapping);
             db.AttendanceLogs.Add(new AttendanceLog
             {

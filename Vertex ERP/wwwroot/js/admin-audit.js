@@ -10,7 +10,7 @@
             }
             if (!response.ok) throw new Error('Unable to refresh');
             const logs = await response.json();
-            const items = logs.map(log => {
+            const items = logs.slice(0, 5).map(log => {
                 const item = document.createElement('div'); item.className = 'alert-item';
                 const title = document.createElement('strong'); title.textContent = log.title;
                 const detail = document.createElement('p'); detail.className = 'sub-text';

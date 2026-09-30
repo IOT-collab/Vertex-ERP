@@ -27,7 +27,7 @@ public static class ModuleCatalog
         if (c == "leavebalances") return "leave";
         if (c == "salarysliprevision") return "payroll";
         if (c == "taskmanagement") return "tasks";
-        if (c == "projectmgm") return "projects";
+        if (c is "projectmgm" or "projectworkspace") return "projects";
         if (c is "employee" or "employeedetails" or "teamoverview") return "hr";
         if (c is not ("main" or "hr")) return null;
         if (a.Contains("salary") || a.Contains("bank")) return "payroll";

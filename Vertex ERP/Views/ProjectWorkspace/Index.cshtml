@@ -1,0 +1,142 @@
+@model VertexERP.Models.ProjectWorkspace
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    ViewData["Title"] = "Project Management";
+    var tabs = new Dictionary<string,string> { ["projects"]="Project Creation", ["teams"]="Teams", ["tasks"]="Tasks", ["timeline"]="Project Timeline", ["resources"]="Resource Allocation", ["timesheets"]="Timesheet", ["budget"]="Budget Tracking", ["enquiries"]="Enquiries" };
+    var projects = Model.VisibleProjects.ToList();
+    var ids = projects.Select(p => p.Id).ToHashSet();
+    var tasks = Model.Tasks.Where(t => ids.Contains(t.ProjectId!.Value)).ToList();
+    var times = Model.Timesheets.Where(t => ids.Contains(t.ProjectId)).ToList();
+    var costs = Model.Costs.Where(c => ids.Contains(c.ProjectId)).ToList();
+    var enquiries = Model.Enquiries.Where(e => ids.Contains(e.ProjectId)).ToList();
+    var projectOptions = new SelectList(Model.Projects, "Id", "ProjectName");
+    var employeeOptions = new SelectList(Model.Employees.Select(e => new { e.Id, Name = e.FullName + " (" + e.EmployeeCode + ")" }), "Id", "Name");
+}
+<link rel="stylesheet" href="~/css/ProjectWorkspace.css" asp-append-version="true" />
+<main class="project-workspace">
+    <header class="pw-header"><div><p>PROJECT MANAGEMENT</p><h1>@tabs[Model.Section]</h1><span>Projects, people and delivery in one place.</span></div><a asp-controller="Main" asp-action="ProjectMgm">All modules</a></header>
+    <nav class="pw-tabs" aria-label="Project modules">
+        @foreach (var tab in tabs) { <a asp-action="Index" asp-route-section="@tab.Key" class="@(Model.Section == tab.Key ? "selected" : "")" aria-current="@(Model.Section == tab.Key ? "page" : null)">@tab.Value</a> }
+    </nav>
+    @if (TempData["ProjectMessage"] is string message) { <div class="pw-message" role="status">@message</div> }
+    <div asp-validation-summary="All" class="pw-errors" role="alert"></div>
+    @if (Model.Section != "teams") {
+        <form method="get" class="pw-filter"><input type="hidden" name="section" value="@Model.Section" /><label for="project-filter">Project</label><select id="project-filter" name="projectId"><option value="">All projects</option>@foreach(var p in Model.Projects){<option value="@p.Id" selected="@(Model.SelectedProjectId == p.Id)">@p.ProjectCode — @p.ProjectName</option>}</select><button type="submit">Apply</button><a asp-action="Index" asp-route-section="@Model.Section">Clear</a></form>
+        <div class="pw-stats"><article><strong>@projects.Count</strong><span>Projects</span></article><article><strong>@tasks.Count(t => t.Status != "Completed")</strong><span>Open tasks</span></article><article><strong>@Model.Assignments.Where(a => ids.Contains(a.ProjectId)).Select(a => a.EmployeeId).Distinct().Count()</strong><span>Allocated employees</span></article><article><strong>@(tasks.Count == 0 ? 0 : tasks.Count(t => t.Status == "Completed") * 100 / tasks.Count)%</strong><span>Tasks completed</span></article></div>
+    }
+    @if (Model.Section == "projects")
+    {
+        @if (Model.CanManageProjects)
+        {
+            <section class="pw-panel"><h2>@(Model.ProjectForm.Id == 0 ? "Create project" : "Edit project")</h2>
+                <form asp-action="SaveProject" method="post" class="pw-form">
+                    <input asp-for="ProjectForm.Id" type="hidden" />
+                    <label>Project code<input asp-for="ProjectForm.ProjectCode" maxlength="40" required /></label>
+                    <label>Project name<input asp-for="ProjectForm.ProjectName" maxlength="160" required /></label>
+                    <label>Department<select asp-for="ProjectForm.DepartmentId" asp-items="@(new SelectList(Model.Departments, "Id", "DepartmentName"))"><option value="">No department</option></select></label>
+                    <label>Manager<select asp-for="ProjectForm.ManagerId" asp-items="@(new SelectList(Model.Managers, "Id", "FullName"))" required><option value="">Select manager</option></select></label>
+                    <label>Team<select asp-for="ProjectForm.TeamId" asp-items="@(new SelectList(Model.Teams.Where(t => t.IsActive), "Id", "Name"))" required><option value="">Select team</option></select></label>
+                    <label>Budget (INR)<input asp-for="ProjectForm.Budget" type="number" min="0" max="1000000000" step="0.01" required /></label>
+                    <label>Start date<input asp-for="ProjectForm.StartDate" type="date" required /></label><label>End date<input asp-for="ProjectForm.EndDate" type="date" required /></label>
+                    <label>Status<select asp-for="ProjectForm.Status">@foreach(var status in new[]{"Planning","Active","On Hold","Completed","Cancelled"}){<option>@status</option>}</select></label>
+                    <label class="pw-wide">Description<textarea asp-for="ProjectForm.Description" maxlength="2000"></textarea></label>
+                    <p class="pw-wide pw-hint">Create a named team in Teams first. Selecting a different team adds its active members to this project's allocation. Manage individual additions and removals in Resource Allocation.</p>
+                    @if (Model.Managers.Count == 0) { <p class="pw-wide pw-hint">No active manager is available. Assign the Manager role to an employee account first.</p> }
+                    <div class="pw-wide pw-actions"><button type="submit">Save project</button><a asp-action="Index" asp-route-section="projects">New / cancel edit</a></div>
+                </form>
+            </section>
+        }
+        <section class="pw-panel"><h2>Project directory</h2><div class="pw-table"><table><thead><tr><th>Project</th><th>Manager / team</th><th>Dates</th><th>Status</th><th>Employees</th><th>Actions</th></tr></thead><tbody>
+            @foreach(var p in projects){<tr><td><strong>@p.ProjectName</strong><small>@p.ProjectCode</small><small>@p.Description</small></td><td>@(p.Manager?.FullName ?? "Not assigned")<small>@(p.Team?.Name ?? "No team selected")</small></td><td>@p.StartDate.ToString("dd MMM yyyy")<small>to @p.EndDate.ToString("dd MMM yyyy")</small></td><td><span class="pw-badge">@p.Status</span></td><td>@Model.Assignments.Count(a => a.ProjectId == p.Id)</td><td><a asp-action="Index" asp-route-section="timeline" asp-route-projectId="@p.Id">Timeline</a> @if(Model.CanManageProjects){<a asp-action="Index" asp-route-section="projects" asp-route-editId="@p.Id">Edit</a>}</td></tr>}
+            @if(projects.Count == 0){<tr><td colspan="6">No projects available. HR/Admin can create a project above.</td></tr>}
+        </tbody></table></div></section>
+    }
+    @if (Model.Section == "teams")
+    {
+        @if(Model.CanManageProjects){
+            <section class="pw-panel"><h2>@(Model.TeamForm.Id == 0 ? "Create team" : "Edit team")</h2>
+                <form asp-action="SaveTeam" method="post" class="pw-form"><input asp-for="TeamForm.Id" type="hidden" />
+                    <label>Team name<input asp-for="TeamForm.Name" required maxlength="100" /></label><label>Description<input asp-for="TeamForm.Description" maxlength="500" /></label>
+                    <label class="pw-check"><input asp-for="TeamForm.IsActive" /> Active team</label>
+                    <fieldset class="pw-wide"><legend>Team employees</legend><div class="pw-members">@foreach(var e in Model.Employees){<label class="pw-check"><input type="checkbox" name="memberIds" value="@e.Id" checked="@Model.MemberIds.Contains(e.Id)" />@e.FullName <small>@e.EmployeeCode · @e.Department</small></label>}</div></fieldset>
+                    <p class="pw-wide pw-hint">Team membership is used when assigning a team to a project. Existing project allocations are managed separately in Resource Allocation.</p>
+                    <div class="pw-actions pw-wide"><button>Save team</button><a asp-action="Index" asp-route-section="teams">New / cancel edit</a></div>
+                </form>
+            </section>
+        }
+        <section class="pw-panel"><h2>Teams</h2><div class="pw-cards">@foreach(var team in Model.Teams){var members=Model.TeamMembers.Where(m=>m.TeamId==team.Id).ToList();<article><h3>@team.Name</h3><p>@team.Description</p><span class="pw-badge">@(team.IsActive?"Active":"Inactive") · @members.Count members</span><ul>@foreach(var member in members){<li>@member.Employee.FullName (@member.Employee.EmployeeCode)</li>}</ul>@if(Model.CanManageProjects){<a asp-action="Index" asp-route-section="teams" asp-route-editId="@team.Id">Edit team</a>}</article>}</div>@if(Model.Teams.Count==0){<p>No teams created yet.</p>}</section>
+    }
+    @if (Model.Section == "tasks")
+    {
+        <section class="pw-panel"><h2>@(Model.TaskForm.Id == 0 ? "Assign task" : "Edit task")</h2><form asp-action="SaveTask" method="post" class="pw-form" data-member-form>
+            <input asp-for="TaskForm.Id" type="hidden" />
+            <label>Project<select asp-for="TaskForm.ProjectId" asp-items="projectOptions" required data-project-select><option value="">Select project</option></select></label>
+            <label>Employee<select asp-for="TaskForm.AssigneeId" required data-member-select><option value="">Select allocated employee</option>@foreach(var e in Model.Employees){<option value="@e.Id" data-projects="@string.Join(",",Model.Assignments.Where(a=>a.EmployeeId==e.Id).Select(a=>a.ProjectId))">@e.FullName (@e.EmployeeCode)</option>}</select></label>
+            <label>Task title<input asp-for="TaskForm.Title" maxlength="200" required /></label><label>Due date<input asp-for="TaskForm.DueDate" type="date" required /></label>
+            <label>Priority<select asp-for="TaskForm.Priority"><option>Low</option><option>Medium</option><option>High</option></select></label><label>Status<select asp-for="TaskForm.Status"><option>To Do</option><option>In Progress</option><option>In Review</option><option>Completed</option></select></label>
+            <label class="pw-wide">Description<textarea asp-for="TaskForm.Description" maxlength="2000"></textarea></label><p class="pw-hint pw-wide">The task belongs to the selected project's manager. Due dates must fall within the project dates.</p>
+            <div class="pw-wide pw-actions"><button>Save task</button><a asp-action="Index" asp-route-section="tasks">New / cancel edit</a></div>
+        </form></section>
+        <section class="pw-panel"><h2>Project tasks</h2><div class="pw-table"><table><thead><tr><th>Task / project</th><th>Employee</th><th>Due</th><th>Priority</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+            @foreach(var t in tasks){<tr><td><strong>@t.Title</strong><small>@Model.Projects.First(p=>p.Id==t.ProjectId).ProjectName</small><small>@t.Description</small></td><td>@t.Assignee.FullName</td><td>@t.DueDate.ToString("dd MMM yyyy") @if(t.DueDate<DateOnly.FromDateTime(DateTime.Today)&&t.Status!="Completed"){<span class="pw-danger">Overdue</span>}</td><td>@t.Priority</td><td>@t.Status</td><td><a asp-action="Index" asp-route-section="tasks" asp-route-editId="@t.Id">Edit / status</a><form asp-action="DeleteEntry" method="post" data-delete-form><input type="hidden" name="section" value="tasks" /><input type="hidden" name="id" value="@t.Id" /><button class="pw-delete">Delete</button></form></td></tr>}
+            @if(tasks.Count==0){<tr><td colspan="6">No project tasks assigned yet.</td></tr>}
+        </tbody></table></div></section>
+    }
+    @if (Model.Section == "timeline")
+    {
+        <section class="pw-panel"><h2>Project delivery timeline</h2><p class="pw-hint">Progress is calculated from completed tasks. Project dates and status come from Project Creation.</p>
+            @foreach(var p in projects){var work=tasks.Where(t=>t.ProjectId==p.Id).ToList();var percent=work.Count==0?0:work.Count(t=>t.Status=="Completed")*100/work.Count;
+                <article class="pw-timeline"><header><div><h3>@p.ProjectName</h3><span>@p.StartDate.ToString("dd MMM yyyy") → @p.EndDate.ToString("dd MMM yyyy") · @p.Status</span></div><strong>@percent% tasks complete</strong></header><progress value="@percent" max="100" aria-label="@p.ProjectName task completion">@percent%</progress>
+                <p>Manager: @(p.Manager?.FullName??"Not assigned") · Team: @(p.Team?.Name??"Not assigned") · @work.Count tasks</p>
+                @if(p.EndDate<DateOnly.FromDateTime(DateTime.Today)&&p.Status!="Completed"&&p.Status!="Cancelled"){<p class="pw-danger">Project is past its planned end date.</p>}
+                <ol>@foreach(var t in work){<li><time>@t.DueDate.ToString("dd MMM yyyy")</time><span><strong>@t.Title</strong><small>@t.Assignee.FullName · @t.Status</small></span></li>}</ol>
+                @if(work.Count==0){<p>No tasks added to this project yet.</p>}
+                <a asp-action="Index" asp-route-section="tasks" asp-route-projectId="@p.Id">Manage tasks</a></article>
+            }
+            @if(projects.Count==0){<p>No projects available for the timeline.</p>}
+        </section>
+    }
+    @if (Model.Section == "resources")
+    {
+        @foreach(var p in projects){var allocated=Model.Assignments.Where(a=>a.ProjectId==p.Id).ToList();
+            <section class="pw-panel"><h2>@p.ProjectName</h2><p>Manager: @(p.Manager?.FullName??"Not assigned") · Team: @(p.Team?.Name??"No team") · @allocated.Count allocated employees</p>
+                @if(Model.CanManageProjects){<form asp-action="Allocate" method="post"><input type="hidden" name="projectId" value="@p.Id" /><div class="pw-members">@foreach(var e in Model.Employees){<label class="pw-check"><input type="checkbox" name="memberIds" value="@e.Id" checked="@(ViewData.ModelState.IsValid ? allocated.Any(a=>a.EmployeeId==e.Id) : Model.MemberIds.Contains(e.Id))" />@e.FullName <small>@e.EmployeeCode · @e.Department</small></label>}</div><button>Save allocation</button></form>}
+                <div class="pw-table"><table><thead><tr><th>Employee</th><th>Department</th><th>Open tasks</th><th>Logged hours</th></tr></thead><tbody>@foreach(var a in allocated){<tr><td>@a.Employee.FullName <small>@a.Employee.EmployeeCode · @(a.Employee.IsActive?"Active":"Inactive")</small></td><td>@a.Employee.Department</td><td>@Model.Tasks.Count(t=>t.ProjectId==p.Id&&t.AssigneeId==a.EmployeeId&&t.Status!="Completed")</td><td>@Model.Timesheets.Where(t=>t.ProjectId==p.Id&&t.EmployeeId==a.EmployeeId).Sum(t=>t.Hours).ToString("0.##")</td></tr>}</tbody></table></div>
+            </section>
+        }
+        @if(projects.Count==0){<section class="pw-panel">Create a project to allocate employees.</section>}
+    }
+    @if (Model.Section == "timesheets")
+    {
+        <section class="pw-panel"><h2>@(Model.TimeForm.Id==0?"Record work hours":"Edit work hours")</h2><form asp-action="SaveTime" method="post" class="pw-form" data-member-form>
+            <input asp-for="TimeForm.Id" type="hidden" /><label>Project<select asp-for="TimeForm.ProjectId" asp-items="projectOptions" required data-project-select><option value="">Select project</option></select></label>
+            <label>Employee<select asp-for="TimeForm.EmployeeId" required data-member-select><option value="">Select allocated employee</option>@foreach(var e in Model.Employees){<option value="@e.Id" data-projects="@string.Join(",",Model.Assignments.Where(a=>a.EmployeeId==e.Id).Select(a=>a.ProjectId))">@e.FullName (@e.EmployeeCode)</option>}</select></label>
+            <label>Work date<input asp-for="TimeForm.WorkDate" type="date" max="@DateTime.Today.ToString("yyyy-MM-dd")" required /></label><label>Hours<input asp-for="TimeForm.Hours" type="number" min="0.01" max="24" step="0.01" required /></label>
+            <label class="pw-wide">Work description<textarea asp-for="TimeForm.Notes" maxlength="1000" required></textarea></label><div class="pw-actions pw-wide"><button>Save hours</button><a asp-action="Index" asp-route-section="timesheets">New / cancel edit</a></div>
+        </form></section>
+        <section class="pw-panel"><h2>Recorded hours · @times.Sum(t=>t.Hours).ToString("0.##") total</h2><p class="pw-hint">Project work hours entered by HR/Admin or the assigned manager. These are separate from attendance punches.</p><div class="pw-table"><table><thead><tr><th>Date / project</th><th>Employee</th><th>Hours</th><th>Work</th><th>Actions</th></tr></thead><tbody>
+            @foreach(var t in times){<tr><td>@t.WorkDate.ToString("dd MMM yyyy")<small>@Model.Projects.First(p=>p.Id==t.ProjectId).ProjectName</small></td><td>@t.Employee.FullName</td><td>@t.Hours.ToString("0.##")</td><td>@t.Notes</td><td><a asp-action="Index" asp-route-section="timesheets" asp-route-editId="@t.Id">Edit</a><form asp-action="DeleteEntry" method="post" data-delete-form><input type="hidden" name="section" value="timesheets" /><input type="hidden" name="id" value="@t.Id" /><button class="pw-delete">Delete</button></form></td></tr>}
+            @if(times.Count==0){<tr><td colspan="5">No work hours recorded.</td></tr>}
+        </tbody></table></div></section>
+    }
+    @if (Model.Section == "budget")
+    {
+        <section class="pw-panel"><h2>Budget summary (INR)</h2><p class="pw-hint">Budget is set in Project Creation. Actual cost is the total of project costs recorded below.</p><div class="pw-table"><table><thead><tr><th>Project</th><th>Budget</th><th>Actual cost</th><th>Remaining</th></tr></thead><tbody>@foreach(var p in projects){var spent=costs.Where(c=>c.ProjectId==p.Id).Sum(c=>c.Amount);<tr><td>@p.ProjectName</td><td>@p.Budget.ToString("N2")</td><td>@spent.ToString("N2")</td><td class="@(spent>p.Budget?"pw-danger":"")">@((p.Budget-spent).ToString("N2"))</td></tr>}</tbody></table></div></section>
+        @if(Model.CanManageProjects){<section class="pw-panel"><h2>@(Model.CostForm.Id==0?"Add project cost":"Edit project cost")</h2><form asp-action="SaveCost" method="post" class="pw-form"><input asp-for="CostForm.Id" type="hidden" />
+            <label>Project<select asp-for="CostForm.ProjectId" asp-items="projectOptions" required><option value="">Select project</option></select></label><label>Expense title<input asp-for="CostForm.Title" maxlength="150" required /></label>
+            <label>Amount (INR)<input asp-for="CostForm.Amount" type="number" step="0.01" min="0.01" max="1000000000" required /></label><label>Expense date<input asp-for="CostForm.ExpenseDate" type="date" max="@DateTime.Today.ToString("yyyy-MM-dd")" required /></label><label class="pw-wide">Notes<textarea asp-for="CostForm.Notes" maxlength="1000"></textarea></label>
+            <div class="pw-actions pw-wide"><button>Save cost</button><a asp-action="Index" asp-route-section="budget">New / cancel edit</a></div></form></section>}
+        <section class="pw-panel"><h2>Project costs</h2><div class="pw-table"><table><thead><tr><th>Date / project</th><th>Expense</th><th>Amount (INR)</th><th>Actions</th></tr></thead><tbody>@foreach(var c in costs){<tr><td>@c.ExpenseDate.ToString("dd MMM yyyy")<small>@Model.Projects.First(p=>p.Id==c.ProjectId).ProjectName</small></td><td>@c.Title<small>@c.Notes</small></td><td>@c.Amount.ToString("N2")</td><td>@if(Model.CanManageProjects){<a asp-action="Index" asp-route-section="budget" asp-route-editId="@c.Id">Edit</a><form asp-action="DeleteEntry" method="post" data-delete-form><input type="hidden" name="section" value="budget" /><input type="hidden" name="id" value="@c.Id" /><button class="pw-delete">Delete</button></form>}</td></tr>}@if(costs.Count==0){<tr><td colspan="4">No costs recorded.</td></tr>}</tbody></table></div></section>
+    }
+    @if (Model.Section == "enquiries")
+    {
+        <section class="pw-panel"><h2>@(Model.EnquiryForm.Id==0?"Raise project enquiry":"Update enquiry")</h2><form asp-action="SaveEnquiry" method="post" class="pw-form"><input asp-for="EnquiryForm.Id" type="hidden" />
+            <label>Project<select asp-for="EnquiryForm.ProjectId" asp-items="projectOptions" required><option value="">Select project</option></select></label><label>Subject<input asp-for="EnquiryForm.Subject" maxlength="150" required /></label>
+            <label>Status<select asp-for="EnquiryForm.Status"><option>Open</option><option>In Progress</option><option>Resolved</option><option>Closed</option></select></label>
+            <label class="pw-wide">Description<textarea asp-for="EnquiryForm.Description" maxlength="2000" required></textarea></label><label class="pw-wide">Resolution<textarea asp-for="EnquiryForm.Resolution" maxlength="2000"></textarea></label>
+            <div class="pw-actions pw-wide"><button>Save enquiry</button><a asp-action="Index" asp-route-section="enquiries">New / cancel edit</a></div></form></section>
+        <section class="pw-panel"><h2>Enquiry history</h2><div class="pw-table"><table><thead><tr><th>Reference / project</th><th>Enquiry</th><th>Status</th><th>Resolution</th><th>Actions</th></tr></thead><tbody>@foreach(var e in enquiries){<tr><td>ENQ-@e.Id<small>@Model.Projects.First(p=>p.Id==e.ProjectId).ProjectName</small><small>@e.CreatedAtUtc.ToLocalTime().ToString("dd MMM yyyy HH:mm")</small></td><td><strong>@e.Subject</strong><small>@e.Description</small></td><td>@e.Status</td><td>@e.Resolution</td><td><a asp-action="Index" asp-route-section="enquiries" asp-route-editId="@e.Id">Update / resolve</a><form asp-action="DeleteEntry" method="post" data-delete-form><input type="hidden" name="section" value="enquiries" /><input type="hidden" name="id" value="@e.Id" /><button class="pw-delete">Delete</button></form></td></tr>}@if(enquiries.Count==0){<tr><td colspan="5">No project enquiries yet.</td></tr>}</tbody></table></div></section>
+    }
+</main>
+<script src="~/js/project-workspace.js" asp-append-version="true"></script>

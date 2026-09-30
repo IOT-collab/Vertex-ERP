@@ -14,7 +14,7 @@ public sealed class EmployeeDocumentFormViewModel
     [Required, StringLength(80)] public string Designation { get; set; } = string.Empty;
     [StringLength(80)] public string Department { get; set; } = string.Empty;
     [Required, StringLength(120)] public string ManagerName { get; set; } = string.Empty;
-    [Required] public string DocumentType { get; set; } = "Offer Letter";
+    [Required] public string DocumentType { get; set; } = "Joining Letter";
     [Required, DataType(DataType.Date)] public DateOnly EffectiveDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     [StringLength(80)] public string? NewDesignation { get; set; }
     [StringLength(1000)] public string? AdditionalNotes { get; set; }

@@ -12,3 +12,9 @@ Vertex ERP/appsettings.Production.json
 *.userosscache
 *.sln.docstates
 /Vertex ERP/output/pdf/Sanjeev_Kumar_ATS_Resume.pdf
+
+# Local project workflow verification output and disposable database
+/.artifacts/project-checks/
+/.artifacts/project-test-db/
+/.artifacts/project-test-keys/
+/.artifacts/project-workspace/

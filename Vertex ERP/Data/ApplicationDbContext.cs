@@ -50,6 +50,11 @@ namespace VertexERP.Data
         public DbSet<WorkTask> WorkTasks => Set<WorkTask>();
         public DbSet<ErpProject> Projects => Set<ErpProject>();
         public DbSet<ProjectEmployee> ProjectEmployees => Set<ProjectEmployee>();
+        public DbSet<ProjectTeam> ProjectTeams => Set<ProjectTeam>();
+        public DbSet<ProjectTeamMember> ProjectTeamMembers => Set<ProjectTeamMember>();
+        public DbSet<ProjectTimeEntry> ProjectTimeEntries => Set<ProjectTimeEntry>();
+        public DbSet<ProjectCost> ProjectCosts => Set<ProjectCost>();
+        public DbSet<ProjectEnquiry> ProjectEnquiries => Set<ProjectEnquiry>();
         public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
         public DbSet<EmployeeLeaveBalance> EmployeeLeaveBalances => Set<EmployeeLeaveBalance>();
         public DbSet<ManualLeaveBalance> ManualLeaveBalances => Set<ManualLeaveBalance>();
@@ -67,6 +72,33 @@ namespace VertexERP.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<ProjectTeam>(entity =>
+            {
+                entity.Property<string>("NormalizedName").HasComputedColumnSql("lower(btrim(\"Name\"))", stored: true);
+                entity.HasIndex("NormalizedName").IsUnique();
+            });
+            modelBuilder.Entity<ProjectTeamMember>(entity =>
+            {
+                entity.HasKey(x => new { x.TeamId, x.EmployeeId });
+                entity.HasOne(x => x.Team).WithMany().HasForeignKey(x => x.TeamId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<ErpProject>().HasOne(x => x.Team).WithMany().HasForeignKey(x => x.TeamId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ErpProject>().Property(x => x.Budget).HasPrecision(18, 2);
+            modelBuilder.Entity<WorkTask>().HasOne(x => x.Project).WithMany().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ProjectTimeEntry>(entity =>
+            {
+                entity.Property(x => x.Hours).HasPrecision(5, 2);
+                entity.HasOne(x => x.Project).WithMany().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(x => new { x.EmployeeId, x.WorkDate });
+            });
+            modelBuilder.Entity<ProjectCost>(entity =>
+            {
+                entity.Property(x => x.Amount).HasPrecision(18, 2);
+                entity.HasOne(x => x.Project).WithMany().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Restrict);
+            });
+            modelBuilder.Entity<ProjectEnquiry>().HasOne(x => x.Project).WithMany().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<ManualLeaveBalance>(entity =>
             {
                 entity.HasIndex(x => new { x.EmployeeId, x.Year, x.Category }).IsUnique();

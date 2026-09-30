@@ -21,9 +21,18 @@ public sealed class BiometricRepository : IBiometricRepository
     public async Task AddDeviceAsync(BiometricDevice device, CancellationToken cancellationToken = default) => await _db.BiometricDevices.AddAsync(device, cancellationToken);
     public void RemoveDevice(BiometricDevice device) => _db.BiometricDevices.Remove(device);
     public Task<EmployeeDeviceMapping?> GetMappingAsync(int deviceId, string deviceUserId, CancellationToken cancellationToken = default) =>
-        _db.EmployeeDeviceMappings.SingleOrDefaultAsync(mapping => mapping.BiometricDeviceId == deviceId && mapping.DeviceUserId == deviceUserId && mapping.IsActive, cancellationToken);
-    public Task<Employee?> GetActiveEmployeeByCodeAsync(string employeeCode, CancellationToken cancellationToken = default) =>
-        _db.Employees.SingleOrDefaultAsync(employee => employee.IsActive && employee.EmployeeCode.ToLower() == employeeCode.Trim().ToLower(), cancellationToken);
+        _db.EmployeeDeviceMappings.SingleOrDefaultAsync(mapping => mapping.BiometricDeviceId == deviceId && mapping.DeviceUserId.ToUpper() == deviceUserId.Trim().ToUpper() && mapping.IsActive, cancellationToken);
+    public async Task<Employee?> GetActiveEmployeeByCodeAsync(string employeeCode, CancellationToken cancellationToken = default)
+    {
+        var code = employeeCode.Trim().ToUpperInvariant();
+        var linkedIds = await _db.EmployeeDeviceMappings.Where(mapping => mapping.IsActive && mapping.DeviceUserId.ToUpper() == code)
+            .Select(mapping => mapping.EmployeeId).Distinct().Take(2).ToListAsync(cancellationToken);
+        if (linkedIds.Count > 1) return null;
+        if (linkedIds.Count == 1)
+            return await _db.Employees.SingleOrDefaultAsync(employee => employee.Id == linkedIds[0] && employee.IsActive, cancellationToken);
+        return await _db.Employees.SingleOrDefaultAsync(employee => employee.IsActive && employee.EmployeeCode.ToUpper() == code
+            && !_db.EmployeeDeviceMappings.Any(mapping => mapping.EmployeeId == employee.Id), cancellationToken);
+    }
     public async Task<IReadOnlyList<EmployeeDeviceMapping>> GetMappingsAsync(int deviceId, CancellationToken cancellationToken = default) =>
         await _db.EmployeeDeviceMappings.AsNoTracking().Include(mapping => mapping.Employee).Where(mapping => mapping.BiometricDeviceId == deviceId).OrderBy(mapping => mapping.DeviceUserId).ToListAsync(cancellationToken);
     public async Task AddOrUpdateMappingAsync(EmployeeDeviceMapping mapping, CancellationToken cancellationToken = default)

@@ -96,7 +96,18 @@ public class BiometricDevicesController : Controller
             var deviceUserId = model.DeviceUserId.Trim();
             await _repository.AddOrUpdateMappingAsync(new EmployeeDeviceMapping { BiometricDeviceId = model.DeviceId, EmployeeId = model.EmployeeId!.Value, DeviceUserId = deviceUserId, IsActive = true }, cancellationToken);
             await _repository.SaveChangesAsync(cancellationToken);
-            await _db.AttendanceLogs.Where(log => log.BiometricDeviceId == model.DeviceId && log.DeviceUserId == deviceUserId && log.EmployeeId == null).ExecuteUpdateAsync(update => update.SetProperty(log => log.EmployeeId, model.EmployeeId.Value), cancellationToken);
+            await _db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+            {
+                _db.ChangeTracker.Clear();
+                await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+                var linked = await _db.AttendanceLogs.Where(log => log.BiometricDeviceId == model.DeviceId && log.DeviceUserId == deviceUserId && log.EmployeeId == null).ExecuteUpdateAsync(update => update.SetProperty(log => log.EmployeeId, model.EmployeeId.Value), cancellationToken);
+                if (linked > 0)
+                {
+                    _db.AuditLogs.Add(VertexERP.Services.AuditLogFactory.CreateEvent("AttendanceLog", "Attendance punches linked", $"{linked} punch(es) · Device #{model.DeviceId} · Employee #{model.EmployeeId}", User));
+                    await _db.SaveChangesAsync(cancellationToken);
+                }
+                await transaction.CommitAsync(cancellationToken);
+            });
             TempData["BiometricMessage"] = "Employee mapping saved. Existing raw punches were linked automatically.";
         }
         catch (DbUpdateException exception) { _logger.LogWarning(exception, "Could not save biometric mapping"); TempData["BiometricError"] = "This employee or device user ID is already mapped."; }

@@ -149,7 +149,7 @@ namespace Vertex_ERP.Controllers
                     || !Number($"leaveDeduction_{salary.EmployeeId}", out var deduction) || deduction < 0 || deduction > salary.GrossSalary || decimal.Round(deduction, 2) != deduction
                     || note?.Length > 300)
                 {
-                    TempData["SalaryError"] = $"Enter valid salary days (0–{end.Day}) and deduction for {salary.Employee.FullName}. No slips were generated.";
+                    TempData["SalaryError"] = $"Enter valid salary days (0â€“{end.Day}) and deduction for {salary.Employee.FullName}. No slips were generated.";
                     return Back();
                 }
                 pending.Add(new GeneratedSalarySlip
@@ -251,14 +251,14 @@ namespace Vertex_ERP.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GenerateDocument(EmployeeDocumentFormViewModel model)
         {
-            var allowedTypes = new[] { "Offer Letter", "Increment / Promotion Letter", "Relieving Letter", "Experience Letter" };
+            var allowedTypes = new[] { "Joining Letter", "Increment / Promotion Letter", "Relieving Letter", "Experience Letter" };
             if (!allowedTypes.Contains(model.DocumentType)) ModelState.AddModelError(nameof(model.DocumentType), "Select a valid document type.");
-            if (model.DocumentType == "Offer Letter")
+            if (model.DocumentType == "Joining Letter")
             {
-                if (string.IsNullOrWhiteSpace(model.PanNumber)) ModelState.AddModelError(nameof(model.PanNumber), "PAN number is required for an offer letter.");
-                if (string.IsNullOrWhiteSpace(model.AnnualCtc)) ModelState.AddModelError(nameof(model.AnnualCtc), "Annual CTC is required for an offer letter.");
-                if (string.IsNullOrWhiteSpace(model.WorkLocation)) ModelState.AddModelError(nameof(model.WorkLocation), "Work location is required for an offer letter.");
-                if (!model.BasicSalary.HasValue) ModelState.AddModelError(nameof(model.BasicSalary), "Basic salary is required for an offer letter.");
+                if (string.IsNullOrWhiteSpace(model.PanNumber)) ModelState.AddModelError(nameof(model.PanNumber), "PAN number is required for a joining letter.");
+                if (string.IsNullOrWhiteSpace(model.AnnualCtc)) ModelState.AddModelError(nameof(model.AnnualCtc), "Annual CTC is required for a joining letter.");
+                if (string.IsNullOrWhiteSpace(model.WorkLocation)) ModelState.AddModelError(nameof(model.WorkLocation), "Work location is required for a joining letter.");
+                if (!model.BasicSalary.HasValue) ModelState.AddModelError(nameof(model.BasicSalary), "Basic salary is required for a joining letter.");
             }
             if (model.DocumentType == "Increment / Promotion Letter" && string.IsNullOrWhiteSpace(model.RevisedCompensation))
                 ModelState.AddModelError(nameof(model.RevisedCompensation), "Revised compensation is required for an increment / promotion letter.");
@@ -275,7 +275,7 @@ namespace Vertex_ERP.Controllers
         public IActionResult DownloadGeneratedDocument(EmployeeDocumentFormViewModel model)
         {
             if (!ModelState.IsValid) return BadRequest("Document details are incomplete.");
-            var allowedTypes = new[] { "Offer Letter", "Increment / Promotion Letter", "Relieving Letter", "Experience Letter" };
+            var allowedTypes = new[] { "Joining Letter", "Increment / Promotion Letter", "Relieving Letter", "Experience Letter" };
             if (!allowedTypes.Contains(model.DocumentType)) return BadRequest("Invalid document type.");
             return File(BuildEmployeeDocumentPdf(model), "application/pdf", BuildDocumentFileName(model));
         }
@@ -291,7 +291,7 @@ namespace Vertex_ERP.Controllers
                 throw new FileNotFoundException("The official HR letterhead stationery image is missing.", stationeryPath);
             using var document = new PdfDocument();
             var page = AddStationeryPage();
-            if (model.DocumentType == "Offer Letter")
+            if (model.DocumentType == "Joining Letter")
             {
                 AddStationeryPage();
                 AddStationeryPage();
@@ -321,7 +321,7 @@ namespace Vertex_ERP.Controllers
             y += 8;
 
             var effectiveDate = model.EffectiveDate.ToString("dd MMMM yyyy");
-            if (model.DocumentType == "Offer Letter")
+            if (model.DocumentType == "Joining Letter")
             {
                 DrawParagraph($"We are pleased to offer you the position of {model.Designation} in the {model.Department} department at Vertex Automation System (P.) Ltd., effective from {effectiveDate}.");
                 DrawLabelValue("Designation", model.Designation);
@@ -373,7 +373,7 @@ namespace Vertex_ERP.Controllers
                 DrawParagraph(model.AdditionalNotes.Trim());
             }
 
-            if (model.DocumentType == "Offer Letter")
+            if (model.DocumentType == "Joining Letter")
             {
                 DrawOfferSalaryAndTermsPage(document.Pages[1]);
                 DrawOfferTermsPage(document.Pages[2], 3, "GENERAL TERMS AND ACCEPTANCE", new[]
@@ -722,41 +722,50 @@ namespace Vertex_ERP.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddDepartment(AddDepartmentViewModel model)
         {
-            var departmentName = model.DepartmentName?.Trim() ?? string.Empty;
-            var departmentCode = model.DepartmentCode?.Trim() ?? string.Empty;
-
-            if (await _dbContext.Departments.AnyAsync(department => department.DepartmentName.ToLower() == departmentName.ToLower()))
-                ModelState.AddModelError(nameof(model.DepartmentName), "Department name already exists.");
-            if (await _dbContext.Departments.AnyAsync(department => department.DepartmentCode.ToLower() == departmentCode.ToLower()))
-                ModelState.AddModelError(nameof(model.DepartmentCode), "Department code already exists.");
-            if (model.ManagerId.HasValue && !await _dbContext.Employees.AnyAsync(employee => employee.Id == model.ManagerId.Value && employee.IsActive))
-                ModelState.AddModelError(nameof(model.ManagerId), "Please select a valid active employee as manager.");
-
-            if (!ModelState.IsValid) return View(await PopulateDepartmentManagersAsync(model));
-
-            _dbContext.Departments.Add(new Department
+            return await _dbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
             {
-                DepartmentName = departmentName,
-                DepartmentCode = departmentCode,
-                Description = Clean(model.Description),
-                IsActive = model.IsActive,
-                ManagerId = model.ManagerId,
-                CreatedDate = DateTime.UtcNow
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+                _dbContext.ChangeTracker.Clear();
+                // Serialize the duplicate check and save across simultaneous department writes.
+                await _dbContext.Database.ExecuteSqlRawAsync("LOCK TABLE \"Departments\" IN SHARE ROW EXCLUSIVE MODE");
+                var departmentName = model.DepartmentName?.Trim() ?? string.Empty;
+                var departmentCode = model.DepartmentCode?.Trim() ?? string.Empty;
+
+                if (await _dbContext.Departments.AnyAsync(department => department.DepartmentName.Trim().ToLower() == departmentName.ToLower()))
+                    ModelState.AddModelError(nameof(model.DepartmentName), "Department name already exists.");
+                if (await _dbContext.Departments.AnyAsync(department => department.DepartmentCode.Trim().ToLower() == departmentCode.ToLower()))
+                    ModelState.AddModelError(nameof(model.DepartmentCode), "Department code already exists.");
+                if (model.ManagerId.HasValue && !await _dbContext.Employees.AnyAsync(employee => employee.Id == model.ManagerId.Value && employee.IsActive))
+                    ModelState.AddModelError(nameof(model.ManagerId), "Please select a valid active employee as manager.");
+
+                if (!ModelState.IsValid) return View(await PopulateDepartmentManagersAsync(model));
+
+                _dbContext.Departments.Add(new Department
+                {
+                    DepartmentName = departmentName,
+                    DepartmentCode = departmentCode,
+                    Description = Clean(model.Description),
+                    IsActive = model.IsActive,
+                    ManagerId = model.ManagerId,
+                    CreatedDate = DateTime.UtcNow
+                });
+
+                try
+                {
+                    await _dbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    TempData["DepartmentMessage"] = "Department added successfully.";
+                    return RedirectToAction(nameof(Department));
+                }
+                catch (DbUpdateException exception)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(exception, "Database error while adding department {DepartmentCode}.", departmentCode);
+                    ModelState.AddModelError(string.Empty, "Unable to add department. The name or code may already exist.");
+                    return View(await PopulateDepartmentManagersAsync(model));
+                }
             });
-
-            try
-            {
-                await _dbContext.SaveChangesAsync();
-
-                TempData["DepartmentMessage"] = "Department added successfully.";
-                return RedirectToAction(nameof(Department));
-            }
-            catch (DbUpdateException exception)
-            {
-                _logger.LogError(exception, "Database error while adding department {DepartmentCode}.", departmentCode);
-                ModelState.AddModelError(string.Empty, "Unable to add department. The name or code may already exist.");
-                return View(await PopulateDepartmentManagersAsync(model));
-            }
         }
 
         [HttpGet]
@@ -779,31 +788,39 @@ namespace Vertex_ERP.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditDepartment(int id, AddDepartmentViewModel model)
         {
-            if (id != model.Id) return BadRequest();
-            var department = await _dbContext.Departments.FirstOrDefaultAsync(item => item.Id == id);
-            if (department == null) return NotFound();
+            return await _dbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
+            {
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+                _dbContext.ChangeTracker.Clear();
+                // Serialize the duplicate check and save across simultaneous department writes.
+                await _dbContext.Database.ExecuteSqlRawAsync("LOCK TABLE \"Departments\" IN SHARE ROW EXCLUSIVE MODE");
+                if (id != model.Id) return BadRequest();
+                var department = await _dbContext.Departments.FirstOrDefaultAsync(item => item.Id == id);
+                if (department == null) return NotFound();
 
-            var departmentName = model.DepartmentName?.Trim() ?? string.Empty;
-            var departmentCode = model.DepartmentCode?.Trim() ?? string.Empty;
-            if (await _dbContext.Departments.AnyAsync(item => item.Id != id && item.DepartmentName.ToLower() == departmentName.ToLower()))
-                ModelState.AddModelError(nameof(model.DepartmentName), "Department name already exists.");
-            if (await _dbContext.Departments.AnyAsync(item => item.Id != id && item.DepartmentCode.ToLower() == departmentCode.ToLower()))
-                ModelState.AddModelError(nameof(model.DepartmentCode), "Department code already exists.");
-            if (model.ManagerId.HasValue && !await _dbContext.Employees.AnyAsync(employee => employee.Id == model.ManagerId.Value && employee.IsActive))
-                ModelState.AddModelError(nameof(model.ManagerId), "Please select a valid active employee as manager.");
+                var departmentName = model.DepartmentName?.Trim() ?? string.Empty;
+                var departmentCode = model.DepartmentCode?.Trim() ?? string.Empty;
+                if (await _dbContext.Departments.AnyAsync(item => item.Id != id && item.DepartmentName.Trim().ToLower() == departmentName.ToLower()))
+                    ModelState.AddModelError(nameof(model.DepartmentName), "Department name already exists.");
+                if (await _dbContext.Departments.AnyAsync(item => item.Id != id && item.DepartmentCode.Trim().ToLower() == departmentCode.ToLower()))
+                    ModelState.AddModelError(nameof(model.DepartmentCode), "Department code already exists.");
+                if (model.ManagerId.HasValue && !await _dbContext.Employees.AnyAsync(employee => employee.Id == model.ManagerId.Value && employee.IsActive))
+                    ModelState.AddModelError(nameof(model.ManagerId), "Please select a valid active employee as manager.");
 
-            if (!ModelState.IsValid) return View("AddDepartment", await PopulateDepartmentManagersAsync(model));
+                if (!ModelState.IsValid) return View("AddDepartment", await PopulateDepartmentManagersAsync(model));
 
-            department.DepartmentName = departmentName;
-            department.DepartmentCode = departmentCode;
-            department.Description = Clean(model.Description);
-            department.IsActive = model.IsActive;
-            department.ManagerId = model.ManagerId;
-            department.UpdatedDate = DateTime.UtcNow;
+                department.DepartmentName = departmentName;
+                department.DepartmentCode = departmentCode;
+                department.Description = Clean(model.Description);
+                department.IsActive = model.IsActive;
+                department.ManagerId = model.ManagerId;
+                department.UpdatedDate = DateTime.UtcNow;
 
-            await _dbContext.SaveChangesAsync();
-            TempData["DepartmentMessage"] = "Department updated successfully.";
-            return RedirectToAction(nameof(Department));
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+                TempData["DepartmentMessage"] = "Department updated successfully.";
+                return RedirectToAction(nameof(Department));
+            });
         }
 
         [HttpGet]
@@ -1047,7 +1064,7 @@ namespace Vertex_ERP.Controllers
 
             if (await _dbContext.AppUsers.AnyAsync(user => user.NormalizedUsername == normalizedUsername))
                 ModelState.AddModelError(nameof(model.LoginUsername), "Login username already exists.");
-            var matches = await FindEmployeeByBiometricCodeAsync(employeeCode);
+            var matches = model.PendingBiometricEmployeeId.HasValue ? await _dbContext.Employees.Where(x => x.Id == model.PendingBiometricEmployeeId.Value).ToListAsync() : await FindEmployeeByBiometricCodeAsync(employeeCode);
             var pendingEmployee = matches.Count == 1 ? matches[0] : null;
             if (matches.Count > 1 || (pendingEmployee != null && !await CanCompleteBiometricProfileAsync(pendingEmployee)))
                 ModelState.AddModelError(nameof(model.EmployeeId), "Employee already exists. Use Employee Management > Edit Profile.");
@@ -1056,6 +1073,8 @@ namespace Vertex_ERP.Controllers
             if (pendingEmployee == null && model.PendingBiometricEmployeeId.HasValue)
                 ModelState.AddModelError(nameof(model.EmployeeId), "Employee ID changed or profile is unavailable. Check Employee ID again.");
             var existingId = pendingEmployee?.Id ?? 0;
+            if (await _dbContext.Employees.AnyAsync(employee => employee.Id != existingId && employee.EmployeeCode.ToUpper() == employeeCode))
+                ModelState.AddModelError(nameof(model.EmployeeId), "ERP Employee ID already exists.");
             if (await _dbContext.Employees.AnyAsync(employee => employee.Id != existingId && employee.Email == email))
                 ModelState.AddModelError(nameof(model.Email), "Email address already exists.");
             if (await _dbContext.Employees.AnyAsync(employee => employee.Id != existingId && employee.PhoneNumber == (model.Phone ?? "").Trim()))
@@ -1105,6 +1124,12 @@ namespace Vertex_ERP.Controllers
                     ReportingManagerId = model.ReportingManagerId,
                     WorkLocation = Clean(model.WorkLocation),
                     Address = Clean(model.Address),
+                    PermanentAddressSameAsPresent = model.PermanentAddressSameAsPresent,
+                    PermanentAddress = Clean(model.PermanentAddressSameAsPresent ? model.Address : model.PermanentAddress),
+                    PermanentCity = Clean(model.PermanentAddressSameAsPresent ? model.City : model.PermanentCity),
+                    PermanentState = Clean(model.PermanentAddressSameAsPresent ? model.State : model.PermanentState),
+                    PermanentPinCode = Clean(model.PermanentAddressSameAsPresent ? model.PinCode : model.PermanentPinCode),
+
                     City = Clean(model.City),
                     State = Clean(model.State),
                     PinCode = Clean(model.PinCode),
@@ -1120,7 +1145,7 @@ namespace Vertex_ERP.Controllers
                 {
                     // Update the existing row so device mappings and attendance keep the same key.
                     employee.Id = pendingEmployee.Id;
-                    employee.EmployeeCode = pendingEmployee.EmployeeCode;
+
                     employee.CreatedDate = pendingEmployee.CreatedDate;
                     employee.PhotoPath ??= pendingEmployee.PhotoPath;
                     employee.UpdatedDate = DateTime.UtcNow;
@@ -1213,6 +1238,11 @@ namespace Vertex_ERP.Controllers
 
         private async Task<HrAddEmployeeViewModel> PopulateManagersAsync(HrAddEmployeeViewModel model)
         {
+            model.SourceEnrollments = await _dbContext.EmployeeDeviceMappings.AsNoTracking()
+                .Where(mapping => mapping.EmployeeId == model.PendingBiometricEmployeeId)
+                .OrderBy(mapping => mapping.BiometricDevice.Name)
+                .Select(mapping => mapping.DeviceUserId + " (" + mapping.BiometricDevice.Name + ")")
+                .Distinct().ToListAsync();
             model.Managers = await _dbContext.Employees.AsNoTracking()
                 .Where(employee => employee.IsActive && _dbContext.AppUsers
                     .Any(user => user.EmployeeId == employee.Id && user.IsActive && user.Role == "Manager"))

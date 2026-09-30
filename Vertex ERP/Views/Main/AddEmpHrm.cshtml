@@ -11,6 +11,14 @@
     <div class="form-container-wrapper">
         <form class="employee-onboarding-form" asp-controller="Employee" asp-action="@(editing ? "Edit" : "Create")" asp-route-id="@(editing ? Model.Id : null)" method="post" enctype="multipart/form-data">
             <input asp-for="Id" type="hidden" />
+            <div class="form-group">
+                <label>Source Enrollment Number / Emp ID</label>
+                @foreach (var enrollment in Model.SourceEnrollments)
+                {
+                    <input type="text" value="@enrollment" readonly aria-label="Source Enrollment Number / Emp ID" />
+                }
+                <small>@(Model.SourceEnrollments.Count == 0 ? "Not linked to a biometric source." : "Received from the attendance source. This number cannot be edited here; changing the ERP Employee ID keeps attendance linked.")</small>
+            </div>
             <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
             <div class="form-main-section" style="margin-bottom:18px;">
                 <div class="section-divider"><span>Employee Photo</span></div>
@@ -56,20 +64,40 @@
                         <div class="form-group"><label asp-for="EmergencyContact"></label><input asp-for="EmergencyContact" /><span asp-validation-for="EmergencyContact" class="field-validation"></span></div>
                     </div>
 
-                    <div class="section-divider"><span>Address</span></div>
+                    <div class="section-divider"><span>Present Address</span></div>
                     <div class="form-group"><label asp-for="Address"></label><input asp-for="Address" /><span asp-validation-for="Address" class="field-validation"></span></div>
                     <div class="form-row">
                         <div class="form-group"><label asp-for="City"></label><input asp-for="City" /></div>
                         <div class="form-group"><label asp-for="State"></label><input asp-for="State" /></div>
                     </div>
                     <div class="form-row"><div class="form-group"><label asp-for="PinCode"></label><input asp-for="PinCode" maxlength="6" inputmode="numeric" /><span asp-validation-for="PinCode" class="field-validation"></span></div></div>
+<div class="form-group" style="grid-column:1 / -1"><h3>Permanent Address</h3><label style="display:flex;align-items:center;gap:10px;margin:12px 0"><input asp-for="PermanentAddressSameAsPresent" style="width:18px;height:18px" /> Same as Present Address</label></div>
+<div class="form-group" style="grid-column:1 / -1"><label asp-for="PermanentAddress"></label><textarea asp-for="PermanentAddress" rows="3" maxlength="300"></textarea><span asp-validation-for="PermanentAddress" class="field-validation"></span></div>
+<div class="form-group"><label asp-for="PermanentCity"></label><input asp-for="PermanentCity" maxlength="80" /><span asp-validation-for="PermanentCity" class="field-validation"></span></div>
+<div class="form-group"><label asp-for="PermanentState"></label><input asp-for="PermanentState" maxlength="80" /><span asp-validation-for="PermanentState" class="field-validation"></span></div>
+<div class="form-group"><label asp-for="PermanentPinCode"></label><input asp-for="PermanentPinCode" maxlength="6" /><span asp-validation-for="PermanentPinCode" class="field-validation"></span></div>
+
                 </div>
 
                 <div class="form-side-section">
                     <div class="config-card">
                         <h3>Organizational Mapping</h3>
                         <div class="form-group"><label asp-for="JoiningDate"></label><input asp-for="JoiningDate" type="date" /><span asp-validation-for="JoiningDate" class="field-validation"></span></div>
-                        <div class="form-group"><label asp-for="Department"></label><input asp-for="Department" /><span asp-validation-for="Department" class="field-validation"></span></div>
+                        <div class="form-group">
+                            <label asp-for="DepartmentId"></label>
+                            <select asp-for="DepartmentId" required>
+                                <option value="">Select department</option>
+                                @foreach (var department in Model.AvailableDepartments)
+                                {
+                                    <option value="@department.Id">@department.DepartmentName</option>
+                                }
+                            </select>
+                            <span asp-validation-for="DepartmentId" class="field-validation"></span>
+                            @if (Model.AvailableDepartments.Count == 0)
+                            {
+                                <small>Add an active department in the Department section first.</small>
+                            }
+                        </div>
                         <div class="form-group"><label asp-for="Designation"></label><input asp-for="Designation" /><span asp-validation-for="Designation" class="field-validation"></span></div>
                         <div class="form-group"><label asp-for="ReportingManagerId"></label><select asp-for="ReportingManagerId"><option value="">No reporting manager</option>@foreach (var manager in Model.Managers){<option value="@manager.Id">@manager.FullName (@manager.EmployeeCode)</option>}</select><span asp-validation-for="ReportingManagerId" class="field-validation"></span></div>
                         <div class="form-group"><label asp-for="WorkLocation"></label><input asp-for="WorkLocation" /></div>
@@ -91,7 +119,7 @@
                     <div class="form-row triple-row"><div class="form-group"><label asp-for="PanNumber"></label><input asp-for="PanNumber"/></div><div class="form-group"><label asp-for="UanNumber"></label><input asp-for="UanNumber"/></div><div class="form-group"><label asp-for="EsicNumber"></label><input asp-for="EsicNumber"/></div></div>
                     <div class="form-row"><div class="form-group"><label asp-for="UpiId"></label><input asp-for="UpiId"/></div></div>
                 </div>
-                <div class="form-main-section" style="margin-top:18px"><div class="section-divider"><span>Salary Details (HR Only)</span></div><div class="form-row triple-row"><div class="form-group"><label asp-for="BasicSalary"></label><input asp-for="BasicSalary" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="HouseRentAllowance"></label><input asp-for="HouseRentAllowance" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="ConveyanceAllowance"></label><input asp-for="ConveyanceAllowance" type="text" inputmode="decimal"/></div></div><div class="form-row triple-row"><div class="form-group"><label asp-for="SpecialAllowance"></label><input asp-for="SpecialAllowance" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="ProvidentFund"></label><input asp-for="ProvidentFund" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="ProfessionalTax"></label><input asp-for="ProfessionalTax" type="text" inputmode="decimal"/></div></div><div class="form-row triple-row"><div class="form-group"><label asp-for="Tds"></label><input asp-for="Tds" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="OtherDeductions"></label><input asp-for="OtherDeductions" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="SalaryEffectiveFrom"></label><input asp-for="SalaryEffectiveFrom" type="date"/></div></div><div class="form-row"><div class="form-group"><label asp-for="PfNumber"></label><input asp-for="PfNumber"/></div><div class="form-group"><label asp-for="PfUan"></label><input asp-for="PfUan"/></div></div></div>
+                <div class="form-main-section" style="margin-top:18px"><div class="section-divider"><span>Salary Details (HR Only)</span></div><div class="form-row triple-row"><div class="form-group"><label asp-for="BasicSalary"></label><input asp-for="BasicSalary" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="HouseRentAllowance"></label><input asp-for="HouseRentAllowance" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="ConveyanceAllowance"></label><input asp-for="ConveyanceAllowance" type="text" inputmode="decimal"/></div></div><div class="form-row triple-row"><div class="form-group"><label asp-for="SpecialAllowance"></label><input asp-for="SpecialAllowance" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="ProvidentFund"></label><input asp-for="ProvidentFund" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="ProfessionalTax"></label><input asp-for="ProfessionalTax" type="text" inputmode="decimal"/></div></div><div class="form-row triple-row"><div class="form-group"><label asp-for="Tds"></label><input asp-for="Tds" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="OtherDeductions"></label><input asp-for="OtherDeductions" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="SalaryEffectiveFrom"></label><input asp-for="SalaryEffectiveFrom" type="date"/></div></div><div class="form-row"><div class="form-group"><label asp-for="PfUan"></label><input asp-for="PfUan"/></div></div></div>
             }
             @if (editing)
             {
@@ -100,7 +128,7 @@
                     <p>@(Model.HasExistingAccount ? "Leave the password blank to keep the current password." : "Enter or generate a username and password to create login access.")</p>
                     <div class="form-row">
                         <div class="form-group"><label asp-for="LoginUsername"></label><input asp-for="LoginUsername" autocomplete="off" minlength="3" maxlength="50" pattern="[A-Za-z0-9._-]+" /><span asp-validation-for="LoginUsername" class="field-validation"></span></div>
-                        <div class="form-group"><label asp-for="TemporaryPassword"></label><div class="edit-password-input"><input asp-for="TemporaryPassword" type="password" autocomplete="new-password" minlength="8" maxlength="100" value="" /><button type="button" id="toggleEditPassword" class="edit-password-toggle" aria-label="Show password" title="Show password" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div><span asp-validation-for="TemporaryPassword" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="TemporaryPassword"></label><div class="edit-password-input"><input asp-for="TemporaryPassword" type="password" autocomplete="new-password" minlength="8" maxlength="100" value="" /><button type="button" id="toggleEditPassword" class="edit-password-toggle" aria-label="Show password" title="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path class="password-eye-slash" d="m3 3 18 18" style="display:none"/></svg></button></div><span asp-validation-for="TemporaryPassword" class="field-validation"></span></div>
                     </div>
                     @if (!Model.HasExistingAccount)
                     {
@@ -118,7 +146,7 @@
         const password = document.getElementById('TemporaryPassword');
         password.type = password.type === 'password' ? 'text' : 'password';
         const visible = password.type === 'text';
-        this.querySelector('i').className = visible ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+        this.querySelector('.password-eye-slash').style.display = visible ? '' : 'none';
         this.setAttribute('aria-label', visible ? 'Hide password' : 'Show password');
         this.setAttribute('title', visible ? 'Hide password' : 'Show password');
         this.setAttribute('aria-pressed', String(visible));
@@ -157,3 +185,5 @@
         if (placeholder) placeholder.style.display = 'none';
     });
 </script>
+
+<script src="~/js/employee-address.js" asp-append-version="true"></script>

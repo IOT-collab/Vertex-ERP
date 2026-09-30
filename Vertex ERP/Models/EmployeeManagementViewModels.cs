@@ -89,6 +89,8 @@ public class EmployeeLoginAccessViewModel
 
 public class EmployeeFormViewModel : IValidatableObject
 {
+    [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
+    public IReadOnlyList<string> SourceEnrollments { get; set; } = Array.Empty<string>();
     [Required(ErrorMessage = "Aadhaar Number is required.")]
     [StringLength(12)]
     [RegularExpression(@"^[0-9]{12}$", ErrorMessage = "Aadhaar Number must contain exactly 12 digits.")]
@@ -98,7 +100,7 @@ public class EmployeeFormViewModel : IValidatableObject
     public int Id { get; set; }
 
     [Required(ErrorMessage = "Employee ID is required."), StringLength(30, ErrorMessage = "Employee ID cannot exceed 30 characters.")]
-    [Display(Name = "Employee ID")]
+    [Display(Name = "ERP Employee ID")]
     public string EmployeeCode { get; set; } = string.Empty;
 
     [Required, StringLength(60)]
@@ -143,6 +145,19 @@ public class EmployeeFormViewModel : IValidatableObject
     [Display(Name = "PIN")]
     public string? PinCode { get; set; }
 
+    [StringLength(300), Display(Name = "Permanent Address")]
+    public string? PermanentAddress { get; set; }
+    [StringLength(80), Display(Name = "City")]
+    public string? PermanentCity { get; set; }
+    [StringLength(80), Display(Name = "State")]
+    public string? PermanentState { get; set; }
+    [StringLength(10), RegularExpression(@"^[0-9]{6}$", ErrorMessage = "PIN code must contain exactly 6 digits."), Display(Name = "PIN Code")]
+    public string? PermanentPinCode { get; set; }
+    [Display(Name = "Same as Present Address")]
+    public bool PermanentAddressSameAsPresent { get; set; }
+
+
+
     [StringLength(120), Display(Name = "Work Location")]
     public string? WorkLocation { get; set; }
 
@@ -155,7 +170,12 @@ public class EmployeeFormViewModel : IValidatableObject
     [Display(Name = "Joining Date")]
     public DateOnly JoiningDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
-    [Required, StringLength(80)]
+    [Required(ErrorMessage = "Please select an active department."), Display(Name = "Department")]
+    public int? DepartmentId { get; set; }
+
+    public IReadOnlyList<Department> AvailableDepartments { get; set; } = Array.Empty<Department>();
+
+    [StringLength(80)]
     public string Department { get; set; } = string.Empty;
 
     [Required, StringLength(80)]
@@ -280,6 +300,8 @@ public class EmployeeSalaryDraft
 
 public class HrAddEmployeeViewModel : IValidatableObject
 {
+    [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
+    public IReadOnlyList<string> SourceEnrollments { get; set; } = Array.Empty<string>();
     public int? PendingBiometricEmployeeId { get; set; }
     [Required(ErrorMessage = "Aadhaar Number is required.")]
     [StringLength(12)]
@@ -348,6 +370,19 @@ public class HrAddEmployeeViewModel : IValidatableObject
     [RegularExpression(@"^[0-9]{6}$", ErrorMessage = "PIN code must contain exactly 6 digits.")]
     [Display(Name = "PIN Code")]
     public string? PinCode { get; set; }
+
+    [StringLength(300), Display(Name = "Permanent Address")]
+    public string? PermanentAddress { get; set; }
+    [StringLength(80), Display(Name = "City")]
+    public string? PermanentCity { get; set; }
+    [StringLength(80), Display(Name = "State")]
+    public string? PermanentState { get; set; }
+    [StringLength(10), RegularExpression(@"^[0-9]{6}$", ErrorMessage = "PIN code must contain exactly 6 digits."), Display(Name = "PIN Code")]
+    public string? PermanentPinCode { get; set; }
+    [Display(Name = "Same as Present Address")]
+    public bool PermanentAddressSameAsPresent { get; set; }
+
+
 
     [Display(Name = "Employee Photo")]
     public IFormFile? EmployeePhoto { get; set; }

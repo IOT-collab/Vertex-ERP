@@ -39,3 +39,30 @@ var deleteMethod = typeof(AuditController).GetMethod("Delete")!;
 Check(Attribute.IsDefined(deleteMethod, typeof(Microsoft.AspNetCore.Mvc.HttpPostAttribute)) && Attribute.IsDefined(deleteMethod, typeof(Microsoft.AspNetCore.Mvc.ValidateAntiForgeryTokenAttribute)), "Deletion requires POST and anti-forgery validation");
 var deleteAllMethod = typeof(AuditController).GetMethod("DeleteAll")!;
 Check(Attribute.IsDefined(deleteAllMethod, typeof(Microsoft.AspNetCore.Mvc.HttpPostAttribute)) && Attribute.IsDefined(deleteAllMethod, typeof(Microsoft.AspNetCore.Mvc.ValidateAntiForgeryTokenAttribute)), "Delete All requires POST and anti-forgery validation");
+
+// Every business entity participates in the central add/update/delete audit path.
+foreach (var entityType in db.Model.GetEntityTypes().Where(type => type.ClrType != typeof(AuditLog) && type.ClrType != typeof(PasswordResetToken)))
+{
+    db.ChangeTracker.Clear();
+    var entity = Activator.CreateInstance(entityType.ClrType)!;
+    var entry = db.Entry(entity);
+    foreach (var key in entityType.FindPrimaryKey()!.Properties)
+        entry.Property(key.Name).CurrentValue = key.ClrType == typeof(int) ? (object)901
+            : key.ClrType == typeof(long) ? 901L : key.ClrType == typeof(string) ? "audit-check" : Activator.CreateInstance(key.ClrType);
+    foreach (var state in new[] { EntityState.Added, EntityState.Modified, EntityState.Deleted })
+    {
+        entry.State = state;
+        var result = AuditLogFactory.Create(entry, actor);
+        Check(result != null && result.ActorId == "42" && result.EntityType == entityType.ClrType.Name,
+            $"{entityType.ClrType.Name}: {state} records actor and entity");
+    }
+}
+db.ChangeTracker.Clear();
+var account = new AppUser { Id = 90, Username = "audit-test", PasswordHash = "SECRET-HASH-DO-NOT-LOG" };
+db.Add(account);
+Check(!AuditLogFactory.Create(db.Entry(account), actor)!.Detail.Contains(account.PasswordHash), "Account audit never copies password hashes");
+var bulkEvent = AuditLogFactory.CreateEvent("ProjectEmployee", "Project employee assigned", "Project #7 · Employee #9", actor);
+Check(bulkEvent.ActorId == "42" && bulkEvent.ActorRole == "Manager" && bulkEvent.Detail.Contains("Project #7"), "Bulk changes retain actor and affected record");
+var employeeRecord = new Employee { EmployeeCode = "EMP-9", FullName = "Audit Employee" };
+db.Add(employeeRecord);
+Check(AuditLogFactory.Create(db.Entry(employeeRecord), actor)!.Detail.Contains("EMP-9"), "New employee audit identifies the employee before database ID generation");

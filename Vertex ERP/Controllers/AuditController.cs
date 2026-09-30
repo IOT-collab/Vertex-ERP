@@ -37,7 +37,7 @@ public sealed class AuditController(ApplicationDbContext db) : Controller
     [HttpGet]
     public async Task<IActionResult> Recent(CancellationToken cancellationToken)
     {
-        var logs = await db.AuditLogs.AsNoTracking().OrderByDescending(log => log.Id).Take(8).ToListAsync(cancellationToken);
+        var logs = await db.AuditLogs.AsNoTracking().OrderByDescending(log => log.Id).Take(5).ToListAsync(cancellationToken);
         return Json(logs.Select(log => new { title = log.Action, detail = $"{log.ActorName} ({log.ActorRole}) · {log.Detail}", occurredAt = log.OccurredAtUtc }));
     }
 
@@ -48,7 +48,7 @@ public sealed class AuditController(ApplicationDbContext db) : Controller
         if (!id.HasValue && (!from.HasValue || !to.HasValue || maxId <= 0)) return BadRequest("Choose both dates before deleting logs.");
         var query = Filter(from, to);
         query = id.HasValue ? query.Where(x => x.Id == id.Value) : query.Where(x => x.Id <= maxId);
-        var deleted = await query.ExecuteDeleteAsync(cancellationToken);
+        var deleted = await DeleteWithAuditAsync(query, "Selected audit history deleted", cancellationToken);
         TempData["AuditMessage"] = $"{deleted} log(s) permanently deleted.";
         return RedirectToAction(nameof(Index), new { from = from?.ToString("yyyy-MM-dd"), to = to?.ToString("yyyy-MM-dd") });
     }
@@ -56,7 +56,7 @@ public sealed class AuditController(ApplicationDbContext db) : Controller
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteAll(CancellationToken cancellationToken)
     {
-        var deleted = await db.AuditLogs.ExecuteDeleteAsync(cancellationToken);
+        var deleted = await DeleteWithAuditAsync(db.AuditLogs, "All audit history deleted", cancellationToken);
         TempData["AuditMessage"] = $"{deleted} log(s) permanently deleted across all dates.";
         return RedirectToAction(nameof(Index));
     }
@@ -75,5 +75,22 @@ public sealed class AuditController(ApplicationDbContext db) : Controller
             Rows = logs.Select(x => (IReadOnlyList<string>)new[] { x.OccurredAtUtc.ToString("dd MMM yyyy HH:mm:ss"), x.ActorName, x.ActorRole, x.Action, x.Detail }).ToList()
         };
         return File(AdminReportPdfService.Create(report), "application/pdf", $"audit-logs-{DateTime.UtcNow:yyyyMMdd-HHmmss}.pdf");
+    }
+
+    private async Task<int> DeleteWithAuditAsync(IQueryable<AuditLog> query, string action, CancellationToken cancellationToken)
+    {
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            db.ChangeTracker.Clear();
+            await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+            var deleted = await query.ExecuteDeleteAsync(cancellationToken);
+            if (deleted > 0)
+            {
+                db.AuditLogs.Add(AuditLogFactory.CreateEvent("AuditLog", action, $"{deleted} audit record(s) deleted", User));
+                await db.SaveChangesAsync(cancellationToken);
+            }
+            await transaction.CommitAsync(cancellationToken);
+            return deleted;
+        });
     }
 }

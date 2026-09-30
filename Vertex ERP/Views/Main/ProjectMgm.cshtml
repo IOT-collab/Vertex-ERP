@@ -13,9 +13,11 @@
             <p>Manage Projects, Tasks & Resources</p>
         </div>
 
-        <a href="@Url.Action("AddProjectMgm", "Main")" class="btn-add">
+        @if (User.IsInRole("Admin") || User.IsInRole("HR")) {
+        <a href="@Url.Action("Index", "ProjectWorkspace", new { section = "projects" })" class="btn-add">
             + Create Project
         </a>
+        }
     </div>
 
     <!-- Analytics Metrics Row -->
@@ -43,6 +45,10 @@
 
     <!-- Operational Modules Grid -->
     <div class="module-grid">
+        <div class="module-card">
+            <div class="icon">👥</div><h3>Teams</h3><p>Create named teams and choose their employees.</p>
+            <a asp-controller="ProjectWorkspace" asp-action="Index" asp-route-section="teams" class="btn-module-action">Open</a>
+        </div>
 
         <div class="module-card">
             <div class="icon">📁</div>

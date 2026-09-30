@@ -55,13 +55,28 @@ public sealed class BiometricEmployeeReconciliationService(IServiceScopeFactory 
                     var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(group.Key.Code))).ToLowerInvariant();
                     var canonicalCode = group.Key.Code.Length <= 30 ? group.Key.Code : "BIO-" + hash[..26];
                     // Match existing HR/imported codes before creating a profile. Never change an existing profile.
-                    employee = await db.Employees.FirstOrDefaultAsync(x => x.EmployeeCode.ToUpper() == canonicalCode.ToUpper(), cancellationToken)
-                        ?? await db.Employees.FirstOrDefaultAsync(x => x.EmployeeCode.ToUpper() == "BIO-" + group.Key.Code, cancellationToken);
+                    // Resolve the source identity before the editable ERP employee code.
+                    var linkedIds = await db.EmployeeDeviceMappings
+                        .Where(x => x.IsActive && x.DeviceUserId.ToUpper() == group.Key.Code)
+                        .Select(x => x.EmployeeId).Distinct().Take(2).ToListAsync(cancellationToken);
+                    if (linkedIds.Count > 1) continue;
+                    employee = linkedIds.Count == 1
+                        ? await db.Employees.SingleAsync(x => x.Id == linkedIds[0], cancellationToken)
+                        : await db.Employees.FirstOrDefaultAsync(x =>
+                            (x.EmployeeCode.ToUpper() == canonicalCode.ToUpper() || x.EmployeeCode.ToUpper() == "BIO-" + group.Key.Code)
+                            && !db.EmployeeDeviceMappings.Any(m => m.EmployeeId == x.Id), cancellationToken);
                     if (employee == null)
                     {
+                        string erpCode;
+                        do
+                        {
+                            var number = await db.Database.SqlQueryRaw<long>("SELECT nextval('\"EmployeeCodeSequence\"') AS \"Value\"")
+                                .SingleAsync(cancellationToken);
+                            erpCode = $"Vertex-{number:D2}";
+                        } while (await db.Employees.AnyAsync(x => x.EmployeeCode.ToUpper() == erpCode.ToUpper(), cancellationToken));
                         employee = new Employee
                         {
-                            EmployeeCode = canonicalCode,
+                            EmployeeCode = erpCode,
                             IsBiometricProfilePending = true,
                             FirstName = "Biometric User", LastName = group.Key.Code,
                             FullName = "Biometric User " + group.Key.Code,
@@ -74,7 +89,7 @@ public sealed class BiometricEmployeeReconciliationService(IServiceScopeFactory 
                         db.Employees.Add(employee);
                         count++;
                     }
-                    mapping = new EmployeeDeviceMapping { BiometricDeviceId = group.Key.BiometricDeviceId, DeviceUserId = group.Key.Code, Employee = employee, IsActive = true };
+                    mapping = new EmployeeDeviceMapping { BiometricDeviceId = group.Key.BiometricDeviceId, DeviceUserId = group.First().DeviceUserId, Employee = employee, IsActive = true };
                     db.EmployeeDeviceMappings.Add(mapping);
                 }
                 foreach (var log in group) log.Employee = employee;

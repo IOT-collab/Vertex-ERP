@@ -5,6 +5,8 @@ namespace VertexERP.Models;
 public class WorkTask
 {
     public int Id { get; set; }
+    public int? ProjectId { get; set; }
+    public ErpProject? Project { get; set; }
 
     [Required, MaxLength(200)]
     public string Title { get; set; } = string.Empty;

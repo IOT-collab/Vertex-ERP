@@ -10,7 +10,6 @@
     @if (TempData["DocumentMessage"] is string message) { <p role="status">@message</p> }
     <div class="header-section">
         <div class="header-left">
-            <a asp-action="@(employee == null ? "EmployeeDashboard" : "EmpDocuments")" class="btn-back" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></a>
             <div class="page-heading">
                 <span class="page-eyebrow">HR DOCUMENT MANAGEMENT</span>
                 <h1 class="page-title">@(employee == null ? "Employee Documents" : employee.FullName)</h1>

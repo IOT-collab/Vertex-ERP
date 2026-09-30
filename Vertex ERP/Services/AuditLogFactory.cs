@@ -7,9 +7,17 @@ namespace VertexERP.Services;
 
 public static class AuditLogFactory
 {
+    public static AuditLog CreateEvent(string entityType, string action, string detail, ClaimsPrincipal? user) => new()
+    {
+        ActorId = user?.FindFirstValue(ClaimTypes.NameIdentifier) ?? "",
+        ActorName = user?.Identity?.Name ?? "System",
+        ActorRole = user?.FindFirstValue(ClaimTypes.Role) ?? "System",
+        EntityType = entityType, Action = action, Detail = detail
+    };
+
     public static AuditLog? Create(EntityEntry entry, ClaimsPrincipal? user)
     {
-        if (entry.Entity is AuditLog or PasswordResetToken or EmployeeNotificationDismissal
+        if (entry.Entity is AuditLog or PasswordResetToken
             || entry.State is not (EntityState.Added or EntityState.Modified or EntityState.Deleted)) return null;
         var type = entry.Metadata.ClrType.Name;
         var action = entry.State switch { EntityState.Added => "added", EntityState.Deleted => "deleted", _ => "updated" };
@@ -17,6 +25,13 @@ public static class AuditLogFactory
         var detail = entry.IsKeySet
             ? $"{type} #{string.Join(",", entry.Properties.Where(p => p.Metadata.IsPrimaryKey()).Select(p => p.CurrentValue))}"
             : $"New {type}";
+        if (entry.Entity is Employee employee)
+            detail = $"Employee: {employee.FullName} · Code: {employee.EmployeeCode}";
+        else if (entry.Entity is Department department)
+            detail = $"Department: {department.DepartmentName} · Code: {department.DepartmentCode}";
+        else if (entry.Entity is ErpProject project)
+            detail = $"Project: {project.ProjectName} · Code: {project.ProjectCode}";
+
         if (entry.Entity is ModuleState module)
         {
             action = module.IsActive ? "activated" : "deactivated";

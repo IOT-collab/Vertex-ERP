@@ -22,7 +22,8 @@ static class BiometricEmployeeChecks
         await using var concurrent = new ApplicationDbContext(options);
         var created = await Task.WhenAll(BiometricEmployeeReconciliationService.ReconcileAsync(db), BiometricEmployeeReconciliationService.ReconcileAsync(concurrent));
         check(created.Sum() == 2, "Concurrent biometric sync creates only two ERP employees across devices");
-        var first = await db.Employees.SingleAsync(x => x.EmployeeCode == "VPC0176");
+        var first = await db.EmployeeDeviceMappings.Where(x => x.BiometricDeviceId == device.Id && x.DeviceUserId == "Vpc0176").Select(x => x.Employee).SingleAsync();
+        check(first.EmployeeCode.StartsWith("Vertex-") && first.EmployeeCode != "VPC0176", "New biometric employee receives a separate ERP ID");
         check(await db.AttendanceLogs.CountAsync(x => x.EmployeeId == first.Id) == 2 && await db.EmployeeDeviceMappings.CountAsync(x => x.EmployeeId == first.Id) == 2, "Historical punches and device identities linked to employee");
         var http = new DefaultHttpContext();
         var controller = new EmployeeController(db, null!, null!) { ControllerContext = new() { HttpContext = http }, TempData = new TempDataDictionary(http, new MemoryTempData()) };
@@ -31,6 +32,8 @@ static class BiometricEmployeeChecks
         check(pendingDirectory.Employees.Count == 2 && pendingDirectory.Employees.All(x => x.IsBiometricProfilePending), "HR can filter biometric profiles needing details");
         check(directory.Employees.Count == 2 && controller.Details(first.Id) is ViewResult && controller.Edit(first.Id) is ViewResult && await controller.LoginAccess(first.Id) is ViewResult, "Imported profiles support directory, view, edit and login operations");
         var form = (EmployeeFormViewModel)((ViewResult)controller.Edit(first.Id)).Model!;
+        check(form.SourceEnrollments.Contains("Vpc0176 (Test)"), "Profile shows original source enrollment including letter case");
+        check(typeof(EmployeeFormViewModel).GetProperty(nameof(EmployeeFormViewModel.SourceEnrollments))!.IsDefined(typeof(Microsoft.AspNetCore.Mvc.ModelBinding.BindNeverAttribute), true), "Source enrollment cannot be posted through the employee edit form");
         form.FirstName = "HR Edited";
         form.LastName = "Name";
         form.Department = "Production";
@@ -38,12 +41,24 @@ static class BiometricEmployeeChecks
         form.PhoneNumber = "7000000176";
         form.AadhaarNumber = "123456789012";
         form.IsActive = false;
+        var department = await db.Departments.FirstAsync(x => x.IsActive);
+        form.DepartmentId = department.Id;
+        form.SourceEnrollments = new[] { "TAMPERED" };
         check(await controller.Edit(first.Id, form) is RedirectToActionResult, "HR can save edits to imported employee through existing controller");
         db.AttendanceLogs.Add(Log(device.Id, "VPC0176"));
         await db.SaveChangesAsync();
         check(await BiometricEmployeeReconciliationService.ReconcileAsync(db) == 0, "Repeated sync does not duplicate edited employee");
+        check(await db.EmployeeDeviceMappings.AnyAsync(x => x.EmployeeId == first.Id && x.DeviceUserId == "Vpc0176"), "Changing ERP ID and submitting source values preserves enrollment");
         first = await db.Employees.SingleAsync(x => x.Id == first.Id);
-        check(first.FullName == "HR Edited Name" && first.Department == "Production" && !first.IsActive && await db.AttendanceLogs.CountAsync(x => x.EmployeeId == first.Id) == 3, "HR edits, changed code and inactive state preserved while punches stay linked");
+        check(first.FullName == "HR Edited Name" && first.Department == department.DepartmentName && !first.IsActive && await db.AttendanceLogs.CountAsync(x => x.EmployeeId == first.Id) == 3, "HR edits, changed code and inactive state preserved while punches stay linked");
+        var third = new BiometricDevice { Name = "Third", SerialNumber = "TEST-BIO-3", Model = "Test" };
+        db.BiometricDevices.Add(third);
+        await db.SaveChangesAsync();
+        db.AttendanceLogs.Add(Log(third.Id, "Vpc0176"));
+        await db.SaveChangesAsync();
+        check(await BiometricEmployeeReconciliationService.ReconcileAsync(db) == 0
+            && await db.AttendanceLogs.AnyAsync(x => x.BiometricDeviceId == third.Id && x.EmployeeId == first.Id),
+            "Enrollment on a new device resolves the same employee after ERP ID changes");
         check(await controller.DeleteConfirmed(first.Id) is RedirectToActionResult && !await db.Employees.AnyAsync(x => x.Id == first.Id), "Imported employee supports existing delete operation");
         db.AttendanceLogs.Add(Log(device.Id, "VPC0176"));
         await db.SaveChangesAsync();

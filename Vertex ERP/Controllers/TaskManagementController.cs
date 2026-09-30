@@ -63,7 +63,7 @@ public class TaskManagementController : ControllerBase
         var today = DateOnly.FromDateTime(DateTime.Today);
         var currentManagerId = User.IsInRole("Manager") ? await GetCurrentEmployeeIdAsync(cancellationToken) : null;
         var tasks = await _db.WorkTasks.AsNoTracking()
-            .Where(task => !currentManagerId.HasValue || task.ManagerId == currentManagerId.Value)
+            .Where(task => !User.IsInRole("Manager") || (currentManagerId.HasValue && task.ManagerId == currentManagerId.Value))
             .OrderByDescending(task => task.CreatedAtUtc)
             .Select(task => new
             {
@@ -90,8 +90,8 @@ public class TaskManagementController : ControllerBase
             tasks,
             metrics = new
             {
-                managers = await _db.WorkTasks.Select(task => task.ManagerId).Distinct().CountAsync(cancellationToken),
-                employees = await _db.WorkTasks.Select(task => task.AssigneeId).Distinct().CountAsync(cancellationToken),
+                managers = tasks.Select(task => task.managerId).Distinct().Count(),
+                employees = tasks.Select(task => task.assigneeId).Distinct().Count(),
                 totalTasks = tasks.Count,
                 overdue = tasks.Count(task => task.DueDate < today && task.Status != "Completed")
             }
@@ -164,6 +164,14 @@ public class TaskManagementController : ControllerBase
 
         var managerId = request.ManagerId!.Value;
         var assigneeId = request.AssigneeId!.Value;
+        if (task.ProjectId.HasValue)
+        {
+            var project = await _db.Projects.AsNoTracking().FirstOrDefaultAsync(p => p.Id == task.ProjectId, cancellationToken);
+            if (project == null || project.ManagerId != managerId ||
+                !await _db.ProjectEmployees.AnyAsync(a => a.ProjectId == task.ProjectId && a.EmployeeId == assigneeId && a.Employee.IsActive, cancellationToken) ||
+                request.DueDate < project.StartDate || request.DueDate > project.EndDate)
+                return BadRequest("Use an allocated project employee, the project's manager, and a due date within the project dates.");
+        }
         if (User.IsInRole("Manager"))
         {
             var currentManagerId = await GetCurrentEmployeeIdAsync(cancellationToken);

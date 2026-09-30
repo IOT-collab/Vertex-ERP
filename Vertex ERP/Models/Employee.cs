@@ -56,6 +56,17 @@ public class Employee
     [MaxLength(10)]
     public string? PinCode { get; set; }
 
+    [StringLength(300), Display(Name = "Permanent Address")]
+    public string? PermanentAddress { get; set; }
+    [StringLength(80), Display(Name = "City")]
+    public string? PermanentCity { get; set; }
+    [StringLength(80), Display(Name = "State")]
+    public string? PermanentState { get; set; }
+    [StringLength(10), RegularExpression(@"^[0-9]{6}$", ErrorMessage = "PIN code must contain exactly 6 digits."), Display(Name = "PIN Code")]
+    public string? PermanentPinCode { get; set; }
+    [Display(Name = "Same as Present Address")]
+    public bool PermanentAddressSameAsPresent { get; set; }
+
     [MaxLength(260)]
     public string? PhotoPath { get; set; }
 

@@ -11,6 +11,9 @@ public sealed class ErpProject
     public Department? Department { get; set; }
     public int? ManagerId { get; set; }
     public Employee? Manager { get; set; }
+    public int? TeamId { get; set; }
+    public ProjectTeam? Team { get; set; }
+    [Range(0, 1000000000)] public decimal Budget { get; set; }
     public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today.AddDays(30));
     [Required, RegularExpression("^(Planning|Active|On Hold|Completed|Cancelled)$"), MaxLength(20)]

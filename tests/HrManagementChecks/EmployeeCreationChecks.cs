@@ -83,11 +83,12 @@ static class EmployeeCreationChecks
             });
             await db.SaveChangesAsync();
             await BiometricEmployeeReconciliationService.ReconcileAsync(db);
-            var pending = await db.Employees.SingleAsync(x => x.EmployeeCode == "ONBOARD176");
+            var pending = await db.EmployeeDeviceMappings.Where(x => x.DeviceUserId == "ONBOARD176").Select(x => x.Employee).SingleAsync();
             var originalId = pending.Id;
             var originalCount = await db.Employees.CountAsync();
             var pendingForm = (HrAddEmployeeViewModel)((ViewResult)await Controller().HrAddEmp((int?)originalId)).Model!;
-            check(pendingForm.PendingBiometricEmployeeId == originalId && pendingForm.EmployeeId == "ONBOARD176"
+            check(pendingForm.PendingBiometricEmployeeId == originalId && pendingForm.EmployeeId == pending.EmployeeCode
+                && pendingForm.SourceEnrollments.Any(x => x.StartsWith("ONBOARD176 ("))
                 && string.IsNullOrEmpty(pendingForm.Email) && string.IsNullOrEmpty(pendingForm.FirstName),
                 "Employee directory completion opens the same biometric ID without placeholder personal details");
             check(await Controller().HrAddEmp((int?)int.MaxValue) is NotFoundResult, "Unknown completion profile returns not found");
@@ -96,10 +97,12 @@ static class EmployeeCreationChecks
             var completion = Model("ONBOARD176");
             check(await Controller().HrAddEmp(completion) is ViewResult, "Pending biometric completion requires confirmed lookup identity");
             completion.PendingBiometricEmployeeId = originalId;
+            completion.EmployeeId = "ERP-176";
+            completion.SourceEnrollments = new[] { "FAKE-SOURCE" };
             check(await Controller().HrAddEmp(completion) is RedirectToActionResult, "Add Employee completes biometric profile");
             db.ChangeTracker.Clear();
             var completed = await db.Employees.SingleAsync(x => x.Id == originalId);
-            check(!completed.IsBiometricProfilePending && completed.FullName == "Test Employee" && await db.Employees.CountAsync() == originalCount,
+            check(!completed.IsBiometricProfilePending && completed.EmployeeCode == "ERP-176" && completed.FullName == "Test Employee" && await db.Employees.CountAsync() == originalCount,
                 "Completion updates the existing employee without creating a duplicate");
             check(await db.AttendanceLogs.AnyAsync(x => x.DeviceUserId == "ONBOARD176" && x.EmployeeId == originalId)
                 && await db.EmployeeDeviceMappings.AnyAsync(x => x.DeviceUserId == "ONBOARD176" && x.EmployeeId == originalId),

@@ -2,6 +2,8 @@ namespace VertexERP.Models;
 
 public sealed class ManagerDashboardViewModel
 {
+    public IReadOnlyList<ErpProject> Projects { get; init; } = Array.Empty<ErpProject>();
+    public IReadOnlyList<ProjectEmployee> ProjectAssignments { get; init; } = Array.Empty<ProjectEmployee>();
     public IReadOnlyList<Employee> Managers { get; init; } = Array.Empty<Employee>();
     public IReadOnlyList<Employee> TeamMembers { get; init; } = Array.Empty<Employee>();
     public IReadOnlyList<WorkTask> Tasks { get; init; } = Array.Empty<WorkTask>();

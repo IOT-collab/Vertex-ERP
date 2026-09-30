@@ -6,7 +6,7 @@ namespace Vertex_ERP.Controllers
     using Microsoft.AspNetCore.Mvc.Rendering;
     using VertexERP.Data;
     using VertexERP.Models;
-    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin,HR")]
+    [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin,HR,Manager")]
     public class ProjectMgmController : Controller
     {
         private readonly ApplicationDbContext _db;
@@ -14,11 +14,11 @@ namespace Vertex_ERP.Controllers
 
         public async Task<IActionResult> ProjectCreation()
         {
-            await LoadProjectsAsync();
-            return View("ProjectForm", new ErpProject());
+            await Task.CompletedTask;
+            return RedirectToAction("Index", "ProjectWorkspace", new { section = "projects" });
         }
 
-        [HttpPost, ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken, Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin,HR")]
         public async Task<IActionResult> ProjectCreation([Bind("ProjectCode,ProjectName,DepartmentId,ManagerId,StartDate,EndDate,Status,Description")] ErpProject model)
         {
             model.ProjectCode = (model.ProjectCode ?? "").Trim().ToUpperInvariant();
@@ -48,32 +48,32 @@ namespace Vertex_ERP.Controllers
 
         public IActionResult AssignTask()
         {
-            return View();
+            return RedirectToAction("Index", "ProjectWorkspace", new { section = "tasks" });
         }
 
         public IActionResult ProjectTimeline()
         {
-            return View();
+            return RedirectToAction("Index", "ProjectWorkspace", new { section = "timeline" });
         }
 
         public IActionResult ResourceAllocation()
         {
-            return View();
+            return RedirectToAction("Index", "ProjectWorkspace", new { section = "resources" });
         }
 
         public IActionResult Timesheet()
         {
-            return View();
+            return RedirectToAction("Index", "ProjectWorkspace", new { section = "timesheets" });
         }
 
         public IActionResult BudgetTracking()
         {
-            return View();
+            return RedirectToAction("Index", "ProjectWorkspace", new { section = "budget" });
         }
 
         public IActionResult RaisedEnquiry()
         {
-            return View();
+            return RedirectToAction("Index", "ProjectWorkspace", new { section = "enquiries" });
         }
 
 

@@ -34,6 +34,7 @@ public class EmployeeController : Controller
             var term = search.Trim().ToLower();
             query = query.Where(employee =>
                 employee.EmployeeCode.ToLower().Contains(term) ||
+                _dbContext.EmployeeDeviceMappings.Any(mapping => mapping.EmployeeId == employee.Id && mapping.DeviceUserId.ToLower().Contains(term)) ||
                 employee.FirstName.ToLower().Contains(term) ||
                 (employee.LastName != null && employee.LastName.ToLower().Contains(term)) ||
                 employee.Email.ToLower().Contains(term) ||
@@ -87,6 +88,7 @@ public class EmployeeController : Controller
             .AsNoTracking()
             .Include(item => item.ReportingManager)
             .FirstOrDefault(item => item.Id == id);
+        ViewData["SourceEnrollments"] = GetSourceEnrollments(id);
         return employee == null ? NotFound() : View(employee);
     }
 
@@ -286,7 +288,7 @@ public class EmployeeController : Controller
         {
             var salary = await _dbContext.EmployeeSalaryDetails.FirstOrDefaultAsync(item => item.EmployeeId == id);
             if (salary == null) { salary = new EmployeeSalaryDetail { EmployeeId = id }; _dbContext.EmployeeSalaryDetails.Add(salary); }
-            salary.BasicSalary=model.BasicSalary; salary.HouseRentAllowance=model.HouseRentAllowance; salary.ConveyanceAllowance=model.ConveyanceAllowance; salary.SpecialAllowance=model.SpecialAllowance; salary.ProvidentFund=model.ProvidentFund; salary.ProfessionalTax=model.ProfessionalTax; salary.Tds=model.Tds; salary.OtherDeductions=model.OtherDeductions; salary.PfNumber=Clean(model.PfNumber); salary.PfUan=Clean(model.PfUan); salary.EffectiveFrom=model.SalaryEffectiveFrom; salary.IsActive=true; salary.UpdatedAtUtc=DateTime.UtcNow;
+            salary.BasicSalary=model.BasicSalary; salary.HouseRentAllowance=model.HouseRentAllowance; salary.ConveyanceAllowance=model.ConveyanceAllowance; salary.SpecialAllowance=model.SpecialAllowance; salary.ProvidentFund=model.ProvidentFund; salary.ProfessionalTax=model.ProfessionalTax; salary.Tds=model.Tds; salary.OtherDeductions=model.OtherDeductions; salary.PfUan=Clean(model.PfUan); salary.EffectiveFrom=model.SalaryEffectiveFrom; salary.IsActive=true; salary.UpdatedAtUtc=DateTime.UtcNow;
             await _dbContext.SaveChangesAsync();
         }
 
@@ -396,6 +398,12 @@ public class EmployeeController : Controller
 
     private void ValidateUniqueFields(EmployeeFormViewModel model)
     {
+        var selectedDepartment = _dbContext.Departments.AsNoTracking()
+            .FirstOrDefault(item => item.Id == model.DepartmentId && item.IsActive);
+        if (selectedDepartment == null)
+            ModelState.AddModelError(nameof(model.DepartmentId), "Please select an active department from the Department section.");
+        else
+            model.Department = selectedDepartment.DepartmentName;
         var code = model.EmployeeCode.Trim().ToUpperInvariant();
         var email = model.Email.Trim().ToLowerInvariant();
         var phoneNumber = model.PhoneNumber.Trim();
@@ -425,6 +433,10 @@ public class EmployeeController : Controller
 
     private EmployeeFormViewModel PopulateManagers(EmployeeFormViewModel model)
     {
+        model.SourceEnrollments = GetSourceEnrollments(model.Id);
+        model.AvailableDepartments = _dbContext.Departments.AsNoTracking()
+            .Where(department => department.IsActive)
+            .OrderBy(department => department.DepartmentName).ToList();
         model.Managers = _dbContext.Employees.AsNoTracking()
             .Where(employee => employee.IsActive && employee.Id != model.Id)
             .OrderBy(employee => employee.FirstName)
@@ -432,6 +444,13 @@ public class EmployeeController : Controller
             .ToList();
         return model;
     }
+
+    private IReadOnlyList<string> GetSourceEnrollments(int employeeId) =>
+        _dbContext.EmployeeDeviceMappings.AsNoTracking()
+            .Where(mapping => mapping.EmployeeId == employeeId)
+            .OrderBy(mapping => mapping.BiometricDevice.Name)
+            .Select(mapping => mapping.DeviceUserId + " (" + mapping.BiometricDevice.Name + ")")
+            .Distinct().ToList();
 
     private bool TrySave(string errorMessage)
     {
@@ -462,12 +481,19 @@ public class EmployeeController : Controller
         employee.MaritalStatus = Clean(model.MaritalStatus);
         employee.EmergencyContact = Clean(model.EmergencyContact);
         employee.Address = Clean(model.Address);
+        employee.PermanentAddressSameAsPresent = model.PermanentAddressSameAsPresent;
+        employee.PermanentAddress = Clean(model.PermanentAddressSameAsPresent ? model.Address : model.PermanentAddress);
+        employee.PermanentCity = Clean(model.PermanentAddressSameAsPresent ? model.City : model.PermanentCity);
+        employee.PermanentState = Clean(model.PermanentAddressSameAsPresent ? model.State : model.PermanentState);
+        employee.PermanentPinCode = Clean(model.PermanentAddressSameAsPresent ? model.PinCode : model.PermanentPinCode);
+
         employee.City = Clean(model.City);
         employee.State = Clean(model.State);
         employee.PinCode = Clean(model.PinCode);
         employee.WorkLocation = Clean(model.WorkLocation);
         employee.JoiningDate = model.JoiningDate;
         employee.Department = model.Department.Trim();
+        employee.DepartmentId = model.DepartmentId;
         employee.Designation = model.Designation.Trim();
         employee.ReportingManagerId = model.ReportingManagerId;
         employee.EmploymentType = model.EmploymentType;
@@ -490,6 +516,12 @@ public class EmployeeController : Controller
         MaritalStatus = employee.MaritalStatus,
         EmergencyContact = employee.EmergencyContact,
         Address = employee.Address,
+        PermanentAddress = employee.PermanentAddress,
+        PermanentCity = employee.PermanentCity,
+        PermanentState = employee.PermanentState,
+        PermanentPinCode = employee.PermanentPinCode,
+        PermanentAddressSameAsPresent = employee.PermanentAddressSameAsPresent,
+
         City = employee.City,
         State = employee.State,
         PinCode = employee.PinCode,
@@ -497,6 +529,7 @@ public class EmployeeController : Controller
         PhotoPath = employee.PhotoPath,
         JoiningDate = employee.JoiningDate,
         Department = employee.Department,
+        DepartmentId = employee.DepartmentId,
         Designation = employee.Designation,
         ReportingManagerId = employee.ReportingManagerId,
         EmploymentType = employee.EmploymentType,

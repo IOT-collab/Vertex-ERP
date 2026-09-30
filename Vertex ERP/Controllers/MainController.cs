@@ -278,6 +278,13 @@ namespace VertexERP.Controllers
                 .ExecuteUpdateAsync(update => update.SetProperty(item => item.PasswordHash, newHash)
                     .SetProperty(item => item.MustChangePassword, false));
             if (updated != 1) return RedirectToAction(nameof(ForgotPassword));
+            _dbContext.AuditLogs.Add(AuditLogFactory.CreateEvent("AppUser", "Account password reset", $"Account #{user.Id} · Password reset completed", new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, user.Role)
+            }, "PasswordReset"))));
+            await _dbContext.SaveChangesAsync();
             await _dbContext.PasswordResetTokens.Where(item => item.AppUserId == user.Id && item.UsedAtUtc == null)
                 .ExecuteUpdateAsync(update => update.SetProperty(item => item.UsedAtUtc, DateTime.UtcNow));
             await transaction.CommitAsync();
@@ -1301,16 +1308,21 @@ namespace VertexERP.Controllers
             var managers = await managersQuery.OrderBy(employee => employee.FirstName).ThenBy(employee => employee.LastName).ToListAsync();
 
             var managerIds = managers.Select(manager => manager.Id).ToList();
-            var managerDepartmentIds = managers.Where(manager => manager.DepartmentId.HasValue).Select(manager => manager.DepartmentId!.Value).Distinct().ToList();
             var managerLogin = User.IsInRole("Manager");
             var teamMembers = await _dbContext.Employees.AsNoTracking()
-                .Where(employee => employee.IsActive && !managerIds.Contains(employee.Id)
-                    && (managerLogin
-                        ? employee.ReportingManagerId.HasValue && managerIds.Contains(employee.ReportingManagerId.Value)
-                        : employee.DepartmentId.HasValue && managerDepartmentIds.Contains(employee.DepartmentId.Value))
-                    && !_dbContext.AppUsers.Any(user => user.EmployeeId == employee.Id && user.IsActive && user.Role == "Manager"))
+                .Where(employee => employee.IsActive && employee.ReportingManagerId.HasValue
+                    && employee.Id != employee.ReportingManagerId.Value
+                    && managerIds.Contains(employee.ReportingManagerId.Value))
                 .OrderBy(employee => employee.FullName)
                 .ToListAsync();
+            var projects = await _dbContext.Projects.AsNoTracking()
+                .Where(project => project.ManagerId.HasValue && managerIds.Contains(project.ManagerId.Value))
+                .OrderBy(project => project.ProjectName).ToListAsync();
+            var projectIds = projects.Select(project => project.Id).ToList();
+            var projectAssignments = await _dbContext.ProjectEmployees.AsNoTracking()
+                .Include(assignment => assignment.Employee)
+                .Where(assignment => projectIds.Contains(assignment.ProjectId) && assignment.Employee.IsActive)
+                .OrderBy(assignment => assignment.Employee.FullName).ToListAsync();
             var teamMemberIds = teamMembers.Select(employee => employee.Id).ToList();
             var tasks = await _dbContext.WorkTasks.AsNoTracking()
                 .Include(task => task.Manager).Include(task => task.Assignee)
@@ -1338,6 +1350,8 @@ namespace VertexERP.Controllers
             return View(new ManagerDashboardViewModel
             {
                 Managers = managers,
+                Projects = projects,
+                ProjectAssignments = projectAssignments,
                 TeamMembers = teamMembers,
                 Tasks = tasks,
                 LeaveRequests = leaveRequests,
@@ -1359,16 +1373,27 @@ namespace VertexERP.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Admin,HR")]
-        public IActionResult ProjectMgm()
+        [Authorize(Roles = "Admin,HR,Manager")]
+        public async Task<IActionResult> ProjectMgm()
         {
+            var projects = _dbContext.Projects.AsNoTracking();
+            if (!User.IsInRole("Admin") && !User.IsInRole("HR"))
+            {
+                var employeeId = await GetLoggedInEmployeeIdAsync();
+                projects = projects.Where(p => employeeId.HasValue && p.ManagerId == employeeId);
+            }
+            var ids = await projects.Select(p => p.Id).ToListAsync();
+            ViewBag.TotalProjects = ids.Count;
+            ViewBag.RunningProjects = await projects.CountAsync(p => p.Status == "Active");
+            ViewBag.ActiveTasks = await _dbContext.WorkTasks.CountAsync(t => t.ProjectId.HasValue && ids.Contains(t.ProjectId.Value) && t.Status != "Completed");
+            ViewBag.CompletionRate = (ids.Count == 0 ? 0 : await projects.CountAsync(p => p.Status == "Completed") * 100 / ids.Count) + "%";
             return View();
         }
 
         [Authorize(Roles = "Admin,HR")]
         public IActionResult AddProjectMgm()
         {
-            return View();
+            return RedirectToAction("Index", "ProjectWorkspace", new { section = "projects" });
         }
 
         [Authorize(Roles = "Admin,HR")]
@@ -1539,9 +1564,9 @@ namespace VertexERP.Controllers
         public async Task<IActionResult> ManagerLeaves()
         {
             var managerId = await GetLoggedInEmployeeIdAsync();
-            var departmentId = await _dbContext.Employees.AsNoTracking().Where(employee => employee.Id == managerId).Select(employee => employee.DepartmentId).FirstOrDefaultAsync();
+            if (!managerId.HasValue) return RedirectToAction(nameof(AccessDenied));
             var requests = await _dbContext.LeaveRequests.AsNoTracking().Include(request => request.Employee)
-                .Where(request => departmentId.HasValue && request.Employee.DepartmentId == departmentId && request.EmployeeId != managerId).OrderByDescending(request => request.AppliedAtUtc).ToListAsync();
+                .Where(request => request.AssignedApproverEmployeeId == managerId && request.EmployeeId != managerId).OrderByDescending(request => request.AppliedAtUtc).ToListAsync();
             return View(new ManagerSectionViewModel { LeaveRequests = requests });
         }
 
@@ -1556,13 +1581,29 @@ namespace VertexERP.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Manager")]
-        public async Task<IActionResult> DecideTeamLeave(int id, string decision, string? note)
+        public async Task<IActionResult> DecideTeamLeave(int id, string? decision, string? note)
         {
             var managerId = await GetLoggedInEmployeeIdAsync();
-            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsed) ? parsed : 0;
-            var request = await _dbContext.LeaveRequests.Include(item => item.Employee).FirstOrDefaultAsync(item => item.Id == id && item.AssignedApproverEmployeeId == managerId && item.Status == "Pending");
-            if (request == null) return NotFound();
-            request.Status = decision.Equals("Approved", StringComparison.OrdinalIgnoreCase) ? "Approved" : "Rejected";
+            if (!managerId.HasValue || !int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return Forbid();
+            var normalizedDecision = string.Equals(decision, "Approved", StringComparison.OrdinalIgnoreCase) ? "Approved"
+                : string.Equals(decision, "Rejected", StringComparison.OrdinalIgnoreCase) ? "Rejected" : null;
+            if (normalizedDecision == null || note?.Trim().Length > 500)
+            {
+                TempData["WorkflowMessage"] = "Select Approve or Reject. Decision notes must be 500 characters or fewer.";
+                return RedirectToAction(nameof(ManagerLeaves));
+            }
+            var request = await _dbContext.LeaveRequests.Include(item => item.Employee).FirstOrDefaultAsync(item => item.Id == id && item.AssignedApproverEmployeeId == managerId && item.EmployeeId != managerId);
+            if (request == null)
+            {
+                TempData["WorkflowMessage"] = "This leave request is no longer assigned to you. The list has been refreshed.";
+                return RedirectToAction(nameof(ManagerLeaves));
+            }
+            if (request.Status != "Pending")
+            {
+                TempData["WorkflowMessage"] = $"This request has already been {request.Status.ToLowerInvariant()}.";
+                return RedirectToAction(nameof(ManagerLeaves));
+            }
+            request.Status = normalizedDecision;
             request.DecidedByUserId = userId; request.DecidedAtUtc = DateTime.UtcNow; request.DecisionNote = CleanProfileValue(note);
             await _dbContext.SaveChangesAsync();
             TempData["WorkflowMessage"] = $"Leave request {request.Status.ToLowerInvariant()}. HR can now see the updated status.";
@@ -1704,9 +1745,8 @@ namespace VertexERP.Controllers
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> ManagerProjects()
         {
-            var managerId = await GetLoggedInEmployeeIdAsync();
-            var tasks = await _dbContext.WorkTasks.AsNoTracking().Include(task => task.Assignee).Where(task => task.ManagerId == managerId).OrderByDescending(task => task.CreatedAtUtc).ToListAsync();
-            return View(new ManagerSectionViewModel { Tasks = tasks });
+            await Task.CompletedTask;
+            return RedirectToAction("Index", "ProjectWorkspace", new { section = "projects" });
         }
 
         [HttpPost]

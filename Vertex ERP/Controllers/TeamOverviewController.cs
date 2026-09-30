@@ -36,9 +36,19 @@ public sealed class TeamOverviewController(ApplicationDbContext db) : Controller
             TempData["TeamMessage"] = "Select at least one active employee.";
             return RedirectToAction(nameof(Index), new { tab = "projects", projectId });
         }
-        // The composite key makes repeated assignments safe, including concurrent requests.
-        foreach (var id in ids)
-            await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO \"ProjectEmployees\" (\"ProjectId\", \"EmployeeId\") VALUES ({projectId}, {id}) ON CONFLICT DO NOTHING");
+        await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            db.ChangeTracker.Clear();
+            await using var transaction = await db.Database.BeginTransactionAsync();
+            foreach (var id in ids)
+            {
+                var added = await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO \"ProjectEmployees\" (\"ProjectId\", \"EmployeeId\") VALUES ({projectId}, {id}) ON CONFLICT DO NOTHING");
+                if (added > 0)
+                    db.AuditLogs.Add(VertexERP.Services.AuditLogFactory.CreateEvent("ProjectEmployee", "Project employee assigned", $"Project #{projectId} · Employee #{id}", User));
+            }
+            await db.SaveChangesAsync();
+            await transaction.CommitAsync();
+        });
         TempData["TeamMessage"] = "Employees assigned to the project.";
         return RedirectToAction(nameof(Index), new { tab = "projects", projectId });
     }
@@ -46,7 +56,16 @@ public sealed class TeamOverviewController(ApplicationDbContext db) : Controller
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Remove(int projectId, int employeeId)
     {
-        await db.ProjectEmployees.Where(x => x.ProjectId == projectId && x.EmployeeId == employeeId).ExecuteDeleteAsync();
+        await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            db.ChangeTracker.Clear();
+            await using var transaction = await db.Database.BeginTransactionAsync();
+            var removed = await db.ProjectEmployees.Where(x => x.ProjectId == projectId && x.EmployeeId == employeeId).ExecuteDeleteAsync();
+            if (removed > 0)
+                db.AuditLogs.Add(VertexERP.Services.AuditLogFactory.CreateEvent("ProjectEmployee", "Project employee removed", $"Project #{projectId} · Employee #{employeeId}", User));
+            await db.SaveChangesAsync();
+            await transaction.CommitAsync();
+        });
         TempData["TeamMessage"] = "Employee removed from the project.";
         return RedirectToAction(nameof(Index), new { tab = "projects", projectId });
     }
