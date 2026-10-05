@@ -55,6 +55,11 @@
             <option value="">All departments</option>
             @foreach (var item in Model.Departments) { <option value="@item" selected="@(Model.Department == item)">@item</option> }
         </select>
+        <select name="companyCode" class="employee-filter" aria-label="Filter by company" onchange="this.form.submit()">
+            <option value="">All companies</option>
+            <option value="VAS" selected="@(Model.CompanyCode == "VAS")">Vertex Automation System Pvt. Ltd.</option>
+            <option value="VPC" selected="@(Model.CompanyCode == "VPC")">Vertex Power Controls Pvt. Ltd.</option>
+        </select>
         <select name="status" class="employee-filter" aria-label="Filter by status" onchange="this.form.submit()">
             <option value="">All statuses</option>
             <option value="active" selected="@(Model.Status == "active")">Active</option>
@@ -68,7 +73,7 @@
         <div class="card-header"><div class="card-title-group"><h3>Employee Directory</h3><span class="badge-accent">Live Records</span></div></div>
         <div class="table-responsive">
             <table class="modern-table">
-                <thead><tr><th>Employee ID</th><th>Name</th><th>Email</th><th>Department</th><th>Designation</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                <thead><tr><th>Employee ID</th><th>Company</th><th>Name</th><th>Email</th><th>Department</th><th>Designation</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
                 <tbody>
                 @if (Model.Employees.Count > 0)
                 {
@@ -76,6 +81,7 @@
                     {
                         <tr>
                             <td><span class="code-text">@employee.EmployeeCode</span></td>
+                            <td>@VertexERP.Models.EmployeeCompany.DisplayName(employee.CompanyCode)</td>
                             <td class="fw-semibold">
                                 @if (employee.IsBiometricProfilePending)
                                 {
@@ -106,7 +112,7 @@
                 }
                 else
                 {
-                    <tr><td colspan="7" class="text-center-muted"><div class="empty-state"><i class="fa-solid fa-folder-open"></i><p>No employee records found.</p></div></td></tr>
+                    <tr><td colspan="8" class="text-center-muted"><div class="empty-state"><i class="fa-solid fa-folder-open"></i><p>No employee records found.</p></div></td></tr>
                 }
                 </tbody>
             </table>

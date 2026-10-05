@@ -724,6 +724,13 @@ namespace VertexERP.Controllers
             return View(new EmployeeLeaveViewModel { Employee = employee, Requests = requests, Balances = balances, Year = selectedYear });
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Employee,User,Manager,HR,Admin")]
+        public IActionResult CompanyHoliday()
+        {
+            return View(new CompanyHolidayCalendar(DateTimeOffset.UtcNow));
+        }
+
         [Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> EmployeeProfile()
         {
@@ -1096,7 +1103,7 @@ namespace VertexERP.Controllers
             });
             if (isMonthlyExport)
                 return BuildMonthlyAttendanceWorkbook(exportRecords, dates, monthlySummary.ToDictionary(x => x.Key, x => (x.Value.Present, x.Value.Absent, x.Value.Late, x.Value.Work)));
-            csv.AppendLine("Emp ID,Employee Name,Department,Date,Day,Check In,Check Out,Total Hours,Punch Count,Status,Remark,Late Arrival,Month Present Days,Month Absent Days,Month Late Days,Month Total Hours");
+            csv.AppendLine("Emp ID,Employee Name,Department,Date,Day,Check In,Check Out,Total Hours,Punch Count,Status,Remark,Late Arrival,Month Present Days,Month Absent Days,Month Late Days,Month Total Hours,Overtime,Site Check In - Time / Location / GPS,Site Check Out - Time / Location / GPS");
             foreach (var item in exportRecords.OrderBy(item => item.EmployeeName).ThenBy(item => item.EmpId).ThenBy(item => item.Date))
             {
                 var summary = monthlySummary[item.EmployeeId];
@@ -1105,7 +1112,8 @@ namespace VertexERP.Controllers
                     Csv(item.EmpId), Csv(item.EmployeeName), Csv(item.Department), Csv(item.Date.ToString("dd-MMM-yyyy")), Csv(item.Date.DayOfWeek.ToString()),
                     Csv(item.CheckIn?.ToString("hh:mm tt") ?? string.Empty), Csv(item.CheckOut?.ToString("hh:mm tt") ?? string.Empty),
                     Csv(item.TotalHoursDisplay), item.PunchCount.ToString(), Csv(item.Status), Csv(item.Remark), Csv(item.IsLate ? "Yes" : "No"),
-                    summary.Present.ToString(), summary.Absent.ToString(), summary.Late.ToString(), Csv($"{(int)summary.Work.TotalHours:D2}:{summary.Work.Minutes:D2}")
+                    summary.Present.ToString(), summary.Absent.ToString(), summary.Late.ToString(), Csv($"{(int)summary.Work.TotalHours:D2}:{summary.Work.Minutes:D2}"),
+                    Csv(item.OvertimeDisplay), Csv(item.SiteCheckIns), Csv(item.SiteCheckOuts)
                 }));
             }
 
@@ -1121,29 +1129,44 @@ namespace VertexERP.Controllers
             static string X(string? value) => System.Security.SecurityElement.Escape(value ?? string.Empty) ?? string.Empty;
             var month = dates[0];
             var xml = new StringBuilder("<?xml version=\"1.0\"?><Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:x=\"urn:schemas-microsoft-com:office:excel\">");
-            xml.Append("<Styles><Style ss:ID=\"Default\"><Alignment ss:Vertical=\"Center\"/><Font ss:FontName=\"Calibri\" ss:Size=\"10\"/></Style><Style ss:ID=\"Title\"><Alignment ss:Horizontal=\"Center\"/><Font ss:Bold=\"1\" ss:Size=\"16\" ss:Color=\"#FFFFFF\"/><Interior ss:Color=\"#1D4ED8\" ss:Pattern=\"Solid\"/></Style><Style ss:ID=\"Header\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Font ss:Bold=\"1\" ss:Color=\"#FFFFFF\"/><Interior ss:Color=\"#1E3A5F\" ss:Pattern=\"Solid\"/></Style><Style ss:ID=\"Text\"><Borders><Border ss:Position=\"Bottom\" ss:LineStyle=\"Continuous\" ss:Weight=\"1\" ss:Color=\"#DCE3EA\"/></Borders></Style><Style ss:ID=\"Present\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Interior ss:Color=\"#DCFCE7\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#166534\"/></Style><Style ss:ID=\"Late\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Interior ss:Color=\"#FEF3C7\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#92400E\"/></Style><Style ss:ID=\"Absent\"><Alignment ss:Horizontal=\"Center\"/><Interior ss:Color=\"#FEE2E2\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#991B1B\"/></Style></Styles>");
-            xml.Append($"<Worksheet ss:Name=\"{X(month.ToString("MMM-yyyy"))}\"><Table><Column ss:Width=\"65\"/><Column ss:Width=\"145\"/><Column ss:Width=\"100\"/><Column ss:Width=\"55\" ss:Span=\"3\"/><Column ss:Width=\"70\"/>");
+            xml.Append("<Styles><Style ss:ID=\"Default\"><Alignment ss:Vertical=\"Center\"/><Font ss:FontName=\"Calibri\" ss:Size=\"10\"/></Style><Style ss:ID=\"Title\"><Alignment ss:Horizontal=\"Center\"/><Font ss:Bold=\"1\" ss:Size=\"16\" ss:Color=\"#FFFFFF\"/><Interior ss:Color=\"#1D4ED8\" ss:Pattern=\"Solid\"/></Style><Style ss:ID=\"Header\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Font ss:Bold=\"1\" ss:Color=\"#FFFFFF\"/><Interior ss:Color=\"#1E3A5F\" ss:Pattern=\"Solid\"/></Style><Style ss:ID=\"Text\"><Alignment ss:Vertical=\"Top\" ss:WrapText=\"1\"/><Borders><Border ss:Position=\"Bottom\" ss:LineStyle=\"Continuous\" ss:Weight=\"1\" ss:Color=\"#DCE3EA\"/></Borders></Style><Style ss:ID=\"Present\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Interior ss:Color=\"#DCFCE7\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#166534\"/></Style><Style ss:ID=\"Late\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Interior ss:Color=\"#FEF3C7\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#92400E\"/></Style><Style ss:ID=\"Absent\"><Alignment ss:Horizontal=\"Center\"/><Interior ss:Color=\"#FEE2E2\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#991B1B\"/></Style></Styles>");
+            xml.Append($"<Worksheet ss:Name=\"{X(month.ToString("MMM-yyyy"))}\"><Table><Column ss:Width=\"65\"/><Column ss:Width=\"145\"/><Column ss:Width=\"100\"/><Column ss:Width=\"55\" ss:Span=\"2\"/><Column ss:Width=\"70\" ss:Span=\"1\"/>");
             foreach (var _ in dates) xml.Append("<Column ss:Width=\"82\"/>");
-            var columnCount = 7 + dates.Count;
+            var columnCount = 8 + dates.Count;
             xml.Append($"<Row ss:Height=\"30\"><Cell ss:StyleID=\"Title\" ss:MergeAcross=\"{columnCount - 1}\"><Data ss:Type=\"String\">Monthly Attendance Pivot Report - {X(month.ToString("MMMM yyyy"))}</Data></Cell></Row>");
             xml.Append("<Row ss:StyleID=\"Header\"><Cell><Data ss:Type=\"String\">Emp ID</Data></Cell><Cell><Data ss:Type=\"String\">Employee Name</Data></Cell><Cell><Data ss:Type=\"String\">Department</Data></Cell><Cell><Data ss:Type=\"String\">Present</Data></Cell><Cell><Data ss:Type=\"String\">Absent</Data></Cell><Cell><Data ss:Type=\"String\">Late</Data></Cell><Cell><Data ss:Type=\"String\">Total Hours</Data></Cell>");
+            xml.Append("<Cell><Data ss:Type=\"String\">Overtime</Data></Cell>");
             foreach (var day in dates) xml.Append($"<Cell><Data ss:Type=\"String\">{day:dd MMM}\n{day:ddd}</Data></Cell>");
             xml.Append("</Row>");
             foreach (var employee in records.GroupBy(x => x.EmployeeId).OrderBy(x => x.First().EmployeeName))
             {
                 var first = employee.First(); var summary = summaries[employee.Key]; var byDate = employee.ToDictionary(x => x.Date);
-                xml.Append($"<Row ss:Height=\"75\"><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.EmpId)}</Data></Cell><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.EmployeeName)}</Data></Cell><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.Department)}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Present}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Absent}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Late}</Data></Cell><Cell><Data ss:Type=\"String\">{(int)summary.Work.TotalHours:D2}:{summary.Work.Minutes:D2}</Data></Cell>");
+                xml.Append($"<Row ss:Height=\"90\"><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.EmpId)}</Data></Cell><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.EmployeeName)}</Data></Cell><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.Department)}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Present}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Absent}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Late}</Data></Cell><Cell><Data ss:Type=\"String\">{(int)summary.Work.TotalHours:D2}:{summary.Work.Minutes:D2}</Data></Cell>");
+                var overtime = TimeSpan.FromTicks(employee.Sum(item => item.Overtime.Ticks));
+                xml.Append($"<Cell><Data ss:Type=\"String\">{X(AttendanceRules.FormatHours(overtime))}</Data></Cell>");
                 foreach (var day in dates)
                 {
                     var item = byDate[day];
                     var style = item.Status == "Present" ? "Present" : item.Status == "Absent" ? "Absent" : "Late";
                     var code = X(item.Status);
                     var timing = item.CheckIn.HasValue ? $"&#10;{item.CheckIn:hh:mm tt}-{(item.CheckOut.HasValue ? item.CheckOut.Value.ToString("hh:mm tt") : "—")}" : string.Empty;
-                    xml.Append($"<Cell ss:StyleID=\"{style}\"><Data ss:Type=\"String\">{code}{timing}&#10;{X(item.TotalHoursDisplay)}&#10;{X(item.Remark)}</Data></Cell>");
+                    xml.Append($"<Cell ss:StyleID=\"{style}\"><Data ss:Type=\"String\">{code}{timing}&#10;{X(item.TotalHoursDisplay)}&#10;OT: {X(item.OvertimeDisplay)}&#10;{X(item.Remark)}</Data></Cell>");
                 }
                 xml.Append("</Row>");
             }
-            xml.Append("</Table><WorksheetOptions xmlns=\"urn:schemas-microsoft-com:office:excel\"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>2</SplitHorizontal><TopRowBottomPane>2</TopRowBottomPane><SplitVertical>3</SplitVertical><LeftColumnRightPane>3</LeftColumnRightPane><ProtectObjects>False</ProtectObjects><ProtectScenarios>False</ProtectScenarios></WorksheetOptions></Worksheet></Workbook>");
+            xml.Append("</Table><WorksheetOptions xmlns=\"urn:schemas-microsoft-com:office:excel\"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>2</SplitHorizontal><TopRowBottomPane>2</TopRowBottomPane><SplitVertical>3</SplitVertical><LeftColumnRightPane>3</LeftColumnRightPane><ProtectObjects>False</ProtectObjects><ProtectScenarios>False</ProtectScenarios></WorksheetOptions></Worksheet>");
+            xml.Append("<Worksheet ss:Name=\"Daily Details\"><Table><Column ss:Width=\"75\"/><Column ss:Width=\"140\" ss:Span=\"1\"/><Column ss:Width=\"85\" ss:Span=\"5\"/><Column ss:Width=\"360\" ss:Span=\"1\"/><Row ss:StyleID=\"Header\">");
+            foreach (var heading in new[] { "Emp ID", "Employee Name", "Department", "Date", "Check In", "Check Out", "Total Hours", "Overtime", "Status", "Site Check In - Time / Location / GPS", "Site Check Out - Time / Location / GPS" })
+                xml.Append($"<Cell><Data ss:Type=\"String\">{X(heading)}</Data></Cell>");
+            xml.Append("</Row>");
+            foreach (var item in records.OrderBy(item => item.EmployeeName).ThenBy(item => item.EmployeeId).ThenBy(item => item.Date))
+            {
+                xml.Append("<Row>");
+                foreach (var value in new[] { item.EmpId, item.EmployeeName, item.Department, item.Date.ToString("dd-MMM-yyyy"), item.CheckIn?.ToString("hh:mm tt") ?? "", item.CheckOut?.ToString("hh:mm tt") ?? "", item.TotalHoursDisplay, item.OvertimeDisplay, item.Status, item.SiteCheckIns, item.SiteCheckOuts })
+                    xml.Append($"<Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(value)}</Data></Cell>");
+                xml.Append("</Row>");
+            }
+            xml.Append("</Table></Worksheet></Workbook>");
             return File(new UTF8Encoding(true).GetBytes(xml.ToString()), "application/vnd.ms-excel", $"Attendance-Pivot-{month:yyyy-MM}.xls");
         }
 

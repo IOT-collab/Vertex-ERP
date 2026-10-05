@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
@@ -41,7 +41,7 @@
 		<Content Remove="remote-attendance-checkpoint.json" />
 		<None Remove="remote-attendance-checkpoint.json" />
 
-		<Content Include="DocumentTemplates\**\*"
+		<Content Include="DocumentTemplates\**\*" Exclude="DocumentTemplates\CompanyLetters\**\*"
 				 CopyToOutputDirectory="PreserveNewest"
 				 CopyToPublishDirectory="PreserveNewest" />
 

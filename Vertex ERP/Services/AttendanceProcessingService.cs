@@ -26,7 +26,8 @@ public sealed class AttendanceProcessingService : IAttendanceProcessingService
             var firstLog = group.First(); var employee = firstLog.Employee;
             var paired = AttendanceRules.PairPunches(group.Select(log => (log.PunchTime, log.PunchState)));
             var evaluation = AttendanceRules.EvaluateDay(paired.CheckIn, paired.CheckOut, date, DateOnly.FromDateTime(DateTime.Today), startTime);
-            return new DailyAttendanceViewModel { EmployeeId = employee?.Id ?? 0, EmpId = employee?.EmployeeCode ?? $"BIO-{firstLog.DeviceUserId}", EmployeeName = FormatDisplayText(employee?.FullName ?? $"Unmapped User {firstLog.DeviceUserId}"), Department = FormatDisplayText(employee?.Department ?? "Unmapped"), Date = date, CheckIn = paired.CheckIn.HasValue ? TimeOnly.FromDateTime(paired.CheckIn.Value) : null, CheckOut = paired.CheckOut.HasValue ? TimeOnly.FromDateTime(paired.CheckOut.Value) : null, WorkingHours = evaluation.Hours, PunchCount = group.Count(), Status = evaluation.Status, IsLate = evaluation.IsLate, Remark = evaluation.Remark };
+            return new DailyAttendanceViewModel { EmployeeId = employee?.Id ?? 0, EmpId = employee?.EmployeeCode ?? $"BIO-{firstLog.DeviceUserId}", EmployeeName = FormatDisplayText(employee?.FullName ?? $"Unmapped User {firstLog.DeviceUserId}"), Department = FormatDisplayText(employee?.Department ?? "Unmapped"), Date = date, CheckIn = paired.CheckIn.HasValue ? TimeOnly.FromDateTime(paired.CheckIn.Value) : null, CheckOut = paired.CheckOut.HasValue ? TimeOnly.FromDateTime(paired.CheckOut.Value) : null, WorkingHours = evaluation.Hours, PunchCount = group.Count(), Status = evaluation.Status, IsLate = evaluation.IsLate, Remark = evaluation.Remark,
+                SiteCheckIns = FormatSitePunches(group, "Check In"), SiteCheckOuts = FormatSitePunches(group, "Check Out") };
         }).ToList();
         var punchedEmployeeIds = records.Where(record => record.EmployeeId > 0).Select(record => record.EmployeeId).ToHashSet();
         records.AddRange(employees.Where(employee => !punchedEmployeeIds.Contains(employee.Id)).Select(employee =>
@@ -55,6 +56,16 @@ public sealed class AttendanceProcessingService : IAttendanceProcessingService
         _logger.LogDebug("Built attendance for {Date}: {Punches} punches, {Employees} employees", date, logs.Count, records.Count);
         return new AttendancePageViewModel { Records = filtered.OrderBy(record => record.EmployeeName).ToList(), Departments = employees.Select(employee => FormatDisplayText(employee.Department)).Where(value => !string.IsNullOrWhiteSpace(value)).Distinct(StringComparer.OrdinalIgnoreCase).Order().ToList(), PresentCount = presentCount, AbsentCount = absentCount, LeaveCount = leaveCount, LateCount = lateCount, IncompleteCount = incompleteCount, SearchQuery = search, Department = department, FilterDate = date, Status = status };
     }
+
+    private static string FormatSitePunches(IEnumerable<AttendanceLog> logs, string action) =>
+        string.Join("\n", logs.Where(log =>
+                (log.VerificationMode == AttendanceRules.FieldVerificationMode || !string.IsNullOrWhiteSpace(log.FieldSiteName))
+                && AttendanceRules.NormalizePunchAction(log.PunchState) == action)
+            .OrderBy(log => log.PunchTime).Select(log =>
+                $"{log.PunchTime:dd-MMM-yyyy hh:mm tt} | {log.FieldSiteName ?? "Site not recorded"} | " +
+                (log.Latitude.HasValue && log.Longitude.HasValue
+                    ? FormattableString.Invariant($"https://www.google.com/maps?q={log.Latitude},{log.Longitude}")
+                    : "GPS not recorded")));
 
     private static string FormatDisplayText(string? value)
     {

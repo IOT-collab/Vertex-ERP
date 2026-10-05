@@ -43,7 +43,7 @@ static class EmployeeCreationChecks
             }
             HrAddEmployeeViewModel Model(string code) => new()
             {
-                EmployeeId = code, FirstName = "Test", LastName = "Employee",
+                CompanyCode = "VAS", EmployeeId = code, FirstName = "Test", LastName = "Employee",
                 Email = code + "@example.invalid", Phone = code == "TEST1" ? "7000000001" : "7000000002",
                 EmergencyContact = "7000000003", AadhaarNumber = "123456789012",
                 DepartmentId = department.Id, Designation = "Tester",
@@ -52,11 +52,18 @@ static class EmployeeCreationChecks
                 BankAccountNumber = "123456789012", ConfirmBankAccountNumber = "123456789012",
                 BankIfscCode = "TEST0123456", BasicSalary = 10000
             };
+            var preview = (JsonResult)await Controller().EmployeeIdentityPreview("VAS", null);
+            check(System.Text.Json.JsonSerializer.Serialize(preview.Value).Contains("VAS0180"), "Company selection previews next Automations ID");
+            preview = (JsonResult)await Controller().EmployeeIdentityPreview("VPC", null);
+            check(System.Text.Json.JsonSerializer.Serialize(preview.Value).Contains("VPC0178"), "Company selection previews next Power Controls ID");
+            check((await db.EmployeeCompanies.AsNoTracking().SingleAsync(x => x.Code == "VAS")).LastIssuedNumber == 179,
+                "Viewing ID preview does not consume a number");
             var controller = Controller();
             check(await controller.HrAddEmp(Model("TEST1")) is RedirectToActionResult { ControllerName: "Employee", ActionName: "Index" },
                 "Employee creation succeeds with database retries enabled");
             db.ChangeTracker.Clear();
             var employee = await db.Employees.SingleAsync();
+            check(employee.EmployeeCode == "VAS0180" && employee.CompanyCode == "VAS", "First Automations ID starts after VAS0179 and ignores supplied ID");
             var account = await db.AppUsers.SingleAsync();
             check(account.EmployeeId == employee.Id && PasswordHashService.VerifyPassword("TestPassword123!", account.PasswordHash),
                 "Created employee login is linked and password works");
@@ -73,6 +80,8 @@ static class EmployeeCreationChecks
             check(await db.Employees.CountAsync() == 1 && await db.AppUsers.CountAsync() == 1 &&
                 await db.EmployeeBankDetails.CountAsync() == 1 && await db.EmployeeSalaryDetails.CountAsync() == 1,
                 "Failed creation leaves no partial employee, login, bank or salary records");
+            check((await db.EmployeeCompanies.SingleAsync(x => x.Code == "VAS")).LastIssuedNumber == 180,
+                "Failed creation rolls back the company counter");
             await SalaryGenerationChecks.Run(db, check);
             await BiometricEmployeeChecks.Run(db, check);
             db.AttendanceLogs.Add(new AttendanceLog
@@ -91,18 +100,26 @@ static class EmployeeCreationChecks
                 && pendingForm.SourceEnrollments.Any(x => x.StartsWith("ONBOARD176 ("))
                 && string.IsNullOrEmpty(pendingForm.Email) && string.IsNullOrEmpty(pendingForm.FirstName),
                 "Employee directory completion opens the same biometric ID without placeholder personal details");
+            check(pendingForm.BiometricOptions.Any(x => x.EmployeeId == originalId && x.Label.Contains("ONBOARD176")),
+                "Biometric selector includes source enrollment and employee identity");
+            preview = (JsonResult)await Controller().EmployeeIdentityPreview("VAS", originalId);
+            var identityJson = System.Text.Json.JsonSerializer.Serialize(preview.Value);
+            check(identityJson.Contains("VAS0181") && identityJson.Contains("ONBOARD176"),
+                "Identity preview displays both generated ERP ID and original biometric enrollment");
+            check(await Controller().EmployeeIdentityPreview("VAS", int.MaxValue) is BadRequestObjectResult,
+                "Unknown biometric profile cannot be previewed");
             check(await Controller().HrAddEmp((int?)int.MaxValue) is NotFoundResult, "Unknown completion profile returns not found");
             var lookup = (JsonResult)await Controller().LookupEmployeeForOnboarding(" onboard176 ");
             check(System.Text.Json.JsonSerializer.Serialize(lookup.Value).Contains("\"status\":\"pending\""), "Employee ID lookup recognizes pending biometric profile regardless of case");
             var completion = Model("ONBOARD176");
-            check(await Controller().HrAddEmp(completion) is ViewResult, "Pending biometric completion requires confirmed lookup identity");
+
             completion.PendingBiometricEmployeeId = originalId;
             completion.EmployeeId = "ERP-176";
             completion.SourceEnrollments = new[] { "FAKE-SOURCE" };
             check(await Controller().HrAddEmp(completion) is RedirectToActionResult, "Add Employee completes biometric profile");
             db.ChangeTracker.Clear();
             var completed = await db.Employees.SingleAsync(x => x.Id == originalId);
-            check(!completed.IsBiometricProfilePending && completed.EmployeeCode == "ERP-176" && completed.FullName == "Test Employee" && await db.Employees.CountAsync() == originalCount,
+            check(!completed.IsBiometricProfilePending && completed.EmployeeCode == "VAS0181" && completed.FullName == "Test Employee" && await db.Employees.CountAsync() == originalCount,
                 "Completion updates the existing employee without creating a duplicate");
             check(await db.AttendanceLogs.AnyAsync(x => x.DeviceUserId == "ONBOARD176" && x.EmployeeId == originalId)
                 && await db.EmployeeDeviceMappings.AnyAsync(x => x.DeviceUserId == "ONBOARD176" && x.EmployeeId == originalId),
@@ -113,9 +130,17 @@ static class EmployeeCreationChecks
             check(await Controller().HrAddEmp((int?)originalId) is RedirectToActionResult { ActionName: "Edit", ControllerName: "Employee" },
                 "Completed profile link redirects to edit instead of onboarding again");
             check(System.Text.Json.JsonSerializer.Serialize(lookup.Value).Contains("\"status\":\"existing\""), "Completed employee lookup directs HR to Edit Profile");
+            var power = Model("POWER1");
+            power.CompanyCode = "VPC"; power.Phone = "7000000004";
+            check(await Controller().HrAddEmp(power) is RedirectToActionResult, "Power Controls employee saves successfully");
+            db.ChangeTracker.Clear();
+            check(await db.Employees.AnyAsync(x => x.EmployeeCode == "VPC0178" && x.CompanyCode == "VPC"), "Power Controls starts at VPC0178 independently");
+            var invalid = Model("INVALID"); invalid.CompanyCode = "OTHER";
+            check(await Controller().HrAddEmp(invalid) is ViewResult, "Unknown company is rejected by server");
             completion.FirstName = "Overwrite attempt";
             check(await Controller().HrAddEmp(completion) is ViewResult && (await db.Employees.AsNoTracking().SingleAsync(x => x.Id == originalId)).FirstName == "Test",
                 "Repeated completion cannot overwrite finished employee");
+            await EmployeeNumberingChecks.Run(options, check);
         }
         finally
         {

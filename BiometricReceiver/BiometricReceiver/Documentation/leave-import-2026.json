@@ -4,7 +4,7 @@
   "columns": ["Name", "EL", "CL", "ML", "EW"],
   "companies": [
     {
-      "name": "Vertex Power Controls Pvt Ltd",
+      "name": "Vertex Power Controls Pvt. Ltd.",
       "rows": [
         ["Ashwani Yadav", "9", "4", "4", ""],
         ["Bhram Singh", "10", "0", "NA", ""],
@@ -29,7 +29,7 @@
       ]
     },
     {
-      "name": "Vertex Automation System Pvt Ltd",
+      "name": "Vertex Automation System Pvt. Ltd.",
       "rows": [
         ["Amit Bhati", "28", "3", "NA", "0"],
         ["Bani Singh", "17", "", "NA", "0"],

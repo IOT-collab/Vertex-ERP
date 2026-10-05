@@ -71,6 +71,11 @@ public class DailyAttendanceViewModel
     public TimeOnly? CheckIn { get; init; }
     public TimeOnly? CheckOut { get; init; }
     public TimeSpan WorkingHours { get; init; }
+    public TimeSpan Overtime => VertexERP.Services.AttendanceRules.CalculateOvertime(WorkingHours);
+    public string OvertimeDisplay => CheckIn.HasValue && CheckOut.HasValue
+        ? VertexERP.Services.AttendanceRules.FormatHours(Overtime) : "—";
+    public string SiteCheckIns { get; init; } = string.Empty;
+    public string SiteCheckOuts { get; init; } = string.Empty;
     public bool IsLate { get; init; }
     public string Remark { get; init; } = string.Empty;
     public string TotalHoursDisplay => CheckIn.HasValue && CheckOut.HasValue

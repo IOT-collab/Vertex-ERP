@@ -1,5 +1,7 @@
 using VertexERP.Services;
 
+await AttendanceExportChecks.Run();
+
 var today = new DateOnly(2026, 9, 16);
 var start = new TimeOnly(9, 30);
 DateTime At(int hour, int minute) => today.ToDateTime(new TimeOnly(hour, minute));

@@ -6,6 +6,21 @@ namespace VertexERP.Models;
 public sealed class EmployeeDocumentFormViewModel
 {
     [Required] public int? EmployeeId { get; set; }
+    public string? CompanyCode { get; set; }
+    public string CompanyName => EmployeeCompany.DisplayName(CompanyCode);
+    public string EmployeeCode { get; set; } = string.Empty;
+    [StringLength(120)] public string? FatherName { get; set; }
+    [StringLength(500)] public string? PresentAddress { get; set; }
+    [StringLength(500)] public string? PermanentAddress { get; set; }
+    [StringLength(10)] public string? PresentPinCode { get; set; }
+    [StringLength(10)] public string? PermanentPinCode { get; set; }
+    [StringLength(12), RegularExpression(@"^\d{12}$")] public string? AadhaarNumber { get; set; }
+    [StringLength(200)] public string? AnnualCtcWords { get; set; }
+    [Range(0, 100000000)] public decimal? MonthlyCtc { get; set; }
+    [Range(0, 100000000)] public decimal? EmployerProvidentFund { get; set; }
+    [Range(0, 100000000)] public decimal? EmployerEsi { get; set; }
+    [Range(0, 100000000)] public decimal? PerformanceReviewPay { get; set; }
+    [Range(0, 100000000)] public decimal? OtherBenefits { get; set; }
     [Required, StringLength(120)] public string EmployeeName { get; set; } = string.Empty;
     [DataType(DataType.Date)] public DateOnly? DateOfBirth { get; set; }
     [DataType(DataType.Date)] public DateOnly? JoiningDate { get; set; }
@@ -47,6 +62,14 @@ public sealed class EmployeeDocumentFormViewModel
 
 public sealed class EmployeeDocumentEmployeeOption
 {
+    public string? CompanyCode { get; init; }
+    public string CompanyName => EmployeeCompany.DisplayName(CompanyCode);
+    public string? AadhaarNumber { get; init; }
+    public string? PresentAddress { get; init; }
+    public string? PermanentAddress { get; init; }
+    public string? PresentPinCode { get; init; }
+    public string? PermanentPinCode { get; init; }
+    public string? PanNumber { get; init; }
     public int Id { get; init; }
     public string EmployeeCode { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;

@@ -1,0 +1,66 @@
+@model VertexERP.Models.CompanyHolidayCalendar
+@using System.Globalization
+@{
+    ViewData["Title"] = "Company Holiday";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var culture = CultureInfo.GetCultureInfo("en-IN");
+    string DateLabel(DateOnly date) => date.ToString("dd MMM yyyy", culture);
+    var next = Model.NextHoliday;
+}
+<link href="~/css/CompanyHoliday.css" rel="stylesheet" asp-append-version="true" />
+<section class="company-holidays">
+    <header class="ch-header">
+        <div><span class="ch-eyebrow">VERTEX GROUP · EMPLOYEE CALENDAR</span><h1>Company Holiday</h1><p>Plan your year with the official company holiday schedule.</p></div>
+        <span class="ch-year"><i class="fa-regular fa-calendar-days" aria-hidden="true"></i> @Model.Year</span>
+    </header>
+    <div class="ch-summary">
+        <article class="ch-next"><span class="ch-label">@(next != null && next.Start <= Model.Today ? "Enjoy your holiday" : "Next holiday")</span><h2>@(next?.Name ?? "Year's holidays completed")</h2>
+            @if (next != null) {
+                <p>@DateLabel(next.Start)@(next.Days > 1 ? " – " + DateLabel(next.End) : "")</p>
+                <span class="ch-countdown">@(next.Start <= Model.Today ? "Holiday today" : $"In {next.Start.DayNumber - Model.Today.DayNumber} days")</span>
+            } else { <p>All listed holidays for @Model.Year have passed.</p> }
+        </article>
+        <article class="ch-stat"><span class="ch-label">Total holidays</span><strong>@Model.TotalDays <small>days</small></strong><p>Official schedule for @Model.Year</p></article>
+        <article class="ch-stat"><span class="ch-label">Days remaining</span><strong>@Model.RemainingDays <small>days</small></strong><p>Includes today, if a holiday</p></article>
+    </div>
+    <div class="ch-panel">
+        <div class="ch-toolbar"><div><h2>Holiday schedule</h2><p>@Model.Holidays.Count occasions · @Model.TotalDays holiday days</p></div><div class="ch-filters">
+            <label><span class="ch-sr-only">Search holidays</span><input id="ch-search" type="search" placeholder="Search a holiday…" /></label>
+            <label><span class="ch-sr-only">Filter holiday status</span><select id="ch-status"><option value="all">All holidays</option><option value="upcoming">Upcoming</option><option value="today">Today</option><option value="past">Past</option></select></label>
+        </div></div>
+        <div class="ch-list">
+        @foreach (var holiday in Model.Holidays)
+        {
+            var status = holiday.End < Model.Today ? "past" : holiday.Start > Model.Today ? "upcoming" : "today";
+            <article class="ch-row" data-name="@holiday.Name.ToLowerInvariant()" data-status="@status">
+                <div class="ch-date"><span>@holiday.Start.ToString("MMM", culture)</span><strong>@holiday.Start.Day.ToString("00")</strong></div>
+                <div class="ch-detail"><h3>@holiday.Name</h3><p>@DateLabel(holiday.Start)@(holiday.Days > 1 ? " – " + DateLabel(holiday.End) : "")<span class="ch-weekday"> · @holiday.Start.ToString("dddd", culture)@(holiday.Days > 1 ? " – " + holiday.End.ToString("dddd", culture) : "")</span></p></div>
+                <span class="ch-duration">@holiday.Days @(holiday.Days == 1 ? "day" : "days")</span><span class="ch-status ch-@status">@(status == "today" ? "Today" : status == "past" ? "Past" : "Upcoming")</span>
+            </article>
+        }
+        </div>
+        <p id="ch-empty" class="ch-empty" hidden>No holidays match your search. Try another name or status.</p>
+        <p id="ch-results" class="ch-results" aria-live="polite">Showing all @Model.Holidays.Count occasions</p>
+    </div>
+    <aside class="ch-note"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><div><strong>Holiday updates</strong><p>Dates may change at short notice. Any changes will be announced by email.</p></div></aside>
+</section>
+@section Scripts {
+<script>
+(() => {
+    const search = document.getElementById('ch-search');
+    const status = document.getElementById('ch-status');
+    const rows = Array.from(document.querySelectorAll('.ch-row'));
+    function filter() {
+        let count = 0;
+        rows.forEach(row => {
+            row.hidden = !row.dataset.name.includes(search.value.trim().toLowerCase()) || (status.value !== 'all' && row.dataset.status !== status.value);
+            if (!row.hidden) count++;
+        });
+        document.getElementById('ch-empty').hidden = count !== 0;
+        document.getElementById('ch-results').textContent = `Showing ${count} of ${rows.length} occasions`;
+    }
+    search.addEventListener('input', filter);
+    status.addEventListener('change', filter);
+})();
+</script>
+}

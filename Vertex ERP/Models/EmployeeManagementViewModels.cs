@@ -5,6 +5,7 @@ namespace VertexERP.Models;
 
 public class EmployeeDirectoryViewModel
 {
+    public string? CompanyCode { get; init; }
     public IReadOnlyList<Employee> Employees { get; init; } = Array.Empty<Employee>();
     public int TotalEmployees { get; init; }
     public int ActiveEmployees { get; init; }
@@ -298,10 +299,22 @@ public class EmployeeSalaryDraft
     public DateOnly SalaryEffectiveFrom { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 }
 
+public class BiometricOnboardingOption
+{
+    public int EmployeeId { get; set; }
+    public string Label { get; set; } = string.Empty;
+}
+
 public class HrAddEmployeeViewModel : IValidatableObject
 {
+    [Required(ErrorMessage = "Please select a company.")]
+    [RegularExpression("^(VAS|VPC)$", ErrorMessage = "Please select a valid company.")]
+    [Display(Name = "Company")]
+    public string CompanyCode { get; set; } = string.Empty;
     [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
     public IReadOnlyList<string> SourceEnrollments { get; set; } = Array.Empty<string>();
+    [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
+    public IReadOnlyList<BiometricOnboardingOption> BiometricOptions { get; set; } = Array.Empty<BiometricOnboardingOption>();
     public int? PendingBiometricEmployeeId { get; set; }
     [Required(ErrorMessage = "Aadhaar Number is required.")]
     [StringLength(12)]
@@ -309,7 +322,7 @@ public class HrAddEmployeeViewModel : IValidatableObject
     [Display(Name = "Aadhaar Number")]
     public string? AadhaarNumber { get; set; }
 
-    [Required(ErrorMessage = "Employee ID is required."), StringLength(30, ErrorMessage = "Employee ID cannot exceed 30 characters.")]
+    [StringLength(30, ErrorMessage = "Employee ID cannot exceed 30 characters.")]
     [Display(Name = "Employee ID")]
     public string EmployeeId { get; set; } = string.Empty;
 

@@ -22,7 +22,7 @@ public class EmployeeController : Controller
     }
 
     [HttpGet]
-    public IActionResult Index(string? search, string? department, string? status)
+    public IActionResult Index(string? search, string? department, string? status, string? companyCode = null)
     {
         var query = _dbContext.Employees
             .AsNoTracking()
@@ -42,6 +42,9 @@ public class EmployeeController : Controller
                 employee.Designation.ToLower().Contains(term));
         }
 
+        if (EmployeeCompany.IsValid(companyCode))
+            query = query.Where(employee => employee.CompanyCode == companyCode);
+
         if (!string.IsNullOrWhiteSpace(department))
             query = query.Where(employee => employee.Department == department);
 
@@ -60,6 +63,7 @@ public class EmployeeController : Controller
             InactiveEmployees = _dbContext.Employees.Count(employee => !employee.IsActive),
             TotalDepartments = _dbContext.Employees.Select(employee => employee.Department).Distinct().Count(),
             Departments = _dbContext.Employees.Select(employee => employee.Department).Distinct().OrderBy(name => name).ToList(),
+            CompanyCode = companyCode,
             Search = search,
             Department = department,
             Status = status
@@ -79,6 +83,17 @@ public class EmployeeController : Controller
         return File(AdminReportExcelService.CreateEmployeeList(employees),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             $"Employee-List-{DateTime.Today:yyyy-MM-dd}.xlsx");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ContractualEmployees()
+    {
+        var employees = await _dbContext.Employees.AsNoTracking()
+            .Include(employee => employee.ReportingManager)
+            .Where(employee => employee.EmploymentType.Trim().ToLower() == "contract")
+            .OrderBy(employee => employee.FullName).ThenBy(employee => employee.EmployeeCode)
+            .ToListAsync();
+        return View(employees);
     }
 
     [HttpGet]
@@ -167,27 +182,9 @@ public class EmployeeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(EmployeeFormViewModel model)
+    public IActionResult Create(EmployeeFormViewModel model)
     {
-        ValidateUniqueFields(model);
-        var photoExtension = await ValidatePhotoAsync(model.EmployeePhoto);
-        if (!ModelState.IsValid)
-            return View("~/Views/Main/AddEmpHrm.cshtml", PopulateManagers(model));
-
-        var employee = new Employee();
-        ApplyForm(employee, model);
-        if (model.EmployeePhoto != null && photoExtension != null)
-            employee.PhotoPath = await SavePhotoAsync(model.EmployeePhoto, photoExtension);
-        _dbContext.Employees.Add(employee);
-
-        if (!TrySave("The employee could not be created because the data conflicts with an existing record."))
-        {
-            DeletePhotoIfPresent(employee.PhotoPath);
-            return View("~/Views/Main/AddEmpHrm.cshtml", PopulateManagers(model));
-        }
-
-        TempData["EmployeeMessage"] = "Employee created successfully.";
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction("HrAddEmp", "Hr");
     }
 
     [HttpGet]
@@ -220,6 +217,8 @@ public class EmployeeController : Controller
         var employee = _dbContext.Employees.Find(id);
         if (employee == null) return NotFound();
 
+        model.EmployeeCode = employee.EmployeeCode;
+        ModelState.Remove(nameof(model.EmployeeCode));
         ValidateUniqueFields(model);
         model.PhotoPath = employee.PhotoPath;
         var photoExtension = await ValidatePhotoAsync(model.EmployeePhoto);
@@ -246,7 +245,7 @@ public class EmployeeController : Controller
             newPhotoPath = await SavePhotoAsync(model.EmployeePhoto, photoExtension);
             employee.PhotoPath = newPhotoPath;
         }
-        ApplyForm(employee, model, preserveEmployeeCode: false);
+        ApplyForm(employee, model, preserveEmployeeCode: true);
         employee.IsBiometricProfilePending = false;
         employee.UpdatedDate = DateTime.UtcNow;
 

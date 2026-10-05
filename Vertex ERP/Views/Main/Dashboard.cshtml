@@ -6,9 +6,15 @@
 @{
     ViewData["Title"] = "ERP Master Dashboard";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var canOpenCalendar = User.IsInRole("HR") || User.IsInRole("Admin");
+    var dashboardToday = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(5.5));
 }
 
 <link href="~/css/Dashboard.css" rel="stylesheet" asp-append-version="true" />
+@if (canOpenCalendar)
+{
+    <partial name="_DashboardCalendar" model="new VertexERP.Models.CompanyHolidayCalendar(DateTimeOffset.UtcNow)" />
+}
 
 <div class="dashboard">
 
@@ -41,17 +47,17 @@
             </div>
 
             <!-- Current Date -->
-            <div class="date-box">
+            <div class="date-box" id="dashboardCalendarTrigger" role="@(canOpenCalendar ? "button" : null)" tabindex="@(canOpenCalendar ? "0" : null)" aria-haspopup="@(canOpenCalendar ? "dialog" : null)" aria-controls="@(canOpenCalendar ? "dashboardCalendar" : null)" aria-label="@(canOpenCalendar ? "Open calendar" : null)">
 
                 <span class="calendar-icon"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i></span>
 
                 <div>
                     <strong>
-                        @DateTime.Now.ToString("dddd")
+                        @dashboardToday.ToString("dddd")
                     </strong>
 
                     <span>
-                        @DateTime.Now.ToString("dd MMM yyyy")
+                        @dashboardToday.ToString("dd MMM yyyy")
                     </span>
                 </div>
 

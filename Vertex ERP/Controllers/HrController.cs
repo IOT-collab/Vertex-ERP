@@ -20,6 +20,7 @@ namespace Vertex_ERP.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<HrController> _logger;
         private readonly BankAccountProtectionService _bankProtection;
+        private readonly CompanyLetterPdfService _companyLetterPdf;
 
         public HrController(ApplicationDbContext dbContext, IWebHostEnvironment environment, ILogger<HrController> logger, BankAccountProtectionService bankProtection)
         {
@@ -27,6 +28,7 @@ namespace Vertex_ERP.Controllers
             _environment = environment;
             _logger = logger;
             _bankProtection = bankProtection;
+            _companyLetterPdf = new CompanyLetterPdfService(environment.ContentRootPath);
         }
 
         public IActionResult EmployeeDashboard()
@@ -242,7 +244,8 @@ namespace Vertex_ERP.Controllers
             if (employeeId.HasValue)
             {
                 var employee = await _dbContext.Employees.AsNoTracking().Include(item => item.ReportingManager).FirstOrDefaultAsync(item => item.Id == employeeId.Value);
-                if (employee != null) FillDocumentEmployee(model, employee);
+                if (employee == null) return NotFound();
+                FillDocumentEmployee(model, employee);
             }
             return View(model);
         }
@@ -251,8 +254,13 @@ namespace Vertex_ERP.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GenerateDocument(EmployeeDocumentFormViewModel model)
         {
-            var allowedTypes = new[] { "Joining Letter", "Increment / Promotion Letter", "Relieving Letter", "Experience Letter" };
+            var allowedTypes = CompanyLetterPdfService.DocumentTypes;
             if (!allowedTypes.Contains(model.DocumentType)) ModelState.AddModelError(nameof(model.DocumentType), "Select a valid document type.");
+            var employee = model.EmployeeId.HasValue
+                ? await _dbContext.Employees.AsNoTracking().Include(item => item.ReportingManager).FirstOrDefaultAsync(item => item.Id == model.EmployeeId.Value)
+                : null;
+            if (employee == null) ModelState.AddModelError(nameof(model.EmployeeId), "Select a valid employee.");
+            else FillDocumentEmployee(model, employee);
             if (model.DocumentType == "Joining Letter")
             {
                 if (string.IsNullOrWhiteSpace(model.PanNumber)) ModelState.AddModelError(nameof(model.PanNumber), "PAN number is required for a joining letter.");
@@ -264,20 +272,32 @@ namespace Vertex_ERP.Controllers
                 ModelState.AddModelError(nameof(model.RevisedCompensation), "Revised compensation is required for an increment / promotion letter.");
             if (model.DocumentType == "Relieving Letter" && string.IsNullOrWhiteSpace(model.ClearanceStatus))
                 ModelState.AddModelError(nameof(model.ClearanceStatus), "Clearance status is required for a relieving letter.");
+            if (model.DocumentType is "Joining Letter" or "Offer Letter" or "Letter of Intent (LOI)" && employee != null && !EmployeeCompany.IsValid(employee.CompanyCode))
+                ModelState.AddModelError(nameof(model.EmployeeId), "Assign this employee to a company before generating the selected letter.");
             if (!ModelState.IsValid) { await PopulateDocumentEmployeesAsync(model); return View(model); }
-            var pdf = BuildEmployeeDocumentPdf(model);
+            byte[] pdf;
+            try { pdf = _companyLetterPdf.Build(model); }
+            catch (FileNotFoundException exception) { _logger.LogError(exception, "A required company letter template is missing for employee {EmployeeId}", model.EmployeeId); return Problem("The selected company letter template is unavailable. Contact your system administrator."); }
+            catch (ArgumentException exception) { ModelState.AddModelError(nameof(model.DocumentType), exception.Message); await PopulateDocumentEmployeesAsync(model); return View(model); }
             Response.Headers.ContentDisposition = $"inline; filename=\"{BuildDocumentFileName(model)}\"";
             return File(pdf, "application/pdf");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DownloadGeneratedDocument(EmployeeDocumentFormViewModel model)
+        public async Task<IActionResult> DownloadGeneratedDocument(EmployeeDocumentFormViewModel model)
         {
             if (!ModelState.IsValid) return BadRequest("Document details are incomplete.");
-            var allowedTypes = new[] { "Joining Letter", "Increment / Promotion Letter", "Relieving Letter", "Experience Letter" };
+            var allowedTypes = CompanyLetterPdfService.DocumentTypes;
             if (!allowedTypes.Contains(model.DocumentType)) return BadRequest("Invalid document type.");
-            return File(BuildEmployeeDocumentPdf(model), "application/pdf", BuildDocumentFileName(model));
+            if (!model.EmployeeId.HasValue) return BadRequest("Select an employee.");
+            var employee = await _dbContext.Employees.AsNoTracking().Include(item => item.ReportingManager).FirstOrDefaultAsync(item => item.Id == model.EmployeeId.Value);
+            if (employee == null) return NotFound();
+            FillDocumentEmployee(model, employee);
+            if (model.DocumentType is "Joining Letter" or "Offer Letter" or "Letter of Intent (LOI)" && !EmployeeCompany.IsValid(employee.CompanyCode)) return BadRequest("Assign the employee to a company before generating this letter.");
+            try { return File(_companyLetterPdf.Build(model), "application/pdf", BuildDocumentFileName(model)); }
+            catch (FileNotFoundException exception) { _logger.LogError(exception, "A required company letter template is missing for employee {EmployeeId}", model.EmployeeId); return Problem("The selected company letter template is unavailable. Contact your system administrator."); }
+            catch (ArgumentException exception) { return BadRequest(exception.Message); }
         }
 
         private byte[] BuildEmployeeDocumentPdf(EmployeeDocumentFormViewModel model)
@@ -323,7 +343,7 @@ namespace Vertex_ERP.Controllers
             var effectiveDate = model.EffectiveDate.ToString("dd MMMM yyyy");
             if (model.DocumentType == "Joining Letter")
             {
-                DrawParagraph($"We are pleased to offer you the position of {model.Designation} in the {model.Department} department at Vertex Automation System (P.) Ltd., effective from {effectiveDate}.");
+                DrawParagraph($"We are pleased to offer you the position of {model.Designation} in the {model.Department} department at Vertex Automation System Pvt. Ltd., effective from {effectiveDate}.");
                 DrawLabelValue("Designation", model.Designation);
                 DrawLabelValue("Department", model.Department);
                 DrawLabelValue("Reporting Manager", model.ManagerName);
@@ -360,7 +380,7 @@ namespace Vertex_ERP.Controllers
             else
             {
                 var joiningDate = model.JoiningDate?.ToString("dd MMMM yyyy") ?? "the recorded joining date";
-                DrawParagraph($"This is to certify that {model.EmployeeName} was employed with Vertex Automation System (P.) Ltd. from {joiningDate} to {effectiveDate}.");
+                DrawParagraph($"This is to certify that {model.EmployeeName} was employed with Vertex Automation System Pvt. Ltd. from {joiningDate} to {effectiveDate}.");
                 DrawParagraph($"During this period, {model.EmployeeName} worked as {model.Designation} in the {model.Department} department and reported to {model.ManagerName}.");
                 DrawParagraph("During the tenure with the organization, the employee carried out the assigned responsibilities with professionalism and sincerity. We found the employee's conduct and performance satisfactory.");
                 DrawParagraph("We appreciate the contribution made to the organization and wish the employee success in all future professional endeavours.");
@@ -390,7 +410,7 @@ namespace Vertex_ERP.Controllers
             else
             {
                 y = Math.Min(Math.Max(y + 35, 610), 690);
-                DrawLine("For Vertex Automation System (P.) Ltd.", bodyFont);
+                DrawLine("For Vertex Automation System Pvt. Ltd.", bodyFont);
                 y += 36;
                 DrawLine("Authorized Signatory", boldFont);
                 DrawLine("Human Resources", smallFont);
@@ -458,7 +478,7 @@ namespace Vertex_ERP.Controllers
                 if (includeAcceptance)
                 {
                     continuationY = Math.Max(continuationY + 18, 600);
-                    continuation.DrawString("For Vertex Automation System (P.) Ltd.", bodyFont, ink, new XPoint(left, continuationY));
+                    continuation.DrawString("For Vertex Automation System Pvt. Ltd.", bodyFont, ink, new XPoint(left, continuationY));
                     continuationY += 40;
                     continuation.DrawString("Authorized Signatory", boldFont, ink, new XPoint(left, continuationY));
                     continuation.DrawString("Accepted by: ______________________________", bodyFont, ink, new XPoint(left + 235, continuationY));
@@ -660,7 +680,7 @@ namespace Vertex_ERP.Controllers
 
         public IActionResult Holiday()
         {
-            return View();
+            return RedirectToAction("CompanyHoliday", "Main");
         }
 
         private async Task PopulateDocumentEmployeesAsync(EmployeeDocumentFormViewModel model)
@@ -669,9 +689,11 @@ namespace Vertex_ERP.Controllers
                 .Where(item => item.IsActive).OrderBy(item => item.FullName)
                 .Select(item => new EmployeeDocumentEmployeeOption
                 {
-                    Id = item.Id, EmployeeCode = item.EmployeeCode, Name = item.FullName,
+                    Id = item.Id, CompanyCode = item.CompanyCode, EmployeeCode = item.EmployeeCode, Name = item.FullName,
                     DateOfBirth = item.DateOfBirth.HasValue ? item.DateOfBirth.Value.ToString("yyyy-MM-dd") : null,
                     JoiningDate = item.JoiningDate.ToString("yyyy-MM-dd"),
+                    AadhaarNumber = item.AadhaarNumber, PresentAddress = item.Address,
+                    PermanentAddress = item.PermanentAddress, PresentPinCode = item.PinCode, PermanentPinCode = item.PermanentPinCode,
                     Mobile = item.PhoneNumber, Email = item.Email, Designation = item.Designation,
                     Department = item.Department, ManagerName = item.ReportingManager != null ? item.ReportingManager.FullName : "Not assigned"
                 }).ToListAsync();
@@ -679,9 +701,12 @@ namespace Vertex_ERP.Controllers
 
         private static void FillDocumentEmployee(EmployeeDocumentFormViewModel model, Employee employee)
         {
+            model.CompanyCode = employee.CompanyCode; model.EmployeeCode = employee.EmployeeCode;
             model.EmployeeName = employee.FullName; model.DateOfBirth = employee.DateOfBirth; model.JoiningDate = employee.JoiningDate; model.Mobile = employee.PhoneNumber;
             model.Email = employee.Email; model.Designation = employee.Designation; model.Department = employee.Department;
             model.ManagerName = employee.ReportingManager?.FullName ?? "Not assigned";
+            model.AadhaarNumber = employee.AadhaarNumber; model.PresentAddress = employee.Address;
+            model.PermanentAddress = employee.PermanentAddress; model.PresentPinCode = employee.PinCode; model.PermanentPinCode = employee.PermanentPinCode;
         }
 
         private async Task PopulateUploadEmployeesAsync(EmployeeDocumentUploadViewModel model)
@@ -952,10 +977,35 @@ namespace Vertex_ERP.Controllers
                     return RedirectToAction("Edit", "Employee", new { id = employee.Id });
                 model.PendingBiometricEmployeeId = employee.Id;
                 model.EmployeeId = employee.EmployeeCode;
+                model.CompanyCode = employee.CompanyCode ?? (employee.EmployeeCode.StartsWith("VAS") ? "VAS" : employee.EmployeeCode.StartsWith("VPC") ? "VPC" : string.Empty);
                 model.JoiningDate = employee.JoiningDate;
             }
             ApplyEmployeeExtraDrafts(model);
             return View(await PopulateManagersAsync(model));
+        }
+
+        [HttpGet]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        public async Task<IActionResult> EmployeeIdentityPreview(string? companyCode, int? biometricEmployeeId)
+        {
+            Employee? employee = null;
+            if (biometricEmployeeId.HasValue)
+            {
+                employee = await _dbContext.Employees.AsNoTracking().SingleOrDefaultAsync(x => x.Id == biometricEmployeeId.Value);
+                if (employee == null || !await CanCompleteBiometricProfileAsync(employee))
+                    return BadRequest(new { message = "This biometric profile is unavailable. Refresh the form and select another profile." });
+            }
+            var existingCode = employee?.EmployeeCode;
+            var preserve = existingCode != null && existingCode.Length > 3 &&
+                EmployeeCompany.IsValid(existingCode[..3].ToUpperInvariant()) && int.TryParse(existingCode.AsSpan(3), out _);
+            if (preserve) companyCode = existingCode![..3].ToUpperInvariant();
+            var enrollments = await _dbContext.EmployeeDeviceMappings.AsNoTracking()
+                .Where(x => x.EmployeeId == biometricEmployeeId)
+                .OrderBy(x => x.BiometricDevice.Name)
+                .Select(x => x.DeviceUserId + " (" + x.BiometricDevice.Name + ")").Distinct().ToListAsync();
+            var code = preserve ? existingCode : EmployeeCompany.IsValid(companyCode)
+                ? await EmployeeNumberingService.PreviewAsync(_dbContext, companyCode!) : string.Empty;
+            return Json(new { employeeCode = code, companyCode, enrollments, isPreview = !preserve });
         }
 
         private async Task<List<Employee>> FindEmployeeByBiometricCodeAsync(string code) =>
@@ -1049,9 +1099,10 @@ namespace Vertex_ERP.Controllers
                 model.TemporaryPassword = generated.Password;
                 ModelState.Remove(nameof(model.TemporaryPassword));
             }
-            // Canonical casing makes the database unique index reject IDs that
-            // differ only by upper/lower case.
-            var employeeCode = (model.EmployeeId ?? string.Empty).Trim().ToUpperInvariant();
+            ModelState.Remove(nameof(model.EmployeeId));
+            if (!EmployeeCompany.IsValid(model.CompanyCode))
+                ModelState.AddModelError(nameof(model.CompanyCode), "Please select a valid company.");
+            var employeeCode = string.Empty;
             var email = (model.Email ?? string.Empty).Trim().ToLowerInvariant();
             var loginUsername = model.LoginUsername.Trim();
             // Passwords are exact, case-sensitive credentials. Never transform them after
@@ -1064,17 +1115,22 @@ namespace Vertex_ERP.Controllers
 
             if (await _dbContext.AppUsers.AnyAsync(user => user.NormalizedUsername == normalizedUsername))
                 ModelState.AddModelError(nameof(model.LoginUsername), "Login username already exists.");
-            var matches = model.PendingBiometricEmployeeId.HasValue ? await _dbContext.Employees.Where(x => x.Id == model.PendingBiometricEmployeeId.Value).ToListAsync() : await FindEmployeeByBiometricCodeAsync(employeeCode);
+            var matches = model.PendingBiometricEmployeeId.HasValue ? await _dbContext.Employees.Where(x => x.Id == model.PendingBiometricEmployeeId.Value).ToListAsync() : new List<Employee>();
             var pendingEmployee = matches.Count == 1 ? matches[0] : null;
             if (matches.Count > 1 || (pendingEmployee != null && !await CanCompleteBiometricProfileAsync(pendingEmployee)))
                 ModelState.AddModelError(nameof(model.EmployeeId), "Employee already exists. Use Employee Management > Edit Profile.");
             if (pendingEmployee != null && model.PendingBiometricEmployeeId != pendingEmployee.Id)
                 ModelState.AddModelError(nameof(model.EmployeeId), "Check Employee ID first to confirm the biometric profile to complete.");
             if (pendingEmployee == null && model.PendingBiometricEmployeeId.HasValue)
-                ModelState.AddModelError(nameof(model.EmployeeId), "Employee ID changed or profile is unavailable. Check Employee ID again.");
+                ModelState.AddModelError(nameof(model.EmployeeId), "This biometric profile is unavailable. Reopen it from Employee Management.");
             var existingId = pendingEmployee?.Id ?? 0;
-            if (await _dbContext.Employees.AnyAsync(employee => employee.Id != existingId && employee.EmployeeCode.ToUpper() == employeeCode))
-                ModelState.AddModelError(nameof(model.EmployeeId), "ERP Employee ID already exists.");
+            var preserveCode = pendingEmployee != null &&
+                (pendingEmployee.EmployeeCode.StartsWith("VAS", StringComparison.OrdinalIgnoreCase) || pendingEmployee.EmployeeCode.StartsWith("VPC", StringComparison.OrdinalIgnoreCase)) &&
+                int.TryParse(pendingEmployee.EmployeeCode.AsSpan(3), out _);
+            if (preserveCode && !pendingEmployee!.EmployeeCode.StartsWith(model.CompanyCode ?? string.Empty, StringComparison.OrdinalIgnoreCase))
+                ModelState.AddModelError(nameof(model.CompanyCode), "Company must match the employee's existing ID.");
+            employeeCode = preserveCode ? pendingEmployee!.EmployeeCode : string.Empty;
+            model.EmployeeId = employeeCode;
             if (await _dbContext.Employees.AnyAsync(employee => employee.Id != existingId && employee.Email == email))
                 ModelState.AddModelError(nameof(model.Email), "Email address already exists.");
             if (await _dbContext.Employees.AnyAsync(employee => employee.Id != existingId && employee.PhoneNumber == (model.Phone ?? "").Trim()))
@@ -1106,6 +1162,7 @@ namespace Vertex_ERP.Controllers
                 var employee = new Employee
                 {
                     EmployeeCode = employeeCode,
+                    CompanyCode = model.CompanyCode,
                     FirstName = firstName,
                     LastName = lastName,
                     FullName = $"{firstName} {lastName}".Trim(),
@@ -1179,8 +1236,8 @@ namespace Vertex_ERP.Controllers
                     }
                 // One SaveChanges keeps the employee, login, bank and salary records
                 // atomic and works with the configured retrying execution strategy.
-                await _dbContext.SaveChangesAsync();
-                TempData["EmployeeMessage"] = $"{accountRole} and login account '{loginUsername}' added successfully.";
+                await EmployeeNumberingService.SaveAsync(_dbContext, employee, !preserveCode);
+                TempData["EmployeeMessage"] = $"{accountRole} {employee.EmployeeCode} and login account '{loginUsername}' added successfully.";
                 TempData["CreatedLoginUsername"] = loginUsername;
                 TempData["CreatedLoginPassword"] = loginPassword;
                 TempData["CreatedLoginRole"] = accountRole;
@@ -1238,6 +1295,21 @@ namespace Vertex_ERP.Controllers
 
         private async Task<HrAddEmployeeViewModel> PopulateManagersAsync(HrAddEmployeeViewModel model)
         {
+            var biometricProfiles = await _dbContext.Employees.AsNoTracking()
+                .Where(x => x.IsBiometricProfilePending && x.IsActive &&
+                    !_dbContext.AppUsers.Any(a => a.EmployeeId == x.Id) &&
+                    !_dbContext.EmployeeBankDetails.Any(a => a.EmployeeId == x.Id) &&
+                    !_dbContext.EmployeeSalaryDetails.Any(a => a.EmployeeId == x.Id))
+                .OrderBy(x => x.EmployeeCode).Select(x => new { x.Id, x.EmployeeCode }).ToListAsync();
+            var profileIds = biometricProfiles.Select(x => x.Id).ToList();
+            var mappings = await _dbContext.EmployeeDeviceMappings.AsNoTracking()
+                .Where(x => profileIds.Contains(x.EmployeeId)).OrderBy(x => x.DeviceUserId)
+                .Select(x => new { x.EmployeeId, Label = x.DeviceUserId + " (" + x.BiometricDevice.Name + ")" }).ToListAsync();
+            model.BiometricOptions = biometricProfiles.Select(x => new BiometricOnboardingOption
+            {
+                EmployeeId = x.Id,
+                Label = string.Join(", ", mappings.Where(m => m.EmployeeId == x.Id).Select(m => m.Label).DefaultIfEmpty(x.EmployeeCode))
+            }).ToList();
             model.SourceEnrollments = await _dbContext.EmployeeDeviceMappings.AsNoTracking()
                 .Where(mapping => mapping.EmployeeId == model.PendingBiometricEmployeeId)
                 .OrderBy(mapping => mapping.BiometricDevice.Name)

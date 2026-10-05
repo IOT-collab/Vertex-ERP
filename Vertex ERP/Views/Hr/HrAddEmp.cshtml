@@ -33,7 +33,7 @@
           enctype="multipart/form-data">
 
         @Html.AntiForgeryToken()
-        <input asp-for="PendingBiometricEmployeeId" type="hidden" />
+
         <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
 
 
@@ -128,31 +128,38 @@
             <div class="form-grid">
 
 
-                <!-- Employee ID -->
                 <div class="form-group">
-
-                    <label>
-                        ERP Employee ID
-                        <span>*</span>
-                    </label>
-
-                    <input asp-for="EmployeeId"
-                           type="text"
-                           placeholder="Enter employee ID (e.g. Vertex-22)"
-                           required />
-                    <span asp-validation-for="EmployeeId" class="field-validation"></span>
-                    <button type="button" id="checkEmployeeId" class="btn-cancel">Check Employee ID</button>
-                    <p id="employeeLookupNotice" role="status" aria-live="polite">Assign a unique ERP Employee ID. To complete an imported employee, open their pending profile in Employee Management.</p>
-                    <a id="existingEmployeeEdit" hidden>Edit Profile</a>
-                    <label>Source Enrollment Number / Emp ID</label>
-                    @foreach (var enrollment in Model.SourceEnrollments)
-                    {
-                        <input type="text" value="@enrollment" readonly aria-label="Source Enrollment Number / Emp ID" />
-                    }
-                    <small>@(Model.SourceEnrollments.Count == 0 ? "Not linked to a biometric source." : "Received from the attendance source. This number cannot be edited here.")</small>
-
+                    <label asp-for="CompanyCode">Company <span>*</span></label>
+                    <select asp-for="CompanyCode" required>
+                        <option value="">Select company</option>
+                        <option value="VAS">Vertex Automation System Pvt. Ltd.</option>
+                        <option value="VPC">Vertex Power Controls Pvt. Ltd.</option>
+                    </select>
+                    <span asp-validation-for="CompanyCode" class="field-validation"></span>
                 </div>
-
+                <div class="form-group">
+                    <label asp-for="EmployeeId">ERP Employee ID</label>
+                    <input asp-for="EmployeeId" readonly placeholder="Automatically assigned when saved" />
+                    <span asp-validation-for="EmployeeId" class="field-validation"></span>
+                    <p id="employeeIdPreviewNotice" role="status" aria-live="polite">Select a company to see the next ERP Employee ID.</p>
+                </div>
+                <div class="form-group">
+                    <label asp-for="PendingBiometricEmployeeId">Biometric Enrollment Number / Emp ID</label>
+                    <select asp-for="PendingBiometricEmployeeId">
+                        <option value="">New employee � biometric not linked</option>
+                        @foreach (var profile in Model.BiometricOptions)
+                        {
+                            <option value="@profile.EmployeeId">@profile.Label</option>
+                        }
+                    </select>
+                    <div id="biometricEnrollmentValues">
+                        @foreach (var enrollment in Model.SourceEnrollments)
+                        {
+                            <input type="text" value="@enrollment" readonly aria-label="Biometric enrollment number" />
+                        }
+                    </div>
+                    <small>Select the enrollment received from the biometric device to link this employee's attendance.</small>
+                </div>
 
                 <!-- First Name -->
                 <div class="form-group">
@@ -853,68 +860,53 @@
     });
 </script>
 
+
+
+<script src="~/js/employee-address.js" asp-append-version="true"></script>
+
 <script>
 (() => {
+    const company = document.getElementById('CompanyCode');
+    const biometric = document.getElementById('PendingBiometricEmployeeId');
     const code = document.getElementById('EmployeeId');
-    const pending = document.getElementById('PendingBiometricEmployeeId');
-    const notice = document.getElementById('employeeLookupNotice');
-    const edit = document.getElementById('existingEmployeeEdit');
-    const check = document.getElementById('checkEmployeeId');
+    const notice = document.getElementById('employeeIdPreviewNotice');
+    const enrollments = document.getElementById('biometricEnrollmentValues');
     const save = document.querySelector('.employee-form .btn-save');
     let revision = 0;
-    code.addEventListener('input', () => {
-        if (pending.value) return;
-        revision++;
-        pending.value = '';
-        edit.hidden = true;
-        save.disabled = false;
-        save.textContent = 'Add Employee';
-        notice.textContent = 'Check Employee ID to find an existing biometric profile.';
-    });
-    async function lookup() {
-        if (pending.value) return;
-        const value = code.value.trim();
+    async function refreshIdentity() {
         const current = ++revision;
-        pending.value = '';
-        edit.hidden = true;
-        if (!value) {
-            save.disabled = false;
-            save.textContent = 'Add Employee';
-            notice.textContent = 'Enter an Employee ID before checking.';
-            return;
-        }
+        code.value = '';
+        enrollments.replaceChildren();
+        notice.textContent = 'Loading employee IDs�';
         save.disabled = true;
-        notice.textContent = 'Checking Employee ID…';
+        const query = new URLSearchParams();
+        if (company.value) query.set('companyCode', company.value);
+        if (biometric.value) query.set('biometricEmployeeId', biometric.value);
         try {
-            const response = await fetch('@Url.Action("LookupEmployeeForOnboarding", "Hr")?employeeCode=' + encodeURIComponent(value), { credentials: 'same-origin', cache: 'no-store' });
-            if (!response.ok) throw new Error('Lookup failed');
+            const response = await fetch('@Url.Action("EmployeeIdentityPreview", "Hr")?' + query, { credentials: 'same-origin', cache: 'no-store' });
+            if (!response.ok) throw new Error('Unable to load employee IDs');
             const result = await response.json();
             if (current !== revision) return;
-            notice.textContent = result.message;
-            save.disabled = result.status === 'existing' || result.status === 'ambiguous';
-            save.textContent = result.status === 'pending' ? 'Complete Employee Profile' : 'Add Employee';
-            if (result.status === 'pending') {
-                window.location.href = '@Url.Action("HrAddEmp", "Hr")?biometricEmployeeId=' + encodeURIComponent(result.employeeId);
-                return;
+            code.value = result.employeeCode || '';
+            if (result.companyCode) company.value = result.companyCode;
+            for (const value of result.enrollments) {
+                const input = document.createElement('input');
+                input.type = 'text'; input.value = value; input.readOnly = true;
+                input.setAttribute('aria-label', 'Biometric enrollment number');
+                enrollments.appendChild(input);
             }
-            if (result.status === 'existing') {
-                edit.href = '@Url.Action("Edit", "Employee")?id=' + encodeURIComponent(result.employeeId);
-                edit.hidden = false;
-            }
+            notice.textContent = !code.value ? 'Select a company to see the next ERP Employee ID.'
+                : result.isPreview ? 'Next available ID. The final ID is confirmed when saved.' : 'Existing ERP Employee ID.';
+            save.textContent = biometric.value ? 'Complete Employee Profile' : 'Add Employee';
+            save.disabled = false;
         } catch {
             if (current !== revision) return;
-            notice.textContent = 'Could not check Employee ID. Please retry before saving.';
+            notice.textContent = 'Could not load employee IDs. Select the company again to retry, or refresh the page.';
             save.disabled = true;
         }
     }
-    check.addEventListener('click', lookup);
-    code.addEventListener('change', lookup);
-    if (pending.value) {
-        check.hidden = true;
-        notice.textContent = 'Complete this biometric employee profile. Existing attendance will remain linked.';
-        save.textContent = 'Complete Employee Profile';
-    }
+    company.addEventListener('change', refreshIdentity);
+    biometric.addEventListener('change', refreshIdentity);
+    refreshIdentity();
 })();
 </script>
-
-<script src="~/js/employee-address.js" asp-append-version="true"></script>

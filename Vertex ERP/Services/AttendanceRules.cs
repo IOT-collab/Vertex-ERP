@@ -23,6 +23,9 @@ public static class AttendanceRules
 
     public static string FormatHours(TimeSpan hours) => $"{(int)hours.TotalHours}h {hours.Minutes:D2}m";
 
+    public static TimeSpan CalculateOvertime(TimeSpan workingHours) =>
+        workingHours > TimeSpan.FromMinutes(510) ? workingHours - TimeSpan.FromMinutes(510) : TimeSpan.Zero;
+
     public static string? NormalizePunchAction(string? value)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;

@@ -460,6 +460,10 @@ namespace Vertex_ERP.Migrations
                         .HasMaxLength(80)
                         .HasColumnType("character varying(80)");
 
+                    b.Property<string>("CompanyCode")
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -584,6 +588,8 @@ namespace Vertex_ERP.Migrations
                         .HasColumnType("character varying(120)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyCode");
 
                     b.HasIndex("DepartmentId");
 
@@ -726,6 +732,40 @@ namespace Vertex_ERP.Migrations
                         .IsUnique();
 
                     b.ToTable("EmployeeBankDetails", (string)null);
+                });
+
+            modelBuilder.Entity("VertexERP.Models.EmployeeCompany", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
+                    b.Property<int>("LastIssuedNumber")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.HasKey("Code");
+
+                    b.ToTable("EmployeeCompanies");
+
+                    b.HasData(
+                        new
+                        {
+                            Code = "VAS",
+                            LastIssuedNumber = 179,
+                            Name = "Vertex Automation System Pvt. Ltd."
+                        },
+                        new
+                        {
+                            Code = "VPC",
+                            LastIssuedNumber = 177,
+                            Name = "Vertex Power Controls Pvt. Ltd."
+                        });
                 });
 
             modelBuilder.Entity("VertexERP.Models.EmployeeDeviceMapping", b =>
@@ -1748,6 +1788,11 @@ namespace Vertex_ERP.Migrations
 
             modelBuilder.Entity("VertexERP.Models.Employee", b =>
                 {
+                    b.HasOne("VertexERP.Models.EmployeeCompany", null)
+                        .WithMany()
+                        .HasForeignKey("CompanyCode")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("VertexERP.Models.Department", "DepartmentEntity")
                         .WithMany("Employees")
                         .HasForeignKey("DepartmentId")

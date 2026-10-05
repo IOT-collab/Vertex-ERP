@@ -244,7 +244,7 @@
 
     .attendance-panel-container th {
         padding: 16px;
-        text-align: center;
+        text-align: left;
         color: #475569;
         font-size: 12px;
         font-weight: 700;
@@ -255,7 +255,7 @@
 
     .attendance-panel-container td {
         padding: 16px;
-        text-align: center;
+        text-align: left;
         border-bottom: 1px solid #f1f5f9;
         color: #334155;
         font-size: 13.5px;

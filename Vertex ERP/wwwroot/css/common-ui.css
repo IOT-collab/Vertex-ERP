@@ -206,6 +206,12 @@ body > .container td {
     color: var(--erp-text) !important;
 }
 
+/* Keep headings and row text at the same starting edge across ERP tables.
+   Preserve spanning messages and explicitly right-aligned numeric columns. */
+:is(.page-content, body > .container) table :is(th, td):not([colspan]):not(.text-end):not(.text-right) {
+    text-align: left !important;
+}
+
 .erp-empty-state {
     padding: 28px 16px !important;
     color: var(--erp-text-muted) !important;

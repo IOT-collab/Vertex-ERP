@@ -6,6 +6,8 @@ public class Employee
 {
     public int Id { get; set; }
 
+    [MaxLength(3)] public string? CompanyCode { get; set; }
+
     [ConcurrencyCheck]
     public bool IsBiometricProfilePending { get; set; }
 

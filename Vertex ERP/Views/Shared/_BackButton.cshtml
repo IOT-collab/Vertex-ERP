@@ -22,13 +22,14 @@
     var isDepartmentPage = string.Equals(controller, "Hr", StringComparison.OrdinalIgnoreCase)
         && action is "Department" or "AddDepartment" or "EditDepartment" or "DeleteDepartment" or "DepartmentDetails";
     var isEmployeePage = string.Equals(controller, "Employee", StringComparison.OrdinalIgnoreCase);
-    var isEmployeeIndex = isEmployeePage && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase);
+    var isEmployeeIndex = isEmployeePage && (string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(action, "ContractualEmployees", StringComparison.OrdinalIgnoreCase));
     var isHrPage = string.Equals(controller, "Hr", StringComparison.OrdinalIgnoreCase);
     var isEmployeeSelfServicePage = (User.IsInRole("Employee") || User.IsInRole("User"))
         && ((string.Equals(controller, "Main", StringComparison.OrdinalIgnoreCase)
             && action is "EmployeeTasks" or "EmployeeAttendance" or "FieldAttendance" or "EmployeeLeaves"
                 or "EmployeeProfile" or "EmployeeNotifications" or "EmployeeQueries" or "SalarySlips"
-                or "EmployeeAssets" or "MyBankDetails")
+                or "EmployeeAssets" or "MyBankDetails" or "CompanyHoliday")
             || (string.Equals(controller, "Expense", StringComparison.OrdinalIgnoreCase)
                 && string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase)));
     if (isEmployeeSelfServicePage) showBackButton = true;

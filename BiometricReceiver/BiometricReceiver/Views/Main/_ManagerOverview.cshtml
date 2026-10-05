@@ -1,0 +1,70 @@
+@model VertexERP.Models.ManagerDashboardViewModel
+@{
+    var teams = Model.TeamMembers.ToLookup(employee => employee.ReportingManagerId);
+    var projects = Model.Projects.ToLookup(project => project.ManagerId);
+    var assignments = Model.ProjectAssignments.ToLookup(assignment => assignment.ProjectId);
+}
+<section class="manager-overview" aria-labelledby="manager-overview-title">
+    <div class="panel-heading">
+        <div><h2 id="manager-overview-title">Managers, Projects &amp; Teams</h2><p>Active employees grouped by their reporting manager. Project assignments are shown separately.</p></div>
+        <span>@Model.Managers.Count manager(s) · @Model.Projects.Count project(s)</span>
+    </div>
+    @if (Model.Managers.Count == 0)
+    {
+        <div class="panel empty-section"><strong>No active managers found</strong><small>Link an active Manager account to an employee profile.</small></div>
+    }
+    @foreach (var manager in Model.Managers)
+    {
+        var team = teams[manager.Id].ToList();
+        var managerProjects = projects[manager.Id].ToList();
+        <article class="panel manager-overview-card">
+            <header class="manager-overview-header">
+                <div class="manager-person">
+                    @if (!string.IsNullOrWhiteSpace(manager.PhotoPath)) { <img src="@manager.PhotoPath" alt="" /> }
+                    else { <span><i class="fa-solid fa-user-tie" aria-hidden="true"></i></span> }
+                    <div><h3>@manager.FullName</h3><small>@manager.EmployeeCode · @manager.Designation · @manager.Department</small><small>@manager.Email · @manager.PhoneNumber</small></div>
+                </div>
+                <div class="manager-overview-counts"><span><b>@team.Count</b> team employees</span><span><b>@managerProjects.Count</b> projects</span></div>
+            </header>
+            <h4>Assigned projects</h4>
+            @if (managerProjects.Count == 0)
+            {
+                <p class="manager-overview-empty">No projects assigned to this manager.</p>
+            }
+            else
+            {
+                <div class="table-wrap"><table class="manager-table">
+                    <thead><tr><th>Project</th><th>Status</th><th>Timeline</th><th>Assigned employees</th></tr></thead>
+                    <tbody>
+                    @foreach (var project in managerProjects)
+                    {
+                        var members = assignments[project.Id].ToList();
+                        <tr><td><b>@project.ProjectName</b><div>@project.ProjectCode</div></td><td><span class="task-status">@project.Status</span></td><td>@project.StartDate.ToString("dd MMM yyyy") – @project.EndDate.ToString("dd MMM yyyy")</td>
+                            <td class="project-member-list"><b>@members.Count employee(s)</b>
+                            @if (members.Count == 0) { <div>No employees assigned</div> }
+                            @foreach (var member in members) { <div>@member.Employee.FullName <small>(@member.Employee.EmployeeCode)</small></div> }
+                            </td></tr>
+                    }
+                    </tbody>
+                </table></div>
+            }
+            <details class="manager-team-details" open>
+                <summary>Team members (@team.Count)</summary>
+                @if (team.Count == 0)
+                {
+                    <p class="manager-overview-empty">No active employees report to this manager.</p>
+                }
+                else
+                {
+                    <div class="table-wrap"><table class="manager-table">
+                        <thead><tr><th>Employee</th><th>Employee ID</th><th>Department</th><th>Designation</th><th>Email</th><th>Phone</th></tr></thead>
+                        <tbody>@foreach (var employee in team)
+                        {
+                            <tr><td><b>@employee.FullName</b></td><td>@employee.EmployeeCode</td><td>@employee.Department</td><td>@employee.Designation</td><td>@employee.Email</td><td>@employee.PhoneNumber</td></tr>
+                        }</tbody>
+                    </table></div>
+                }
+            </details>
+        </article>
+    }
+</section>

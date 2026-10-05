@@ -1,0 +1,11 @@
+@model VertexERP.Models.CompanyHolidayCalendar
+<link href="~/css/DashboardCalendar.css" rel="stylesheet" asp-append-version="true" />
+<dialog id="dashboardCalendar" class="dc-dialog" aria-labelledby="dc-title" data-today="@Model.Today.ToString("yyyy-MM-dd")">
+    <header class="dc-header"><div><span>VERTEX GROUP</span><h2 id="dc-title">Company calendar</h2><p>Your dates and company holidays, at a glance.</p></div><button type="button" id="dc-close" class="dc-icon" aria-label="Close calendar and return to dashboard">&times;</button></header>
+    <div class="dc-navigation"><h3 id="dc-month" aria-live="polite"></h3><div><button type="button" id="dc-today">Today</button><button type="button" id="dc-prev" class="dc-icon" aria-label="Previous month">&#8249;</button><button type="button" id="dc-next" class="dc-icon" aria-label="Next month">&#8250;</button></div></div>
+    <div class="dc-weekdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+    <div id="dc-grid" class="dc-grid" role="group" aria-label="Dates in selected month"></div>
+    <footer class="dc-footer"><span><b class="dc-today-dot"></b> Today</span><span><b class="dc-holiday-dot"></b> Company holiday</span><p id="dc-description" aria-live="polite"></p></footer>
+</dialog>
+<script type="application/json" id="dc-holidays">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Holidays.Select(h => new { name = h.Name, start = h.Start.ToString("yyyy-MM-dd"), end = h.End.ToString("yyyy-MM-dd") })))</script>
+<script src="~/js/dashboard-calendar.js" asp-append-version="true" defer></script>

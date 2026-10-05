@@ -53,7 +53,7 @@
   <div class="export-period-options"><label><input type="radio" name="exportPeriod" value="day" checked onchange="setExportPeriod('day')"/><span><i class="fa-regular fa-calendar-day"></i><b>Particular Day</b><small>One selected date</small></span></label><label><input type="radio" name="exportPeriod" value="month" onchange="setExportPeriod('month')"/><span><i class="fa-regular fa-calendar-days"></i><b>Complete Month</b><small>Day-wise monthly report</small></span></label></div>
   <label class="export-date-field" id="exportDayField"><span>Select date</span><input type="date" name="filterDate" value="@filterDateValue" max="@DateTime.Today.ToString("yyyy-MM-dd")"/></label>
   <label class="export-date-field hidden" id="exportMonthField"><span>Select month</span><input type="month" name="exportMonth" value="@Model.FilterDate.ToString("yyyy-MM")" max="@DateTime.Today.ToString("yyyy-MM")" disabled/></label>
-  <div class="export-note"><i class="fa-solid fa-circle-info"></i><span>Complete Month report includes every active employee for every date, grouped employee-wise. Day export follows the current filters.</span></div>
+  <div class="export-note"><i class="fa-solid fa-circle-info"></i><span>Includes site check-in/out times, site names, GPS locations and overtime beyond 8 hours 30 minutes per day. Complete Month includes an employee summary and Daily Details sheet. Day export follows the current filters.</span></div>
   <footer><button type="button" class="export-cancel" onclick="closeAttendanceExport()">Cancel</button><button type="submit" class="export-download"><i class="fa-solid fa-download"></i> Download</button></footer>
  </form></div>
 </div>

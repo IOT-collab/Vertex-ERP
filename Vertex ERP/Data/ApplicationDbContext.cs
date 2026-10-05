@@ -42,6 +42,7 @@ namespace VertexERP.Data
 
         public DbSet<AppUser> AppUsers => Set<AppUser>();
         public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+        public DbSet<EmployeeCompany> EmployeeCompanies => Set<EmployeeCompany>();
         public DbSet<Employee> Employees => Set<Employee>();
         public DbSet<Department> Departments => Set<Department>();
         public DbSet<BiometricDevice> BiometricDevices => Set<BiometricDevice>();
@@ -72,6 +73,11 @@ namespace VertexERP.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<EmployeeCompany>().HasData(
+                new EmployeeCompany { Code = "VAS", Name = "Vertex Automation System Pvt. Ltd.", LastIssuedNumber = 179 },
+                new EmployeeCompany { Code = "VPC", Name = "Vertex Power Controls Pvt. Ltd.", LastIssuedNumber = 177 });
+            modelBuilder.Entity<Employee>().HasOne<EmployeeCompany>().WithMany()
+                .HasForeignKey(x => x.CompanyCode).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<ProjectTeam>(entity =>
             {
                 entity.Property<string>("NormalizedName").HasComputedColumnSql("lower(btrim(\"Name\"))", stored: true);

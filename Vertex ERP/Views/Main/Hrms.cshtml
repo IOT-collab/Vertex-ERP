@@ -83,6 +83,13 @@
         @if (User.IsInRole("HR") || User.IsInRole("Admin"))
         {
             <div class="module-card">
+                <div class="module-content"><div class="icon">📋</div><h3>Contractual Employees</h3><p>View all contract employees and their complete employee details.</p></div>
+                <a asp-controller="Employee" asp-action="ContractualEmployees" class="btn-module-action">Open</a>
+            </div>
+        }
+        @if (User.IsInRole("HR") || User.IsInRole("Admin"))
+        {
+            <div class="module-card">
                 <div class="module-content"><div class="icon">👥</div><h3>Manager &amp; Project Overview</h3><p>View every manager's team and project employee assignments.</p></div>
                 <a asp-controller="TeamOverview" asp-action="Index" class="btn-module-action">Open</a>
             </div>
@@ -211,14 +218,14 @@
 
                 <div class="icon">📅</div>
 
-                <h3>Holiday Calendar</h3>
+                <h3>Company Holiday</h3>
 
-                <p>Manage company holidays.</p>
+                <p>View the official company holiday schedule.</p>
 
             </div>
 
-            <a asp-controller="Hr"
-               asp-action="Holiday"
+            <a asp-controller="Main"
+               asp-action="CompanyHoliday"
                class="btn-module-action">
                 Open
             </a>
