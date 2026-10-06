@@ -135,7 +135,7 @@ modelBuilder.Entity<EmployeeLeaveBalance>(entity =>
             modelBuilder.HasSequence<long>("EmployeeCodeSequence");
             modelBuilder.Entity<EmployeeAsset>(entity =>
             {
-                entity.HasIndex(asset => asset.AssetTag).IsUnique();
+                entity.HasIndex(asset => asset.AssetTag).IsUnique().HasFilter("\"Status\" <> 'Declined'");
                 entity.HasOne(asset => asset.Employee).WithMany()
                     .HasForeignKey(asset => asset.EmployeeId).OnDelete(DeleteBehavior.Restrict);
             });

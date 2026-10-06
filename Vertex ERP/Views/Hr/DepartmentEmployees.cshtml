@@ -1,0 +1,35 @@
+@model VertexERP.Models.Department
+@{
+    ViewData["Title"] = "Department Employees";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/AddDepartment.css" rel="stylesheet" asp-append-version="true" />
+<div class="add-department-page">
+    <div class="department-form-card department-roster-card">
+        <div class="department-form-header">
+            <h1>@Model.DepartmentName — Employees</h1>
+            <p>Total employees: @Model.Employees.Count · Manager: @(Model.Manager?.FullName ?? "Not Assigned")</p>
+        </div>
+        <div class="department-roster-scroll" tabindex="0" role="region" aria-label="Department employees">
+            <table class="department-roster-table">
+                <thead><tr><th scope="col">Employee ID</th><th scope="col">Name</th><th scope="col">Designation</th><th scope="col">Company</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead>
+                <tbody>
+                @foreach (var employee in Model.Employees.OrderBy(item => item.FullName).ThenBy(item => item.EmployeeCode))
+                {
+                    <tr>
+                        <td>@employee.EmployeeCode</td><td>@employee.FullName</td><td>@employee.Designation</td>
+                        <td>@VertexERP.Models.EmployeeCompany.DisplayName(employee.CompanyCode)</td>
+                        <td>@(employee.IsActive ? "Active" : "Inactive")</td>
+                        <td><a asp-controller="Employee" asp-action="Details" asp-route-id="@employee.Id" aria-label="View profile of @employee.FullName">View Profile</a></td>
+                    </tr>
+                }
+                @if (Model.Employees.Count == 0)
+                {
+                    <tr><td colspan="6">No employees are assigned to this department.</td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <div class="department-form-actions"><a asp-action="DepartmentDetails" asp-route-id="@Model.Id" class="department-cancel">Back to Department</a></div>
+    </div>
+</div>

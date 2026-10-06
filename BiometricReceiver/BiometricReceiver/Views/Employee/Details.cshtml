@@ -17,7 +17,7 @@
     </div>
     <div class="form-container-wrapper">
         <div class="form-group"><label>Company</label><strong>@VertexERP.Models.EmployeeCompany.DisplayName(Model.CompanyCode)</strong></div>
-        <div class="form-group"><label>ERP Employee ID</label><strong>@Model.EmployeeCode</strong></div>
+        <div class="form-group"><label>Employee ID</label><strong>@Model.EmployeeCode</strong></div>
         <div class="form-group">
             <label>Source Enrollment Number / Emp ID (read-only)</label>
             @{ var enrollments = ViewData["SourceEnrollments"] as IReadOnlyList<string> ?? Array.Empty<string>(); }

@@ -101,16 +101,19 @@ public class EmployeeFormViewModel : IValidatableObject
     public int Id { get; set; }
 
     [Required(ErrorMessage = "Employee ID is required."), StringLength(30, ErrorMessage = "Employee ID cannot exceed 30 characters.")]
-    [Display(Name = "ERP Employee ID")]
+    [Display(Name = "Employee ID")]
     public string EmployeeCode { get; set; } = string.Empty;
+
+    [StringLength(3), Display(Name = "Company")]
+    public string? CompanyCode { get; set; }
 
     [Required, StringLength(60)]
     [Display(Name = "First Name")]
     public string FirstName { get; set; } = string.Empty;
 
-    [Required, StringLength(60)]
+    [StringLength(60)]
     [Display(Name = "Last Name")]
-    public string LastName { get; set; } = string.Empty;
+    public string? LastName { get; set; }
 
     [Required, EmailAddress, StringLength(150)]
     public string Email { get; set; } = string.Empty;

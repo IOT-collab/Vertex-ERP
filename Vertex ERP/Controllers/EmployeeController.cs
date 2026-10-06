@@ -217,6 +217,19 @@ public class EmployeeController : Controller
         var employee = _dbContext.Employees.Find(id);
         if (employee == null) return NotFound();
 
+        if (!string.IsNullOrWhiteSpace(model.CompanyCode) && !EmployeeCompany.IsValid(model.CompanyCode))
+            ModelState.AddModelError(nameof(model.CompanyCode), "Select a valid company.");
+        var existingBank = await _dbContext.EmployeeBankDetails.FirstOrDefaultAsync(item => item.EmployeeId == id);
+        if (existingBank != null)
+        {
+            model.MaskedBankAccountNumber = $"XXXX XXXX {existingBank.AccountLastFour}";
+            if (string.IsNullOrWhiteSpace(model.BankAccountHolderName))
+                ModelState.AddModelError(nameof(model.BankAccountHolderName), "Account holder name is required.");
+            if (string.IsNullOrWhiteSpace(model.BankName))
+                ModelState.AddModelError(nameof(model.BankName), "Bank name is required.");
+            if (string.IsNullOrWhiteSpace(model.BankIfscCode))
+                ModelState.AddModelError(nameof(model.BankIfscCode), "IFSC code is required.");
+        }
         model.EmployeeCode = employee.EmployeeCode;
         ModelState.Remove(nameof(model.EmployeeCode));
         ValidateUniqueFields(model);
@@ -246,6 +259,7 @@ public class EmployeeController : Controller
             employee.PhotoPath = newPhotoPath;
         }
         ApplyForm(employee, model, preserveEmployeeCode: true);
+        employee.CompanyCode = Clean(model.CompanyCode);
         employee.IsBiometricProfilePending = false;
         employee.UpdatedDate = DateTime.UtcNow;
 
@@ -266,7 +280,6 @@ public class EmployeeController : Controller
             return View("~/Views/Main/AddEmpHrm.cshtml", PopulateManagers(model));
         }
 
-        var existingBank = await _dbContext.EmployeeBankDetails.FirstOrDefaultAsync(item => item.EmployeeId == id);
         if (!string.IsNullOrWhiteSpace(model.BankAccountNumber) || existingBank != null)
         {
             var bank = existingBank;
@@ -504,6 +517,7 @@ public class EmployeeController : Controller
     {
         Id = employee.Id,
         EmployeeCode = employee.EmployeeCode,
+        CompanyCode = employee.CompanyCode,
         FirstName = employee.FirstName,
         LastName = employee.LastName ?? string.Empty,
         Email = employee.Email,

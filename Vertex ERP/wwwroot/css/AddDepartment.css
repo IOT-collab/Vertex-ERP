@@ -16,6 +16,15 @@
 .department-submit { border: 0; color: #fff; background: #2563eb; }
 .department-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .department-detail-grid div { padding: 16px; background: #0f172a; border: 1px solid #334155; border-radius: 9px; }
+.department-employees-link { display: block; padding: 16px; background: #0f172a; border: 1px solid #334155; border-radius: 9px; color: inherit; text-decoration: none; }
+.department-employees-link:hover, .department-employees-link:focus-visible { border-color: #60a5fa; outline: 2px solid #60a5fa; outline-offset: 2px; }
+.department-employees-link small { display: block; margin-top: 8px; color: #60a5fa; }
+.department-roster-card { max-width: 1200px; }
+.department-roster-scroll { overflow-x: auto; }
+.department-roster-table { width: 100%; border-collapse: collapse; }
+.department-roster-table th, .department-roster-table td { text-align: left; padding: 14px; border-bottom: 1px solid #334155; }
+.department-roster-table th { color: #94a3b8; }
+.department-roster-table a { color: #60a5fa; white-space: nowrap; }
 .department-detail-grid span, .department-detail-grid strong { display: block; }
 .department-detail-grid span { margin-bottom: 7px; color: #94a3b8; font-size: 12px; }
 .department-confirm-card { max-width: 680px; }

@@ -3,15 +3,26 @@
 <link href="~/css/EmployeeSections.css" rel="stylesheet" asp-append-version="true" />
 <section class="employee-section">
     <header><div><h1>My Assets</h1><p>Assets issued by HR to @Model.Employee.FullName (@Model.Employee.EmployeeCode)</p></div></header>
-    <div class="employee-summary"><article><small>Issued Assets</small><strong>@Model.Assets.Count</strong></article></div>
+    @if (TempData["AssetMessage"] is string message) { <div class="alert alert-info" role="status">@message</div> }
+    <div class="employee-summary"><article><small>Issued Assets</small><strong>@Model.Assets.Where(asset => asset.Status == "Issued").Sum(asset => (long)asset.Quantity)</strong></article></div>
     <div class="employee-panel">
         @if (Model.Assets.Count == 0) { <div class="employee-empty">No assets have been issued to you yet.</div> }
         else
         {
-            <table class="employee-table"><thead><tr><th>Asset Tag</th><th>Asset</th><th>Category</th><th>Serial Number</th><th>Issue Date</th><th>Notes</th></tr></thead>
+            <table class="employee-table"><thead><tr><th>Asset Tag</th><th>Asset</th><th>Category</th><th>Quantity</th><th>Status</th><th>Response Time (IST)</th><th>Serial Number</th><th>Issue Date</th><th>Notes</th><th>Action</th></tr></thead>
             <tbody>@foreach (var asset in Model.Assets)
             {
-                <tr><td>@asset.AssetTag</td><td>@asset.AssetName</td><td>@asset.Category</td><td>@(asset.SerialNumber ?? "--")</td><td>@asset.IssueDate.ToString("dd MMM yyyy")</td><td>@(asset.Notes ?? "--")</td></tr>
+                <tr><td>@asset.AssetTag</td><td>@asset.AssetName</td><td>@asset.Category</td><td>@asset.Quantity</td><td>@(asset.Status == "Issued" && asset.RespondedAtUtc.HasValue ? "Accepted / Issued" : asset.Status)</td><td>@(asset.RespondedAtUtc.HasValue ? VertexERP.Services.FieldAttendanceClock.IndiaTime(new DateTimeOffset(asset.RespondedAtUtc.Value)).ToString("dd MMM yyyy HH:mm") : "--")</td><td>@(asset.SerialNumber ?? "--")</td><td>@asset.IssueDate.ToString("dd MMM yyyy")</td><td>@(asset.Notes ?? "--")</td><td>
+                    @if (asset.Status == "Pending")
+                    {
+                        <form asp-action="RespondToAsset" method="post">
+                            <input type="hidden" name="id" value="@asset.Id" />
+                            <button type="submit" name="decision" value="Accept" class="btn btn-primary">Accept</button>
+                            <button type="submit" name="decision" value="Decline" class="btn btn-secondary">Decline</button>
+                        </form>
+                    }
+                    else { <span>--</span> }
+                </td></tr>
             }</tbody></table>
         }
     </div>

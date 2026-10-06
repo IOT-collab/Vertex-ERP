@@ -70,6 +70,20 @@ static class AttendanceExportChecks
         Check((await service.GetDailyAttendanceAsync(day, "INACTIVE002", null, null)).Records.Count == 1, "Inactive employee punches remain searchable");
         var activeCsv = (FileContentResult)await controller.ExportAttendance(null, null, day, null);
         Check(Encoding.UTF8.GetString(activeCsv.FileContents).Contains("INACTIVE002"), "Daily export includes inactive employee punches");
+        foreach (var exportMonth in new[] { "2026-09", DateTime.Today.ToString("yyyy-MM"), DateTime.Today.AddMonths(-1).ToString("yyyy-MM"), "2024-02" }.Distinct())
+        {
+            var monthFile = (FileContentResult)await controller.ExportAttendance(null, null, null, null, exportPeriod: "month", exportMonth: exportMonth);
+            var monthXml = XDocument.Parse(Encoding.UTF8.GetString(monthFile.FileContents));
+            Check(monthFile.FileDownloadName == $"Attendance-Pivot-{exportMonth}.xls" && monthXml.Root!.Elements(ns + "Worksheet").Count() == 2,
+                $"Monthly export downloads valid workbook for {exportMonth}");
+            if (exportMonth == "2026-09")
+            {
+                var inactiveRow = monthXml.Root!.Elements(ns + "Worksheet").First().Descendants(ns + "Row")
+                    .Single(row => row.Elements(ns + "Cell").FirstOrDefault()?.Value == "INACTIVE002");
+                Check(inactiveRow.Elements(ns + "Cell").Count() == 38 && inactiveRow.Value.Contains("—"),
+                    "Inactive employee with partial-month punches exports missing days without failure");
+            }
+        }
         stub.Employees = new[] { employee, absent, inactive };
         inactive.IsActive = true;
         Check((await service.GetDailyAttendanceAsync(day, null, null, null)).Records.Any(r => r.EmployeeId == inactive.Id), "Reactivated employee attendance is visible again");

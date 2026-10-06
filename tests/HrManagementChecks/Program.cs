@@ -7,6 +7,11 @@ using VertexERP.Services;
 using VertexERP.Controllers;
 using Vertex_ERP.Controllers;
 
+if (args.Length == 2 && args[0] == "--assets")
+{
+    await AssetAcceptanceChecks.Run(args[1]);
+    return;
+}
 if (args.Length == 2 && args[0] == "--leave-roster")
 {
     await LeaveRosterCheck.Run(args[1]);

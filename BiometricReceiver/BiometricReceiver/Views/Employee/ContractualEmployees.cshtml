@@ -1,0 +1,64 @@
+@model IReadOnlyList<VertexERP.Models.Employee>
+@{
+    ViewData["Title"] = "Contractual Employees";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    string Value(string? value) => string.IsNullOrWhiteSpace(value) ? "Not provided" : value;
+}
+<link href="~/css/ContractualEmployees.css" rel="stylesheet" asp-append-version="true" />
+<section class="contract-directory">
+    <header class="ce-header"><div><span class="ce-eyebrow">HR MANAGEMENT</span><h1>Contractual Employees</h1><p>All employees saved with Employment Type: Contract.</p></div><a asp-controller="Hr" asp-action="HrAddEmp" class="ce-link">+ Add Employee</a></header>
+    <div class="ce-stats"><article><span>Total contract employees</span><strong>@Model.Count</strong></article><article><span>Active</span><strong>@Model.Count(e => e.IsActive)</strong></article><article><span>Inactive</span><strong>@Model.Count(e => !e.IsActive)</strong></article></div>
+    <div class="ce-toolbar"><label>Search employees<input id="ce-search" type="search" placeholder="Name, employee ID, department…" /></label><label>Status<select id="ce-status"><option value="all">All employees</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label></div>
+    <p class="ce-results" id="ce-results" aria-live="polite">Showing @Model.Count employees</p>
+    @foreach (var employee in Model)
+    {
+        <details class="ce-employee" data-search="@($"{employee.FullName} {employee.EmployeeCode} {employee.Department} {employee.Designation} {employee.Email} {employee.PhoneNumber} {VertexERP.Models.EmployeeCompany.DisplayName(employee.CompanyCode)}".ToLowerInvariant())" data-status="@(employee.IsActive ? "active" : "inactive")">
+            <summary><div class="ce-avatar">@(employee.FullName.Length > 0 ? employee.FullName[..1].ToUpperInvariant() : "E")</div><div class="ce-identity"><h2>@employee.FullName</h2><p>@employee.EmployeeCode · @employee.Designation · @employee.Department</p></div><span class="ce-badge @(employee.IsActive ? "ce-active" : "")">@(employee.IsActive ? "Active" : "Inactive")</span><span class="ce-expand">Details <i class="fa-solid fa-chevron-down" aria-hidden="true"></i></span></summary>
+            <div class="ce-details">
+                <section><h3>Employment details</h3><dl>
+                    <dt>Company</dt><dd>@VertexERP.Models.EmployeeCompany.DisplayName(employee.CompanyCode)</dd>
+                    <dt>Employee ID</dt><dd>@employee.EmployeeCode</dd><dt>Employment type</dt><dd>@employee.EmploymentType</dd>
+                    <dt>Department</dt><dd>@employee.Department</dd><dt>Designation</dt><dd>@employee.Designation</dd>
+                    <dt>Joining date</dt><dd>@employee.JoiningDate.ToString("dd MMM yyyy")</dd>
+                    <dt>Reporting manager</dt><dd>@(employee.ReportingManager?.FullName ?? "Not assigned")</dd>
+                    <dt>Work location</dt><dd>@Value(employee.WorkLocation)</dd><dt>Status</dt><dd>@employee.EmployeeStatus</dd>
+                </dl></section>
+                <section><h3>Personal & contact details</h3><dl>
+                    <dt>Email</dt><dd>@Value(employee.Email)</dd><dt>Phone</dt><dd>@Value(employee.PhoneNumber)</dd>
+                    <dt>Date of birth</dt><dd>@(employee.DateOfBirth?.ToString("dd MMM yyyy") ?? "Not provided")</dd>
+                    <dt>Gender</dt><dd>@Value(employee.Gender)</dd><dt>Marital status</dt><dd>@Value(employee.MaritalStatus)</dd>
+                    <dt>Emergency contact</dt><dd>@Value(employee.EmergencyContact)</dd><dt>Aadhaar number</dt><dd>@Value(employee.AadhaarNumber)</dd>
+                </dl></section>
+                <section><h3>Address details</h3><dl>
+                    <dt>Present address</dt><dd>@Value(string.Join(", ", new[] { employee.Address, employee.City, employee.State, employee.PinCode }.Where(v => !string.IsNullOrWhiteSpace(v))))</dd>
+                    <dt>Permanent address</dt><dd>@(employee.PermanentAddressSameAsPresent ? Value(string.Join(", ", new[] { employee.Address, employee.City, employee.State, employee.PinCode }.Where(v => !string.IsNullOrWhiteSpace(v)))) : Value(string.Join(", ", new[] { employee.PermanentAddress, employee.PermanentCity, employee.PermanentState, employee.PermanentPinCode }.Where(v => !string.IsNullOrWhiteSpace(v)))))</dd>
+                </dl>
+                @if (!string.IsNullOrWhiteSpace(employee.PhotoPath)) { <img class="ce-photo" src="@Url.Content(employee.PhotoPath)" alt="@employee.FullName profile photo" loading="lazy" /> }
+                </section>
+                <div class="ce-actions"><a asp-action="Details" asp-route-id="@employee.Id" class="ce-link">Open Profile</a><a asp-action="Edit" asp-route-id="@employee.Id" class="ce-link">Edit Employee</a></div>
+            </div>
+        </details>
+    }
+    <div id="ce-empty" class="ce-empty" hidden="@(Model.Count > 0)"><h2>No contract employees found</h2><p>Employees saved with Employment Type set to Contract will appear here. If you used filters, try changing them.</p></div>
+    <a asp-controller="Main" asp-action="Hrms" class="ce-back">Back to HR Management</a>
+</section>
+@section Scripts {
+<script>
+(() => {
+    const search = document.getElementById('ce-search');
+    const status = document.getElementById('ce-status');
+    const rows = Array.from(document.querySelectorAll('.ce-employee'));
+    function filter() {
+        let count = 0;
+        rows.forEach(row => {
+            row.hidden = !row.dataset.search.includes(search.value.trim().toLowerCase()) || (status.value !== 'all' && row.dataset.status !== status.value);
+            if (!row.hidden) count++;
+        });
+        document.getElementById('ce-results').textContent = `Showing ${count} of ${rows.length} employees`;
+        document.getElementById('ce-empty').hidden = count > 0;
+    }
+    search.addEventListener('input', filter);
+    status.addEventListener('change', filter);
+})();
+</script>
+}

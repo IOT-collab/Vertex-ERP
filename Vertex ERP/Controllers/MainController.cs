@@ -603,6 +603,27 @@ namespace VertexERP.Controllers
             return View(new EmployeeAssetsViewModel { Employee = employee, Assets = assets });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Employee,User,Manager,HR")]
+        public async Task<IActionResult> RespondToAsset(int id, string decision)
+        {
+            if (decision != "Accept" && decision != "Decline") return BadRequest();
+            var employee = await LoadLoggedInEmployeeAsync();
+            if (employee == null) return Forbid();
+            var status = decision == "Accept" ? "Issued" : "Declined";
+            // A conditional update prevents duplicate or competing responses and enforces ownership.
+            var updated = await _dbContext.EmployeeAssets
+                .Where(asset => asset.Id == id && asset.EmployeeId == employee.Id && asset.Status == "Pending")
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(asset => asset.Status, status)
+                    .SetProperty(asset => asset.RespondedAtUtc, DateTime.UtcNow));
+            TempData["AssetMessage"] = updated == 0
+                ? "This request is no longer pending or is unavailable."
+                : decision == "Accept" ? "Asset accepted and issued to you." : "Asset declined. It has not been issued to you.";
+            return RedirectToAction(nameof(EmployeeAssets));
+        }
+
         [HttpGet]
         [Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> FieldAttendance()
@@ -1146,7 +1167,11 @@ namespace VertexERP.Controllers
                 xml.Append($"<Cell><Data ss:Type=\"String\">{X(AttendanceRules.FormatHours(overtime))}</Data></Cell>");
                 foreach (var day in dates)
                 {
-                    var item = byDate[day];
+                    if (!byDate.TryGetValue(day, out var item))
+                    {
+                        xml.Append("<Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">—</Data></Cell>");
+                        continue;
+                    }
                     var style = item.Status == "Present" ? "Present" : item.Status == "Absent" ? "Absent" : "Late";
                     var code = X(item.Status);
                     var timing = item.CheckIn.HasValue ? $"&#10;{item.CheckIn:hh:mm tt}-{(item.CheckOut.HasValue ? item.CheckOut.Value.ToString("hh:mm tt") : "—")}" : string.Empty;

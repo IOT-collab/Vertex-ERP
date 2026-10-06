@@ -1,0 +1,134 @@
+{
+  "SourceFile": "Power offer letter.docx",
+  "CompanyCode": "VPC",
+  "Kind": "Offer",
+  "SourceParagraphCount": 14,
+  "Blocks": [
+    {
+      "Paragraph": {
+        "SourceId": 7,
+        "SourceText": "Date : ………………..",
+        "Text": "Date : {{IssueDate}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 8,
+        "SourceText": "To,",
+        "Text": "To,",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 10,
+        "SourceText": "Mr.  ………………………",
+        "Text": "Mr. {{EmployeeName}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 11,
+        "SourceText": "Address-……………………………..",
+        "Text": "Address-{{PresentAddress}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 13,
+        "SourceText": "Dear Mr.  ……………………",
+        "Text": "Dear Mr. {{EmployeeName}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 15,
+        "SourceText": " Letter of Offer for Employment",
+        "Text": "Letter of Offer for Employment",
+        "Bold": true,
+        "Title": true
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 18,
+        "SourceText": "It is my pleasure to extend the following offer of employment to you on behalf of Vertex Power Controls Pvt. Ltd., further to the interview and discussions you have had with us. You are expected to join duty on  ………………….",
+        "Text": "It is my pleasure to extend the following offer of employment to you on behalf of {{CompanyName}}, further to the interview and discussions you have had with us. You are expected to join duty on {{EffectiveDate}}.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 20,
+        "SourceText": "You are appointed to the position of ………………………. .  As   A Designation, your salary will be Rs…………….. (CTC Per Month). ",
+        "Text": "You are appointed to the position of {{Designation}} . As {{Designation}}, your salary will be Rs{{MonthlyCtc}} (CTC Per Month).",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 22,
+        "SourceText": "Offer stands canceled in case of any deviations in information or if you fail to report to me on or before pre-decided date. Please sign and return duplicate copy of this letter in token of your acceptance.",
+        "Text": "Offer stands canceled in case of any deviations in information or if you fail to report to me on or before pre-decided date. Please sign and return duplicate copy of this letter in token of your acceptance.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 24,
+        "SourceText": "You will need to submit photocopy of all your original qualification documents and four photographs on the date of joining.",
+        "Text": "You will need to submit photocopy of all your original qualification documents and four photographs on the date of joining.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 26,
+        "SourceText": "We congratulate you on your joining and wish you a long and successful career with us. We are confident that your contribution will take us further in our journey towards becoming world leaders. We assure you of our support for your professional development and growth.",
+        "Text": "We congratulate you on your joining and wish you a long and successful career with us. We are confident that your contribution will take us further in our journey towards becoming world leaders. We assure you of our support for your professional development and growth.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 29,
+        "SourceText": "Thanking You,",
+        "Text": "Thanking You,",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 32,
+        "SourceText": "For Vertex Power Controls Pvt. Ltd.",
+        "Text": "For {{CompanyName}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 35,
+        "SourceText": "Authorized Signatory: ",
+        "Text": "Authorized Signatory:",
+        "Bold": true,
+        "Title": false
+      }
+    }
+  ]
+}

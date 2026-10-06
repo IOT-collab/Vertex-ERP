@@ -849,13 +849,13 @@ namespace Vertex_ERP.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> DepartmentDetails(int id)
+        public async Task<IActionResult> DepartmentDetails(int id, bool employees = false)
         {
             var department = await _dbContext.Departments.AsNoTracking()
                 .Include(item => item.Manager)
                 .Include(item => item.Employees)
                 .FirstOrDefaultAsync(item => item.Id == id);
-            return department == null ? NotFound() : View(department);
+            return department == null ? NotFound() : View(employees ? "DepartmentEmployees" : "DepartmentDetails", department);
         }
 
         [HttpGet]
@@ -928,7 +928,7 @@ namespace Vertex_ERP.Controllers
                 ModelState.AddModelError(nameof(model.EmployeeId), "Select an active employee.");
             if (model.IssueDate > DateOnly.FromDateTime(DateTime.Today))
                 ModelState.AddModelError(nameof(model.IssueDate), "Issue date cannot be in the future.");
-            if (await _dbContext.EmployeeAssets.AnyAsync(asset => asset.AssetTag == model.AssetTag))
+            if (await _dbContext.EmployeeAssets.AnyAsync(asset => asset.AssetTag == model.AssetTag && asset.Status != "Declined"))
                 ModelState.AddModelError(nameof(model.AssetTag), "This asset tag has already been issued.");
             if (ModelState.IsValid)
             {
@@ -936,12 +936,13 @@ namespace Vertex_ERP.Controllers
                 {
                     EmployeeId = model.EmployeeId, AssetTag = model.AssetTag, AssetName = model.AssetName.Trim(),
                     Category = model.Category.Trim(), SerialNumber = model.SerialNumber?.Trim(),
-                    IssueDate = model.IssueDate!.Value, Notes = model.Notes?.Trim()
+                    IssueDate = model.IssueDate!.Value, Notes = model.Notes?.Trim(),
+                    Quantity = model.Quantity, Status = "Pending"
                 });
                 try
                 {
                     await _dbContext.SaveChangesAsync();
-                    TempData["AssetMessage"] = "Asset issued successfully. It is now visible in the employee's Assets page.";
+                    TempData["AssetMessage"] = "Asset request sent. It will be issued only after the employee accepts it.";
                     return RedirectToAction(nameof(AssetManagement));
                 }
                 catch (DbUpdateException exception) when (exception.InnerException is Npgsql.PostgresException { SqlState: "23505" })

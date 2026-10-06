@@ -138,10 +138,10 @@
                     <span asp-validation-for="CompanyCode" class="field-validation"></span>
                 </div>
                 <div class="form-group">
-                    <label asp-for="EmployeeId">ERP Employee ID</label>
+                    <label asp-for="EmployeeId">Employee ID</label>
                     <input asp-for="EmployeeId" readonly placeholder="Automatically assigned when saved" />
                     <span asp-validation-for="EmployeeId" class="field-validation"></span>
-                    <p id="employeeIdPreviewNotice" role="status" aria-live="polite">Select a company to see the next ERP Employee ID.</p>
+                    <p id="employeeIdPreviewNotice" role="status" aria-live="polite">Select a company to see the next Employee ID.</p>
                 </div>
                 <div class="form-group">
                     <label asp-for="PendingBiometricEmployeeId">Biometric Enrollment Number / Emp ID</label>
@@ -182,7 +182,7 @@
                 <div class="form-group">
 
                     <label>
-                        Last Name
+                        Last Name (optional)
                     </label>
 
                     <input asp-for="LastName"
@@ -895,8 +895,8 @@
                 input.setAttribute('aria-label', 'Biometric enrollment number');
                 enrollments.appendChild(input);
             }
-            notice.textContent = !code.value ? 'Select a company to see the next ERP Employee ID.'
-                : result.isPreview ? 'Next available ID. The final ID is confirmed when saved.' : 'Existing ERP Employee ID.';
+            notice.textContent = !code.value ? 'Select a company to see the next Employee ID.'
+                : result.isPreview ? 'Next available ID. The final ID is confirmed when saved.' : 'Existing Employee ID.';
             save.textContent = biometric.value ? 'Complete Employee Profile' : 'Add Employee';
             save.disabled = false;
         } catch {

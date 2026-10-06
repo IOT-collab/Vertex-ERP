@@ -13,7 +13,7 @@
             <div><span>Description</span><strong>@(Model.Description ?? "Not provided")</strong></div>
             <div><span>Status</span><strong>@(Model.IsActive ? "Active" : "Inactive")</strong></div>
             <div><span>Manager</span><strong>@(Model.Manager?.FullName ?? "Not Assigned")</strong></div>
-            <div><span>Employees</span><strong>@Model.Employees.Count</strong></div>
+            <a asp-action="DepartmentDetails" asp-route-id="@Model.Id" asp-route-employees="true" class="department-employees-link" aria-label="View all @Model.Employees.Count employees in @Model.DepartmentName"><span>Employees</span><strong>@Model.Employees.Count</strong><small>View employees →</small></a>
         </div>
         <div class="department-form-actions"><a asp-action="Department" class="department-cancel">Back</a><a asp-action="EditDepartment" asp-route-id="@Model.Id" class="department-submit">Edit Department</a></div>
     </div>
