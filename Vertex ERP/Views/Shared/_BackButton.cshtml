@@ -13,12 +13,21 @@
         "ProjectMgm",
         "AdminPanel",
         "UserSettings",
-        "Reports",
         "Settings"
     };
     var showBackButton = !string.Equals(controller, "Main", StringComparison.OrdinalIgnoreCase)
         || string.IsNullOrWhiteSpace(action)
         || !topLevelMainPages.Contains(action);
+    var requestedMainBackPages = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "Employees", "Attendence", "ProjectMgm", "AdminPanel", "UserSettings"
+    };
+    if (string.Equals(controller, "Main", StringComparison.OrdinalIgnoreCase)
+        && action is not null
+        && requestedMainBackPages.Contains(action))
+    {
+        showBackButton = true;
+    }
     var isDepartmentPage = string.Equals(controller, "Hr", StringComparison.OrdinalIgnoreCase)
         && action is "Department" or "AddDepartment" or "EditDepartment" or "DeleteDepartment" or "DepartmentDetails";
     var isEmployeePage = string.Equals(controller, "Employee", StringComparison.OrdinalIgnoreCase);
@@ -43,6 +52,19 @@
         : isEmployeeIndex ? "Hrms"
         : isEmployeePage ? "Index"
         : ViewData["BackAction"]?.ToString();
+    if (string.Equals(controller, "Main", StringComparison.OrdinalIgnoreCase))
+    {
+        if (string.Equals(action, "UserSettings", StringComparison.OrdinalIgnoreCase))
+        {
+            backController = "Main";
+            backAction = "AdminPanel";
+        }
+        else if (action is "Employees" or "Attendence" or "ProjectMgm" or "AdminPanel")
+        {
+            backController = "Main";
+            backAction = "Dashboard";
+        }
+    }
     if (isHrPage && !isDepartmentPage)
     {
         if (action is "GenerateDocument" or "UploadDocument")

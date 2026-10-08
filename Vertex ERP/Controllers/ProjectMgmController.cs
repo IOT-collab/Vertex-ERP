@@ -32,7 +32,7 @@ namespace Vertex_ERP.Controllers
             if (ModelState.IsValid)
             {
                 _db.Projects.Add(model);
-                try { await _db.SaveChangesAsync(); TempData["ProjectMessage"] = "Project saved and available in reports."; return RedirectToAction(nameof(ProjectCreation)); }
+                try { await _db.SaveChangesAsync(); TempData["ProjectMessage"] = "Project saved successfully."; return RedirectToAction(nameof(ProjectCreation)); }
                 catch (DbUpdateException) { ModelState.AddModelError("", "Project could not be saved. Check the code and retry."); }
             }
             await LoadProjectsAsync();

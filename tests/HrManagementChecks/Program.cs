@@ -7,6 +7,11 @@ using VertexERP.Services;
 using VertexERP.Controllers;
 using Vertex_ERP.Controllers;
 
+if (args.Length == 2 && args[0] == "--manual-approval")
+{
+    await ManualApprovalChecks.Run(args[1]);
+    return;
+}
 if (args.Length == 2 && args[0] == "--assets")
 {
     await AssetAcceptanceChecks.Run(args[1]);
@@ -25,6 +30,23 @@ if (args.Length == 2 && args[0] == "--field-web")
 
 int passed = 0;
 void Check(bool condition, string name) { if (!condition) throw new Exception(name); Console.WriteLine("PASS " + name); passed++; }
+var requestRoles = typeof(AttendanceRequestsController).GetCustomAttributes(typeof(AuthorizeAttribute), true)
+    .Cast<AuthorizeAttribute>().Single().Roles!.Split(',');
+Check(!requestRoles.Contains("Employee") && !requestRoles.Contains("User"), "Employee roles cannot open attendance requests");
+Check(new[] { "Admin", "HR", "Manager" }.All(requestRoles.Contains), "Attendance management access is preserved");
+foreach (var role in new[] { "Employee", "User" })
+{
+    var requests = new AttendanceRequestsController(null!)
+    {
+        ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext {
+            User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity(new[] {
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, role),
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, "1")
+            }, "test"))
+        } }
+    };
+    Check(await requests.Index() is ForbidResult, $"{role} request access denied before database lookup");
+}
 foreach (long size in new long[] { 3 * 1024 * 1024 - 1, 3 * 1024 * 1024, 3 * 1024 * 1024 + 1, 16 * 1024 * 1024 })
 {
     var model = new EmployeeDocumentUploadViewModel { EmployeeId = 1, DocumentType = "Other", DocumentName = "Boundary test", File = new FormFile(Stream.Null, 0, size, "File", "test.pdf") };

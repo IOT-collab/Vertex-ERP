@@ -367,3 +367,78 @@
     cursor: pointer;
 }
 .edit-password-toggle:focus-visible { outline: 2px solid #3b82f6; }
+
+.employee-biometric-notice {
+    margin: 14px 0;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+.employee-biometric-notice.success { color: #bbf7d0; background: rgba(22, 101, 52, .28); border: 1px solid rgba(74, 222, 128, .35); }
+.employee-biometric-notice.error { color: #fecaca; background: rgba(153, 27, 27, .24); border: 1px solid rgba(248, 113, 113, .35); }
+.employee-biometric-editor { margin-bottom: 18px; }
+.employee-biometric-editor > p { color: #cbd5e1; line-height: 1.55; }
+.employee-biometric-batch-form { display: grid; gap: 16px; }
+.employee-biometric-scroll {
+    max-height: 370px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid rgba(148, 163, 184, .23);
+    border-radius: 12px;
+    background: rgba(15, 23, 42, .38);
+    scrollbar-color: #64748b rgba(15, 23, 42, .4);
+}
+.employee-biometric-scroll:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
+.employee-biometric-link-row {
+    display: grid;
+    grid-template-columns: minmax(180px, .75fr) minmax(320px, 1.25fr);
+    gap: 24px;
+    align-items: center;
+    padding: 15px 18px;
+    border-bottom: 1px solid rgba(148, 163, 184, .16);
+}
+.employee-biometric-link-row:last-child { border-bottom: 0; }
+.employee-biometric-link-details { display: flex; gap: 12px; align-items: center; min-width: 0; }
+.employee-biometric-link-details > div { display: grid; gap: 5px; }
+.employee-biometric-link-details strong { color: #f1f5f9; font-size: .96rem; }
+.employee-biometric-link-details span:not(.employee-biometric-device-icon) { color: #aebbd0; font-size: .87rem; }
+.employee-biometric-device-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    color: #93c5fd;
+    background: rgba(59, 130, 246, .16);
+    font-size: 14px;
+}
+.employee-biometric-link-controls { display: grid; gap: 8px; }
+.employee-biometric-link-controls > label:first-child { color: #dbe5f2; font-size: .84rem; font-weight: 600; }
+.employee-biometric-link-controls > select {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 12px;
+    color: #f1f5f9;
+    background: #111c30;
+    border: 1px solid #34445e;
+    border-radius: 8px;
+}
+.employee-biometric-link-controls > select:focus { border-color: #60a5fa; outline: 2px solid rgba(96, 165, 250, .2); }
+.employee-biometric-confirm { display: flex; gap: 8px; align-items: center; color: #aebbd0; font-size: .82rem; }
+.employee-biometric-confirm input { accent-color: #3b82f6; }
+.employee-biometric-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding-top: 2px;
+}
+.employee-biometric-actions > span { color: #aebbd0; font-size: .86rem; }
+.employee-biometric-actions .btn-submit { width: auto; min-width: 205px; }
+@media (max-width: 768px) {
+    .employee-biometric-link-row { grid-template-columns: 1fr; gap: 12px; padding: 14px; }
+    .employee-biometric-actions { flex-direction: column; align-items: stretch; }
+    .employee-biometric-actions .btn-submit { width: 100%; }
+}

@@ -92,6 +92,8 @@ public class EmployeeFormViewModel : IValidatableObject
 {
     [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
     public IReadOnlyList<string> SourceEnrollments { get; set; } = Array.Empty<string>();
+    [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
+    public IReadOnlyList<EmployeeBiometricDeviceLinkViewModel> BiometricDeviceLinks { get; set; } = Array.Empty<EmployeeBiometricDeviceLinkViewModel>();
     [Required(ErrorMessage = "Aadhaar Number is required.")]
     [StringLength(12)]
     [RegularExpression(@"^[0-9]{12}$", ErrorMessage = "Aadhaar Number must contain exactly 12 digits.")]
@@ -270,6 +272,34 @@ public class EmployeeFormViewModel : IValidatableObject
         if (!string.IsNullOrWhiteSpace(BankIfscCode) && !System.Text.RegularExpressions.Regex.IsMatch(BankIfscCode.Trim(), @"^[A-Za-z]{4}0[A-Za-z0-9]{6}$", System.Text.RegularExpressions.RegexOptions.CultureInvariant))
             yield return new ValidationResult("Enter a valid 11-character IFSC code (example: BARB0MURADN).", new[] { nameof(BankIfscCode) });
     }
+}
+
+public sealed class EmployeeBiometricDeviceLinkViewModel
+{
+    public int DeviceId { get; init; }
+    public string DeviceName { get; init; } = string.Empty;
+    public int? CurrentMappingId { get; init; }
+    public string? CurrentEnrollmentLabel { get; init; }
+    public IReadOnlyList<EmployeeBiometricMappingOptionViewModel> Options { get; init; } = Array.Empty<EmployeeBiometricMappingOptionViewModel>();
+}
+
+public sealed class EmployeeBiometricMappingOptionViewModel
+{
+    public int MappingId { get; init; }
+    public string DeviceUserId { get; init; } = string.Empty;
+    public string? LinkedEmployeeName { get; init; }
+}
+
+public sealed class EmployeeBiometricMappingUpdateViewModel
+{
+    public List<EmployeeBiometricDeviceSelectionViewModel> DeviceLinks { get; set; } = new();
+}
+
+public sealed class EmployeeBiometricDeviceSelectionViewModel
+{
+    [Required] public int DeviceId { get; set; }
+    public int? SelectedMappingId { get; set; }
+    public bool ConfirmTransfer { get; set; }
 }
 
 public class EmployeeBankDraft

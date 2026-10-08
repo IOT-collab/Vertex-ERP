@@ -31,10 +31,10 @@
         </div>
 
         <div class="manual-step"><span>3</span><div><h2>Reason & Confirmation</h2><p>Add a clear reason for the missing biometric punch.</p></div></div>
-        <label class="remarks-field"><span>Reason / Remarks</span><textarea asp-for="Remarks" rows="4" maxlength="300" placeholder="Example: Biometric device was offline during employee arrival..."></textarea></label>
-        <div class="manual-confirm"><i class="fa-solid fa-shield-halved"></i><span>This entry will be recorded as an authorized manual attendance entry with the name of the logged-in HR, Admin, or Manager.</span></div>
+        <label class="remarks-field"><span>Reason / Remarks *</span><textarea asp-for="Remarks" required rows="4" maxlength="300" placeholder="Example: Biometric device was offline during employee arrival..."></textarea></label>
+        <div class="manual-confirm"><i class="fa-solid fa-shield-halved"></i><span>This request will be sent to Admin with your reason. Attendance will be marked only after Admin approval.</span></div>
         <div asp-validation-summary="All" class="submit-errors"></div>
-        <footer><a asp-action="Attendence" class="manual-cancel">Cancel</a><button type="submit" id="submitAttendance"><i class="fa-solid fa-check"></i> Approve & Mark Attendance</button></footer>
+        <footer><a asp-action="Attendence" class="manual-cancel">Cancel</a><button type="submit" id="submitAttendance"><i class="fa-solid fa-check"></i> Send to Admin</button></footer>
     </form>
 </section>
 

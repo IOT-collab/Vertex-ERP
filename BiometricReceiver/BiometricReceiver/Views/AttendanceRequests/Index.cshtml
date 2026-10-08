@@ -1,0 +1,35 @@
+@model IReadOnlyList<VertexERP.Models.AttendanceRequest>
+@{ ViewData["Title"] = "Manual Attendance Requests"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
+<link href="~/css/EmployeeSections.css" rel="stylesheet" asp-append-version="true" />
+<section class="employee-section">
+    <header><div><h1>Manual Attendance Requests</h1><p>Missing biometric attendance requires Admin approval. Pending and rejected requests do not mark attendance.</p></div>
+    @if (User.IsInRole("HR") || User.IsInRole("Admin") || User.IsInRole("Manager"))
+    { <a asp-controller="Main" asp-action="AddAttendance" class="btn btn-primary">Request Manual Attendance</a> }
+    </header>
+    @if (User.IsInRole("HR") || User.IsInRole("Admin")) { <p><a asp-controller="LeaveBalances" asp-action="Index">Employee Leave Balances</a> · <a asp-controller="Main" asp-action="WorkflowManagement">Leave Approvals &amp; Queries</a></p> }
+    @if (TempData["AttendanceRequestMessage"] is string message) { <div class="alert alert-info" role="status">@message</div> }
+    <div class="employee-summary">
+        <article><small>Pending</small><strong>@Model.Count(r => r.Status == "Pending")</strong></article>
+        <article><small>Approved</small><strong>@Model.Count(r => r.Status == "Approved")</strong></article>
+        <article><small>Rejected</small><strong>@Model.Count(r => r.Status == "Rejected")</strong></article>
+    </div>
+    <div class="employee-panel" style="overflow-x:auto">
+    @if (Model.Count == 0) { <div class="employee-empty">No manual attendance requests yet.</div> }
+    else {
+        <table class="employee-table"><thead><tr><th>Employee</th><th>Date</th><th>Check In / Out</th><th>Reason</th><th>Status</th><th>Admin Response</th>@if (User.IsInRole("Admin")) { <th>Review</th> }</tr></thead>
+        <tbody>@foreach (var request in Model) {
+            <tr><td>@request.Employee.FullName<small>@request.Employee.EmployeeCode</small></td><td>@request.AttendanceDate.ToString("dd MMM yyyy")</td>
+            <td>@request.CheckInTime.ToString("HH:mm") / @(request.CheckOutTime?.ToString("HH:mm") ?? "--")</td>
+            <td>@request.Reason</td><td><span class="employee-badge @request.Status.ToLowerInvariant()">@request.Status</span></td>
+            <td>@(request.ReviewReason ?? "--") @if (request.ReviewedAtUtc.HasValue) { <small>@VertexERP.Services.FieldAttendanceClock.IndiaTime(new DateTimeOffset(request.ReviewedAtUtc.Value)).ToString("dd MMM yyyy HH:mm") IST</small> }</td>
+            @if (User.IsInRole("Admin")) { <td>@if (request.Status == "Pending") {
+                <form asp-action="Review" method="post"><input type="hidden" name="id" value="@request.Id" />
+                <input name="reviewReason" maxlength="300" aria-label="Admin response" placeholder="Reason required for rejection" />
+                <button name="decision" value="Approved" class="btn btn-primary">Approve</button>
+                <button name="decision" value="Rejected" class="btn btn-secondary">Reject</button></form>
+            }</td> }
+            </tr>
+        }</tbody></table>
+    }
+    </div>
+</section>

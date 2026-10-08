@@ -211,6 +211,77 @@ public class EmployeeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateBiometricMapping(int id, EmployeeBiometricMappingUpdateViewModel model)
+    {
+        var employee = await _dbContext.Employees.SingleOrDefaultAsync(item => item.Id == id);
+        if (employee == null) return NotFound();
+
+        var selections = model.DeviceLinks ?? new List<EmployeeBiometricDeviceSelectionViewModel>();
+        if (selections.Count > 100 || selections.Select(item => item.DeviceId).Distinct().Count() != selections.Count)
+        {
+            TempData["EmployeeError"] = "The biometric machine list was invalid. Refresh the employee profile and try again.";
+            return RedirectToAction(nameof(Edit), new { id });
+        }
+        var selectedLinks = selections.Where(item => item.SelectedMappingId.HasValue).ToList();
+        if (selectedLinks.Count == 0)
+        {
+            TempData["EmployeeError"] = "Select at least one enrollment before saving.";
+            return RedirectToAction(nameof(Edit), new { id });
+        }
+
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        await _dbContext.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock({BiometricEmployeeReconciliationService.LockId})");
+        var selectedMappingIds = selectedLinks.Select(item => item.SelectedMappingId!.Value).ToList();
+        if (selectedMappingIds.Distinct().Count() != selectedMappingIds.Count)
+        {
+            TempData["EmployeeError"] = "The same biometric enrollment cannot be selected for multiple machines.";
+            return RedirectToAction(nameof(Edit), new { id });
+        }
+        var mappings = await _dbContext.EmployeeDeviceMappings
+            .Include(item => item.Employee)
+            .Include(item => item.BiometricDevice)
+            .Where(item => selectedMappingIds.Contains(item.Id) && item.IsActive && item.BiometricDevice.IsActive)
+            .ToListAsync();
+        if (mappings.Count != selectedLinks.Count || selectedLinks.Any(selection =>
+                !mappings.Any(mapping => mapping.Id == selection.SelectedMappingId && mapping.BiometricDeviceId == selection.DeviceId)))
+        {
+            TempData["EmployeeError"] = "One of the selected enrollments is no longer available. Refresh the employee profile and try again.";
+            return RedirectToAction(nameof(Edit), new { id });
+        }
+        foreach (var selection in selectedLinks)
+        {
+            var mapping = mappings.Single(item => item.Id == selection.SelectedMappingId);
+            if (mapping.EmployeeId != id && !selection.ConfirmTransfer)
+            {
+                TempData["EmployeeError"] = $"{mapping.DeviceUserId} is currently linked to {mapping.Employee.FullName}. Confirm each transfer before saving.";
+                return RedirectToAction(nameof(Edit), new { id });
+            }
+        }
+
+        var deviceIds = selectedLinks.Select(item => item.DeviceId).Distinct().ToList();
+        var previousMappingsForDevice = await _dbContext.EmployeeDeviceMappings
+            .Where(item => item.EmployeeId == id && deviceIds.Contains(item.BiometricDeviceId) && !selectedMappingIds.Contains(item.Id))
+            .ToListAsync();
+        // The database enforces one mapping row per employee and device (including inactive rows).
+        // Remove a superseded link so the selected machine identity can be assigned to this employee.
+        _dbContext.EmployeeDeviceMappings.RemoveRange(previousMappingsForDevice);
+        if (previousMappingsForDevice.Count > 0)
+            await _dbContext.SaveChangesAsync();
+
+        foreach (var mapping in mappings)
+        {
+            mapping.EmployeeId = id;
+            mapping.IsActive = true;
+        }
+        await _dbContext.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        TempData["EmployeeMessage"] = $"Biometric enrollment links for {employee.FullName} were saved. Existing attendance history was not changed.";
+        return RedirectToAction(nameof(Edit), new { id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, EmployeeFormViewModel model)
     {
         if (id != model.Id) return BadRequest();
@@ -379,6 +450,7 @@ public class EmployeeController : Controller
 
                 _dbContext.EmployeeDeviceMappings.RemoveRange(deviceMappings);
                 _dbContext.AttendanceLogs.RemoveRange(attendanceLogs);
+                _dbContext.AttendanceRequests.RemoveRange(await _dbContext.AttendanceRequests.Where(request => request.EmployeeId == id).ToListAsync());
                 _dbContext.WorkTasks.RemoveRange(employeeTasks);
                 _dbContext.EmployeeAssets.RemoveRange(employeeAssets);
                 _dbContext.LeaveRequests.RemoveRange(employeeLeaves);
@@ -446,6 +518,7 @@ public class EmployeeController : Controller
     private EmployeeFormViewModel PopulateManagers(EmployeeFormViewModel model)
     {
         model.SourceEnrollments = GetSourceEnrollments(model.Id);
+        model.BiometricDeviceLinks = GetBiometricDeviceLinks(model.Id);
         model.AvailableDepartments = _dbContext.Departments.AsNoTracking()
             .Where(department => department.IsActive)
             .OrderBy(department => department.DepartmentName).ToList();
@@ -455,6 +528,36 @@ public class EmployeeController : Controller
             .ThenBy(employee => employee.LastName)
             .ToList();
         return model;
+    }
+
+    private IReadOnlyList<EmployeeBiometricDeviceLinkViewModel> GetBiometricDeviceLinks(int employeeId)
+    {
+        var mappings = _dbContext.EmployeeDeviceMappings.AsNoTracking()
+            .Include(mapping => mapping.Employee)
+            .Include(mapping => mapping.BiometricDevice)
+            .Where(mapping => mapping.IsActive && mapping.BiometricDevice.IsActive)
+            .OrderBy(mapping => mapping.BiometricDevice.Name)
+            .ThenBy(mapping => mapping.DeviceUserId)
+            .ToList();
+
+        return mappings.GroupBy(mapping => new { mapping.BiometricDeviceId, mapping.BiometricDevice.Name })
+            .Select(group =>
+            {
+                var current = group.FirstOrDefault(mapping => mapping.EmployeeId == employeeId);
+                return new EmployeeBiometricDeviceLinkViewModel
+                {
+                    DeviceId = group.Key.BiometricDeviceId,
+                    DeviceName = group.Key.Name,
+                    CurrentMappingId = current?.Id,
+                    CurrentEnrollmentLabel = current?.DeviceUserId,
+                    Options = group.Select(mapping => new EmployeeBiometricMappingOptionViewModel
+                    {
+                        MappingId = mapping.Id,
+                        DeviceUserId = mapping.DeviceUserId,
+                        LinkedEmployeeName = mapping.EmployeeId == employeeId ? "This employee" : $"{mapping.Employee?.FullName} ({mapping.Employee?.EmployeeCode})"
+                    }).ToList()
+                };
+            }).ToList();
     }
 
     private IReadOnlyList<string> GetSourceEnrollments(int employeeId) =>

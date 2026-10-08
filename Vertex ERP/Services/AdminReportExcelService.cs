@@ -6,13 +6,6 @@ namespace VertexERP.Services;
 
 public static class AdminReportExcelService
 {
-    public static byte[] Create(AdminReportViewModel report)
-    {
-        var data = new List<IReadOnlyList<string>> { new[] { report.ReportTitle }, new[] { report.FilterSummary }, new[] { $"Period: {report.FromDate:yyyy-MM-dd} to {report.ToDate:yyyy-MM-dd}" }, report.Columns };
-        data.AddRange(report.Rows);
-        return CreateWorkbook(data, report.Columns.Count, 4, "Report");
-    }
-
     public static byte[] CreateEmployeeList(IEnumerable<Employee> employees)
     {
         var data = new List<IReadOnlyList<string>>

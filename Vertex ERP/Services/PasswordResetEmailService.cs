@@ -19,7 +19,7 @@ public sealed class PasswordResetEmailService : IPasswordResetEmailService
         using var client = new SmtpClient(host, port) { EnableSsl = !bool.TryParse(settings["EnableSsl"], out var ssl) || ssl };
         var username = settings["Username"]; var password = settings["Password"];
         if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password)) client.Credentials = new NetworkCredential(username, password);
-        using var message = new MailMessage(sender, recipientEmail) { Subject = "Vertex ERP password reset code", Body = $"Your Vertex ERP password reset code is: {otp}\n\nIt expires in 10 minutes. Do not share this code with anyone.", IsBodyHtml = false };
+        using var message = new MailMessage(sender, recipientEmail) { Subject = "Vertex ERP password reset code", Body = $"Your Vertex ERP password reset code is: {otp}\n\nIt expires in 5 minutes. Do not share this code with anyone.", IsBodyHtml = false };
         await client.SendMailAsync(message, cancellationToken);
     }
 }

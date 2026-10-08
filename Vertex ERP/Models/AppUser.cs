@@ -32,5 +32,7 @@ namespace VertexERP.Models
         public bool MustChangePassword { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? PasswordChangedAtUtc { get; set; }
     }
 }

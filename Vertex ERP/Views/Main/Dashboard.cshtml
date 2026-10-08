@@ -103,41 +103,14 @@
 
     <section class="card-row">
 
-        <!-- Total Workforce -->
-        <div class="dashboard-card status-blue">
+        <!-- Present Today -->
+        <a class="dashboard-card dashboard-card-link status-blue" href="@Url.Action("DashboardAttendance", "Main", new { status = "Present" })" aria-label="Show employees present today">
 
             <div class="card-meta">
 
-                <span>Total Workforce</span>
+                <span>Present</span>
 
                 <div class="card-icon blue-icon">
-                    <i class="fa-solid fa-users" aria-hidden="true"></i>
-                </div>
-
-            </div>
-
-            <div class="card-body-metrics">
-
-                <!-- Dynamic Value -->
-                <h2>@Model.TotalWorkforce</h2>
-
-                <span class="trend up">@Model.ActiveWorkforce active</span>
-
-            </div>
-
-            <div class="card-footer-info">Saved employee records</div>
-
-        </div>
-
-
-        <!-- Present Today -->
-        <div class="dashboard-card status-green">
-
-            <div class="card-meta">
-
-                <span>Present Today</span>
-
-                <div class="card-icon green-icon">
                     <i class="fa-solid fa-user-check" aria-hidden="true"></i>
                 </div>
 
@@ -152,20 +125,47 @@
 
             </div>
 
-            <div class="card-footer-info">@Model.AbsentToday currently absent</div>
+            <div class="card-footer-info">Attendance recorded today</div>
 
-        </div>
+        </a>
 
 
-        <!-- Pending Approvals -->
-        <div class="dashboard-card status-orange">
+        <!-- Absent Today -->
+        <a class="dashboard-card dashboard-card-link status-red" href="@Url.Action("DashboardAttendance", "Main", new { status = "Absent" })" aria-label="Show employees absent today">
 
             <div class="card-meta">
 
-                <span>Open Tasks</span>
+                <span>Absent</span>
+
+                <div class="card-icon red-icon">
+                    <i class="fa-solid fa-user-xmark" aria-hidden="true"></i>
+                </div>
+
+            </div>
+
+            <div class="card-body-metrics">
+
+                <!-- Dynamic Value -->
+                <h2>@Model.AbsentToday</h2>
+
+                <span class="trend neutral">Today</span>
+
+            </div>
+
+            <div class="card-footer-info">Excludes approved leave and weekly off</div>
+
+        </a>
+
+
+        <!-- Late Arrivals -->
+        <a class="dashboard-card dashboard-card-link status-orange" href="@Url.Action("DashboardAttendance", "Main", new { status = "Late" })" aria-label="Show employees who arrived late today">
+
+            <div class="card-meta">
+
+                <span>Late</span>
 
                 <div class="card-icon orange-icon">
-                    <i class="fa-solid fa-hourglass-half" aria-hidden="true"></i>
+                    <i class="fa-solid fa-clock" aria-hidden="true"></i>
                 </div>
 
             </div>
@@ -173,26 +173,26 @@
             <div class="card-body-metrics">
 
                 <!-- Dynamic Value -->
-                <h2>@Model.OpenTasks</h2>
+                <h2>@Model.LateToday</h2>
 
-                <span class="trend warning">@Model.OverdueTasks overdue</span>
+                <span class="trend warning">Today</span>
 
             </div>
 
-            <div class="card-footer-info">@Model.CompletedTasks completed</div>
+            <div class="card-footer-info">Late arrivals today</div>
 
-        </div>
+        </a>
 
 
-        <!-- Inventory Items -->
-        <div class="dashboard-card status-purple">
+        <!-- Employees On Leave -->
+        <a class="dashboard-card dashboard-card-link status-purple" href="@Url.Action("DashboardAttendance", "Main", new { status = "Leave" })" aria-label="Show employees on approved leave today">
 
             <div class="card-meta">
 
-                <span>Departments</span>
+                <span>Leave</span>
 
                 <div class="card-icon purple-icon">
-                    <i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i>
+                    <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
                 </div>
 
             </div>
@@ -200,15 +200,15 @@
             <div class="card-body-metrics">
 
                 <!-- Dynamic Value -->
-                <h2>@Model.Departments.Count</h2>
+                <h2>@Model.OnLeaveToday</h2>
 
-                <span class="trend neutral">Active teams</span>
+                <span class="trend neutral">Today</span>
 
             </div>
 
-            <div class="card-footer-info">Workforce distribution</div>
+            <div class="card-footer-info">Employees on approved leave</div>
 
-        </div>
+        </a>
 
     </section>
 
@@ -569,7 +569,7 @@
 
                         </span>
 
-                        <strong class="metric-val">0</strong>
+                        <strong class="metric-val">@Model.OnLeaveToday</strong>
 
                     </div>
 
@@ -674,105 +674,6 @@
 
     </section>
     }
-    <!-- =========================
-         VERTEX AI ASSISTANT
-    ========================== -->
-
-    <section class="ai-assistant"
-             aria-label="Vertex AI Assistant">
-
-
-        <button type="button"
-                class="ai-toggle"
-                id="aiToggle"
-                title="Open Vertex AI Assistant">
-
-            <span class="ai-pulse"></span>
-
-            <strong>
-                AI
-            </strong>
-
-        </button>
-
-
-        <div class="ai-panel"
-             id="aiPanel">
-
-
-            <div class="ai-panel-header">
-
-                <div>
-
-                    <span class="system-badge">
-                        Voice Assistant
-                    </span>
-
-                    <h3>
-                        Vertex AI
-                    </h3>
-
-                    <p class="sub-text">
-                        Ask for today's report, users,
-                        attendance, or calendar status.
-                    </p>
-
-                </div>
-
-
-                <button type="button"
-                        class="ai-close"
-                        id="aiClose"
-                        title="Close assistant">
-
-                    ×
-
-                </button>
-
-            </div>
-
-
-            <div class="ai-messages"
-                 id="aiMessages">
-
-                <!-- AI responses appear here -->
-
-            </div>
-
-
-            <div class="ai-controls">
-
-
-                <button type="button"
-                        class="ai-mic"
-                        id="aiMic"
-                        title="Speak to assistant">
-
-                    <i class="fa-solid fa-microphone" aria-hidden="true"></i>
-
-                </button>
-
-
-                <input type="text"
-                       id="aiInput"
-                       placeholder="Ask Vertex AI..." />
-
-
-                <button type="button"
-                        class="ai-send"
-                        id="aiSend">
-
-                    Send
-
-                </button>
-
-
-            </div>
-
-        </div>
-
-    </section>
-
 </div>
 
 
@@ -879,7 +780,7 @@
         // ADD MESSAGE
         // =====================
 
-        const addMessage = (text, type) => {
+            const addMessage = (text, type) => {
 
             if (!aiMessages)
                 return;
@@ -901,6 +802,7 @@
 
             aiMessages.scrollTop =
                 aiMessages.scrollHeight;
+            return message;
 
         };
 
@@ -975,12 +877,13 @@
 
         const askAssistant = async () => {
 
-            if (!aiInput)
+            if (!aiInput || !aiSend || aiSend.disabled)
                 return;
 
 
+            const attachment = window.vertexAiGetAttachment?.() || null;
             const question =
-                aiInput.value.trim();
+                aiInput.value.trim() || (attachment ? "Please analyze the attached file and suggest useful improvements." : "");
 
 
             if (!question)
@@ -988,43 +891,25 @@
 
 
             addMessage(
-                question,
+                attachment ? `${question}\n📎 ${attachment.name}` : question,
                 "user"
             );
 
 
             aiInput.value = "";
+            const assistantStatus = document.getElementById("aiStatus");
+            aiSend.disabled = true;
+            if (assistantStatus) assistantStatus.textContent = "Checking authorized ERP data…";
 
 
             try {
-
-                const response =
-                    await fetch(
-                        "/Main/AskAssistant",
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body:
-                                JSON.stringify({
-                                    message: question
-                                })
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                addMessage(
-                    data.reply,
-                    "assistant"
-                );
+                const answerMessage = addMessage("", "assistant");
+                const reply = await window.vertexGeminiAsk(question, chunk => {
+                    if (answerMessage) answerMessage.textContent += chunk;
+                    if (aiMessages) aiMessages.scrollTop = aiMessages.scrollHeight;
+                }, attachment);
+                if (answerMessage) answerMessage.textContent = reply;
+                if (attachment) window.vertexAiClearAttachment?.();
 
 
                 if (
@@ -1032,15 +917,15 @@
                     aiPanel.classList.contains("open")
                 ) {
 
-                    speak(data.reply);
+                    speak(reply);
 
                 }
 
             }
-            catch {
+            catch (error) {
 
                 const fallback =
-                    "Assistant service is not responding right now.";
+                    error?.message || "Gemini could not respond. Check Firebase AI Logic setup and your connection.";
 
 
                 addMessage(
@@ -1058,6 +943,9 @@
 
                 }
 
+            } finally {
+                aiSend.disabled = false;
+                if (assistantStatus) assistantStatus.textContent = "Ready";
             }
 
         };
@@ -1074,6 +962,7 @@
                 () => {
 
                     aiPanel?.classList.toggle("open");
+                    if (aiPanel?.classList.contains("open")) window.vertexLoadAdminBriefing?.();
 
 
                     if (

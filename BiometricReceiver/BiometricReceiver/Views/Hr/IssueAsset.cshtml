@@ -10,10 +10,12 @@
             <label>Asset Tag<input asp-for="AssetTag" class="form-control" maxlength="100" required /></label>
             <label>Asset Name<input asp-for="AssetName" class="form-control" maxlength="150" required /></label>
             <label>Category<select asp-for="Category" class="form-select" required><option value="">Select category</option><option>Laptop</option><option>Workstation</option><option>Monitor</option><option>Accessories</option><option>Phone</option><option>Uniform</option><option>SIM</option><option>Shoes</option><option>Diaries</option><option>Other</option></select></label>
+            <label>Quantity<input asp-for="Quantity" type="number" min="1" max="2147483647" step="1" class="form-control" required /></label>
             <label>Serial Number<input asp-for="SerialNumber" class="form-control" maxlength="100" /></label>
             <label>Issue Date<input asp-for="IssueDate" type="date" class="form-control" max="@DateTime.Today.ToString("yyyy-MM-dd")" required /></label>
             <label class="wide">Notes<textarea asp-for="Notes" class="form-control" maxlength="500" rows="3"></textarea></label>
-            <button type="submit" class="btn btn-primary">Issue Asset</button>
+            <p class="wide">The employee must accept this request before the asset is issued.</p>
+            <button type="submit" class="btn btn-primary">Send Asset Request</button>
         </div>
     </form>
 </section>

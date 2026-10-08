@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Collections.Concurrent;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -21,6 +23,7 @@ namespace VertexERP.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly IShipmentTrackingService _shipmentTrackingService;
         private readonly IPasswordResetSmsService _passwordResetSmsService;
+        private static readonly ConcurrentDictionary<string, (DateTime StartedUtc, int Count)> RecoveryRequestWindows = new();
 
         public MainController(ApplicationDbContext dbContext, IAttendanceProcessingService attendanceProcessingService, BankAccountProtectionService bankProtection, IWebHostEnvironment environment, IShipmentTrackingService shipmentTrackingService, IPasswordResetSmsService passwordResetSmsService)
         {
@@ -129,11 +132,18 @@ namespace VertexERP.Controllers
             HttpContext.Session.SetString("username", user.Username);
             HttpContext.Session.SetString("role", role);
             HttpContext.Session.SetString("fullName", user.FullName);
+            var welcomeGender = user.Employee?.Gender;
+            HttpContext.Session.SetString("showWelcomePopup", "true");
+            HttpContext.Session.SetString("welcomeGender", welcomeGender ?? string.Empty);
             return RedirectToRoleHome(role);
         }
 
         [AllowAnonymous]
-        public IActionResult ForgotPassword() => View(new ForgotPasswordViewModel());
+        public IActionResult ForgotPassword()
+        {
+            ClearPasswordRecoverySession();
+            return View(new ForgotPasswordViewModel());
+        }
 
         [HttpPost]
         [AllowAnonymous]
@@ -141,167 +151,304 @@ namespace VertexERP.Controllers
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
-            var phoneNumber = model.PhoneNumber.Trim();
+            if (!AllowRecoveryRequest("identify", 20, TimeSpan.FromMinutes(15)))
+            {
+                model.StatusMessage = "Please wait a few minutes before trying again.";
+                return View(model);
+            }
+
+            ClearPasswordRecoverySession();
+            var lookup = model.Username.Trim();
+            var normalized = DatabaseInitializer.NormalizeUsername(lookup);
             var users = await _dbContext.AppUsers.Include(item => item.Employee)
-                .Where(item => item.IsActive && item.Employee != null &&
-                    (item.Employee.PhoneNumber == phoneNumber || item.Employee.PhoneNumber == "+91" + phoneNumber || item.Employee.PhoneNumber == "91" + phoneNumber))
+                .Where(item => item.IsActive && item.Employee != null && item.Employee.IsActive &&
+                    (item.NormalizedUsername == normalized || item.Username.ToUpper() == normalized || item.Employee.EmployeeCode.ToLower() == lookup.ToLower()))
                 .Take(2).ToListAsync();
             var user = users.Count == 1 ? users[0] : null;
-
-            // Only an unambiguous, active employee account can receive a reset code.
-            HttpContext.Session.Remove("PasswordResetUserId");
-            HttpContext.Session.Remove("PasswordResetPhoneNumber");
-            HttpContext.Session.Remove("PasswordResetDeadline");
-            HttpContext.Session.Remove("ResetOtpTokenId");
-            HttpContext.Session.Remove("PasswordResetHash");
-            if (!_passwordResetSmsService.IsConfigured)
+            if (user?.Employee is null)
             {
-                ModelState.AddModelError(string.Empty, "SMS password recovery is not configured yet. Please contact HR.");
+                ModelState.AddModelError(string.Empty, "We couldn't continue with those details. Check the Employee ID / Username or contact HR.");
                 return View(model);
             }
-            if (user != null)
+
+            var phone = ToIndianE164(user.Employee.PhoneNumber);
+            var email = user.Employee.Email?.Trim();
+            model.HasSms = phone != null;
+            model.HasEmail = HasDeliverableEmail(email);
+            model.MaskedPhone = phone is null ? null : MaskPhone(phone);
+            model.MaskedEmail = model.HasEmail ? MaskEmail(email!) : null;
+            model.MethodsAvailable = model.HasSms || model.HasEmail;
+            if (!model.MethodsAvailable)
             {
-                var otp = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
-                var tokenId = await _dbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
-                {
-                    // Each retry must reload state rolled back by the previous attempt.
-                    _dbContext.ChangeTracker.Clear();
-                    await using var transaction = await _dbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
-                    var now = DateTime.UtcNow;
-                    var recent = await _dbContext.PasswordResetTokens
-                        .Where(item => item.AppUserId == user.Id && item.CreatedAtUtc > now.AddHours(-1)).ToListAsync();
-                    if (recent.Count >= 5 || recent.Any(item => item.CreatedAtUtc > now.AddMinutes(-1))) return (int?)null;
-                    await _dbContext.PasswordResetTokens.Where(item => item.AppUserId == user.Id && item.UsedAtUtc == null)
-                        .ExecuteUpdateAsync(update => update.SetProperty(item => item.UsedAtUtc, now));
-                    var newToken = new PasswordResetToken
-                    {
-                        AppUserId = user.Id,
-                        OtpHash = PasswordHashService.HashPassword(otp),
-                        CreatedAtUtc = now,
-                        ExpiresAtUtc = now.AddMinutes(5)
-                    };
-                    _dbContext.PasswordResetTokens.Add(newToken);
-                    await _dbContext.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                    return (int?)newToken.Id;
-                });
-                if (!tokenId.HasValue)
-                {
-                    ModelState.AddModelError(string.Empty, "Please wait before requesting another code. Maximum five requests per hour.");
-                    return View(model);
-                }
-                try
-                {
-                    // Sending is deliberately outside the retried transaction: a database
-                    // retry must never send a second SMS.
-                    await _passwordResetSmsService.SendOtpAsync(phoneNumber, otp, HttpContext.RequestAborted);
-                    HttpContext.Session.SetInt32("ResetOtpTokenId", tokenId.Value);
-                }
-                catch
-                {
-                    await _dbContext.PasswordResetTokens.Where(item => item.Id == tokenId.Value)
-                        .ExecuteUpdateAsync(update => update.SetProperty(item => item.UsedAtUtc, DateTime.UtcNow));
-                    ModelState.AddModelError(string.Empty, "We could not send the reset code right now. Please try again later.");
-                    return View(model);
-                }
+                ModelState.AddModelError(string.Empty, "We couldn't continue with those details. Contact HR for assistance.");
+                return View(model);
             }
 
-            TempData["ResetNotice"] = "If this is a registered employee mobile number, a six-digit reset code has been sent. It is valid for 5 minutes.";
-            return RedirectToAction(nameof(VerifyResetOtp), new { phoneNumber });
+            HttpContext.Session.SetInt32("RecoveryUserId", user.Id);
+            return View(model);
         }
 
-        [AllowAnonymous]
-        public IActionResult VerifyResetOtp(string phoneNumber) => View(new VerifyResetOtpViewModel { PhoneNumber = phoneNumber });
-
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> VerifyResetOtp(VerifyResetOtpViewModel model)
+        [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
+        public async Task<IActionResult> BeginEmailOtp()
         {
-            if (!ModelState.IsValid) return View(model);
-            return await _dbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
-            {
-                _dbContext.ChangeTracker.Clear();
-            var phoneNumber = model.PhoneNumber.Trim();
-            await using var transaction = await _dbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
-            var challengeId = HttpContext.Session.GetInt32("ResetOtpTokenId");
-            var token = await _dbContext.PasswordResetTokens.Include(item => item.AppUser).ThenInclude(item => item!.Employee)
-                .Where(item => item.Id == challengeId && item.UsedAtUtc == null && item.ExpiresAtUtc > DateTime.UtcNow && item.FailedAttempts < 5 && item.AppUser!.IsActive && (item.AppUser.Employee!.PhoneNumber == phoneNumber || item.AppUser.Employee.PhoneNumber == "+91" + phoneNumber || item.AppUser.Employee.PhoneNumber == "91" + phoneNumber))
-                .OrderByDescending(item => item.CreatedAtUtc).FirstOrDefaultAsync();
+            var user = await GetRecoveryUserAsync();
+            if (user?.Employee is null) return Json(new { ok = false, message = "Start again from the Employee ID / Username step." });
+            if (!HasDeliverableEmail(user.Employee.Email))
+                return BadRequest(new { ok = false, message = "Email verification is unavailable for this account. Choose SMS or contact HR." });
+            if (!AllowRecoveryRequest($"otp:{user.Id}", 5, TimeSpan.FromHours(1)))
+                return StatusCode(429, new { ok = false, message = "Please wait 60 seconds before requesting another code. The hourly limit is five codes." });
+            var now = DateTime.UtcNow;
+            var sentRecently = await _dbContext.PasswordResetTokens.AnyAsync(item => item.AppUserId == user.Id &&
+                ((item.VerificationMethod == "Email" && item.AppUser!.Employee != null && !item.AppUser.Employee.Email.EndsWith("@import.vertex") && item.CreatedAtUtc > now.AddMinutes(-1)) || item.SmsSentAtUtc > now.AddMinutes(-1)));
+            var recentCount = await _dbContext.PasswordResetTokens.CountAsync(item => item.AppUserId == user.Id &&
+                ((item.VerificationMethod == "Email" && item.AppUser!.Employee != null && !item.AppUser.Employee.Email.EndsWith("@import.vertex") && item.CreatedAtUtc > now.AddHours(-1)) || item.SmsSentAtUtc > now.AddHours(-1)));
+            if (sentRecently || recentCount >= 5)
+                return StatusCode(429, new { ok = false, message = "Please wait 60 seconds before requesting another code. The hourly limit is five codes." });
 
-            if (token == null || !PasswordHashService.VerifyPassword(model.Otp, token.OtpHash))
+            var otp = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
+            await _dbContext.PasswordResetTokens.Where(item => item.AppUserId == user.Id && item.UsedAtUtc == null)
+                .ExecuteUpdateAsync(update => update.SetProperty(item => item.UsedAtUtc, now));
+            var token = new PasswordResetToken
             {
-                if (token != null) { token.FailedAttempts++; await _dbContext.SaveChangesAsync(); await transaction.CommitAsync(); }
-                ModelState.AddModelError(nameof(model.Otp), "The code is invalid or has expired.");
-                return View(model);
-            }
-
-            token.UsedAtUtc = DateTime.UtcNow;
+                AppUserId = user.Id,
+                VerificationMethod = "Email",
+                OtpHash = PasswordHashService.HashPassword(otp),
+                CreatedAtUtc = now,
+                ExpiresAtUtc = now.AddMinutes(5)
+            };
+            _dbContext.PasswordResetTokens.Add(token);
             await _dbContext.SaveChangesAsync();
-            await transaction.CommitAsync();
-            HttpContext.Session.Remove("ResetOtpTokenId");
-            HttpContext.Session.SetString("PasswordResetHash", token.AppUser!.PasswordHash);
-            HttpContext.Session.SetString("PasswordResetDeadline", token.ExpiresAtUtc.ToString("O"));
-            HttpContext.Session.SetInt32("PasswordResetUserId", token.AppUserId);
-            HttpContext.Session.SetString("PasswordResetPhoneNumber", phoneNumber);
-            return RedirectToAction(nameof(ResetPassword));
-            });
+            try
+            {
+                await HttpContext.RequestServices.GetRequiredService<IPasswordResetEmailService>()
+                    .SendOtpAsync(user.Employee.Email, otp, HttpContext.RequestAborted);
+            }
+            catch
+            {
+                token.UsedAtUtc = DateTime.UtcNow;
+                await _dbContext.SaveChangesAsync();
+                return StatusCode(503, new { ok = false, message = "We couldn't send a code right now. Please try again later or use SMS." });
+            }
+            HttpContext.Session.SetInt32("RecoveryChallengeId", token.Id);
+            HttpContext.Session.Remove("PasswordResetGrantTokenId");
+            return Json(new { ok = true, message = $"A code was sent to {MaskEmail(user.Employee.Email)}. It expires in 5 minutes.", expiresInSeconds = 300, resendAfterSeconds = 60 });
         }
 
-        [AllowAnonymous]
-        public IActionResult ResetPassword()
+        [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyEmailOtp(BeginEmailOtpViewModel model)
         {
-            var phoneNumber = HttpContext.Session.GetString("PasswordResetPhoneNumber");
-            return !HasValidPasswordResetGrant() || string.IsNullOrWhiteSpace(phoneNumber) ? RedirectToAction(nameof(ForgotPassword)) : View(new ResetPasswordViewModel { PhoneNumber = phoneNumber });
+            var tokenId = HttpContext.Session.GetInt32("RecoveryChallengeId");
+            if (!ModelState.IsValid || !tokenId.HasValue)
+                return BadRequest(new { ok = false, message = "The code is invalid or has expired. Request a new code." });
+            var token = await _dbContext.PasswordResetTokens.Include(item => item.AppUser)
+                .FirstOrDefaultAsync(item => item.Id == tokenId && item.VerificationMethod == "Email" && item.UsedAtUtc == null && item.VerifiedAtUtc == null && item.ExpiresAtUtc > DateTime.UtcNow && item.FailedAttempts < 5 && item.AppUserId == HttpContext.Session.GetInt32("RecoveryUserId") && item.AppUser!.IsActive);
+            if (token is null) return BadRequest(new { ok = false, message = "The code is invalid or has expired." });
+            if (!PasswordHashService.VerifyPassword(model.Otp, token.OtpHash))
+            {
+                await _dbContext.PasswordResetTokens.Where(item => item.Id == token.Id && item.VerifiedAtUtc == null && item.UsedAtUtc == null && item.ExpiresAtUtc > DateTime.UtcNow && item.FailedAttempts < 5)
+                    .ExecuteUpdateAsync(update => update.SetProperty(item => item.FailedAttempts, item => item.FailedAttempts + 1));
+                return BadRequest(new { ok = false, message = "The code is invalid or has expired." });
+            }
+            var verifiedAt = DateTime.UtcNow;
+            var markedVerified = await _dbContext.PasswordResetTokens.Where(item => item.Id == token.Id && item.VerifiedAtUtc == null && item.UsedAtUtc == null && item.ExpiresAtUtc > verifiedAt && item.FailedAttempts < 5)
+                .ExecuteUpdateAsync(update => update.SetProperty(item => item.VerifiedAtUtc, verifiedAt));
+            if (markedVerified != 1) return BadRequest(new { ok = false, message = "The code is invalid or has expired." });
+            HttpContext.Session.SetInt32("PasswordResetGrantTokenId", token.Id);
+            HttpContext.Session.Remove("RecoveryChallengeId");
+            HttpContext.Session.Remove("RecoveryUserId");
+            return Json(new { ok = true, redirectUrl = Url.Action(nameof(ResetPassword)) });
         }
 
-        [HttpPost]
+        [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
+        public async Task<IActionResult> BeginSmsOtp()
+        {
+            var user = await GetRecoveryUserAsync();
+            if (user?.Employee is null) return Json(new { ok = false, message = "Start again from the Employee ID / Username step." });
+            var phone = ToIndianE164(user.Employee.PhoneNumber);
+            if (phone is null) return BadRequest(new { ok = false, message = "SMS verification is unavailable for this account." });
+            if (!AllowRecoveryRequest($"sms-start:{user.Id}", 20, TimeSpan.FromMinutes(15)))
+                return StatusCode(429, new { ok = false, message = "Too many verification attempts. Please try again later." });
+            var now = DateTime.UtcNow;
+            var sentRecently = await _dbContext.PasswordResetTokens.AnyAsync(item => item.AppUserId == user.Id &&
+                ((item.VerificationMethod == "Email" && item.AppUser!.Employee != null && !item.AppUser.Employee.Email.EndsWith("@import.vertex") && item.CreatedAtUtc > now.AddMinutes(-1)) || item.SmsSentAtUtc > now.AddMinutes(-1)));
+            var recentCount = await _dbContext.PasswordResetTokens.CountAsync(item => item.AppUserId == user.Id &&
+                ((item.VerificationMethod == "Email" && item.AppUser!.Employee != null && !item.AppUser.Employee.Email.EndsWith("@import.vertex") && item.CreatedAtUtc > now.AddHours(-1)) || item.SmsSentAtUtc > now.AddHours(-1)));
+            if (sentRecently || recentCount >= 5)
+                return StatusCode(429, new { ok = false, message = "Please wait 60 seconds before requesting another code. The hourly limit is five codes." });
+            await _dbContext.PasswordResetTokens.Where(item => item.AppUserId == user.Id && item.UsedAtUtc == null)
+                .ExecuteUpdateAsync(update => update.SetProperty(item => item.UsedAtUtc, now));
+            var token = new PasswordResetToken { AppUserId = user.Id, VerificationMethod = "Sms", OtpHash = string.Empty, CreatedAtUtc = now, ExpiresAtUtc = now.AddMinutes(5) };
+            _dbContext.PasswordResetTokens.Add(token);
+            await _dbContext.SaveChangesAsync();
+            HttpContext.Session.SetInt32("RecoveryChallengeId", token.Id);
+            HttpContext.Session.Remove("PasswordResetGrantTokenId");
+            return Json(new { ok = true, phoneNumber = phone, resendAfterSeconds = 60 });
+        }
+
+        [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkSmsSent()
+        {
+            var tokenId = HttpContext.Session.GetInt32("RecoveryChallengeId");
+            var userId = HttpContext.Session.GetInt32("RecoveryUserId");
+            if (!tokenId.HasValue || !userId.HasValue)
+                return BadRequest(new { ok = false, message = "The verification session has expired. Start again." });
+            var token = await _dbContext.PasswordResetTokens.FirstOrDefaultAsync(item => item.Id == tokenId && item.AppUserId == userId &&
+                item.VerificationMethod == "Sms" && item.UsedAtUtc == null && item.VerifiedAtUtc == null && item.ExpiresAtUtc > DateTime.UtcNow);
+            if (token is null) return BadRequest(new { ok = false, message = "The verification session has expired. Start again." });
+            if (token.SmsSentAtUtc.HasValue) return Json(new { ok = true });
+
+            var now = DateTime.UtcNow;
+            var recentCount = await _dbContext.PasswordResetTokens.CountAsync(item => item.AppUserId == userId &&
+                ((item.VerificationMethod == "Email" && item.AppUser!.Employee != null && !item.AppUser.Employee.Email.EndsWith("@import.vertex") && item.CreatedAtUtc > now.AddHours(-1)) || item.SmsSentAtUtc > now.AddHours(-1)));
+            if (recentCount >= 5)
+            {
+                token.UsedAtUtc = now;
+                await _dbContext.SaveChangesAsync();
+                return StatusCode(429, new { ok = false, message = "The hourly verification limit was reached. Please try again later." });
+            }
+            token.SmsSentAtUtc = now;
+            await _dbContext.SaveChangesAsync();
+            return Json(new { ok = true });
+        }
+
+        [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelSmsOtp()
+        {
+            var tokenId = HttpContext.Session.GetInt32("RecoveryChallengeId");
+            if (tokenId.HasValue)
+            {
+                await _dbContext.PasswordResetTokens.Where(item => item.Id == tokenId && item.VerificationMethod == "Sms" && item.SmsSentAtUtc == null && item.UsedAtUtc == null)
+                    .ExecuteUpdateAsync(update => update.SetProperty(item => item.UsedAtUtc, DateTime.UtcNow));
+                HttpContext.Session.Remove("RecoveryChallengeId");
+            }
+            return Json(new { ok = true });
+        }
+
+        [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifySmsOtp([FromBody] FirebaseTokenRequest request)
+        {
+            var tokenId = HttpContext.Session.GetInt32("RecoveryChallengeId");
+            var userId = HttpContext.Session.GetInt32("RecoveryUserId");
+            if (string.IsNullOrWhiteSpace(request.IdToken) || !tokenId.HasValue || !userId.HasValue)
+                return BadRequest(new { ok = false, message = "The verification session has expired. Start again." });
+            var token = await _dbContext.PasswordResetTokens.Include(item => item.AppUser).ThenInclude(item => item!.Employee)
+                .FirstOrDefaultAsync(item => item.Id == tokenId && item.AppUserId == userId && item.VerificationMethod == "Sms" && item.SmsSentAtUtc != null && item.UsedAtUtc == null && item.VerifiedAtUtc == null && item.ExpiresAtUtc > DateTime.UtcNow && item.AppUser!.IsActive && item.AppUser.Employee!.IsActive);
+            if (token?.AppUser?.Employee is null) return BadRequest(new { ok = false, message = "The verification session has expired. Start again." });
+            var identity = await HttpContext.RequestServices.GetRequiredService<IFirebaseIdTokenVerifier>()
+                .VerifyAsync(request.IdToken, HttpContext.RequestAborted);
+            var registeredPhone = ToIndianE164(token.AppUser.Employee.PhoneNumber);
+            if (identity is null || registeredPhone is null || !string.Equals(ToIndianE164(identity.PhoneNumber), registeredPhone, StringComparison.Ordinal))
+                return BadRequest(new { ok = false, message = "Phone verification failed. Check the code and try again." });
+            token.VerifiedAtUtc = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync();
+            HttpContext.Session.SetInt32("PasswordResetGrantTokenId", token.Id);
+            HttpContext.Session.Remove("RecoveryChallengeId");
+            HttpContext.Session.Remove("RecoveryUserId");
+            return Json(new { ok = true, redirectUrl = Url.Action(nameof(ResetPassword)) });
+        }
+
         [AllowAnonymous]
-        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword() => await HasValidPasswordResetGrantAsync()
+            ? View(new ResetPasswordViewModel()) : RedirectToAction(nameof(ForgotPassword));
+
+        [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
-            var resetUserId = HttpContext.Session.GetInt32("PasswordResetUserId");
-            var resetPhoneNumber = HttpContext.Session.GetString("PasswordResetPhoneNumber");
             if (!ModelState.IsValid) return View(model);
-            return await _dbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
-            {
-                _dbContext.ChangeTracker.Clear();
-            if (!HasValidPasswordResetGrant() || !resetUserId.HasValue || !string.Equals(model.PhoneNumber, resetPhoneNumber, StringComparison.OrdinalIgnoreCase)) return RedirectToAction(nameof(ForgotPassword));
-            var user = await _dbContext.AppUsers.FirstOrDefaultAsync(item => item.Id == resetUserId && item.IsActive);
-            if (user == null) return RedirectToAction(nameof(ForgotPassword));
-
-            var expectedHash = HttpContext.Session.GetString("PasswordResetHash");
+            var grantId = HttpContext.Session.GetInt32("PasswordResetGrantTokenId");
+            if (!grantId.HasValue) return RedirectToAction(nameof(ForgotPassword));
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            var now = DateTime.UtcNow;
+            var grant = await _dbContext.PasswordResetTokens.Include(item => item.AppUser)
+                .FirstOrDefaultAsync(item => item.Id == grantId && item.UsedAtUtc == null && item.VerifiedAtUtc != null && item.ExpiresAtUtc > now && item.AppUser!.IsActive);
+            if (grant?.AppUser is null) return RedirectToAction(nameof(ForgotPassword));
+            var consumed = await _dbContext.PasswordResetTokens.Where(item => item.Id == grant.Id && item.UsedAtUtc == null && item.VerifiedAtUtc != null && item.ExpiresAtUtc > now)
+                .ExecuteUpdateAsync(update => update.SetProperty(item => item.UsedAtUtc, now));
+            if (consumed != 1) return RedirectToAction(nameof(ForgotPassword));
             var newHash = PasswordHashService.HashPassword(model.NewPassword);
-            var updated = await _dbContext.AppUsers
-                .Where(item => item.Id == user.Id && item.IsActive && item.PasswordHash == expectedHash)
+            var updated = await _dbContext.AppUsers.Where(item => item.Id == grant.AppUserId && item.IsActive)
                 .ExecuteUpdateAsync(update => update.SetProperty(item => item.PasswordHash, newHash)
-                    .SetProperty(item => item.MustChangePassword, false));
+                    .SetProperty(item => item.MustChangePassword, false)
+                    .SetProperty(item => item.PasswordChangedAtUtc, now));
             if (updated != 1) return RedirectToAction(nameof(ForgotPassword));
-            _dbContext.AuditLogs.Add(AuditLogFactory.CreateEvent("AppUser", "Account password reset", $"Account #{user.Id} · Password reset completed", new ClaimsPrincipal(new ClaimsIdentity(new[]
+            await _dbContext.PasswordResetTokens.Where(item => item.AppUserId == grant.AppUserId && item.UsedAtUtc == null)
+                .ExecuteUpdateAsync(update => update.SetProperty(item => item.UsedAtUtc, now));
+            _dbContext.AuditLogs.Add(AuditLogFactory.CreateEvent("AppUser", "Account password reset", $"Account #{grant.AppUserId} · Password reset completed", new ClaimsPrincipal(new ClaimsIdentity(new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.NameIdentifier, grant.AppUserId.ToString()),
+                new Claim(ClaimTypes.Name, grant.AppUser.Username),
+                new Claim(ClaimTypes.Role, grant.AppUser.Role)
             }, "PasswordReset"))));
             await _dbContext.SaveChangesAsync();
-            await _dbContext.PasswordResetTokens.Where(item => item.AppUserId == user.Id && item.UsedAtUtc == null)
-                .ExecuteUpdateAsync(update => update.SetProperty(item => item.UsedAtUtc, DateTime.UtcNow));
             await transaction.CommitAsync();
-            HttpContext.Session.Remove("PasswordResetHash");
-            HttpContext.Session.Remove("PasswordResetUserId");
-            HttpContext.Session.Remove("PasswordResetPhoneNumber");
-            HttpContext.Session.Remove("PasswordResetDeadline");
+            ClearPasswordRecoverySession();
             TempData["LoginMessage"] = "Password reset successfully. Please sign in.";
             return RedirectToAction(nameof(Login));
-            });
         }
 
-        private bool HasValidPasswordResetGrant() =>
-            HttpContext.Session.GetInt32("PasswordResetUserId").HasValue &&
-            !string.IsNullOrWhiteSpace(HttpContext.Session.GetString("PasswordResetHash")) &&
-            DateTime.TryParse(HttpContext.Session.GetString("PasswordResetDeadline"), null,
-                System.Globalization.DateTimeStyles.RoundtripKind, out var deadline) && deadline > DateTime.UtcNow;
+        private async Task<bool> HasValidPasswordResetGrantAsync()
+        {
+            var grantId = HttpContext.Session.GetInt32("PasswordResetGrantTokenId");
+            return grantId.HasValue && await _dbContext.PasswordResetTokens.AnyAsync(item => item.Id == grantId && item.UsedAtUtc == null && item.VerifiedAtUtc != null && item.ExpiresAtUtc > DateTime.UtcNow && item.AppUser!.IsActive);
+        }
+
+        private async Task<AppUser?> GetRecoveryUserAsync()
+        {
+            var userId = HttpContext.Session.GetInt32("RecoveryUserId");
+            return userId.HasValue ? await _dbContext.AppUsers.Include(item => item.Employee)
+                .FirstOrDefaultAsync(item => item.Id == userId && item.IsActive && item.Employee != null && item.Employee.IsActive) : null;
+        }
+
+        private void ClearPasswordRecoverySession()
+        {
+            HttpContext.Session.Remove("RecoveryUserId");
+            HttpContext.Session.Remove("RecoveryChallengeId");
+            HttpContext.Session.Remove("PasswordResetGrantTokenId");
+            HttpContext.Session.Remove("ResetOtpTokenId");
+            HttpContext.Session.Remove("PasswordResetHash");
+        }
+
+        private bool AllowRecoveryRequest(string key, int maximum, TimeSpan period)
+        {
+            var ip = HttpContext.Connection.RemoteIpAddress?.MapToIPv6().ToString() ?? "unknown";
+            var now = DateTime.UtcNow;
+            var bucket = (ip + ":" + key, period);
+            var item = RecoveryRequestWindows.AddOrUpdate(bucket.Item1,
+                _ => (now, 1),
+                (_, current) => now - current.StartedUtc >= period ? (now, 1) : (current.StartedUtc, current.Count + 1));
+            if (RecoveryRequestWindows.Count > 10_000)
+                foreach (var entry in RecoveryRequestWindows)
+                    if (now - entry.Value.StartedUtc > TimeSpan.FromHours(2)) RecoveryRequestWindows.TryRemove(entry.Key, out _);
+            return item.Count <= maximum;
+        }
+
+        private static string? ToIndianE164(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return null;
+            var digits = new string(value.Where(char.IsDigit).ToArray());
+            if (digits.Length == 10) return "+91" + digits;
+            if (digits.Length == 12 && digits.StartsWith("91", StringComparison.Ordinal)) return "+" + digits;
+            if (digits.Length == 11 && digits.StartsWith("0", StringComparison.Ordinal)) return "+91" + digits[1..];
+            if (digits.Length == 14 && digits.StartsWith("0091", StringComparison.Ordinal)) return "+" + digits[2..];
+            return null;
+        }
+
+        private static string MaskPhone(string e164) => "******" + e164[^4..];
+
+        private static string MaskEmail(string email)
+        {
+            var parts = email.Split('@', 2);
+            if (parts.Length != 2) return "***";
+            var local = parts[0];
+            return (local.Length <= 3 ? local[..1] : local[..3]) + "****@" + parts[1];
+        }
+
+        private static bool HasDeliverableEmail(string? email) =>
+            !string.IsNullOrWhiteSpace(email) &&
+            !email.EndsWith("@import.vertex", StringComparison.OrdinalIgnoreCase) &&
+            new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(email);
+
+        public sealed class FirebaseTokenRequest { public string IdToken { get; set; } = string.Empty; }
 
         [HttpGet]
         public IActionResult ChangePassword() => View(new ChangePasswordViewModel());
@@ -460,10 +607,12 @@ namespace VertexERP.Controllers
         [Authorize(Roles = "Admin,HR")]
         public async Task<IActionResult> Dashboard()
         {
-            var today = DateTime.Today;
+            var today = FieldAttendanceClock.Now.Date;
             var tomorrow = today.AddDays(1);
             var weekStart = today.AddDays(-(((int)today.DayOfWeek + 6) % 7));
-            var employees = await _dbContext.Employees.AsNoTracking().ToListAsync();
+            var employees = await _dbContext.Employees.AsNoTracking()
+                .Where(employee => employee.IsActive)
+                .ToListAsync();
             var departments = await _dbContext.Departments.AsNoTracking()
                 .Where(department => department.IsActive)
                 .OrderBy(department => department.DepartmentName)
@@ -475,11 +624,14 @@ namespace VertexERP.Controllers
                 .Where(log => log.EmployeeId != null && log.PunchTime >= weekStart && log.PunchTime < tomorrow)
                 .ToListAsync();
             var tasks = await _dbContext.WorkTasks.AsNoTracking().ToListAsync();
+            var activeEmployeeIds = employees.Select(employee => employee.Id).ToHashSet();
             var presentIds = todayLogs.Where(log => log.EmployeeId.HasValue).Select(log => log.EmployeeId!.Value).Distinct().ToHashSet();
             var onLeaveIds = (await _dbContext.LeaveRequests.AsNoTracking()
                 .Where(request => request.Status == "Approved" && request.FromDate <= DateOnly.FromDateTime(today) && request.ToDate >= DateOnly.FromDateTime(today))
                 .Select(request => request.EmployeeId).Distinct().ToListAsync()).ToHashSet();
-            var lateCount = todayLogs.Where(log => log.EmployeeId.HasValue)
+            presentIds.IntersectWith(activeEmployeeIds);
+            onLeaveIds.IntersectWith(activeEmployeeIds);
+            var lateCount = todayLogs.Where(log => log.EmployeeId.HasValue && activeEmployeeIds.Contains(log.EmployeeId.Value))
                 .GroupBy(log => log.EmployeeId!.Value)
                 .Count(group => group.Min(log => log.PunchTime).TimeOfDay > new TimeSpan(10, 0, 0));
             var taskHealth = TaskHealthSummary.From(tasks, DateOnly.FromDateTime(today));
@@ -487,10 +639,11 @@ namespace VertexERP.Controllers
             var model = new DashboardViewModel
             {
                 TotalWorkforce = employees.Count,
-                ActiveWorkforce = employees.Count(employee => employee.IsActive),
+                ActiveWorkforce = employees.Count,
                 PresentToday = presentIds.Count,
                 LateToday = lateCount,
-                AbsentToday = AttendanceRules.IsWeeklyOff(DateOnly.FromDateTime(today)) ? 0 : employees.Count(employee => employee.IsActive && !presentIds.Contains(employee.Id) && !onLeaveIds.Contains(employee.Id)),
+                OnLeaveToday = employees.Count(employee => onLeaveIds.Contains(employee.Id)),
+                AbsentToday = AttendanceRules.IsWeeklyOff(DateOnly.FromDateTime(today)) ? 0 : employees.Count(employee => !presentIds.Contains(employee.Id) && !onLeaveIds.Contains(employee.Id)),
                 OpenTasks = taskHealth.OpenTasks,
                 OverdueTasks = taskHealth.OverdueTasks,
                 CompletedTasks = taskHealth.CompletedTasks,
@@ -501,10 +654,68 @@ namespace VertexERP.Controllers
                     department.DepartmentName,
                     employees.Count(employee => employee.DepartmentId == department.Id))).ToList(),
                 WeeklyAttendance = Enumerable.Range(0, 6).Select(offset => weekStart.AddDays(offset))
-                    .Select(day => new DashboardDayMetric(day.ToString("ddd"), weekLogs.Where(log => log.PunchTime.Date == day.Date).Select(log => log.EmployeeId).Distinct().Count())).ToList(),
+                    .Select(day => new DashboardDayMetric(day.ToString("ddd"), weekLogs.Where(log => log.PunchTime.Date == day.Date && log.EmployeeId.HasValue && activeEmployeeIds.Contains(log.EmployeeId.Value)).Select(log => log.EmployeeId).Distinct().Count())).ToList(),
                 RecentActivity = Array.Empty<DashboardActivityItem>()
             };
             return View(model);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin,HR")]
+        public async Task<IActionResult> DashboardAttendance(string status, CancellationToken cancellationToken)
+        {
+            var normalizedStatus = status?.Trim();
+            if (normalizedStatus is not ("Present" or "Absent" or "Late" or "Leave"))
+                return BadRequest();
+
+            var today = FieldAttendanceClock.Now.Date;
+            var tomorrow = today.AddDays(1);
+            var todayDate = DateOnly.FromDateTime(today);
+            var logs = await _dbContext.AttendanceLogs.AsNoTracking()
+                .Where(log => log.EmployeeId != null && log.PunchTime >= today && log.PunchTime < tomorrow)
+                .OrderBy(log => log.PunchTime)
+                .ToListAsync(cancellationToken);
+            var firstPunchByEmployee = logs.GroupBy(log => log.EmployeeId!.Value)
+                .ToDictionary(group => group.Key, group => group.Min(log => log.PunchTime));
+            var approvedLeaveRequests = await _dbContext.LeaveRequests.AsNoTracking()
+                .Where(request => request.Status == "Approved" && request.FromDate <= todayDate && request.ToDate >= todayDate)
+                .ToListAsync(cancellationToken);
+            var employees = await _dbContext.Employees.AsNoTracking()
+                .Where(employee => employee.IsActive)
+                .OrderBy(employee => employee.FirstName).ThenBy(employee => employee.LastName)
+                .ToListAsync(cancellationToken);
+            var activeEmployeeIds = employees.Select(employee => employee.Id).ToHashSet();
+            var leaveEmployeeIds = approvedLeaveRequests.Select(request => request.EmployeeId).Where(activeEmployeeIds.Contains).ToHashSet();
+            var presentEmployeeIds = firstPunchByEmployee.Keys.Where(activeEmployeeIds.Contains).ToHashSet();
+
+            IEnumerable<Employee> filteredEmployees = normalizedStatus switch
+            {
+                "Present" => employees.Where(employee => presentEmployeeIds.Contains(employee.Id)),
+                "Absent" => AttendanceRules.IsWeeklyOff(todayDate)
+                    ? Enumerable.Empty<Employee>()
+                    : employees.Where(employee => employee.IsActive && !presentEmployeeIds.Contains(employee.Id) && !leaveEmployeeIds.Contains(employee.Id)),
+                "Late" => employees.Where(employee => firstPunchByEmployee.TryGetValue(employee.Id, out var firstPunch)
+                    && firstPunch.TimeOfDay > new TimeSpan(10, 0, 0)),
+                "Leave" => employees.Where(employee => employee.IsActive && leaveEmployeeIds.Contains(employee.Id)),
+                _ => Enumerable.Empty<Employee>()
+            };
+
+            var leaveTypes = approvedLeaveRequests.GroupBy(request => request.EmployeeId)
+                .ToDictionary(group => group.Key, group => string.Join(", ", group.Select(request => request.LeaveType).Distinct()));
+            var rows = filteredEmployees.Select(employee =>
+            {
+                DateTime? firstPunch = firstPunchByEmployee.TryGetValue(employee.Id, out var punch) ? punch : null;
+                return new DashboardAttendanceEmployeeRow(
+                    employee.Id,
+                    employee.EmployeeCode,
+                    employee.FullName,
+                    employee.Department,
+                    employee.Designation,
+                    firstPunch,
+                    leaveTypes.GetValueOrDefault(employee.Id));
+            }).ToList();
+
+            return View(new DashboardAttendanceListViewModel { Status = normalizedStatus, Date = todayDate, Employees = rows });
         }
 
         [HttpGet]
@@ -561,8 +772,8 @@ namespace VertexERP.Controllers
         {
             var employee = await LoadLoggedInEmployeeAsync();
             if (employee == null) return RedirectToAction(nameof(AccessDenied));
-            var now = DateTime.Today;
-            var start = now.AddDays(-29);
+            var now = FieldAttendanceClock.Now.Date;
+            var start = new DateTime(now.Year, now.Month, 1);
             var end = now.AddDays(1);
             var logs = await _dbContext.AttendanceLogs.AsNoTracking()
                 .Where(log => log.EmployeeId == employee.Id && log.PunchTime >= start && log.PunchTime < end)
@@ -848,7 +1059,8 @@ namespace VertexERP.Controllers
         {
             var employee = await LoadLoggedInEmployeeAsync();
             if (employee == null) return RedirectToAction(nameof(AccessDenied));
-            var tickets = await _dbContext.QueryTickets.AsNoTracking().Where(ticket => ticket.EmployeeId == employee.Id).OrderByDescending(ticket => ticket.CreatedAtUtc).ToListAsync();
+            var tickets = await _dbContext.QueryTickets.AsNoTracking().Include(ticket => ticket.ResolvedByUser)
+                .Where(ticket => ticket.EmployeeId == employee.Id).OrderByDescending(ticket => ticket.CreatedAtUtc).ToListAsync();
             return View(new EmployeeQueryViewModel { Employee = employee, Tickets = tickets });
         }
 
@@ -938,51 +1150,6 @@ namespace VertexERP.Controllers
             });
         }
 
-        [HttpPost]
-        [Authorize(Roles = "Admin,HR")]
-        public IActionResult AskAssistant([FromBody] AssistantRequest request)
-        {
-            var message = (request?.Message ?? string.Empty).Trim().ToLowerInvariant();
-            var totalUsers = _dbContext.AppUsers.Count(user => user.IsActive);
-            var admins = _dbContext.AppUsers.Count(user => user.IsActive && user.Role == "Admin");
-            var supervisors = _dbContext.AppUsers.Count(user => user.IsActive && user.Role == "Supervisor");
-            var employees = _dbContext.AppUsers.Count(user => user.IsActive && user.Role == "User");
-
-            var reply = "Hello. I am the Vertex AI assistant. You can ask me for today's company report, active login users, attendance summary, or meeting status.";
-
-            if (message.Contains("report") ||
-                message.Contains("attendance") ||
-                message.Contains("present") ||
-                message.Contains("company") ||
-                message.Contains("today") ||
-                message.Contains("aaj") ||
-                message.Contains("batao"))
-            {
-                reply = "Live attendance and company reporting data is not available yet. " +
-                    $"The system currently has {totalUsers} active login users configured: {admins} admin, {supervisors} supervisor, and {employees} employee users.";
-            }
-            else if (message.Contains("user") ||
-                message.Contains("login") ||
-                message.Contains("employee"))
-            {
-                reply = $"The ERP login database currently has {totalUsers} active users. Role split: {admins} admin, {supervisors} supervisor, and {employees} employee users.";
-            }
-            else if (message.Contains("meeting") ||
-                message.Contains("calendar") ||
-                message.Contains("google") ||
-                message.Contains("baare"))
-            {
-                reply = "Google Calendar is not connected yet. In the next phase, after OAuth setup, I will be able to read real calendar meetings and summarize them here.";
-            }
-            else if (message.Contains("hello") ||
-                message.Contains("hi") ||
-                message.Contains("good morning"))
-            {
-                reply = "Hello, good morning. The Vertex ERP assistant is ready. You can ask about company reports, attendance, login users, or calendar status.";
-            }
-
-            return Json(new { reply });
-        }
 
         [Authorize(Roles = "Employee,User,Admin,HR,Manager")]
         public async Task<IActionResult> Employees(int? id)
@@ -1204,6 +1371,7 @@ namespace VertexERP.Controllers
         [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Admin,HR,Manager")]
         public async Task<IActionResult> AddAttendance(ManualAttendanceViewModel model)
         {
+            if (string.IsNullOrWhiteSpace(model.Remarks) || model.Remarks.Length > 300) ModelState.AddModelError(nameof(model.Remarks), "Enter a reason of up to 300 characters.");
             if (string.IsNullOrWhiteSpace(model.Department)) ModelState.AddModelError(nameof(model.Department), "Select a department.");
             if (!model.EmployeeId.HasValue) ModelState.AddModelError(nameof(model.EmployeeId), "Select an employee.");
             if (!model.CheckInTime.HasValue) ModelState.AddModelError(nameof(model.CheckInTime), "Enter check-in time.");
@@ -1238,31 +1406,22 @@ namespace VertexERP.Controllers
 
             if (!ModelState.IsValid) return View(await BuildManualAttendanceViewModelAsync(model));
 
-            var device = await _dbContext.BiometricDevices.FirstOrDefaultAsync(item => item.SerialNumber == "MANUAL-ENTRY");
-            if (device == null)
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var actorUserId)) return Forbid();
+            _dbContext.AttendanceRequests.Add(new AttendanceRequest
             {
-                device = new BiometricDevice { Name = "ERP Manual Attendance", SerialNumber = "MANUAL-ENTRY", Model = "ERP", CommunicationMode = "Manual", Notes = "System device used for approved manual attendance entries." };
-                _dbContext.BiometricDevices.Add(device);
-                await _dbContext.SaveChangesAsync();
+                EmployeeId = employee!.Id, AttendanceDate = model.AttendanceDate,
+                CheckInTime = model.CheckInTime!.Value, CheckOutTime = model.CheckOutTime,
+                Reason = model.Remarks!.Trim(), RequestedByUserId = actorUserId
+            });
+            try { await _dbContext.SaveChangesAsync(); }
+            catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException { SqlState: "23505" })
+            {
+                ModelState.AddModelError(string.Empty, "A pending request already exists for this employee and date.");
+                return View(await BuildManualAttendanceViewModelAsync(model));
             }
-
-            var actorUserId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedActorId) ? parsedActorId : 0;
-            var actor = await _dbContext.AppUsers.AsNoTracking().Where(user => user.Id == actorUserId).Select(user => user.FullName).FirstOrDefaultAsync()
-                ?? User.FindFirstValue(ClaimTypes.Name) ?? User.Identity?.Name ?? "Authorized user";
-            var checkIn = model.AttendanceDate.ToDateTime(model.CheckInTime!.Value);
-            var raw = $"MANUAL|Employee:{employee!.EmployeeCode}|Department:{employee.Department}|MarkedBy:{actor}|Remarks:{CleanProfileValue(model.Remarks)}";
-            var logs = new List<AttendanceLog>
-            {
-                new() { BiometricDeviceId = device.Id, EmployeeId = employee.Id, DeviceUserId = employee.EmployeeCode, PunchTime = checkIn, PunchState = "Check In", VerificationMode = "Manual Approved", UniqueHash = Guid.NewGuid().ToString("N"), RawPayload = raw }
-            };
-            if (model.CheckOutTime.HasValue)
-                logs.Add(new AttendanceLog { BiometricDeviceId = device.Id, EmployeeId = employee.Id, DeviceUserId = employee.EmployeeCode, PunchTime = model.AttendanceDate.ToDateTime(model.CheckOutTime.Value), PunchState = "Check Out", VerificationMode = "Manual Approved", UniqueHash = Guid.NewGuid().ToString("N"), RawPayload = raw });
-            _dbContext.AttendanceLogs.AddRange(logs);
-            await _dbContext.SaveChangesAsync();
-            TempData["AttendanceMessage"] = $"Attendance marked successfully for {employee.FullName}.";
-            return RedirectToAction(nameof(Attendence), new { filterDate = model.AttendanceDate.ToString("yyyy-MM-dd"), searchQuery = employee.EmployeeCode });
+            TempData["AttendanceRequestMessage"] = "Request sent to Admin. Attendance will be marked only after approval.";
+            return RedirectToAction("Index", "AttendanceRequests");
         }
-
         private async Task<ManualAttendanceViewModel> BuildManualAttendanceViewModelAsync(ManualAttendanceViewModel model)
         {
             var employeeQuery = _dbContext.Employees.AsNoTracking().Where(employee => employee.IsActive);
@@ -1276,30 +1435,6 @@ namespace VertexERP.Controllers
             model.Employees = await employeeQuery.OrderBy(employee => employee.FullName).ToListAsync();
             model.Departments = model.Employees.Select(employee => employee.Department).Where(name => !string.IsNullOrWhiteSpace(name)).Distinct(StringComparer.OrdinalIgnoreCase).Order().ToList();
             return model;
-        }
-
-        [Authorize(Roles = "Admin")]
-        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-        public async Task<IActionResult> Reports(string? reportType, int? departmentId, int? employeeId, int? managerId, DateOnly? date, string? month, DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken, int? projectId = null, string? status = null)
-        {
-            if (!string.IsNullOrEmpty(reportType) && !AdminReportTypes.All.Any(item => item.Value == reportType)) return BadRequest("Select a valid report type.");
-            try { return View(await AdminReportBuilder.BuildAsync(_dbContext, reportType, departmentId, employeeId, managerId, date, month, fromDate, toDate, cancellationToken, projectId, status)); }
-            catch (ArgumentException ex) { return BadRequest(ex.Message); }
-        }
-
-        [HttpGet]
-        [Authorize(Roles = "Admin")]
-        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-        public async Task<IActionResult> DownloadAdminReport(string reportType, int? departmentId, int? employeeId, int? managerId, DateOnly? date, string? month, DateOnly? fromDate, DateOnly? toDate, CancellationToken cancellationToken, int? projectId = null, string? status = null, string format = "pdf")
-        {
-            if (!AdminReportTypes.All.Any(item => item.Value == reportType)) return BadRequest("Select a valid report type.");
-            if (format != "pdf" && format != "xlsx") return BadRequest("Select PDF or Excel.");
-            AdminReportViewModel report;
-            try { report = await AdminReportBuilder.BuildAsync(_dbContext, reportType, departmentId, employeeId, managerId, date, month, fromDate, toDate, cancellationToken, projectId, status); }
-            catch (ArgumentException ex) { return BadRequest(ex.Message); }
-            if (format == "xlsx") return File(AdminReportExcelService.Create(report), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"{reportType}-{DateTime.UtcNow:yyyyMMdd-HHmmss}.xlsx");
-            var fileName = $"{reportType}-{DateTime.Now:yyyyMMdd-HHmmss}.pdf";
-            return File(AdminReportPdfService.Create(report), "application/pdf", fileName);
         }
 
         [Authorize(Roles = "Admin,HR")]
@@ -1484,6 +1619,7 @@ namespace VertexERP.Controllers
         [Authorize(Roles = "Employee,User,Admin,HR")]
         public IActionResult LeaveManagement()
         {
+            if (User.IsInRole("HR") || User.IsInRole("Admin")) return RedirectToAction("Index", "AttendanceRequests");
             return View();
         }
 
@@ -1668,8 +1804,7 @@ namespace VertexERP.Controllers
             ticket.Status = status is "Resolved" or "Closed" ? status : "In Progress";
             ticket.Resolution = CleanProfileValue(resolution);
             ticket.UpdatedAtUtc = DateTime.UtcNow;
-            ticket.ResolvedByUserId = ticket.Status is "Resolved" or "Closed"
-                && int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId) ? userId : null;
+            ticket.ResolvedByUserId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId) ? userId : null;
             await _dbContext.SaveChangesAsync();
             return RedirectToAction(User.IsInRole("Manager") ? nameof(ManagerQueries) : nameof(WorkflowManagement));
         }
@@ -1704,7 +1839,7 @@ namespace VertexERP.Controllers
         {
             var leaves = await _dbContext.LeaveRequests.AsNoTracking().Include(item => item.Employee).Include(item => item.AssignedApproverEmployee)
                 .Where(item => item.Status == "Pending").OrderByDescending(item => item.AppliedAtUtc).ToListAsync();
-            var tickets = await _dbContext.QueryTickets.AsNoTracking().Include(item => item.Employee).Include(item => item.ReportingManager)
+            var tickets = await _dbContext.QueryTickets.AsNoTracking().Include(item => item.Employee).Include(item => item.ReportingManager).Include(item => item.ResolvedByUser)
                 .Where(item => item.Status != "Resolved" && item.Status != "Closed")
                 .OrderByDescending(item => item.CreatedAtUtc).ToListAsync();
             return View(new WorkflowManagementViewModel { LeaveRequests = leaves, QueryTickets = tickets });

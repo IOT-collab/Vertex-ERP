@@ -10,9 +10,9 @@
 <section class="clear-workflow-page">
     <header class="clear-page-header">
         <div>
-            <span class="clear-kicker">HR WORKSPACE</span>
+            <span class="clear-kicker">@(User.IsInRole("Admin") ? "ADMIN & HR WORKSPACE" : "HR WORKSPACE")</span>
             <h1>Leave Approvals & Employee Issues</h1>
-            <p>Review pending leave requests and respond to open employee issues.</p>
+            <p>Review pending leave requests, track when employee issues were raised, and reply or take action.</p>
         </div>
         <div class="clear-summary">
             <span><b>@pendingLeaves</b> Pending Leaves</span>
@@ -21,7 +21,7 @@
     </header>
 
     <article class="clear-section-card">
-        <div class="clear-section-title">
+            <div class="clear-section-title">
             <div class="clear-icon leave-icon"><i class="fa-regular fa-calendar-check"></i></div>
             <div><h2>Pending Employee Leave Requests</h2><p>Leave applications that are still waiting for a manager decision.</p></div>
             <span class="count-pill">@Model.LeaveRequests.Count Requests</span>
@@ -53,10 +53,10 @@
         }
         else
         {
-            <div class="clear-table-wrap"><table class="employee-table"><thead><tr><th>Employee</th><th>Issue Details</th><th>Assigned Manager</th><th>Current Status</th><th>Response & Update</th></tr></thead><tbody>
+            <div class="clear-table-wrap"><table class="employee-table"><thead><tr><th>Employee</th><th>Issue Details</th><th>Raised On</th><th>Assigned Manager</th><th>Current Status</th><th>Response & Update</th></tr></thead><tbody>
             @foreach (var ticket in Model.QueryTickets)
             {
-                <tr><td><strong>@ticket.Employee.FullName</strong><small>@ticket.Employee.EmployeeCode · @ticket.Employee.Department</small></td><td><strong>#@ticket.Id · @ticket.Subject</strong><small>@ticket.Description</small></td><td>@(ticket.ReportingManager?.FullName ?? "Not assigned")</td><td><span class="employee-badge">@ticket.Status</span></td><td><form asp-action="UpdateQueryTicket" method="post" class="clear-response-form"><input type="hidden" name="id" value="@ticket.Id"/><input name="resolution" value="@ticket.Resolution" placeholder="Write a response..."/><select name="status"><option value="In Progress">In Progress</option><option value="Resolved">Resolved</option><option value="Closed">Closed</option></select><button>Save</button></form></td></tr>
+                <tr><td><strong>@ticket.Employee.FullName</strong><small>@ticket.Employee.EmployeeCode · @ticket.Employee.Department</small></td><td><strong>#@ticket.Id · @ticket.Subject</strong><small>@ticket.Description</small></td><td><time datetime="@ticket.CreatedAtUtc.ToString("O")">@ticket.CreatedAtUtc.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</time><small>Query raised</small></td><td>@(ticket.ReportingManager?.FullName ?? "Not assigned")</td><td><span class="employee-badge">@ticket.Status</span></td><td>@if (ticket.UpdatedAtUtc.HasValue){<small>Last action: @ticket.UpdatedAtUtc.Value.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt") by @(ticket.ResolvedByUser?.FullName ?? "Admin / HR")</small>}else{<small>Awaiting first response</small>}<form asp-action="UpdateQueryTicket" method="post" class="clear-response-form"><input type="hidden" name="id" value="@ticket.Id"/><input name="resolution" value="@ticket.Resolution" placeholder="Write a response or action note..."/><select name="status"><option value="In Progress" selected="@(ticket.Status == "In Progress")">In Progress</option><option value="Resolved" selected="@(ticket.Status == "Resolved")">Resolved</option><option value="Closed" selected="@(ticket.Status == "Closed")">Closed</option></select><button>Save response</button></form></td></tr>
             }
             </tbody></table></div>
         }

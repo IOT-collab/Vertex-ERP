@@ -13,8 +13,7 @@ public static class ModuleCatalog
         new("projects", "Project Management", "Projects and manager project lists.", "Main", "ProjectMgm"),
         new("documents", "Document Management", "Employee document generation and downloads.", "Hr", "EmpDocuments"),
         new("expenses", "Expenses", "Expense claims and review.", "Expense", "Index"),
-        new("shipments", "Shipment Tracking", "Shipment tracking and status lookup.", "Main", "OrderTracking"),
-        new("reports", "Reports", "Administrative reports and exports.", "Main", "Reports")
+        new("shipments", "Shipment Tracking", "Shipment tracking and status lookup.", "Main", "OrderTracking")
     ];
     public static string? ForRoute(string? controller, string? action)
     {
@@ -22,7 +21,7 @@ public static class ModuleCatalog
         if (c == "moduleadmin" || c == "audit") return null;
         // Device ingress remains available to retain punches while user access is disabled.
         if (c is "biometricapi" or "zkadms") return null;
-        if (c == "biometricdevices") return "attendance";
+        if (c is "biometricdevices" or "attendancerequests") return "attendance";
         if (c == "expense") return "expenses";
         if (c == "leavebalances") return "leave";
         if (c == "salarysliprevision") return "payroll";
@@ -37,7 +36,6 @@ public static class ModuleCatalog
         if (a.Contains("leave") || a.Contains("quer") || a is "workflowmanagement" or "closedissues") return "leave";
         if (a.Contains("task")) return "tasks";
         if (a.Contains("project")) return "projects";
-        if (a is "reports" or "downloadadminreport") return "reports";
         if (a == "ordertracking") return "shipments";
         if (a == "settings") return "settings";
         if (c == "hr" || a is "employees" or "hrms" or "manager" or "addemphrm" or "empaddrequirement" or "departmentmanagement" or "employeeprofile" or "editemployeeprofile") return "hr";

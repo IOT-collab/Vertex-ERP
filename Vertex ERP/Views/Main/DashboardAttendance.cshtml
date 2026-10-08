@@ -1,0 +1,75 @@
+@model VertexERP.Models.DashboardAttendanceListViewModel
+@{
+    ViewData["Title"] = $"{Model.Status} Employees";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var statusClass = Model.Status.ToLowerInvariant();
+}
+<link href="~/css/DashboardAttendance.css" rel="stylesheet" asp-append-version="true" />
+
+<main class="dashboard-attendance-page">
+    <header class="dashboard-attendance-header">
+        <div>
+            <span class="dashboard-attendance-eyebrow">TODAY'S ATTENDANCE</span>
+            <h1>@Model.Status Employees</h1>
+            <p>@Model.Date.ToString("dddd, dd MMMM yyyy") · @Model.Employees.Count employee(s)</p>
+        </div>
+        <a class="dashboard-attendance-back" asp-controller="Main" asp-action="Dashboard">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Back to dashboard
+        </a>
+    </header>
+
+    <section class="dashboard-attendance-card" aria-label="@Model.Status employee list">
+        @if (Model.Employees.Count == 0)
+        {
+            <div class="dashboard-attendance-empty">
+                <span class="empty-icon"><i class="fa-regular fa-circle-check" aria-hidden="true"></i></span>
+                <h2>No @Model.Status.ToLowerInvariant() employees</h2>
+                <p>There are no employees in this category for today.</p>
+            </div>
+        }
+        else
+        {
+            <div class="dashboard-attendance-table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Employee ID</th>
+                            <th>Department</th>
+                            <th>Designation</th>
+                            @if (Model.Status == "Leave")
+                            {
+                                <th>Leave type</th>
+                            }
+                            else
+                            {
+                                <th>First punch</th>
+                            }
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var employee in Model.Employees)
+                        {
+                            <tr>
+                                <td><strong>@employee.FullName</strong></td>
+                                <td><span class="employee-code">@employee.EmployeeCode</span></td>
+                                <td>@(string.IsNullOrWhiteSpace(employee.Department) ? "—" : employee.Department)</td>
+                                <td>@(string.IsNullOrWhiteSpace(employee.Designation) ? "—" : employee.Designation)</td>
+                                @if (Model.Status == "Leave")
+                                {
+                                    <td>@(employee.LeaveType ?? "Approved leave")</td>
+                                }
+                                else
+                                {
+                                    <td>@(employee.FirstPunch?.ToString("hh:mm tt") ?? "—")</td>
+                                }
+                                <td><span class="attendance-status @statusClass">@Model.Status</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</main>

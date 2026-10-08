@@ -21,8 +21,36 @@
         var isEmployee = User.IsInRole("Employee") || User.IsInRole("User");
         var isManager = User.IsInRole("Manager");
         var isHr = User.IsInRole("HR");
+        var showWelcomePopup = Context.Session.GetString("showWelcomePopup") == "true";
+        var welcomeGender = Context.Session.GetString("welcomeGender");
+        var welcomeHonorific = string.Equals(welcomeGender, "Male", StringComparison.OrdinalIgnoreCase) ? "Mr." : string.Equals(welcomeGender, "Female", StringComparison.OrdinalIgnoreCase) ? "Mrs." : string.Empty;
+        if (showWelcomePopup)
+        {
+            Context.Session.Remove("showWelcomePopup");
+            Context.Session.Remove("welcomeGender");
+        }
         var pendingBankRequestCount = isHr ? LayoutDb.BankDetailUpdateRequests.Count(request => request.Status == "Pending") : 0;
         var homeUrl = isEmployee ? "/Main/EmployeeHome" : isManager ? "/Main/Manager" : "/Main/Dashboard";
+    }
+
+    @if (showWelcomePopup)
+    {
+        <div class="vertex-welcome-overlay" id="vertexWelcomePopup" role="dialog" aria-modal="true" aria-labelledby="vertexWelcomeTitle">
+            <section class="vertex-welcome-card">
+                <button class="vertex-welcome-close" type="button" aria-label="Close welcome message">&times;</button>
+                <div class="vertex-welcome-mark"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></div>
+                <p class="vertex-welcome-eyebrow">A NEW DAY AT VERTEX</p>
+                <h1 id="vertexWelcomeTitle">Welcome to Vertex Group</h1>
+                <p class="vertex-welcome-name">@welcomeHonorific @currentName</p>
+                <p class="vertex-welcome-copy">Wishing you a productive day ahead.</p>
+                <button class="vertex-welcome-continue" type="button">Continue</button>
+            </section>
+        </div>
+    }
+
+    @if (User.IsInRole("Admin") || User.IsInRole("HR") || User.IsInRole("Manager"))
+    {
+        <partial name="_VertexAiAssistant" />
     }
 
     <!-- Pure CSS Sidebar Drawer Controller Toggle -->
@@ -79,9 +107,10 @@
                     <li><a href="/Main/Employees"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Employees</span></a></li>
                     <li><a href="/Main/Attendence"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
                     <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Site Employee Location</span></a></li>
+                    <li><a asp-controller="AttendanceRequests" asp-action="Index"><i class="fa-solid fa-user-check" aria-hidden="true"></i><span>Attendance Approvals</span></a></li>
                     <li><a href="/Main/LeaveManagement"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
                     <li><a asp-controller="Main" asp-action="CompanyHoliday"><i class="fa-regular fa-calendar-days" aria-hidden="true"></i><span>Company Holiday</span></a></li>
-                    <li><a href="/Main/WorkflowManagement"><i class="fa-solid fa-code-pull-request" aria-hidden="true"></i><span>Leave & Queries</span></a></li>
+                    <li><a href="/Main/WorkflowManagement"><i class="fa-solid fa-code-pull-request" aria-hidden="true"></i><span>Leave Approvals & Employee Queries</span></a></li>
 @*                     <li><a href="/Main/DepartmentManagement"><i class="fa-solid fa-building" aria-hidden="true"></i><span>Department</span></a></li>
  *@                    <li><a href="/Main/Hrms"><i class="fa-solid fa-user-tie" aria-hidden="true"></i><span>HR Management</span></a></li>
                     <li><a href="/Main/Manager"><i class="fa-solid fa-people-roof" aria-hidden="true"></i><span>Manager</span></a></li>
@@ -92,7 +121,6 @@
                     {
                     <li><a href="/Main/AdminPanel"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Admin Panel</span></a></li>
                     <li><a href="/Main/UserSettings"><i class="fa-solid fa-user-gear" aria-hidden="true"></i><span>User Setting</span></a></li>
-                    <li><a href="/Main/Reports"><i class="fa-solid fa-chart-column" aria-hidden="true"></i><span>Reports</span></a></li>
                     }
                     @if (isHr)
                     {
@@ -139,6 +167,23 @@
     </div>
 
     @await RenderSectionAsync("Scripts", required: false)
+    @if (showWelcomePopup)
+    {
+        <script>
+            (() => {
+                const popup = document.getElementById('vertexWelcomePopup');
+                if (!popup) return;
+                const close = () => {
+                    popup.classList.add('is-closing');
+                    window.setTimeout(() => popup.remove(), 180);
+                };
+                popup.querySelectorAll('.vertex-welcome-close, .vertex-welcome-continue').forEach(button => button.addEventListener('click', close));
+                popup.addEventListener('click', event => { if (event.target === popup) close(); });
+                document.addEventListener('keydown', event => { if (event.key === 'Escape') close(); }, { once: true });
+                window.setTimeout(close, 7000);
+            })();
+        </script>
+    }
     <script src="~/js/input-rules.js" asp-append-version="true"></script>
     <script>
         (() => {

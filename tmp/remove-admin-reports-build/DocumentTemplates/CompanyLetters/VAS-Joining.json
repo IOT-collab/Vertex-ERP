@@ -1,0 +1,4056 @@
+{
+  "SourceFile": "Automation Joining letter.docx",
+  "CompanyCode": "VAS",
+  "Kind": "Joining",
+  "SourceParagraphCount": 243,
+  "Blocks": [
+    {
+      "Paragraph": {
+        "SourceId": 2,
+        "SourceText": " Date- -------------",
+        "Text": "Date: {{IssueDate}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 4,
+        "SourceText": "Ref: Vertex Automation /HR & Admin/2026-27/VAS-------                                      ",
+        "Text": "Ref: {{CompanyReference}} /HR & Admin/{{FinancialYear}}/{{EmployeeCode}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 6,
+        "SourceText": "DOJ:------------",
+        "Text": "DOJ: {{EffectiveDate}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 7,
+        "SourceText": "Kind Attn: Mr.-------------",
+        "Text": "Kind Attn: Mr. {{EmployeeName}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 8,
+        "SourceText": "DOB: -----------------",
+        "Text": "DOB: {{DateOfBirth}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 9,
+        "SourceText": "Aadhar no. -----------------",
+        "Text": "Aadhar no. {{AadhaarNumber}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Table": {
+        "Widths": [
+          4947,
+          4914
+        ],
+        "Rows": [
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 11,
+                  "SourceText": "Permanent",
+                  "Text": "Permanent",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 12,
+                  "SourceText": "Present",
+                  "Text": "Present",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 13,
+                  "SourceText": "S/o Mr ----------------------------",
+                  "Text": "S/o Mr {{FatherName}}\n{{PermanentAddress}}",
+                  "Bold": true,
+                  "Title": false
+                },
+                {
+                  "SourceId": 14,
+                  "SourceText": "Pin----------------------------",
+                  "Text": "Pin {{PermanentPinCode}}",
+                  "Bold": true,
+                  "Title": false
+                },
+                {
+                  "SourceId": 15,
+                  "SourceText": "Mob NO.-------------------------",
+                  "Text": "Mob NO. {{Mobile}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 17,
+                  "SourceText": "Vill.-------------------",
+                  "Text": "Vill. {{PresentAddress}}",
+                  "Bold": true,
+                  "Title": false
+                },
+                {
+                  "SourceId": 18,
+                  "SourceText": "Pin-------------------",
+                  "Text": "Pin {{PresentPinCode}}",
+                  "Bold": true,
+                  "Title": false
+                },
+                {
+                  "SourceId": 19,
+                  "SourceText": "Mob NO. -------------",
+                  "Text": "Mob NO. {{Mobile}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            }
+          ]
+        ],
+        "Kind": "Address"
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 21,
+        "SourceText": "APPOINTMENT LETTER",
+        "Text": "APPOINTMENT LETTER",
+        "Bold": true,
+        "Title": true
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 22,
+        "SourceText": "With reference to your application and the subsequent interview you had with us, we have pleasure in offering you an appointment on the following terms and conditions:",
+        "Text": "With reference to your application and the subsequent interview you had with us, we have pleasure in offering you an appointment on the following terms and conditions:",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 24,
+        "SourceText": "DESIGNATION",
+        "Text": "1. DESIGNATION",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 25,
+        "SourceText": "You will be designated (–Designation)- (Department).",
+        "Text": "• You will be designated (–Designation)- (Department).",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 26,
+        "SourceText": "Reporting Office:",
+        "Text": "• Reporting Office:",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 27,
+        "SourceText": "                   M/s. Vertex Power Controls Pvt.Ltd.",
+        "Text": "M/s. {{CompanyName}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 28,
+        "SourceText": "                   F-16,Site-C,Surajpur Industrial Area ",
+        "Text": "F-16,Site-C,Surajpur Industrial Area",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 29,
+        "SourceText": "                   Greater Noida.",
+        "Text": "Greater Noida.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 31,
+        "SourceText": "2. SALARY & GUIDELINES FOR SCALE   ",
+        "Text": "2. SALARY & GUIDELINES FOR SCALE",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 32,
+        "SourceText": "Your annual CTC will be Rs. (--------------)/-(--------------------------Rupees Only). Detailed Salary Breakup is described in Annexure-1 respectively with this Letter.",
+        "Text": "• Your annual CTC will be Rs. ({{AnnualCtc}})/-({{AnnualCtcWords}} Rupees Only). Detailed Salary Breakup is described in Annexure-1 respectively with this Letter.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 34,
+        "SourceText": "3. EFFECTIVE DATE OF APPOINTMENT",
+        "Text": "3. EFFECTIVE DATE OF APPOINTMENT",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 35,
+        "SourceText": "Your date of joining and commencement of employment with the company is",
+        "Text": "Your date of joining and commencement of employment with the company is",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 36,
+        "SourceText": "          DOJ.",
+        "Text": "{{EffectiveDate}}.",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 37,
+        "SourceText": "You will be abide by Service Agreement period of Two years from the date of Joining,",
+        "Text": "You will be abide by Service Agreement period of Two years from the date of Joining,",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 39,
+        "SourceText": "4. Attendance:",
+        "Text": "4. Attendance:",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 40,
+        "SourceText": "         Your attendance will be considered on the basis of daily reporting via e-mail followed    by whatsapp group. However it will be justified by your presence on the basis of daily   attendance register, site MOM and project output.",
+        "Text": "Your attendance will be considered on the basis of daily reporting via e-mail followed by whatsapp group. However it will be justified by your presence on the basis of daily attendance register, site MOM and project output.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 43,
+        "SourceText": "5. MEDICAL FITNESS",
+        "Text": "5. MEDICAL FITNESS",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 44,
+        "SourceText": "This appointment and its continuance is subject to your being found and remaining medically (physically and mentally) fit. ",
+        "Text": "This appointment and its continuance is subject to your being found and remaining medically (physically and mentally) fit.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 47,
+        "SourceText": "6. RETIREMENT",
+        "Text": "6. RETIREMENT",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 48,
+        "SourceText": "You will automatically retire on attaining the age of 58 years. An extension may, however, be given at the discretion by the Management.",
+        "Text": "You will automatically retire on attaining the age of 58 years. An extension may, however, be given at the discretion by the Management.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 51,
+        "SourceText": "7. TERMINATION & RESIGNATION OF SERVICE",
+        "Text": "7. TERMINATION & RESIGNATION OF SERVICE",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 52,
+        "SourceText": "After completion of service agreement period of 2 years. The management reserves the right to terminate this appointment on giving you notice period 2 months or pay in lieu thereof. Similarly after completion of agreement period of 2 years, you shall be at liberty to resign from service after giving 2 months notice or payment in lieu thereof.",
+        "Text": "After completion of service agreement period of 2 years. The management reserves the right to terminate this appointment on giving you notice period 2 months or pay in lieu thereof. Similarly after completion of agreement period of 2 years, you shall be at liberty to resign from service after giving 2 months notice or payment in lieu thereof.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 53,
+        "SourceText": "At the time of resignation, you should hand over all data of company along with work report completed till the date of resignation.",
+        "Text": "At the time of resignation, you should hand over all data of company along with work report completed till the date of resignation.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 54,
+        "SourceText": "Full & Final settlement will be done by company within 45 days of your relieving provided you completed all resignation formalities including no dues clearance from relevant department.",
+        "Text": "Full & Final settlement will be done by company within 45 days of your relieving provided you completed all resignation formalities including no dues clearance from relevant department.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 57,
+        "SourceText": "8. Misconduct: ",
+        "Text": "8. Misconduct:",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 58,
+        "SourceText": "If at any time, you are found guilty of misconduct, commit any breach this contract of employment or refuse or willfully neglect to perform to the satisfaction of the company or any of the sister/ group companies in connection with whose business you may be engaged, all or any of the duties devolving upon you, the company may at once, without any previous notice, terminate the contract of your employment solely at your cost, risk and responsibility. If company find any misconduct then company reserve its right to terminate you immediately without any notice period.",
+        "Text": "If at any time, you are found guilty of misconduct, commit any breach this contract of employment or refuse or willfully neglect to perform to the satisfaction of the company or any of the sister/ group companies in connection with whose business you may be engaged, all or any of the duties devolving upon you, the company may at once, without any previous notice, terminate the contract of your employment solely at your cost, risk and responsibility. If company find any misconduct then company reserve its right to terminate you immediately without any notice period.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 61,
+        "SourceText": "9. SECRECY",
+        "Text": "9. SECRECY",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 62,
+        "SourceText": "You shall observe strict secrecy with regards to information that may come to your knowledge or possession in course of your employment with the company, and shall at no time divulge, publish or otherwise disclose any information concerning the business, technology or affairs of the company except for the purpose specially authorized in writing by the company. You expressly recognized that the technology and trade secrets of the company are proprietary and constitute great value for the company and loss unauthorized disclosure of which will cause great financial loss to company. Even after leaving the organization you should not expose the any company business secrets, documents and photograph otherwise company will have full right to claim the losses from you.",
+        "Text": "You shall observe strict secrecy with regards to information that may come to your knowledge or possession in course of your employment with the company, and shall at no time divulge, publish or otherwise disclose any information concerning the business, technology or affairs of the company except for the purpose specially authorized in writing by the company. You expressly recognized that the technology and trade secrets of the company are proprietary and constitute great value for the company and loss unauthorized disclosure of which will cause great financial loss to company. Even after leaving the organization you should not expose the any company business secrets, documents and photograph otherwise company will have full right to claim the losses from you.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 63,
+        "SourceText": "You shall not take any papers , documents, files, drawing, photograph, instruments, apparatus or any other property of the company out of the company premises where you are based and any such material must be returned intact and without dissemination to the company at the time of end of employment with the company.",
+        "Text": "You shall not take any papers , documents, files, drawing, photograph, instruments, apparatus or any other property of the company out of the company premises where you are based and any such material must be returned intact and without dissemination to the company at the time of end of employment with the company.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 66,
+        "SourceText": "10. OTHER RULES AND REGULATIONS",
+        "Text": "10. OTHER RULES AND REGULATIONS",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 68,
+        "SourceText": "The company will expect you to work in section / department in which you are placed with a high standard of initiative, efficiency and economy.",
+        "Text": "a) The company will expect you to work in section / department in which you are placed with a high standard of initiative, efficiency and economy.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 70,
+        "SourceText": "You will in all respect be governed by the rules and regulations applicable from time   to time to your category of employees.",
+        "Text": "b) You will in all respect be governed by the rules and regulations applicable from time to time to your category of employees.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 71,
+        "SourceText": "The Management may transfer you for work in any section / department or unit of the company as it may consider in the discretion from time to time without detriment to your status of emoluments.",
+        "Text": "c) The Management may transfer you for work in any section / department or unit of the company as it may consider in the discretion from time to time without detriment to your status of emoluments.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 72,
+        "SourceText": "You will devote full time to the work of the company and will not undertake any direct/indirect business or work, honorary or remunerator except with the prior permission of the Management in each case.",
+        "Text": "d) You will devote full time to the work of the company and will not undertake any direct/indirect business or work, honorary or remunerator except with the prior permission of the Management in each case.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 73,
+        "SourceText": "You shall not carry on or be concerned in any similar trade or business or occupation either during the employment or thereafter up to one year of your leaving the employment.",
+        "Text": "e) You shall not carry on or be concerned in any similar trade or business or occupation either during the employment or thereafter up to one year of your leaving the employment.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 74,
+        "SourceText": "You shall not join any company/firm in similar trade or business or occupation within one year of your leaving the employment.",
+        "Text": "f) You shall not join any company/firm in similar trade or business or occupation within one year of your leaving the employment.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 75,
+        "SourceText": "You should meet out attendance criteria and submit daily report and one day",
+        "Text": "g) You should meet out attendance criteria and submit daily report and one day",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 76,
+        "SourceText": "        advance planning on official whats app group and by mail defined by HR/Admin         otherwise it will be treated absent whatsoever the reason.",
+        "Text": "advance planning on official whats app group and by mail defined by HR/Admin otherwise it will be treated absent whatsoever the reason.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 77,
+        "SourceText": "h)    You should adhere leave policy of organization and your leave should be prior   ",
+        "Text": "h) You should adhere leave policy of organization and your leave should be prior",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 78,
+        "SourceText": "        approved by your reporting senior /HR & Admin otherwise it will be treated absent ",
+        "Text": "approved by your reporting senior /HR & Admin otherwise it will be treated absent",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 79,
+        "SourceText": "                      In case of absenteeism company reserve rights to take relevant action.",
+        "Text": "In case of absenteeism company reserve rights to take relevant action.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 80,
+        "SourceText": "i) Company has full right to change your reporting address/location at any time and requirement.",
+        "Text": "i) Company has full right to change your reporting address/location at any time and requirement.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 82,
+        "SourceText": "11. Travelling Expenses",
+        "Text": "11. Travelling Expenses",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 83,
+        "SourceText": "Conveyance from your residence to daily reporting address is covered under part of your CTC.",
+        "Text": "Conveyance from your residence to daily reporting address is covered under part of your CTC.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 84,
+        "SourceText": "However from Res/working location to other site travelling expenses should be as per travel policy of company as attached Annexure-2.",
+        "Text": "However from Res/working location to other site travelling expenses should be as per travel policy of company as attached Annexure-2.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 86,
+        "SourceText": "Please return the duplicate of this letter of appointment duly signed in token of your having accepted the appointment, along with passport size photograph, within a week from the date of receipt of this letter. Kindly also bring clearance from your previous employer and copies of the educational experience certificates along with you.",
+        "Text": "Please return the duplicate of this letter of appointment duly signed in token of your having accepted the appointment, along with passport size photograph, within a week from the date of receipt of this letter. Kindly also bring clearance from your previous employer and copies of the educational experience certificates along with you.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 87,
+        "SourceText": "We would be looking forward to have you among us in the office. You are advised to contact our Personnel Department at the time of reporting for duty for necessary instructions and guidance.",
+        "Text": "We would be looking forward to have you among us in the office. You are advised to contact our Personnel Department at the time of reporting for duty for necessary instructions and guidance.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 89,
+        "SourceText": "Thanking you,",
+        "Text": "Thanking you,",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 90,
+        "SourceText": "Yours faithfully,",
+        "Text": "Yours faithfully,",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 91,
+        "SourceText": "For Vertex Power Controls Pvt.Ltd.",
+        "Text": "For {{CompanyName}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 95,
+        "SourceText": "(HR)                                                                                                                        (Director)                     ",
+        "Text": "(HR) (Director)",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 97,
+        "SourceText": "Employee Acceptance:",
+        "Text": "Employee Acceptance:",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 98,
+        "SourceText": "I have read and understood the above terms and conditions and hereby signify my acceptance of the same. ",
+        "Text": "I have read and understood the above terms and conditions and hereby signify my acceptance of the same.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 99,
+        "SourceText": "Signature......................................",
+        "Text": "Signature......................................",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Table": {
+        "Widths": [
+          1980,
+          1185,
+          1155,
+          300,
+          2670,
+          1020,
+          1110
+        ],
+        "Rows": [
+          [
+            {
+              "Span": 7,
+              "Paragraphs": [
+                {
+                  "SourceId": 105,
+                  "SourceText": "Annexure- 1",
+                  "Text": "Annexure- 1",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 113,
+                  "SourceText": "Name:- ",
+                  "Text": "Name:-",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 2,
+              "Paragraphs": [
+                {
+                  "SourceId": 114,
+                  "SourceText": "Mr--------",
+                  "Text": "{{EmployeeName}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 116,
+                  "SourceText": "Designation:- ",
+                  "Text": "Designation:-",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 2,
+              "Paragraphs": [
+                {
+                  "SourceId": 117,
+                  "SourceText": "----------",
+                  "Text": "{{Designation}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 118,
+                  "SourceText": "Department:- ",
+                  "Text": "Department:-",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 2,
+              "Paragraphs": [
+                {
+                  "SourceId": 119,
+                  "SourceText": "--------------",
+                  "Text": "{{Department}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 121,
+                  "SourceText": "Reporting Manager:-",
+                  "Text": "Reporting Manager:-",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 2,
+              "Paragraphs": [
+                {
+                  "SourceId": 122,
+                  "SourceText": "------------",
+                  "Text": "{{ManagerName}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 130,
+                  "SourceText": "Salary Components ",
+                  "Text": "Salary Components",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 131,
+                  "SourceText": "Monthly",
+                  "Text": "Monthly",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 132,
+                  "SourceText": "Yearly",
+                  "Text": "Yearly",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 134,
+                  "SourceText": "Salary Components ",
+                  "Text": "Salary Components",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 135,
+                  "SourceText": "Monthly",
+                  "Text": "Monthly",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 136,
+                  "SourceText": "Yearly",
+                  "Text": "Yearly",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 3,
+              "Paragraphs": [
+                {
+                  "SourceId": 137,
+                  "SourceText": "Fixed ( A )",
+                  "Text": "Fixed ( A )",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 3,
+              "Paragraphs": [
+                {
+                  "SourceId": 139,
+                  "SourceText": "PF & ESI Employee Contribution (C)",
+                  "Text": "PF & ESI Employee Contribution (C)",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 140,
+                  "SourceText": "Basic ",
+                  "Text": "Basic",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 141,
+                  "SourceText": "0000",
+                  "Text": "{{BasicMonthly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 142,
+                  "SourceText": "000000",
+                  "Text": "{{BasicYearly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 144,
+                  "SourceText": "PF Employee Contribution (12% of Basic)",
+                  "Text": "PF Employee Contribution (12% of Basic)",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 145,
+                  "SourceText": "000",
+                  "Text": "{{EmployeePfMonthly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 146,
+                  "SourceText": "0000",
+                  "Text": "{{EmployeePfYearly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 147,
+                  "SourceText": "HRA (50% of Basic) + Other",
+                  "Text": "HRA (50% of Basic) + Other",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 148,
+                  "SourceText": "0000",
+                  "Text": "{{HraOtherMonthly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 149,
+                  "SourceText": "000000",
+                  "Text": "{{HraOtherYearly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 151,
+                  "SourceText": "ESI Employee Contribution (0.75% of Gross)",
+                  "Text": "ESI Employee Contribution (0.75% of Gross)",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 152,
+                  "SourceText": "000",
+                  "Text": "{{EmployeeEsiMonthly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 153,
+                  "SourceText": "0000",
+                  "Text": "{{EmployeeEsiYearly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 158,
+                  "SourceText": "Total Employees Contribution",
+                  "Text": "Total Employees Contribution",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 159,
+                  "SourceText": "0000",
+                  "Text": "{{EmployeeContributionMonthly}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 160,
+                  "SourceText": "00000",
+                  "Text": "{{EmployeeContributionYearly}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 162,
+                  "SourceText": "00000",
+                  "Text": "{{FixedMonthly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 163,
+                  "SourceText": "0000000",
+                  "Text": "{{FixedYearly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 3,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 3,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 3,
+              "Paragraphs": [
+                {
+                  "SourceId": 175,
+                  "SourceText": "PF & ESI Employer Contribution (D)",
+                  "Text": "PF & ESI Employer Contribution (D)",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 180,
+                  "SourceText": "PF Employer Contribution (12% of Basic)",
+                  "Text": "PF Employer Contribution (12% of Basic)",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 181,
+                  "SourceText": "000",
+                  "Text": "{{EmployerPfMonthly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 182,
+                  "SourceText": "0000",
+                  "Text": "{{EmployerPfYearly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 194,
+                  "SourceText": "ESI Employer Contribution (3.25 % of Gross)",
+                  "Text": "ESI Employer Contribution (3.25 % of Gross)",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 195,
+                  "SourceText": "000",
+                  "Text": "{{EmployerEsiMonthly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 196,
+                  "SourceText": "0000",
+                  "Text": "{{EmployerEsiYearly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 201,
+                  "SourceText": "Total Employees Contribution",
+                  "Text": "Total Employees Contribution",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 202,
+                  "SourceText": "0000",
+                  "Text": "{{EmployerContributionMonthly}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 203,
+                  "SourceText": "00000",
+                  "Text": "{{EmployerContributionYearly}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 3,
+              "Paragraphs": [
+                {
+                  "SourceId": 204,
+                  "SourceText": "Variable & Other Benefits (B)",
+                  "Text": "Variable & Other Benefits (B)",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 3,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 207,
+                  "SourceText": "EPR (10% of Basic)",
+                  "Text": "EPR (10% of Basic)",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 208,
+                  "SourceText": "0",
+                  "Text": "{{EprMonthly}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 209,
+                  "SourceText": "0",
+                  "Text": "{{EprYearly}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 214,
+                  "SourceText": "Other Benefits",
+                  "Text": "Other Benefits",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 215,
+                  "SourceText": "0",
+                  "Text": "{{OtherBenefitsMonthly}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 216,
+                  "SourceText": "0",
+                  "Text": "{{OtherBenefitsYearly}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 225,
+                  "SourceText": "Net Salary (A+B-C)",
+                  "Text": "Net Salary (A+B-C)",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 226,
+                  "SourceText": "00000",
+                  "Text": "{{NetMonthly}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 227,
+                  "SourceText": "0000000",
+                  "Text": "{{NetYearly}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 228,
+                  "SourceText": "Gross Salary (A+B)",
+                  "Text": "Gross Salary (A+B)",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 229,
+                  "SourceText": "00000",
+                  "Text": "{{GrossMonthly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 230,
+                  "SourceText": "000000",
+                  "Text": "{{GrossYearly}}",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 232,
+                  "SourceText": "CTC (A+B+D)",
+                  "Text": "CTC (A+B+D)",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 233,
+                  "SourceText": "00000",
+                  "Text": "{{CtcMonthly}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 234,
+                  "SourceText": "0000000",
+                  "Text": "{{CtcYearly}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 235,
+                  "SourceText": "* Note",
+                  "Text": "* Note",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 2,
+              "Paragraphs": [
+                {
+                  "SourceId": 242,
+                  "SourceText": "TDS as per Govt. Norms",
+                  "Text": "TDS as per Govt. Norms",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 2,
+              "Paragraphs": [
+                {
+                  "SourceId": 246,
+                  "SourceText": "Approved By                                                           HR & Admin",
+                  "Text": "Approved By HR & Admin",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 2,
+              "Paragraphs": [
+                {
+                  "SourceId": 247,
+                  "SourceText": "Bonus will be provided in month of Oct./ Nov.",
+                  "Text": "Bonus will be provided in month of Oct./ Nov.",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 2,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 2,
+              "Paragraphs": [
+                {
+                  "SourceId": 252,
+                  "SourceText": "ERP is Employee Performance Review Based",
+                  "Text": "ERP is Employee Performance Review Based",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ]
+        ],
+        "Kind": "Salary"
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 260,
+        "SourceText": "ANNEXURE-2",
+        "Text": "ANNEXURE-2",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 262,
+        "SourceText": "LOCAL CONVEYANCE / Travel POLICY",
+        "Text": "LOCAL CONVEYANCE / Travel POLICY",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 264,
+        "SourceText": "1. Objective ",
+        "Text": "1. Objective",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 265,
+        "SourceText": "To establish guidance and policy while traveling on official business and to provide procedures for the approval, reimbursement, and control of travel expenses.",
+        "Text": "To establish guidance and policy while traveling on official business and to provide procedures for the approval, reimbursement, and control of travel expenses.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 267,
+        "SourceText": "2. Scope ",
+        "Text": "2. Scope",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 268,
+        "SourceText": "This policy applies to internal travel arrangements on approved Company business, regardless of the source of funds, duration of travel or business purpose (e.g. conferences, visiting other Companies, research, generating Company income, consulting, professional development, Training, etc)",
+        "Text": "This policy applies to internal travel arrangements on approved Company business, regardless of the source of funds, duration of travel or business purpose (e.g. conferences, visiting other Companies, research, generating Company income, consulting, professional development, Training, etc)",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 270,
+        "SourceText": "3. Standard Operating Procedure ",
+        "Text": "3. Standard Operating Procedure",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 271,
+        "SourceText": "3.1. Local Conveyance ",
+        "Text": "3.1. Local Conveyance",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 272,
+        "SourceText": "It is advice to use public transport preferably like – Metro and public transport and same will be reimbursed as per actual.  ",
+        "Text": "• It is advice to use public transport preferably like – Metro and public transport and same will be reimbursed as per actual.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 274,
+        "SourceText": "Each employee Is entitled to claim conveyance according to his / her level in the organization as defined below –",
+        "Text": "• Each employee Is entitled to claim conveyance according to his / her level in the organization as defined below –",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 276,
+        "SourceText": "L1- Car ",
+        "Text": "• L1- Car",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 277,
+        "SourceText": "L2- Bike/Auto ",
+        "Text": "• L2- Bike/Auto",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 278,
+        "SourceText": "L3-Bus /Metro",
+        "Text": "• L3-Bus /Metro",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 280,
+        "SourceText": "In case if employee has given company provided car / vehicle then below mention rates are applicable-",
+        "Text": "• In case if employee has given company provided car / vehicle then below mention rates are applicable-",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 281,
+        "SourceText": "L1- Car – 6 per km if its own vehicle and for company provided vehicle it will be 4",
+        "Text": "• L1- Car – 6 per km if its own vehicle and for company provided vehicle it will be 4",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 282,
+        "SourceText": "L2-Bike – 2.75 per km if its own vehicle and for company provided vehicle it will be 1.75",
+        "Text": "• L2-Bike – 2.75 per km if its own vehicle and for company provided vehicle it will be 1.75",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 283,
+        "SourceText": "For company provided vehicle and own, all maintenance will be from employee’s side",
+        "Text": "• For company provided vehicle and own, all maintenance will be from employee’s side",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 287,
+        "SourceText": "If Auto or cab is booked that should be allowed on the permission of L1 and L2. ",
+        "Text": "• If Auto or cab is booked that should be allowed on the permission of L1 and L2.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 292,
+        "SourceText": "HR Signatory                                                                                                      Director        ",
+        "Text": "HR Signatory Director",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 299,
+        "SourceText": "Daily Allowance ",
+        "Text": "Daily Allowance",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 301,
+        "SourceText": "       For local visits if any engineer /supervisor / worker stay at site till 10:00 P.M (Night) he may claim @Rs 80/ Rs. 70/ Rs. 60 per day respectively. Next day person should ensure to report site as per his shift timings. He/ She only can claim when they will work till 10 P.M.",
+        "Text": "i) For local visits if any engineer /supervisor / worker stay at site till 10:00 P.M (Night) he may claim @Rs 80/ Rs. 70/ Rs. 60 per day respectively. Next day person should ensure to report site as per his shift timings. He/ She only can claim when they will work till 10 P.M.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 302,
+        "SourceText": "       The toll and parking fees will be paid at actual. To claim it management will require supporting documents for toll, parking etc. ",
+        "Text": "ii) The toll and parking fees will be paid at actual. To claim it management will require supporting documents for toll, parking etc.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 303,
+        "SourceText": "       No one can claim conveyance from home to site on daily basis but they can claim from their office / factory location to site. If anyone travelling to outside of Delhi NCR then they can claim from their home location to site location (If home location is near by the site). Company will reimburse the conveyance according to that. ",
+        "Text": "iii) No one can claim conveyance from home to site on daily basis but they can claim from their office / factory location to site. If anyone travelling to outside of Delhi NCR then they can claim from their home location to site location (If home location is near by the site). Company will reimburse the conveyance according to that.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 305,
+        "SourceText": "        Company will not reimburse for Lunch, when our client provides and where client doesn’t provide lunch then they can claim as per clause No.- i. Please note for dinner its required 12 hours to work (Expl: 7 A.M to 10 P.M).. For lunch its need (Expl: 9:30 A.M to 6 P.M)",
+        "Text": "iv) Company will not reimburse for Lunch, when our client provides and where client doesn’t provide lunch then they can claim as per clause No.- i. Please note for dinner its required 12 hours to work (Expl: 7 A.M to 10 P.M).. For lunch its need (Expl: 9:30 A.M to 6 P.M)",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 306,
+        "SourceText": "       No one will claim conveyance from home to factory on daily basic , if accommodation are provided from company side ",
+        "Text": "v) No one will claim conveyance from home to factory on daily basic , if accommodation are provided from company side",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 308,
+        "SourceText": "       If anyone fail to pay the conveyance within the time Line then it  will get lapse without asking.",
+        "Text": "vi) If anyone fail to pay the conveyance within the time Line then it will get lapse without asking.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 310,
+        "SourceText": "In case employee is working on National holidays or Sunday; the allowance can be reimbursed on approval of HOD with valid reason of working on holidays. For reimbursement or comp off needs to approve from the senior/ manager within 2 months or else it will be lapse.",
+        "Text": "vii) In case employee is working on National holidays or Sunday; the allowance can be reimbursed on approval of HOD with valid reason of working on holidays. For reimbursement or comp off needs to approve from the senior/ manager within 2 months or else it will be lapse.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 312,
+        "SourceText": "Anytime an employee attending OD directly from residence without attending office, in such cases the employee would entitle only for the extra kms over and above their normal travel kms from residence to office ",
+        "Text": "viii) Anytime an employee attending OD directly from residence without attending office, in such cases the employee would entitle only for the extra kms over and above their normal travel kms from residence to office",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 314,
+        "SourceText": "       Daily work management book should be maintained. ",
+        "Text": "ix) Daily work management book should be maintained.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 316,
+        "SourceText": "      Entertainment Expenses will be reimbursed on prior approval of MD or HR.",
+        "Text": "x) Entertainment Expenses will be reimbursed on prior approval of MD or HR.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 318,
+        "SourceText": "      In NCR (With in 250KM) for long distance company will provide PG for nearby project site. It should be prior approved by management.",
+        "Text": "xi) In NCR (With in 250KM) for long distance company will provide PG for nearby project site. It should be prior approved by management.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 320,
+        "SourceText": "Travel Expense will be valid only for true working & Output also it should be approved by supervisor followed Hr & Admin.",
+        "Text": "xii) Travel Expense will be valid only for true working & Output also it should be approved by supervisor followed Hr & Admin.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 323,
+        "SourceText": "HR Signatory                                                                                                          Director",
+        "Text": "HR Signatory Director",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 329,
+        "SourceText": "3.2. ",
+        "Text": "3.2.",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 330,
+        "SourceText": "While on Outdoor Duty.",
+        "Text": "While on Outdoor Duty.",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 331,
+        "SourceText": "Mode of Transportation",
+        "Text": "Mode of Transportation",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 332,
+        "SourceText": "By Train , Bus , Air ",
+        "Text": "• By Train , Bus , Air",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 333,
+        "SourceText": "              By Train – L3 Labour / Worker by general ",
+        "Text": "By Train – L3 Labour / Worker by general",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 334,
+        "SourceText": "                                 L2 will be entitled for sleeper coach/AC.",
+        "Text": "L2 will be entitled for sleeper coach/AC.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 335,
+        "SourceText": "                                 L1 and L2 will be entitled for 3rd AC.",
+        "Text": "L1 and L2 will be entitled for 3rd AC.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 337,
+        "SourceText": "In case of Rajdhani and Shatabdi booking or in other high class booking should take prior approval from HR & MD.",
+        "Text": "• In case of Rajdhani and Shatabdi booking or in other high class booking should take prior approval from HR & MD.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 340,
+        "SourceText": "In case of Air travel it is recommended to book the ticket in 25 days to 30 days prior in advance .However approval for air travel is required for HR & MD.",
+        "Text": "• In case of Air travel it is recommended to book the ticket in 25 days to 30 days prior in advance .However approval for air travel is required for HR & MD.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 342,
+        "SourceText": "Travel during Outdoor Duty – Apply as same as in 3.1.",
+        "Text": "• Travel during Outdoor Duty – Apply as same as in 3.1.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 344,
+        "SourceText": "NOTE- Original bill is required for claim of conveyance.",
+        "Text": "NOTE- Original bill is required for claim of conveyance.",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 346,
+        "SourceText": "3.3 - Hotel (Per day expenses) –L1 – Rs 800 or above that on approval basis",
+        "Text": "3.3 - Hotel (Per day expenses) –L1 – Rs 800 or above that on approval basis",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 347,
+        "SourceText": "                                                            L2 – Rs 600",
+        "Text": "L2 – Rs 600",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 348,
+        "SourceText": "                                                            L3 – Rs 300",
+        "Text": "L3 – Rs 300",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 350,
+        "SourceText": "NOTE- Original bill is required for claim",
+        "Text": "NOTE- Original bill is required for claim",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 352,
+        "SourceText": "3.4 – Fooding (Per day expenses) – L1- 300",
+        "Text": "3.4 – Fooding (Per day expenses) – L1- 300",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 353,
+        "SourceText": "L2 -200",
+        "Text": "L2 -200",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 354,
+        "SourceText": "                                                              L3- 100",
+        "Text": "L3- 100",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 356,
+        "SourceText": "Own arrangement: If any employee is ready to do their own arrangement then 50% of hotel booking and fooding allowances will provide to the employee.",
+        "Text": "Own arrangement: If any employee is ready to do their own arrangement then 50% of hotel booking and fooding allowances will provide to the employee.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 358,
+        "SourceText": "Reimbursement ",
+        "Text": "Reimbursement",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 359,
+        "SourceText": "Employees may only receive reimbursement for actual, reasonable travel costs up to the limits prescribed in the policy, on presentation of conveyance sheet as per format of Annexure 2. ",
+        "Text": "Employees may only receive reimbursement for actual, reasonable travel costs up to the limits prescribed in the policy, on presentation of conveyance sheet as per format of Annexure 2.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 364,
+        "SourceText": "HR  Signatory                                                                                                                 Director ",
+        "Text": "HR Signatory Director",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 373,
+        "SourceText": "4-General ",
+        "Text": "4-General",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 375,
+        "SourceText": "This policy outlines the spirit behind the Company’s approach in giving fair and consistent ",
+        "Text": "This policy outlines the spirit behind the Company’s approach in giving fair and consistent",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 376,
+        "SourceText": "treatment to all employees. Therefore, employees are expected to respect the rules and the standard operating procedures governing this policy. Where circumstances are unusual or situations not anticipated or defined in this policy, such matters should be referred to the VP – Admin & Commercial for resolution in a manner that is consistent with the whole aim and sprit of this policy. Such decisions shall be final and binding. ",
+        "Text": "treatment to all employees. Therefore, employees are expected to respect the rules and the standard operating procedures governing this policy. Where circumstances are unusual or situations not anticipated or defined in this policy, such matters should be referred to the VP – Admin & Commercial for resolution in a manner that is consistent with the whole aim and sprit of this policy. Such decisions shall be final and binding.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 379,
+        "SourceText": "This policy supersedes all other policies, procedures and practices prevalent on this subject to date. Company reserves the right to add to, alter or amend, or cancel this policy at its discretion if needed in future. ",
+        "Text": "This policy supersedes all other policies, procedures and practices prevalent on this subject to date. Company reserves the right to add to, alter or amend, or cancel this policy at its discretion if needed in future.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 381,
+        "SourceText": "Conveyance Voucher is attached for your reference and everyone needs to submit according to that. ",
+        "Text": "• Conveyance Voucher is attached for your reference and everyone needs to submit according to that.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 384,
+        "SourceText": "Grades",
+        "Text": "Grades",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Table": {
+        "Widths": [
+          1920,
+          1860,
+          6000
+        ],
+        "Rows": [
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 388,
+                  "SourceText": "SL. No",
+                  "Text": "SL. No",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 389,
+                  "SourceText": "Category",
+                  "Text": "Category",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 390,
+                  "SourceText": "Designation",
+                  "Text": "Designation",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 394,
+                  "SourceText": "",
+                  "Text": "1. ",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 395,
+                  "SourceText": "L1",
+                  "Text": "L1",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 396,
+                  "SourceText": "GM, AGM, Department Head and Manager",
+                  "Text": "GM, AGM, Department Head and Manager",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 397,
+                  "SourceText": "",
+                  "Text": "2. ",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 398,
+                  "SourceText": "L2",
+                  "Text": "L2",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 399,
+                  "SourceText": "Asst. Manager, Executive and Sr. Executive",
+                  "Text": "Asst. Manager, Executive and Sr. Executive",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 400,
+                  "SourceText": "",
+                  "Text": "3. ",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 401,
+                  "SourceText": "L3",
+                  "Text": "L3",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 402,
+                  "SourceText": "Fitter, Labor, ITI ",
+                  "Text": "Fitter, Labor, ITI",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ]
+        ],
+        "Kind": "Grades"
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 412,
+        "SourceText": "HR Signatory                                                                                                                  Director        ",
+        "Text": "HR Signatory Director",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Table": {
+        "Widths": [
+          726,
+          644,
+          919,
+          964,
+          830,
+          1640,
+          1813,
+          1114,
+          475,
+          569,
+          700
+        ],
+        "Rows": [
+          [
+            {
+              "Span": 11,
+              "Paragraphs": [
+                {
+                  "SourceId": 419,
+                  "SourceText": "Conveyance Voucher",
+                  "Text": "Conveyance Voucher",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 5,
+              "Paragraphs": [
+                {
+                  "SourceId": 420,
+                  "SourceText": "Vertex Power Controls  Pvt. Ltd.",
+                  "Text": "{{CompanyName}}",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 421,
+                  "SourceText": "Voucher No.",
+                  "Text": "Voucher No.",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 2,
+              "Paragraphs": [
+                {
+                  "SourceId": 424,
+                  "SourceText": "Date",
+                  "Text": "Date",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 2,
+              "Paragraphs": [
+                {
+                  "SourceId": 426,
+                  "SourceText": "Name : ",
+                  "Text": "Name :",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 4,
+              "Paragraphs": [
+                {
+                  "SourceId": -1,
+                  "SourceText": "",
+                  "Text": "{{EmployeeName}}"
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 3,
+              "Paragraphs": [
+                {
+                  "SourceId": 429,
+                  "SourceText": "Employee ID No.",
+                  "Text": "Employee ID No.",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": -1,
+                  "SourceText": "",
+                  "Text": "{{EmployeeCode}}"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 2,
+              "Paragraphs": []
+            },
+            {
+              "Span": 9,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 433,
+                  "SourceText": "S.No.",
+                  "Text": "S.No.",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 434,
+                  "SourceText": "Date",
+                  "Text": "Date",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 435,
+                  "SourceText": "PR No.",
+                  "Text": "PR No.",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 436,
+                  "SourceText": "MR No.",
+                  "Text": "MR No.",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 437,
+                  "SourceText": "FROM",
+                  "Text": "FROM",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 438,
+                  "SourceText": "To",
+                  "Text": "To",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 439,
+                  "SourceText": "Distance(km)",
+                  "Text": "Distance(km)",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 440,
+                  "SourceText": "Purpose",
+                  "Text": "Purpose",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 441,
+                  "SourceText": "TA",
+                  "Text": "TA",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 442,
+                  "SourceText": "L/D",
+                  "Text": "L/D",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 443,
+                  "SourceText": "Total",
+                  "Text": "Total",
+                  "Bold": true,
+                  "Title": false
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 444,
+                  "SourceText": "1",
+                  "Text": "1",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 455,
+                  "SourceText": "2",
+                  "Text": "2",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 466,
+                  "SourceText": "3",
+                  "Text": "3",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 477,
+                  "SourceText": "4",
+                  "Text": "4",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 488,
+                  "SourceText": "5",
+                  "Text": "5",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 499,
+                  "SourceText": "6",
+                  "Text": "6",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 510,
+                  "SourceText": "7",
+                  "Text": "7",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 521,
+                  "SourceText": "8",
+                  "Text": "8",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 532,
+                  "SourceText": "9",
+                  "Text": "9",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 543,
+                  "SourceText": "10",
+                  "Text": "10",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 554,
+                  "SourceText": "11",
+                  "Text": "11",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 565,
+                  "SourceText": "12",
+                  "Text": "12",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 576,
+                  "SourceText": "13",
+                  "Text": "13",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 587,
+                  "SourceText": "14",
+                  "Text": "14",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 598,
+                  "SourceText": "15",
+                  "Text": "15",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 609,
+                  "SourceText": "16",
+                  "Text": "16",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 620,
+                  "SourceText": "17",
+                  "Text": "17",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 631,
+                  "SourceText": "18",
+                  "Text": "18",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 642,
+                  "SourceText": "19",
+                  "Text": "19",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 653,
+                  "SourceText": "20",
+                  "Text": "20",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": [
+                {
+                  "SourceId": 664,
+                  "SourceText": "21",
+                  "Text": "21",
+                  "Bold": false,
+                  "Title": false
+                }
+              ]
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ],
+          [
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            },
+            {
+              "Span": 1,
+              "Paragraphs": []
+            }
+          ]
+        ],
+        "Kind": "Voucher"
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 690,
+        "SourceText": "HR Signatory                                                                                             Director        ",
+        "Text": "HR Signatory Director",
+        "Bold": true,
+        "Title": false
+      }
+    }
+  ]
+}

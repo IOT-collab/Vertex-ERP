@@ -1,0 +1,52 @@
+@using System.Text.Json
+@inject IConfiguration Configuration
+@inject IWebHostEnvironment HostEnvironment
+@{
+    var firebaseConfig = Configuration.GetSection("Firebase:Web").Get<Dictionary<string, string>>() ?? new Dictionary<string, string>();
+    var appCheckSiteKey = Configuration["Firebase:AppCheck:SiteKey"] ?? string.Empty;
+    var isDashboard = string.Equals(ViewContext.RouteData.Values["action"]?.ToString(), "Dashboard", StringComparison.OrdinalIgnoreCase);
+}
+<link href="~/css/vertex-ai-assistant.css" rel="stylesheet" asp-append-version="true" />
+<section class="ai-assistant" id="vertex-ai-assistant"
+         aria-label="Vertex AI Assistant"
+         data-firebase-config="@JsonSerializer.Serialize(firebaseConfig)"
+         data-app-check-site-key="@appCheckSiteKey"
+         data-development="@(HostEnvironment.IsDevelopment() ? "true" : "false")"
+         data-admin="@(User.IsInRole("Admin") ? "true" : "false")"
+         data-inline-ui="@(isDashboard ? "true" : "false")">
+    @Html.AntiForgeryToken()
+    <button type="button" class="ai-toggle" id="aiToggle" title="Open Vertex AI Assistant" aria-label="Open Vertex AI Assistant">
+        <span class="ai-pulse"></span><strong>AI</strong>
+    </button>
+    <div class="ai-panel" id="aiPanel" aria-label="Vertex AI chat">
+        <div class="ai-panel-header">
+            <div>
+                <span class="system-badge">GEMINI AI</span>
+                <h3>Vertex AI</h3>
+                <p class="sub-text">Ask general questions or ask about your authorized team data.</p>
+                @if (User.IsInRole("Admin"))
+                {
+                    <button type="button" class="ai-briefing" id="aiBriefing"><i class="fa-solid fa-list-check" aria-hidden="true"></i> Today's admin briefing</button>
+                }
+            </div>
+            <button type="button" class="ai-close" id="aiClose" title="Close assistant" aria-label="Close assistant">×</button>
+        </div>
+        <div class="ai-messages" id="aiMessages" role="log" aria-live="polite" aria-relevant="additions">
+            <div class="ai-message assistant">Hello! I can answer general questions and help with permitted team attendance, leave, and task information.</div>
+        </div>
+        <div class="ai-status" id="aiStatus" role="status">Ready</div>
+        <div class="ai-attachment" id="aiAttachment" hidden><span id="aiAttachmentName"></span><button type="button" id="aiAttachmentRemove" aria-label="Remove attachment">×</button></div>
+        <div class="ai-controls">
+            <button type="button" class="ai-attach" id="aiAttach" title="Attach an image or PDF" aria-label="Attach an image or PDF"><i class="fa-solid fa-paperclip" aria-hidden="true"></i></button>
+            <input type="file" id="aiFile" accept="image/png,image/jpeg,image/webp,application/pdf" hidden />
+            @if (isDashboard)
+            {
+                <button type="button" class="ai-mic" id="aiMic" title="Speak to assistant" aria-label="Speak to assistant"><i class="fa-solid fa-microphone" aria-hidden="true"></i></button>
+            }
+            <input type="text" id="aiInput" maxlength="500" placeholder="Ask Vertex AI..." autocomplete="off" />
+            <button type="button" class="ai-send" id="aiSend">Send</button>
+        </div>
+        <p class="ai-file-note">Selected images or PDFs are sent to Gemini for analysis. Do not upload passwords, payroll, bank, identity, or confidential employee records.</p>
+    </div>
+</section>
+<script type="module" src="~/js/vertex-ai-assistant.js" asp-append-version="true"></script>

@@ -65,6 +65,7 @@ namespace VertexERP.Data
         public DbSet<EmployeeSalaryDetail> EmployeeSalaryDetails => Set<EmployeeSalaryDetail>();
         public DbSet<EmployeeDocument> EmployeeDocuments => Set<EmployeeDocument>();
         public DbSet<EmployeeAsset> EmployeeAssets => Set<EmployeeAsset>();
+        public DbSet<AttendanceRequest> AttendanceRequests => Set<AttendanceRequest>();
         public DbSet<ExpenseClaim> ExpenseClaims => Set<ExpenseClaim>();
         public DbSet<RecruitmentHiringRecord> RecruitmentHiringRecords => Set<RecruitmentHiringRecord>();
         public DbSet<GeneratedSalarySlip> GeneratedSalarySlips => Set<GeneratedSalarySlip>();
@@ -133,6 +134,13 @@ modelBuilder.Entity<EmployeeLeaveBalance>(entity =>
                 entity.HasOne(item => item.Manager).WithMany().HasForeignKey(item => item.ManagerId).OnDelete(DeleteBehavior.Restrict);
             });
             modelBuilder.HasSequence<long>("EmployeeCodeSequence");
+            modelBuilder.Entity<AttendanceRequest>(entity =>
+            {
+                entity.HasIndex(request => new { request.EmployeeId, request.AttendanceDate })
+                    .IsUnique().HasFilter("\"Status\" = 'Pending'");
+                entity.HasOne(request => request.Employee).WithMany()
+                    .HasForeignKey(request => request.EmployeeId).OnDelete(DeleteBehavior.Restrict);
+            });
             modelBuilder.Entity<EmployeeAsset>(entity =>
             {
                 entity.HasIndex(asset => asset.AssetTag).IsUnique().HasFilter("\"Status\" <> 'Declined'");

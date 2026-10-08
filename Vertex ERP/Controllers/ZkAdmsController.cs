@@ -15,7 +15,7 @@ public class ZkAdmsController : ControllerBase
 
     private IActionResult? AuthorizeLanDevice()
     {
-        var address = HttpContext.Connection.RemoteIpAddress;
+        var address = HttpContext.Connection.RemoteIpAddress; 
         if (address?.IsIPv4MappedToIPv6 == true) address = address.MapToIPv4();
         if (address is null || !IsPrivateOrLoopback(address))
         {

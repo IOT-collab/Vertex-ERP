@@ -136,6 +136,12 @@ builder.Services
     .SetApplicationName("VertexERP");
 
 builder.Services.AddScoped<BankAccountProtectionService>();
+builder.Services.AddScoped<IPasswordResetEmailService, PasswordResetEmailService>();
+builder.Services.AddHttpClient<IFirebaseIdTokenVerifier, FirebaseIdTokenVerifier>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(10);
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("VertexERP-FirebaseTokenVerification/1.0");
+}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 builder.Services.AddHttpClient<IPasswordResetSmsService, PasswordResetSmsService>(client =>
     client.Timeout = TimeSpan.FromSeconds(15))
     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
@@ -144,7 +150,14 @@ builder.Services.AddHttpClient<IPasswordResetSmsService, PasswordResetSmsService
 // SESSION
 // ============================================================
 
-builder.Services.AddSession();
+builder.Services.AddSession(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+        ? CookieSecurePolicy.SameAsRequest
+        : CookieSecurePolicy.Always;
+});
 
 // ============================================================
 // AUTHENTICATION
@@ -187,7 +200,9 @@ builder.Services
             var currentUser = await db.AppUsers.AsNoTracking()
                 .SingleOrDefaultAsync(user => user.Id == userId && user.IsActive);
             var currentRole = AccountRoleService.Normalize(currentUser?.Role);
-            if (currentUser == null || currentRole == null)
+            if (currentUser == null || currentRole == null ||
+                (currentUser.PasswordChangedAtUtc.HasValue && context.Properties.IssuedUtc.HasValue &&
+                 context.Properties.IssuedUtc.Value < currentUser.PasswordChangedAtUtc.Value))
             {
                 context.RejectPrincipal();
                 await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -328,6 +343,12 @@ app.MapControllerRoute(
     name: "expense",
     pattern: "Expense/{action=Index}/{id?}",
     defaults: new { controller = "Expense" }
+);
+
+app.MapControllerRoute(
+    name: "ai-assistant",
+    pattern: "AiAssistant",
+    defaults: new { controller = "AiAssistant", action = "Index" }
 );
 
 app.MapControllerRoute(

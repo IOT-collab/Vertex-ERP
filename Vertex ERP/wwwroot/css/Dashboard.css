@@ -340,6 +340,11 @@
     --card-glow: rgba(34, 197, 94, .22);
 }
 
+.dashboard .status-red {
+    --card-accent: var(--erp-red);
+    --card-glow: rgba(239, 68, 68, .22);
+}
+
 .dashboard .status-orange {
     --card-accent: var(--erp-orange);
     --card-glow: rgba(245, 158, 11, .22);
@@ -392,6 +397,10 @@
 
 .dashboard .green-icon {
     background: linear-gradient(135deg, rgba(34, 197, 94, .96), rgba(21, 128, 61, .58)) !important;
+}
+
+.dashboard .red-icon {
+    background: linear-gradient(135deg, rgba(239, 68, 68, .96), rgba(185, 28, 28, .62)) !important;
 }
 
 .dashboard .orange-icon {
@@ -1269,235 +1278,6 @@
     box-shadow: 0 14px 30px rgba(59, 130, 246, .18) !important;
 }
 
-.dashboard .ai-assistant,
-.ai-assistant {
-    position: fixed !important;
-    right: 28px !important;
-    bottom: 28px !important;
-    z-index: 500 !important;
-    width: auto !important;
-    height: auto !important;
-    display: block !important;
-}
-
-.dashboard .ai-toggle,
-.ai-toggle {
-    position: relative !important;
-    width: 62px !important;
-    height: 62px !important;
-    display: grid !important;
-    place-items: center !important;
-    border: 1px solid rgba(59, 130, 246, .48) !important;
-    border-radius: 50% !important;
-    background: linear-gradient(135deg, rgba(59, 130, 246, .98), rgba(139, 92, 246, .86)) !important;
-    color: #ffffff !important;
-    box-shadow: 0 18px 44px rgba(59, 130, 246, .3), inset 0 1px 0 rgba(255, 255, 255, .22) !important;
-    cursor: pointer !important;
-    transition: transform .25s ease, box-shadow .25s ease !important;
-}
-
-.dashboard .ai-toggle:hover,
-.ai-toggle:hover {
-    transform: translateY(-3px) scale(1.04) !important;
-    box-shadow: 0 24px 54px rgba(59, 130, 246, .38), inset 0 1px 0 rgba(255, 255, 255, .24) !important;
-}
-
-.dashboard .ai-toggle strong,
-.ai-toggle strong {
-    position: relative !important;
-    z-index: 2 !important;
-    font-size: 16px !important;
-    font-weight: 800 !important;
-}
-
-.dashboard .ai-pulse,
-.ai-pulse {
-    position: absolute !important;
-    inset: -8px !important;
-    border: 1px solid rgba(59, 130, 246, .26) !important;
-    border-radius: 50% !important;
-    animation: aiPulse 1.8s ease-in-out infinite !important;
-}
-
-.dashboard .ai-panel,
-.ai-panel {
-    position: absolute !important;
-    right: 0 !important;
-    bottom: 78px !important;
-    width: min(390px, calc(100vw - 32px)) !important;
-    max-height: 560px !important;
-    display: none !important;
-    overflow: hidden !important;
-    border: 1px solid rgba(255, 255, 255, .14) !important;
-    border-radius: 24px !important;
-    background: linear-gradient(145deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, .05)) !important;
-    box-shadow: 0 28px 80px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .14) !important;
-    backdrop-filter: blur(24px) saturate(150%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
-}
-
-.dashboard .ai-panel.open,
-.ai-panel.open {
-    display: block !important;
-    animation: aiPanelIn .24s ease both !important;
-}
-
-.dashboard .ai-panel-header,
-.ai-panel-header {
-    display: flex !important;
-    align-items: flex-start !important;
-    justify-content: space-between !important;
-    gap: 14px !important;
-    padding: 18px 18px 14px !important;
-    border-bottom: 1px solid rgba(255, 255, 255, .1) !important;
-}
-
-.dashboard .ai-panel-header h3,
-.ai-panel-header h3 {
-    margin-top: 3px !important;
-}
-
-.dashboard .ai-close,
-.ai-close {
-    width: 34px !important;
-    height: 34px !important;
-    flex: 0 0 34px !important;
-    border: 1px solid rgba(255, 255, 255, .12) !important;
-    border-radius: 50% !important;
-    background: rgba(255, 255, 255, .07) !important;
-    color: #ffffff !important;
-    cursor: pointer !important;
-    font-size: 20px !important;
-    line-height: 1 !important;
-}
-
-.dashboard .ai-messages,
-.ai-messages {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 10px !important;
-    min-height: 210px !important;
-    max-height: 310px !important;
-    overflow-y: auto !important;
-    padding: 16px 18px !important;
-}
-
-.dashboard .ai-message,
-.ai-message {
-    max-width: 88% !important;
-    padding: 11px 13px !important;
-    border: 1px solid rgba(255, 255, 255, .11) !important;
-    border-radius: 16px !important;
-    color: var(--erp-text-soft) !important;
-    font-size: 12px !important;
-    line-height: 1.45 !important;
-}
-
-.dashboard .ai-message.assistant,
-.ai-message.assistant {
-    align-self: flex-start !important;
-    background: rgba(255, 255, 255, .065) !important;
-}
-
-.dashboard .ai-message.user,
-.ai-message.user {
-    align-self: flex-end !important;
-    background: rgba(59, 130, 246, .18) !important;
-    color: #ffffff !important;
-}
-
-.dashboard .ai-controls,
-.ai-controls {
-    display: grid !important;
-    grid-template-columns: 44px 1fr auto !important;
-    gap: 10px !important;
-    padding: 14px 18px 18px !important;
-    border-top: 1px solid rgba(255, 255, 255, .1) !important;
-}
-
-.dashboard .ai-mic,
-.dashboard .ai-send,
-.dashboard .ai-controls input,
-.ai-mic,
-.ai-send,
-.ai-controls input {
-    min-height: 42px !important;
-    border: 1px solid rgba(255, 255, 255, .13) !important;
-    border-radius: 999px !important;
-    background: rgba(255, 255, 255, .07) !important;
-    color: #ffffff !important;
-    outline: none !important;
-}
-
-.dashboard .ai-controls input,
-.ai-controls input {
-    min-width: 0 !important;
-    padding: 0 13px !important;
-    font-size: 12px !important;
-}
-
-.dashboard .ai-controls input::placeholder,
-.ai-controls input::placeholder {
-    color: rgba(168, 179, 207, .75) !important;
-}
-
-.dashboard .ai-mic,
-.dashboard .ai-send,
-.ai-mic,
-.ai-send {
-    cursor: pointer !important;
-    font-size: 12px !important;
-    font-weight: 800 !important;
-    transition: transform .25s ease, background .25s ease, box-shadow .25s ease !important;
-}
-
-.dashboard .ai-mic:hover,
-.dashboard .ai-send:hover,
-.dashboard .ai-mic.listening,
-.ai-mic:hover,
-.ai-send:hover,
-.ai-mic.listening {
-    transform: translateY(-2px) !important;
-    background: rgba(59, 130, 246, .2) !important;
-    box-shadow: 0 14px 30px rgba(59, 130, 246, .18) !important;
-}
-
-.dashboard .ai-mic.listening,
-.ai-mic.listening {
-    border-color: rgba(34, 197, 94, .52) !important;
-    box-shadow: 0 0 0 5px rgba(34, 197, 94, .12), 0 14px 30px rgba(34, 197, 94, .18) !important;
-}
-
-.dashboard .ai-send,
-.ai-send {
-    padding: 0 15px !important;
-    background: linear-gradient(135deg, rgba(59, 130, 246, .96), rgba(37, 99, 235, .78)) !important;
-}
-
-@keyframes aiPulse {
-    0%, 100% {
-        opacity: .55;
-        transform: scale(.92);
-    }
-
-    50% {
-        opacity: 0;
-        transform: scale(1.2);
-    }
-}
-
-@keyframes aiPanelIn {
-    from {
-        opacity: 0;
-        transform: translateY(12px) scale(.97);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
 @media (max-width: 1150px) {
     .dashboard .analytics-row,
     .dashboard .content-row,
@@ -1676,31 +1456,7 @@
         grid-template-columns: 1fr !important;
     }
 
-    .dashboard .ai-assistant {
-        right: 16px !important;
-        bottom: 16px !important;
-    }
 
-    .dashboard .ai-toggle {
-        width: 54px !important;
-        height: 54px !important;
-        min-width: 54px !important;
-        min-height: 54px !important;
-        aspect-ratio: 1 / 1 !important;
-    }
-
-    .dashboard .ai-panel {
-        right: -2px !important;
-        width: calc(100vw - 28px) !important;
-    }
-
-    .dashboard .ai-controls {
-        grid-template-columns: 42px 1fr !important;
-    }
-
-    .dashboard .ai-send {
-        grid-column: 1 / -1 !important;
-    }
 }
 
 @media (max-width: 380px) {
@@ -1743,6 +1499,16 @@
     padding: 12px 6px 6px 0;
     scrollbar-gutter: stable;
 }
+
+.dashboard .dashboard-card-link {
+    color: inherit !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+}
+.dashboard .dashboard-card-link:focus-visible {
+    outline: 3px solid rgba(147, 197, 253, .9) !important;
+    outline-offset: 3px !important;
+}
 .dashboard .department-load-item { min-width: 0; flex: 0 0 auto; }
 .dashboard .department-load-heading {
     display: grid;
@@ -1761,3 +1527,4 @@
 .dashboard .bottom-row > .activity-box { min-width: 0; width: 100%; }
 .dashboard .bottom-row .box-header { flex-wrap: wrap; gap: 12px; }
 .dashboard .bottom-row .alert-item { overflow-wrap: anywhere; }
+

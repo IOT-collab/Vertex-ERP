@@ -1,0 +1,107 @@
+{
+  "SourceFile": "Power Reliving or Experience letter.docx",
+  "CompanyCode": "VPC",
+  "Kind": "Relieving",
+  "SourceParagraphCount": 11,
+  "Blocks": [
+    {
+      "Paragraph": {
+        "SourceId": 5,
+        "SourceText": "                                                                                             Date- ----------------",
+        "Text": "Date: {{IssueDate}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 6,
+        "SourceText": "To,",
+        "Text": "To,",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 7,
+        "SourceText": "Name: - -------------",
+        "Text": "Name: - {{EmployeeName}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 9,
+        "SourceText": "Relieving & Experience Letter",
+        "Text": "Relieving & Experience Letter",
+        "Bold": true,
+        "Title": true
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 10,
+        "SourceText": "This has reference to your resignation letter dated (--/--/----). This is to inform you that your resignation has been accepted, and you are relieved from the position of “------------------------” with Vertex Power Controls Pvt. Ltd. with effect from --/--/----.",
+        "Text": "This has reference to your resignation letter dated ({{ResignationDate}}). This is to inform you that your resignation has been accepted, and you are relieved from the position of “{{Designation}}” with {{CompanyName}} with effect from {{EffectiveDate}}.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 12,
+        "SourceText": "We would like to confirm that you served the organization from --/--/---- until --/--/----. Your last designation was “------------------------” at the time of resignation.",
+        "Text": "We would like to confirm that you served the organization from {{JoiningDate}} until {{EffectiveDate}}. Your last designation was “{{Designation}}” at the time of resignation.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 15,
+        "SourceText": "We appreciate your contributions towards Vertex Automation System Pvt. Ltd. You do not hold any liberty/due towards the company.",
+        "Text": "We appreciate your contributions towards {{CompanyName}} You do not hold any liberty/due towards the company.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 17,
+        "SourceText": "We wish you all success in your future endeavors. ",
+        "Text": "We wish you all success in your future endeavors.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 18,
+        "SourceText": "Best of luck!",
+        "Text": "Best of luck!",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 21,
+        "SourceText": "For Vertex Power Controls Pvt. Ltd. ",
+        "Text": "For {{CompanyName}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 24,
+        "SourceText": "Authorized Signatory: ",
+        "Text": "Authorized Signatory:",
+        "Bold": true,
+        "Title": false
+      }
+    }
+  ]
+}

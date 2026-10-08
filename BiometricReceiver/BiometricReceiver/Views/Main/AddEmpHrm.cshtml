@@ -8,9 +8,61 @@
 
 <div class="hrms-page">
     <div class="page-header"><div class="header-text"><h2>@(editing ? "Edit Employee Profile" : "Add New Employee Profile")</h2><p>Setup personal details, employment information and organizational mapping.</p></div></div>
+    @if (TempData["EmployeeMessage"] is string employeeMessage)
+    {
+        <div class="employee-biometric-notice success" role="status">@employeeMessage</div>
+    }
+    @if (TempData["EmployeeError"] is string employeeError)
+    {
+        <div class="employee-biometric-notice error" role="alert">@employeeError</div>
+    }
     <div class="form-container-wrapper">
-        <form class="employee-onboarding-form" asp-controller="Employee" asp-action="@(editing ? "Edit" : "Create")" asp-route-id="@(editing ? Model.Id : null)" method="post" enctype="multipart/form-data">
-            <input asp-for="Id" type="hidden" />
+        @if (editing)
+        {
+            <section class="form-main-section employee-biometric-editor" aria-labelledby="biometric-enrollment-heading">
+                <div class="section-divider"><span id="biometric-enrollment-heading">Biometric Enrollment Links</span></div>
+                <p>Select the enrollment number reported by each machine. Confirm a transfer when the enrollment is linked to someone else. Previous attendance records will remain unchanged.</p>
+                @if (Model.BiometricDeviceLinks.Count == 0)
+                {
+                    <p>No active biometric enrollments are available from the connected machines.</p>
+                }
+                else
+                {
+                    <form class="employee-biometric-batch-form" asp-controller="Employee" asp-action="UpdateBiometricMapping" asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="employee-biometric-scroll" role="region" aria-label="Biometric machines and enrollment links" tabindex="0">
+                            @for (var linkIndex = 0; linkIndex < Model.BiometricDeviceLinks.Count; linkIndex++)
+                            {
+                                var deviceLink = Model.BiometricDeviceLinks[linkIndex];
+                                <div class="employee-biometric-link-row">
+                                    <input type="hidden" name="DeviceLinks[@linkIndex].DeviceId" value="@deviceLink.DeviceId" />
+                                    <div class="employee-biometric-link-details">
+                                        <span class="employee-biometric-device-icon" aria-hidden="true">●</span>
+                                        <div><strong>@deviceLink.DeviceName</strong><span>Current link: @(deviceLink.CurrentEnrollmentLabel ?? "Not linked")</span></div>
+                                    </div>
+                                    <div class="employee-biometric-link-controls">
+                                        <label for="biometric-enrollment-@deviceLink.DeviceId">Enrollment number</label>
+                                        <select id="biometric-enrollment-@deviceLink.DeviceId" name="DeviceLinks[@linkIndex].SelectedMappingId">
+                                            <option value="">No change</option>
+                                            @foreach (var option in deviceLink.Options)
+                                            {
+                                                <option value="@option.MappingId" selected="@(option.MappingId == deviceLink.CurrentMappingId)">
+                                                    @option.DeviceUserId@(option.LinkedEmployeeName == "This employee" ? " — linked here" : $" — linked to {option.LinkedEmployeeName}")
+                                                </option>
+                                            }
+                                        </select>
+                                        <label class="employee-biometric-confirm"><input type="checkbox" name="DeviceLinks[@linkIndex].ConfirmTransfer" value="true" /> Confirm transfer if linked to another employee</label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="employee-biometric-actions"><span>Choose enrollment changes above, then save once.</span><button type="submit" class="btn-submit">Save enrollment links</button></div>
+                    </form>
+                }
+            </section>
+        }
+        else
+        {
             <div class="form-group">
                 <label>Source Enrollment Number / Emp ID</label>
                 @foreach (var enrollment in Model.SourceEnrollments)
@@ -19,6 +71,9 @@
                 }
                 <small>@(Model.SourceEnrollments.Count == 0 ? "Not linked to a biometric source." : "Received from the attendance source. This number cannot be edited here; attendance remains linked when company details are updated.")</small>
             </div>
+        }
+        <form class="employee-onboarding-form" asp-controller="Employee" asp-action="@(editing ? "Edit" : "Create")" asp-route-id="@(editing ? Model.Id : null)" method="post" enctype="multipart/form-data">
+            <input asp-for="Id" type="hidden" />
             <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
             <div class="form-main-section" style="margin-bottom:18px;">
                 <div class="section-divider"><span>Employee Photo</span></div>
