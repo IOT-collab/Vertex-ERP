@@ -10,7 +10,13 @@ public sealed class ManualLeaveBalance
     [MaxLength(2)] public string Category { get; set; } = "";
     public decimal TotalDays { get; set; }
     public decimal UsedDays { get; set; }
-    [NotMapped] public decimal AvailableDays => TotalDays - UsedDays;
+    public decimal? LegacyUsedDays { get; set; }
+    // UsedDays stores additional HR usage only; approved requests are read live.
+    [NotMapped] public decimal ApprovedDays { get; set; }
+    [NotMapped] public decimal PendingDays { get; set; }
+    [NotMapped] public decimal OpeningDays { get; set; }
+    [NotMapped] public decimal EffectiveUsedDays => UsedDays + ApprovedDays;
+    [NotMapped] public decimal AvailableDays => TotalDays - EffectiveUsedDays;
     [MaxLength(500)] public string? Notes { get; set; }
     [ConcurrencyCheck] public int Revision { get; set; }
     public DateTime UpdatedAtUtc { get; set; }
@@ -30,6 +36,7 @@ public sealed class ManualLeaveEmployeeEdit
 }
 public sealed class ManualLeavePage
 {
+    public List<int> CalculatedEmployeeIds { get; set; } = [];
     public static readonly string[] Categories = ["EL", "CL", "ML", "EW"];
     public List<Employee> Employees { get; set; } = [];
     public List<ManualLeaveBalance> Balances { get; set; } = [];

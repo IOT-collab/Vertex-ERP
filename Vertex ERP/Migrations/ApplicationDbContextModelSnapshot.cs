@@ -51,13 +51,13 @@ namespace Vertex_ERP.Migrations
                     b.Property<bool>("MustChangePassword")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime?>("PasswordChangedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("NormalizedUsername")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("PasswordChangedAtUtc")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -447,6 +447,46 @@ namespace Vertex_ERP.Migrations
                     b.HasKey("DeviceUserCode");
 
                     b.ToTable("BiometricEmployeeExclusions");
+                });
+
+            modelBuilder.Entity("VertexERP.Models.BiometricEnrollment", b =>
+                {
+                    b.Property<string>("EnrollCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int?>("EmployeeId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<bool>("IsSheetReference")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastSeenUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ReviewReason")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("WdmsName")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.HasKey("EnrollCode");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("BiometricEnrollments");
                 });
 
             modelBuilder.Entity("VertexERP.Models.Department", b =>
@@ -1122,6 +1162,87 @@ namespace Vertex_ERP.Migrations
                     b.ToTable("Projects");
                 });
 
+            modelBuilder.Entity("VertexERP.Models.ExpenseAdvance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<string>("ConfirmationStatus")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EmployeeNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("character varying(260)");
+
+                    b.Property<DateTime>("PaidAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentMode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<decimal?>("ReceivedAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTime>("RecordedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RecordedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("RespondedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("RespondedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("character varying(260)");
+
+                    b.Property<string>("TransactionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId", "PaidAtUtc");
+
+                    b.ToTable("ExpenseAdvances");
+                });
+
             modelBuilder.Entity("VertexERP.Models.ExpenseClaim", b =>
                 {
                     b.Property<int>("Id")
@@ -1303,6 +1424,47 @@ namespace Vertex_ERP.Migrations
                     b.ToTable("GeneratedSalarySlips", (string)null);
                 });
 
+            modelBuilder.Entity("VertexERP.Models.LeaveCalculation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("MonthsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("OpeningEL")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<decimal>("OpeningEW")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId", "Year")
+                        .IsUnique();
+
+                    b.ToTable("LeaveCalculations");
+                });
+
             modelBuilder.Entity("VertexERP.Models.LeaveRequest", b =>
                 {
                     b.Property<int>("Id")
@@ -1340,10 +1502,31 @@ namespace Vertex_ERP.Migrations
                     b.Property<DateOnly>("FromDate")
                         .HasColumnType("date");
 
+                    b.Property<bool>("IsHalfDay")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LeaveType")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
+
+                    b.Property<DateTime?>("ManagerDecidedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ManagerDecidedByName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int?>("ManagerDecidedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ManagerDecision")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("ManagerDecisionNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("Reason")
                         .IsRequired()
@@ -1384,6 +1567,9 @@ namespace Vertex_ERP.Migrations
 
                     b.Property<int>("EmployeeId")
                         .HasColumnType("integer");
+
+                    b.Property<decimal?>("LegacyUsedDays")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
@@ -1453,23 +1639,23 @@ namespace Vertex_ERP.Migrations
                     b.Property<int>("FailedAttempts")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("VerifiedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("SmsSentAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("OtpHash")
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime?>("SmsSentAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("UsedAtUtc")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("VerificationMethod")
                         .IsRequired()
                         .HasMaxLength(12)
                         .HasColumnType("character varying(12)");
 
-                    b.Property<DateTime?>("UsedAtUtc")
+                    b.Property<DateTime?>("VerifiedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -1868,6 +2054,16 @@ namespace Vertex_ERP.Migrations
                     b.Navigation("Employee");
                 });
 
+            modelBuilder.Entity("VertexERP.Models.BiometricEnrollment", b =>
+                {
+                    b.HasOne("VertexERP.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("VertexERP.Models.Department", b =>
                 {
                     b.HasOne("VertexERP.Models.Employee", "Manager")
@@ -2009,6 +2205,17 @@ namespace Vertex_ERP.Migrations
                     b.Navigation("Team");
                 });
 
+            modelBuilder.Entity("VertexERP.Models.ExpenseAdvance", b =>
+                {
+                    b.HasOne("VertexERP.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("VertexERP.Models.ExpenseClaim", b =>
                 {
                     b.HasOne("VertexERP.Models.AppUser", "DecidedByUser")
@@ -2051,6 +2258,17 @@ namespace Vertex_ERP.Migrations
                     b.Navigation("Employee");
 
                     b.Navigation("GeneratedByUser");
+                });
+
+            modelBuilder.Entity("VertexERP.Models.LeaveCalculation", b =>
+                {
+                    b.HasOne("VertexERP.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("VertexERP.Models.LeaveRequest", b =>

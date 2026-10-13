@@ -1,4 +1,4 @@
-@model VertexERP.Models.WorkflowManagementViewModel
+﻿@model VertexERP.Models.WorkflowManagementViewModel
 @{
     ViewData["Title"] = "Leave Approvals & Employee Issues";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
@@ -11,7 +11,7 @@
     <header class="clear-page-header">
         <div>
             <span class="clear-kicker">@(User.IsInRole("Admin") ? "ADMIN & HR WORKSPACE" : "HR WORKSPACE")</span>
-            <h1>Leave Approvals & Employee Issues</h1>
+            <h1>Leave Approvals & Employee Issues</h1><p><a asp-action="LeaveStatus">All Leave Requests &amp; Status</a> · <a asp-action="ClosedIssues">Resolved / Closed Queries</a></p>
             <p>Review pending leave requests, track when employee issues were raised, and reply or take action.</p>
         </div>
         <div class="clear-summary">
@@ -23,7 +23,7 @@
     <article class="clear-section-card">
             <div class="clear-section-title">
             <div class="clear-icon leave-icon"><i class="fa-regular fa-calendar-check"></i></div>
-            <div><h2>Pending Employee Leave Requests</h2><p>Leave applications that are still waiting for a manager decision.</p></div>
+            <div><h2>Pending Employee Leave Requests</h2><p>Track manager decisions and complete HR/Admin final approvals.</p></div>
             <span class="count-pill">@Model.LeaveRequests.Count Requests</span>
         </div>
         @if (Model.LeaveRequests.Count == 0)
@@ -32,10 +32,10 @@
         }
         else
         {
-            <div class="clear-table-wrap"><table class="employee-table"><thead><tr><th>Employee</th><th>Leave Details</th><th>Approval With</th><th>Status</th><th>Applied Date</th></tr></thead><tbody>
+            <div class="clear-table-wrap"><table class="employee-table"><thead><tr><th>Employee</th><th>Leave Details</th><th>Approval With</th><th>Status</th><th>Applied Date</th><th>Final Decision</th></tr></thead><tbody>
             @foreach (var leave in Model.LeaveRequests)
             {
-                <tr><td><strong>@leave.Employee.FullName</strong><small>@leave.Employee.EmployeeCode · @leave.Employee.Designation</small></td><td><strong>@leave.LeaveType</strong><small>@leave.FromDate.ToString("dd MMM") – @leave.ToDate.ToString("dd MMM yyyy") (@(leave.ToDate.DayNumber - leave.FromDate.DayNumber + 1) days)</small></td><td>@leave.ApprovalLevel<small>@(leave.AssignedApproverEmployee?.FullName ?? "HR / Admin")</small></td><td><span class="employee-badge @leave.Status.ToLowerInvariant()">@leave.Status</span></td><td><small>@leave.AppliedAtUtc.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small></td></tr>
+                <tr><td><strong>@leave.Employee.FullName</strong><small>@leave.Employee.EmployeeCode · @leave.Employee.Designation</small></td><td><strong>@leave.LeaveType</strong><small>@leave.Reason</small><small>@leave.FromDate.ToString("dd MMM") – @leave.ToDate.ToString("dd MMM yyyy") (@(leave.IsHalfDay ? 0.5m : leave.ToDate.DayNumber - leave.FromDate.DayNumber + 1) days)</small></td><td>@leave.ApprovalLevel<small>@(leave.ApprovalLevel == "HR/Admin" ? "HR / Admin" : leave.AssignedApproverEmployee?.FullName ?? "Unassigned")</small></td><td><span class="employee-badge @leave.Status.ToLowerInvariant()">@leave.DisplayStatus</span><partial name="_LeaveDecisionDetails" model="leave" /></td><td><small>@leave.AppliedAtUtc.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small></td><td>@if(leave.ApprovalLevel == "HR/Admin") {<form asp-action="DecideManagerLeave" method="post"><input type="hidden" name="id" value="@leave.Id"/><input name="note" maxlength="500" placeholder="Decision remarks"/><button type="submit" name="decision" value="Approved">Approve</button><button type="submit" name="decision" value="Rejected">Reject</button></form>}else{<span>Awaiting manager</span>}</td></tr>
             }
             </tbody></table></div>
         }

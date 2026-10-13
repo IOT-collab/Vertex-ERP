@@ -1,4 +1,4 @@
-@model VertexERP.Models.AttendancePageViewModel
+﻿@model VertexERP.Models.AttendancePageViewModel
 @{
     ViewData["Title"] = "Attendance";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
@@ -13,6 +13,10 @@
             <a asp-controller="Main" asp-action="AddAttendance" class="btn-add">+ Mark Attendance</a>
         </div>
     </div>
+    @if (VertexERP.Services.AttendanceRules.HolidayName(Model.FilterDate) is string holidayName)
+    {
+        <p class="holiday">@Model.FilterDate.ToString("dd MMM yyyy") · Holiday: @holidayName</p>
+    }
     <div class="dashboard-cards">
         <a asp-action="Attendence" asp-route-searchQuery="@Model.SearchQuery" asp-route-department="@Model.Department" asp-route-filterDate="@filterDateValue" asp-route-status="Present" class="card present @(Model.Status == "Present" ? "active-filter" : "")"><h3>@Model.PresentCount</h3><span>Present</span><small>All checked-in employees, including late arrivals</small></a>
         <a asp-action="Attendence" asp-route-searchQuery="@Model.SearchQuery" asp-route-department="@Model.Department" asp-route-filterDate="@filterDateValue" asp-route-status="Absent" class="card absent @(Model.Status == "Absent" ? "active-filter" : "")"><h3>@Model.AbsentCount</h3><span>Absent</span><small>Click to filter</small></a>
@@ -23,10 +27,11 @@
             <div class="filter-field"><input type="text" name="searchQuery" value="@Model.SearchQuery" placeholder="Search Employee..."></div>
             <div class="filter-field"><select name="department"><option value="">All Departments</option>@foreach (var item in Model.Departments){<option value="@item" selected="@(item == Model.Department)">@item</option>}</select></div>
             <div class="filter-field"><input type="date" name="filterDate" value="@filterDateValue"></div>
-            <div class="filter-field"><select name="status"><option value="">All Statuses</option><option value="Present" selected="@(Model.Status == "Present")">Present</option><option value="Late" selected="@(Model.Status == "Late")">Late Arrivals</option><option value="Absent" selected="@(Model.Status == "Absent")">Absent</option></select></div>
+            <div class="filter-field"><select name="status"><option value="">All Statuses</option><option value="Present" selected="@(Model.Status == "Present")">Present</option><option value="Late" selected="@(Model.Status == "Late")">Late Arrivals</option><option value="Absent" selected="@(Model.Status == "Absent")">Absent</option><option value="Leave" selected="@(Model.Status == "Leave")">Leave</option><option value="Holiday" selected="@(Model.Status == "Holiday")">Holiday</option></select></div>
             <div class="filter-field action-field"><button type="submit" class="btn-search">Apply Filter</button></div>
         </div>
     </form>
+    <p>Emp ID shows the WDMS Enroll Code. Blank IDs need a verified numeric WDMS link in <a asp-controller="BiometricEnrollments" asp-action="Index">WDMS Enroll Codes / Review</a>.</p>
     <div class="table-box" tabindex="0" role="region" aria-label="Employee attendance; scroll horizontally to view all columns">
         <table>
             <thead><tr><th>Emp ID</th><th>Employee Name</th><th>Department</th><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Action</th></tr></thead>

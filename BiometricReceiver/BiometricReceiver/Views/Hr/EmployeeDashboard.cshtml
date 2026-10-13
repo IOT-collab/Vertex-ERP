@@ -70,7 +70,7 @@
     </form>
 
     <div class="glass-card table-section">
-        <div class="card-header"><div class="card-title-group"><h3>Employee Directory</h3><span class="badge-accent">Live Records</span></div></div>
+        <div class="card-header"><div class="card-title-group"><h3>Employee Directory</h3><span class="badge-accent">Live Records</span></div><a asp-controller="BiometricEnrollments" asp-action="Index" class="btn-secondary">WDMS Enroll Codes / Review</a></div>
         <div class="table-responsive">
             <table class="modern-table">
                 <thead><tr><th>Employee ID</th><th>Company</th><th>Name</th><th>Email</th><th>Department</th><th>Designation</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
@@ -80,7 +80,7 @@
                     @foreach (var employee in Model.Employees)
                     {
                         <tr>
-                            <td><span class="code-text">@employee.EmployeeCode</span></td>
+                            <td><span class="code-text">@employee.EmployeeCode</span>@if(Model.EnrollCodes.TryGetValue(employee.Id, out var enrollCode)){<small style="display:block">Enroll Code: @enrollCode</small>}</td>
                             <td>@VertexERP.Models.EmployeeCompany.DisplayName(employee.CompanyCode)</td>
                             <td class="fw-semibold">
                                 @if (employee.IsBiometricProfilePending)

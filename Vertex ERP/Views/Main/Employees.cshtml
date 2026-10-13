@@ -1,4 +1,4 @@
-@model dynamic
+﻿@model dynamic
 @{
     ViewData["Title"] = "Employee Self-Service Dashboard";
 
@@ -106,7 +106,7 @@
         <div class="stat-card attendance-stat" id="attendanceCard">
             <div class="stat-icon icon-red" id="attendanceIcon"><i class="fa-solid fa-user-clock"></i></div>
             <div>
-                <span class="stat-value attendance-value" id="todayAttendance">Absent</span>
+                <span class="stat-value attendance-value" id="todayAttendance">@VertexERP.Services.AttendanceRules.NoPunchStatus(DateOnly.FromDateTime(VertexERP.Services.FieldAttendanceClock.Now))</span>
                 <span class="stat-label" id="attendanceHint">Not punched in today</span>
             </div>
             <span class="attendance-dot" id="attendanceDot"></span>
@@ -466,7 +466,7 @@
         const hint = document.getElementById('attendanceHint');
         const icon = document.getElementById('attendanceIcon');
         const card = document.getElementById('attendanceCard');
-        value.textContent = isPresent ? 'Present' : 'Absent';
+        value.textContent = isPresent ? 'Present' : '@VertexERP.Services.AttendanceRules.NoPunchStatus(DateOnly.FromDateTime(VertexERP.Services.FieldAttendanceClock.Now))';
         hint.textContent = isPresent ? `Punched in at ${punchInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Not punched in today';
         icon.className = `stat-icon ${isPresent ? 'icon-green' : 'icon-red'}`;
         icon.innerHTML = `<i class="fa-solid ${isPresent ? 'fa-user-check' : 'fa-user-clock'}"></i>`;

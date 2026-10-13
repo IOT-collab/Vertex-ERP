@@ -94,7 +94,7 @@ namespace Vertex_ERP.Controllers
                     EmployeeId = x.Id, EmployeeCode = x.EmployeeCode, EmployeeName = x.FullName, Department = x.Department,
                     GrossSalary = slip?.GrossSalary ?? salary!.GrossSalary,
                     StandardDeductions = slip != null ? slip.TotalDeductions - slip.LeaveDeduction : salary!.TotalDeductions,
-                    ApprovedLeaveDays = slip?.ApprovedLeaveDays ?? leaves.Where(l => l.EmployeeId == x.Id).Sum(l => (decimal)(l.ToDate < periodEnd ? l.ToDate : periodEnd).DayNumber - (l.FromDate > periodStart ? l.FromDate : periodStart).DayNumber + 1),
+                    ApprovedLeaveDays = slip?.ApprovedLeaveDays ?? leaves.Where(l => l.EmployeeId == x.Id).Sum(l => ((decimal)(l.ToDate < periodEnd ? l.ToDate : periodEnd).DayNumber - (l.FromDate > periodStart ? l.FromDate : periodStart).DayNumber + 1) * (l.IsHalfDay ? .5m : 1m)),
                     SalaryDays = slip != null ? slip.SalaryDays : null,
                     LeaveDeduction = slip?.LeaveDeduction ?? 0, DeductionNote = slip?.DeductionNote,
                     SlipId = slip?.Id, IsGenerated = slip != null, GeneratedAtUtc = slip?.GeneratedAtUtc
@@ -162,7 +162,7 @@ namespace Vertex_ERP.Controllers
                     ProvidentFund = salary.ProvidentFund, ProfessionalTax = salary.ProfessionalTax,
                     Tds = salary.Tds, OtherDeductions = salary.OtherDeductions, PfNumber = salary.PfNumber, PfUan = salary.PfUan,
                     LeaveDeduction = deduction, DeductionNote = string.IsNullOrWhiteSpace(note) ? null : note,
-                    ApprovedLeaveDays = leaves.Where(x => x.EmployeeId == salary.EmployeeId).Sum(x => (decimal)(x.ToDate < end ? x.ToDate : end).DayNumber - (x.FromDate > start ? x.FromDate : start).DayNumber + 1),
+                    ApprovedLeaveDays = leaves.Where(x => x.EmployeeId == salary.EmployeeId).Sum(x => ((decimal)(x.ToDate < end ? x.ToDate : end).DayNumber - (x.FromDate > start ? x.FromDate : start).DayNumber + 1) * (x.IsHalfDay ? .5m : 1m)),
                     GeneratedByUserId = userId, GeneratedAtUtc = DateTime.UtcNow, UpdatedAtUtc = DateTime.UtcNow
                 });
             }
@@ -1006,12 +1006,15 @@ namespace Vertex_ERP.Controllers
                 .Select(x => x.DeviceUserId + " (" + x.BiometricDevice.Name + ")").Distinct().ToListAsync();
             var code = preserve ? existingCode : EmployeeCompany.IsValid(companyCode)
                 ? await EmployeeNumberingService.PreviewAsync(_dbContext, companyCode!) : string.Empty;
+            if (biometricEmployeeId.HasValue)
+                enrollments.AddRange(await _dbContext.BiometricEnrollments.Where(x => x.EmployeeId == biometricEmployeeId && x.Status == "Linked").Select(x => x.EnrollCode + " (WDMS)").ToListAsync());
             return Json(new { employeeCode = code, companyCode, enrollments, isPreview = !preserve });
         }
 
         private async Task<List<Employee>> FindEmployeeByBiometricCodeAsync(string code) =>
             await _dbContext.Employees.Where(x => x.EmployeeCode.ToUpper() == code ||
-                _dbContext.EmployeeDeviceMappings.Any(m => m.EmployeeId == x.Id && m.DeviceUserId.ToUpper() == code))
+                _dbContext.EmployeeDeviceMappings.Any(m => m.EmployeeId == x.Id && m.DeviceUserId.ToUpper() == code) ||
+                _dbContext.BiometricEnrollments.Any(e => e.EmployeeId == x.Id && e.EnrollCode == code && e.Status == "Linked"))
                 .Take(2).ToListAsync();
 
         private async Task<bool> CanCompleteBiometricProfileAsync(Employee employee) =>
@@ -1301,21 +1304,26 @@ namespace Vertex_ERP.Controllers
                     !_dbContext.AppUsers.Any(a => a.EmployeeId == x.Id) &&
                     !_dbContext.EmployeeBankDetails.Any(a => a.EmployeeId == x.Id) &&
                     !_dbContext.EmployeeSalaryDetails.Any(a => a.EmployeeId == x.Id))
-                .OrderBy(x => x.EmployeeCode).Select(x => new { x.Id, x.EmployeeCode }).ToListAsync();
+                .OrderBy(x => x.EmployeeCode).Select(x => new { x.Id, x.EmployeeCode, x.FullName }).ToListAsync();
             var profileIds = biometricProfiles.Select(x => x.Id).ToList();
             var mappings = await _dbContext.EmployeeDeviceMappings.AsNoTracking()
                 .Where(x => profileIds.Contains(x.EmployeeId)).OrderBy(x => x.DeviceUserId)
                 .Select(x => new { x.EmployeeId, Label = x.DeviceUserId + " (" + x.BiometricDevice.Name + ")" }).ToListAsync();
+            var enrollments = await _dbContext.BiometricEnrollments.AsNoTracking()
+                .Where(x => x.EmployeeId.HasValue && profileIds.Contains(x.EmployeeId.Value) && x.Status == "Linked").ToListAsync();
             model.BiometricOptions = biometricProfiles.Select(x => new BiometricOnboardingOption
             {
                 EmployeeId = x.Id,
-                Label = string.Join(", ", mappings.Where(m => m.EmployeeId == x.Id).Select(m => m.Label).DefaultIfEmpty(x.EmployeeCode))
+                Label = x.FullName + " — " + string.Join(", ", enrollments.Where(e => e.EmployeeId == x.Id).Select(e => e.EnrollCode + " (WDMS)")
+                    .Concat(mappings.Where(m => m.EmployeeId == x.Id).Select(m => m.Label)).DefaultIfEmpty(x.EmployeeCode))
             }).ToList();
             model.SourceEnrollments = await _dbContext.EmployeeDeviceMappings.AsNoTracking()
                 .Where(mapping => mapping.EmployeeId == model.PendingBiometricEmployeeId)
                 .OrderBy(mapping => mapping.BiometricDevice.Name)
                 .Select(mapping => mapping.DeviceUserId + " (" + mapping.BiometricDevice.Name + ")")
                 .Distinct().ToListAsync();
+            if (model.PendingBiometricEmployeeId.HasValue)
+                model.SourceEnrollments = model.SourceEnrollments.Concat(enrollments.Where(x => x.EmployeeId == model.PendingBiometricEmployeeId).Select(x => x.EnrollCode + " (WDMS)")).Distinct().ToList();
             model.Managers = await _dbContext.Employees.AsNoTracking()
                 .Where(employee => employee.IsActive && _dbContext.AppUsers
                     .Any(user => user.EmployeeId == employee.Id && user.IsActive && user.Role == "Manager"))

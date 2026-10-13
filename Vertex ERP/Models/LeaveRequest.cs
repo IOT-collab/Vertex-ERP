@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace VertexERP.Models;
 
@@ -10,6 +10,7 @@ public class LeaveRequest
     [Required, MaxLength(30)] public string LeaveType { get; set; } = string.Empty;
     public DateOnly FromDate { get; set; }
     public DateOnly ToDate { get; set; }
+    public bool IsHalfDay { get; set; }
     [Required, MaxLength(500)] public string Reason { get; set; } = string.Empty;
     [Required, MaxLength(20)] public string Status { get; set; } = "Pending";
     [Required, MaxLength(30)] public string ApprovalLevel { get; set; } = "Manager";
@@ -19,5 +20,12 @@ public class LeaveRequest
     public AppUser? DecidedByUser { get; set; }
     public DateTime? DecidedAtUtc { get; set; }
     [MaxLength(500)] public string? DecisionNote { get; set; }
+    public int? ManagerDecidedByUserId { get; set; }
+    [MaxLength(200)] public string? ManagerDecidedByName { get; set; }
+    [MaxLength(20)] public string? ManagerDecision { get; set; }
+    public DateTime? ManagerDecidedAtUtc { get; set; }
+    [MaxLength(500)] public string? ManagerDecisionNote { get; set; }
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public string DisplayStatus => Status == "Pending" ? $"Pending {ApprovalLevel}" : Status;
     public DateTime AppliedAtUtc { get; set; } = DateTime.UtcNow;
 }

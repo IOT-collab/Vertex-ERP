@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
@@ -199,7 +199,7 @@ builder.Services
             var db = context.HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
             var currentUser = await db.AppUsers.AsNoTracking()
                 .SingleOrDefaultAsync(user => user.Id == userId && user.IsActive);
-            var currentRole = AccountRoleService.Normalize(currentUser?.Role);
+            var currentRole = currentUser == null ? null : await AccountRoleService.ResolveAsync(db, currentUser);
             if (currentUser == null || currentRole == null ||
                 (currentUser.PasswordChangedAtUtc.HasValue && context.Properties.IssuedUtc.HasValue &&
                  context.Properties.IssuedUtc.Value < currentUser.PasswordChangedAtUtc.Value))

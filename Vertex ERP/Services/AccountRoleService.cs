@@ -2,6 +2,16 @@ namespace VertexERP.Services;
 
 public static class AccountRoleService
 {
+    public static string? EffectiveRole(string? role, bool hasAssignedTeam) =>
+        Normalize(role) is Employee && hasAssignedTeam ? Manager : Normalize(role);
+
+    public static async Task<string?> ResolveAsync(VertexERP.Data.ApplicationDbContext db, VertexERP.Models.AppUser user)
+    {
+        var hasTeam = Normalize(user.Role) == Employee && user.EmployeeId.HasValue
+            && await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.AnyAsync(db.Employees,
+                employee => employee.IsActive && employee.ReportingManagerId == user.EmployeeId && employee.Id != user.EmployeeId);
+        return EffectiveRole(user.Role, hasTeam);
+    }
     public const string Admin = "Admin";
     public const string HR = "HR";
     public const string Manager = "Manager";

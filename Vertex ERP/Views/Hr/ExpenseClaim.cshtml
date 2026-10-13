@@ -12,6 +12,7 @@
  <div class="exp-header"><div><h1 class="exp-title">@ViewData["Title"]</h1><p class="exp-subtitle">@(isManagerSelf ? "Submit your own business expenses to HR and track the decision." : isEmployee ? "Submit business expenses and track your manager's decision." : isManager ? "Review claims from employees directly assigned to you." : "Review all claims, approve or reject pending requests, and track decisions.")</p></div>@if(isEmployee){<button type="button" class="exp-btn-primary" onclick="openClaimModal()"><i class="fa-solid fa-plus"></i> New Expense Claim</button>}</div>
  @if(TempData["ExpenseMessage"] is string message){<div class="exp-alert exp-alert-success"><i class="fa-solid fa-circle-check"></i> @message</div>}
  @if(TempData["ExpenseError"] is string error){<div class="exp-alert exp-alert-error"><i class="fa-solid fa-circle-exclamation"></i> @error</div>}
+ <partial name="_ExpenseAdvances" model="Model" />
  <div class="exp-grid-stats">
   <div class="exp-stat-card"><span class="exp-stat-label">Total Claimed</span><h3 class="exp-stat-value">₹@Model.TotalAmount.ToString("N2")</h3><span class="exp-stat-sub">@Model.Claims.Count claims</span></div>
   <div class="exp-stat-card"><span class="exp-stat-label">Pending Approval</span><h3 class="exp-stat-value">₹@Model.PendingAmount.ToString("N2")</h3><span class="exp-stat-sub text-amber">@Model.Claims.Count(x=>x.Status=="Pending") under review</span></div>

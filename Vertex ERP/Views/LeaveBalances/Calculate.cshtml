@@ -1,0 +1,60 @@
+@model VertexERP.Models.LeaveCalculationEdit
+@using VertexERP.Models
+@using VertexERP.Services
+@using System.Globalization
+@{
+    ViewData["Title"] = "Calculate Leave";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    string N(decimal value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+}
+<link href="~/css/LeaveBalances.css" rel="stylesheet" asp-append-version="true" />
+<section class="manual-leave-page">
+<header><h1>Calculate Leave · @Model.Year</h1><p>@Model.EmployeeName · @Model.EmployeeCode</p><a asp-action="Index" asp-route-year="@Model.Year">Back to leave balances</a></header>
+<div asp-validation-summary="All" class="manual-error" role="alert"></div>
+<form asp-action="Calculate" method="post" class="manual-card" id="calculator">
+<input asp-for="EmployeeId" type="hidden"/><input asp-for="Year" type="hidden"/><input asp-for="Revision" type="hidden"/>
+@for(var i=0;i<Model.BalanceRevisions.Count;i++){<input type="hidden" name="BalanceRevisions[@i]" value="@Model.BalanceRevisions[i]"/>}
+<p>EL: 1 per complete 20 working days. CL and ML: 1 each per complete 40 working days. Working days accumulate across the selected year. EW earnings are entered by HR.</p>
+@if(!Model.HasSavedCalculation && Model.Balances.Any(x=>x.Revision>0)){
+<p class="manual-notice">Existing manual balances are shown below. Enter the complete year's working days and additional usage before saving; this calculator will replace manual totals. Do not re-enter approved requests as adjustments.</p>
+<label><input asp-for="ConfirmReplaceManual"/> I reviewed the existing balances and entered all working days and additional usage to replace the manual totals.</label>}
+<div class="manual-category-grid">
+<fieldset><legend>EL carry forward</legend><label>Opening EL<input asp-for="OpeningEL" type="number" min="0" max="3660" step="0.5" required/></label><p>Previous year available: @(Model.PreviousEL?.ToString("0.##") ?? "Not recorded")</p></fieldset>
+<fieldset><legend>EW carry forward</legend><label>Opening EW<input asp-for="OpeningEW" type="number" min="0" max="3660" step="0.5" required/></label><p>Previous year available: @(Model.PreviousEW?.ToString("0.##") ?? "Not recorded")</p></fieldset>
+</div>
+@if(Model.PreviousEL.HasValue || Model.PreviousEW.HasValue){
+<button type="button" id="refresh-opening" data-el="@N(Math.Max(0, Model.PreviousEL ?? Model.OpeningEL))" data-ew="@N(Math.Max(0, Model.PreviousEW ?? Model.OpeningEW))">Use previous year's closing balances</button>
+@if(Model.HasSavedCalculation && ((Model.PreviousEL.HasValue && Model.OpeningEL!=Math.Max(0,Model.PreviousEL.Value)) || (Model.PreviousEW.HasValue && Model.OpeningEW!=Math.Max(0,Model.PreviousEW.Value)))){<p class="manual-notice">Opening balance differs from the previous year's current closing balance. Review and refresh if appropriate.</p>}}
+<p class="manual-help">Additional used means leave not already recorded as an approved request. Half-day entries are allowed. Opening balances are saved once, never added again on repeated saves.</p>
+<div class="manual-table"><table><thead><tr><th>Month</th><th>Working days</th><th>Additional EL used</th><th>Additional CL used</th><th>Additional ML used</th><th>EW earned</th><th>Additional EW used</th></tr></thead><tbody>
+@for(var i=0;i<Model.Months.Count;i++){
+<tr><th>@CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(Model.Months[i].Month)<input asp-for="Months[i].Month" type="hidden"/></th>
+<td><input asp-for="Months[i].WorkingDays" aria-label="Working days" type="number" min="0" max="@DateTime.DaysInMonth(Model.Year,Model.Months[i].Month)" step="0.5" required/></td>
+<td><input asp-for="Months[i].AdjustedEL" aria-label="Additional EL used" type="number" min="0" max="3660" step="0.5" required/></td>
+<td><input asp-for="Months[i].AdjustedCL" aria-label="Additional CL used" type="number" min="0" max="3660" step="0.5" required/></td>
+<td><input asp-for="Months[i].AdjustedML" aria-label="Additional ML used" type="number" min="0" max="3660" step="0.5" required/></td>
+<td><input asp-for="Months[i].EarnedEW" aria-label="EW earned" type="number" min="0" max="3660" step="0.5" required/></td>
+<td><input asp-for="Months[i].AdjustedEW" aria-label="Additional EW used" type="number" min="0" max="3660" step="0.5" required/></td></tr>
+}
+</tbody></table></div>
+<h3>Total working days: <output id="working-total"></output></h3>
+<div class="manual-table"><table><thead><tr><th>Category</th><th>Opening</th><th>Earned</th><th>Approved (automatic)</th><th>Additional used</th><th>Total used</th><th>Pending</th><th>Available preview</th><th>Currently saved available</th></tr></thead><tbody>
+@foreach(var c in ManualLeavePage.Categories){var b=Model.Balances.Single(x=>x.Category==c);
+<tr data-category="@c" data-approved="@N(b.ApprovedDays)"><th>@c</th><td data-value="opening"></td><td data-value="earned"></td><td>@N(b.ApprovedDays)</td><td data-value="adjusted"></td><td data-value="used"></td><td>@N(b.PendingDays)</td><td data-value="available"></td><td>@(b.Revision>0?N(b.AvailableDays):"Not filled")</td></tr>
+}
+</tbody></table></div>
+<p class="manual-help">Negative balances remain visible. Approved requests are read from the latest saved decisions; this preview refreshes when you reload.</p>
+<div class="manual-actions"><button type="submit">Save Calculation &amp; Update Leaves</button></div>
+</form></section>
+<style>#calculator{padding:24px}#calculator input[type=number]{width:100%;min-width:80px;padding:9px;border:1px solid #64748b;border-radius:6px;background:transparent;color:inherit}#calculator .manual-table{margin-top:20px}#calculator [data-negative=true]{color:#ef4444;font-weight:bold}</style>
+<script>
+(()=>{
+const form=document.getElementById('calculator');
+const sum=field=>Array.from(form.querySelectorAll(`input[name$=".${field}"]`)).reduce((n,e)=>n+(Number(e.value)||0),0);
+const opening=c=>Number(form.elements.namedItem('Opening'+c)?.value)||0;
+function update(){const days=sum('WorkingDays');document.getElementById('working-total').textContent=days;
+form.querySelectorAll('[data-category]').forEach(row=>{const c=row.dataset.category,earned=c==='EW'?sum('EarnedEW'):Math.floor(days/(c==='EL'?20:40)),adjusted=sum('Adjusted'+c),used=Number(row.dataset.approved)+adjusted,available=opening(c)+earned-used;
+Object.entries({opening:opening(c),earned,adjusted,used,available}).forEach(([key,value])=>{const cell=row.querySelector(`[data-value="${key}"]`);cell.textContent=value;cell.dataset.negative=String(value<0);});});}
+form.addEventListener('input',update);document.getElementById('refresh-opening')?.addEventListener('click',e=>{form.elements.OpeningEL.value=e.currentTarget.dataset.el;form.elements.OpeningEW.value=e.currentTarget.dataset.ew;update();});update();
+})();
+</script>

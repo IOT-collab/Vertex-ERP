@@ -40,6 +40,7 @@ public sealed class BiometricEmployeeReconciliationService(IServiceScopeFactory 
             var logs = await db.AttendanceLogs.Where(x => x.EmployeeId == null && x.BiometricDevice.IsActive && x.DeviceUserId.Trim() != ""
                 && !db.EmployeeDeviceMappings.Any(m => m.BiometricDeviceId == x.BiometricDeviceId && !m.IsActive && m.DeviceUserId.ToUpper() == x.DeviceUserId.Trim().ToUpper())
                 && !db.BiometricEmployeeExclusions.Any(e => e.DeviceUserCode == x.DeviceUserId.Trim().ToUpper()))
+                .Where(x => !db.BiometricEnrollments.Any(e => e.EnrollCode == x.DeviceUserId.Trim().ToUpper() && e.Status != "Linked"))
                 .OrderBy(x => x.Id).Take(5000).ToListAsync(cancellationToken);
             var count = 0;
             foreach (var group in logs.GroupBy(x => (x.BiometricDeviceId, Code: x.DeviceUserId.Trim().ToUpperInvariant())))
@@ -50,6 +51,31 @@ public sealed class BiometricEmployeeReconciliationService(IServiceScopeFactory 
                 // An explicitly disabled mapping must not be re-enabled by import.
                 if (mapping is { IsActive: false }) continue;
                 var employee = mapping?.Employee;
+                var enrollment = await db.BiometricEnrollments.Include(x => x.Employee)
+                    .FirstOrDefaultAsync(x => x.EnrollCode == group.Key.Code, cancellationToken);
+                if (enrollment != null)
+                {
+                    if (enrollment.Status != "Linked" || enrollment.Employee == null) continue;
+                    employee = enrollment.Employee;
+                    if (mapping != null && mapping.EmployeeId != employee.Id)
+                    {
+                        enrollment.Status = "Needs review";
+                        enrollment.ReviewReason = "Device mapping differs from the verified enroll-code link.";
+                        await db.SaveChangesAsync(cancellationToken);
+                        continue;
+                    }
+                    if (mapping == null)
+                    {
+                        if (await db.EmployeeDeviceMappings.AnyAsync(x => x.BiometricDeviceId == group.Key.BiometricDeviceId && x.EmployeeId == employee.Id, cancellationToken))
+                        {
+                            enrollment.Status = "Needs review";
+                            enrollment.ReviewReason = "Employee already has a different enroll code on this device.";
+                            await db.SaveChangesAsync(cancellationToken);
+                            continue;
+                        }
+                        db.EmployeeDeviceMappings.Add(new EmployeeDeviceMapping { BiometricDeviceId = group.Key.BiometricDeviceId, DeviceUserId = group.Key.Code, Employee = employee });
+                    }
+                }
                 if (employee == null)
                 {
                     var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(group.Key.Code))).ToLowerInvariant();

@@ -1,4 +1,4 @@
-namespace VertexERP.Services;
+﻿namespace VertexERP.Services;
 public sealed record ModuleDefinition(string Id, string Name, string Description, string Controller, string Action);
 public static class ModuleCatalog
 {
@@ -38,7 +38,7 @@ public static class ModuleCatalog
         if (a.Contains("project")) return "projects";
         if (a == "ordertracking") return "shipments";
         if (a == "settings") return "settings";
-        if (c == "hr" || a is "employees" or "hrms" or "manager" or "addemphrm" or "empaddrequirement" or "departmentmanagement" or "employeeprofile" or "editemployeeprofile") return "hr";
+        if (c == "hr" || a is "myteam" or "employees" or "hrms" or "manager" or "addemphrm" or "empaddrequirement" or "departmentmanagement" or "employeeprofile" or "editemployeeprofile") return "hr";
         return null;
     }
 }

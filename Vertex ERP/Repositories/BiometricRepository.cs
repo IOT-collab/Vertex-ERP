@@ -49,6 +49,12 @@ public sealed class BiometricRepository : IBiometricRepository
         await _db.AttendanceLogs.AsNoTracking().Include(log => log.Employee).Where(log => log.PunchTime >= from && log.PunchTime < to).OrderBy(log => log.PunchTime).ToListAsync(cancellationToken);
     public async Task<IReadOnlyList<Employee>> GetActiveEmployeesAsync(CancellationToken cancellationToken = default) =>
         await _db.Employees.AsNoTracking().Where(employee => employee.IsActive).OrderBy(employee => employee.FullName).ToListAsync(cancellationToken);
+    public async Task<IReadOnlyList<BiometricEnrollment>> GetEnrollmentsAsync(CancellationToken cancellationToken = default) =>
+        await _db.BiometricEnrollments.AsNoTracking().ToListAsync(cancellationToken);
+    public async Task<IReadOnlyList<EmployeeDeviceMapping>> GetActiveMappingsAsync(CancellationToken cancellationToken = default) =>
+        await _db.EmployeeDeviceMappings.AsNoTracking().Where(x => x.IsActive
+            && !_db.BiometricEmployeeExclusions.Any(e => e.DeviceUserCode == x.DeviceUserId.Trim().ToUpper()))
+            .ToListAsync(cancellationToken);
     public async Task<IReadOnlySet<int>> GetApprovedLeaveEmployeeIdsAsync(DateOnly date, CancellationToken cancellationToken = default) =>
         (await _db.LeaveRequests.AsNoTracking()
             .Where(request => request.Status == "Approved" && request.FromDate <= date && request.ToDate >= date)

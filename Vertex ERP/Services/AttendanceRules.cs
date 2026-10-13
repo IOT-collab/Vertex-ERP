@@ -1,4 +1,4 @@
-namespace VertexERP.Services;
+﻿namespace VertexERP.Services;
 
 public static class AttendanceRules
 {
@@ -11,10 +11,25 @@ public static class AttendanceRules
 
     public static bool IsWeeklyOff(DateOnly date) => date.DayOfWeek == DayOfWeek.Sunday;
 
+    private static readonly IReadOnlyList<VertexERP.Models.CompanyHoliday> CompanyHolidays =
+        new VertexERP.Models.CompanyHolidayCalendar(DateTimeOffset.UtcNow).Holidays;
+
+    public static string? HolidayName(DateOnly date) =>
+        CompanyHolidays.FirstOrDefault(holiday => holiday.Start <= date && holiday.End >= date)?.Name
+        ?? (IsWeeklyOff(date) ? "Sunday" : null);
+
+    public static bool IsHoliday(DateOnly date) => HolidayName(date) != null;
+
+    public static string NoPunchStatus(DateOnly date, bool approvedLeave = false) =>
+        IsHoliday(date) ? "Holiday" : approvedLeave ? "Leave" : "Absent";
+
+    public static string StatusFor(DateTime? checkIn, DateOnly date, bool approvedLeave = false) =>
+        checkIn.HasValue ? (IsLateArrival(checkIn.Value) ? "Late" : "Present") : NoPunchStatus(date, approvedLeave);
+
     public static (string Status, string Remark, bool IsLate, TimeSpan Hours) EvaluateDay(
         DateTime? checkIn, DateTime? checkOut, DateOnly date, DateOnly today, TimeOnly startTime)
     {
-        if (!checkIn.HasValue) return ("Absent", "No punches recorded", false, TimeSpan.Zero);
+        if (!checkIn.HasValue) return (NoPunchStatus(date), HolidayName(date) ?? "No punches recorded", false, TimeSpan.Zero);
         var late = IsLateArrival(checkIn.Value);
         var hours = checkOut.HasValue && checkOut.Value > checkIn.Value
             ? checkOut.Value - checkIn.Value : TimeSpan.Zero;

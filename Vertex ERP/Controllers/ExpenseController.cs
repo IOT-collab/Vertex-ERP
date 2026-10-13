@@ -43,8 +43,123 @@ public sealed class ExpenseController(ApplicationDbContext db, IWebHostEnvironme
             query = query.Where(x => x.EmployeeId == employeeId.Value);
             mode = "Employee";
         }
+        var currentEmployeeId = await LoggedInEmployeeIdAsync();
+        var advances = db.ExpenseAdvances.AsNoTracking().Include(x => x.Employee).AsQueryable();
+        if (mode != "HR") advances = advances.Where(x => x.EmployeeId == currentEmployeeId);
         return View("~/Views/Hr/ExpenseClaim.cshtml", new ExpenseClaimPageViewModel
-        { Mode = mode, Claims = await query.OrderByDescending(x => x.SubmittedAtUtc).ToListAsync() });
+        {
+            Mode = mode, CurrentEmployeeId = currentEmployeeId,
+            Claims = await query.OrderByDescending(x => x.SubmittedAtUtc).ToListAsync(),
+            Advances = await advances.OrderByDescending(x => x.PaidAtUtc).ToListAsync(),
+            AdvanceEmployees = mode == "HR" ? await db.Employees.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.FullName).ToListAsync() : new List<Employee>()
+        });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "HR,Admin")]
+    public async Task<IActionResult> RecordAdvance(RecordExpenseAdvanceViewModel model)
+    {
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return Forbid();
+        if (!await db.Employees.AnyAsync(x => x.Id == model.EmployeeId && x.IsActive))
+            ModelState.AddModelError(nameof(model.EmployeeId), "Select an active employee.");
+        if (!new[] { "Bank Transfer", "UPI", "Cash", "Cheque" }.Contains(model.PaymentMode))
+            ModelState.AddModelError(nameof(model.PaymentMode), "Select a valid payment mode.");
+        var paidAtUtc = model.PaidAtIst.HasValue && model.PaidAtIst.Value.Year >= 2000
+            ? DateTime.SpecifyKind(model.PaidAtIst.Value, DateTimeKind.Unspecified).AddMinutes(-330) : (DateTime?)null;
+        if (!paidAtUtc.HasValue || paidAtUtc.Value > DateTime.UtcNow)
+            ModelState.AddModelError(nameof(model.PaidAtIst), "Enter a valid payment date/time in IST, not in the future.");
+        if (model.Amount != decimal.Round(model.Amount, 2)) ModelState.AddModelError(nameof(model.Amount), "Use at most two decimal places.");
+        ValidateReceipt(model.ReceiptFile);
+        if (model.ReceiptFile != null && Path.GetFileName(model.ReceiptFile.FileName).Length > 260)
+            ModelState.AddModelError(nameof(model.ReceiptFile), "Receipt filename must be 260 characters or fewer.");
+        if (ModelState.IsValid && !await HasReceiptSignatureAsync(model.ReceiptFile!))
+            ModelState.AddModelError(nameof(model.ReceiptFile), "The receipt content must match its PDF, JPG or PNG file type.");
+        if (!ModelState.IsValid)
+        {
+            TempData["ExpenseError"] = string.Join(" ", ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage));
+            return RedirectToAction(nameof(Index));
+        }
+        var file = model.ReceiptFile!;
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var storedName = $"{Guid.NewGuid():N}{extension}";
+        var folder = Path.Combine(environment.ContentRootPath, "App_Data", "AdvanceReceipts");
+        Directory.CreateDirectory(folder);
+        var path = Path.Combine(folder, storedName);
+        try
+        {
+            await using (var target = new FileStream(path, FileMode.CreateNew)) await file.CopyToAsync(target);
+            db.ExpenseAdvances.Add(new ExpenseAdvance
+            {
+                EmployeeId = model.EmployeeId, Purpose = model.Purpose.Trim(), Amount = model.Amount,
+                PaymentMode = model.PaymentMode, TransactionId = model.TransactionId.Trim(),
+                PaidAtUtc = DateTime.SpecifyKind(paidAtUtc!.Value, DateTimeKind.Utc), RecordedByUserId = userId,
+                StoredFileName = storedName, OriginalFileName = Path.GetFileName(file.FileName), ContentType = AllowedFiles[extension]
+            });
+            await db.SaveChangesAsync();
+        }
+        catch
+        {
+            if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+            throw;
+        }
+        TempData["ExpenseMessage"] = "Advance payment recorded. Employee confirmation is pending.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> ConfirmAdvance(ConfirmExpenseAdvanceViewModel model)
+    {
+        var employeeId = await LoggedInEmployeeIdAsync();
+        if (!employeeId.HasValue) return Forbid();
+        var advance = await db.ExpenseAdvances.FirstOrDefaultAsync(x => x.Id == model.Id && x.EmployeeId == employeeId.Value);
+        if (advance == null) return NotFound();
+        if (advance.ConfirmationStatus == "Received") return Conflict("Payment receipt has already been confirmed.");
+        if (!new[] { "Received", "Amount Mismatch", "Not Received" }.Contains(model.Response)) return BadRequest();
+        if (model.Response == "Amount Mismatch" && (!model.ReceivedAmount.HasValue || model.ReceivedAmount == advance.Amount))
+            ModelState.AddModelError(nameof(model.ReceivedAmount), "Enter the actual amount received, different from the payment amount.");
+        if (model.ReceivedAmount.HasValue && model.ReceivedAmount != decimal.Round(model.ReceivedAmount.Value, 2))
+            ModelState.AddModelError(nameof(model.ReceivedAmount), "Use at most two decimal places.");
+        if (model.Response != "Received" && string.IsNullOrWhiteSpace(model.Note))
+            ModelState.AddModelError(nameof(model.Note), "Please describe the payment issue.");
+        if (!ModelState.IsValid)
+        {
+            TempData["ExpenseError"] = string.Join(" ", ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage));
+            return RedirectToAction(nameof(Index), User.IsInRole("Manager") ? new { view = "self" } : null);
+        }
+        advance.ConfirmationStatus = model.Response;
+        advance.ReceivedAmount = model.Response == "Received" ? advance.Amount : model.Response == "Not Received" ? 0 : model.ReceivedAmount;
+        advance.EmployeeNote = model.Note?.Trim();
+        advance.RespondedAtUtc = DateTime.UtcNow;
+        advance.RespondedByUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        db.AuditLogs.Add(VertexERP.Services.AuditLogFactory.CreateEvent("ExpenseAdvance", "Employee payment response",
+            $"Advance #{advance.Id} · Employee #{advance.EmployeeId} · {advance.ConfirmationStatus} · Received {advance.ReceivedAmount:0.00}", User));
+        try { await db.SaveChangesAsync(); }
+        catch (DbUpdateConcurrencyException) { return Conflict("This payment was updated. Refresh and check its current status."); }
+        TempData["ExpenseMessage"] = "Your payment response has been shared with HR. Receipt confirmation does not settle the advance against expenses.";
+        return RedirectToAction(nameof(Index), User.IsInRole("Manager") ? new { view = "self" } : null);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> AdvanceReceipt(int id)
+    {
+        var advance = await db.ExpenseAdvances.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        if (advance == null) return NotFound();
+        if (!User.IsInRole("HR") && !User.IsInRole("Admin") && await LoggedInEmployeeIdAsync() != advance.EmployeeId) return Forbid();
+        var path = Path.Combine(environment.ContentRootPath, "App_Data", "AdvanceReceipts", advance.StoredFileName);
+        return System.IO.File.Exists(path) ? PhysicalFile(path, advance.ContentType, advance.OriginalFileName) : NotFound();
+    }
+
+    private static async Task<bool> HasReceiptSignatureAsync(IFormFile file)
+    {
+        await using var stream = file.OpenReadStream();
+        var header = new byte[8];
+        var count = await stream.ReadAtLeastAsync(header, header.Length, throwOnEndOfStream: false);
+        return Path.GetExtension(file.FileName).ToLowerInvariant() switch
+        {
+            ".pdf" => count >= 5 && header.AsSpan(0, 5).SequenceEqual("%PDF-"u8),
+            ".jpg" or ".jpeg" => count >= 3 && header[0] == 255 && header[1] == 216 && header[2] == 255,
+            ".png" => count == 8 && header.SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }),
+            _ => false
+        };
     }
 
     [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Employee,User,Manager")]

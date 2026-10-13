@@ -25,7 +25,7 @@
             cell.classList.toggle('dc-outside', date.getMonth() !== current.getMonth());
             cell.classList.toggle('dc-holiday', !!holiday);
             if (dateKey === key(today)) { cell.classList.add('dc-current'); cell.setAttribute('aria-current', 'date'); }
-            cell.setAttribute('aria-label', label.format(date) + (holiday ? `, ${holiday.name}` : ''));
+            cell.setAttribute('aria-label', label.format(date) + (holiday ? `, ${holiday.name}` : '') + ', View attendance');
             const number = document.createElement('span');
             number.textContent = date.getDate();
             cell.append(number);
@@ -35,12 +35,15 @@
                 cell.classList.add('dc-selected');
                 cell.setAttribute('aria-pressed', 'true');
                 document.getElementById('dc-description').textContent = label.format(date) + (holiday ? ` · ${holiday.name}` : ' · No company holiday listed');
+                const attendanceUrl = new URL(dialog.dataset.attendanceUrl, window.location.href);
+                attendanceUrl.searchParams.set('filterDate', dateKey);
+                window.location.assign(attendanceUrl.href);
             });
             grid.append(cell);
         }
         document.getElementById('dc-description').textContent = current.getFullYear() === 2026
-            ? 'Select a date to see its details.'
-            : 'Company holiday schedule is available for 2026 only.';
+            ? 'Select a date to view attendance for that day.'
+            : 'Select a date to view attendance. Company holiday schedule is available for 2026 only.';
     }
     function open() {
         if (dialog.open) return;

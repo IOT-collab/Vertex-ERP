@@ -1,0 +1,30 @@
+@model List<VertexERP.Models.BiometricEnrollment>
+@{
+    ViewData["Title"] = "WDMS Enroll Codes";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var employees = (List<VertexERP.Models.Employee>)ViewBag.Employees;
+}
+<link href="~/css/ExpenseClaim.css" rel="stylesheet" asp-append-version="true" />
+<div class="exp-container">
+    <div class="exp-header"><div><h1 class="exp-title">WDMS Enroll Codes</h1><p class="exp-subtitle">WDMS Employee ID is the biometric Enroll Code. ERP Employee ID remains separate.</p></div><a asp-controller="Employee" asp-action="Index" class="exp-btn-secondary">Employee Directory</a></div>
+    @if(TempData["EnrollmentError"] is string error){<div class="exp-alert exp-alert-error">@error</div>}
+    @if(TempData["EnrollmentMessage"] is string message){<div class="exp-alert exp-alert-success">@message</div>}
+    <p>@Model.Count enrollments · @Model.Count(x => x.Status == "Linked") linked · @Model.Count(x => x.Status == "Needs review") need review · All displayed times are IST</p>
+    <div class="exp-main-panel"><div class="exp-table-responsive"><table class="exp-table"><thead><tr><th>Enroll Code</th><th>Source name</th><th>ERP employee</th><th>Status</th><th>Review / verification</th></tr></thead><tbody>
+    @foreach(var item in Model)
+    {
+        <tr><td><strong>@item.EnrollCode</strong></td><td><div class="exp-claim-info"><strong>@item.FullName</strong><small>@(item.IsSheetReference ? "Reference: employee sheet" : "Reference: WDMS")</small>@if(item.WdmsName != null && item.WdmsName != item.FullName){<small>WDMS: @item.WdmsName</small>}<small>Last seen: @(item.LastSeenUtc?.AddMinutes(330).ToString("dd MMM yyyy, hh:mm tt") ?? "Not yet seen in WDMS directory")</small></div></td>
+            <td>@if(item.Employee != null){<a asp-controller="Employee" asp-action="Details" asp-route-id="@item.EmployeeId">@item.Employee.EmployeeCode · @item.Employee.FullName</a>}else{<span>Not linked</span>}</td>
+            <td><span class="status-badge @(item.Status == "Linked" ? "status-approved" : "status-pending")">@item.Status</span></td>
+            <td><p>@item.ReviewReason</p>@if(item.Status == "Needs review"){
+                <form asp-action="Link" method="post" class="exp-decision-form">
+                    <input type="hidden" name="enrollCode" value="@item.EnrollCode" />
+                    <label for="enroll-@item.EnrollCode">Verified employee</label><select id="enroll-@item.EnrollCode" name="employeeId" class="exp-input" required><option value="">Select employee</option><option value="0">Create new profile: @item.FullName</option>@foreach(var employee in employees){<option value="@employee.Id">@employee.EmployeeCode · @employee.FullName</option>}</select>
+                    <label><input type="checkbox" name="confirmed" value="true" required /> I verified that this enroll code belongs to the selected employee.</label>
+                    <small>Previously assigned attendance will remain unchanged.</small><button class="exp-approve" type="submit">Verify Link</button>
+                </form>
+            }</td></tr>
+    }
+    @if(Model.Count == 0){<tr><td colspan="5">Enroll codes will appear after WDMS synchronization.</td></tr>}
+    </tbody></table></div></div>
+</div>

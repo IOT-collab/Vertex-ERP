@@ -35,6 +35,7 @@ public class EmployeeController : Controller
             query = query.Where(employee =>
                 employee.EmployeeCode.ToLower().Contains(term) ||
                 _dbContext.EmployeeDeviceMappings.Any(mapping => mapping.EmployeeId == employee.Id && mapping.DeviceUserId.ToLower().Contains(term)) ||
+                _dbContext.BiometricEnrollments.Any(enrollment => enrollment.EmployeeId == employee.Id && enrollment.EnrollCode.ToLower().Contains(term)) ||
                 employee.FirstName.ToLower().Contains(term) ||
                 (employee.LastName != null && employee.LastName.ToLower().Contains(term)) ||
                 employee.Email.ToLower().Contains(term) ||
@@ -57,6 +58,8 @@ public class EmployeeController : Controller
 
         var model = new EmployeeDirectoryViewModel
         {
+            EnrollCodes = _dbContext.BiometricEnrollments.AsNoTracking().Where(x => x.EmployeeId != null && x.Status == "Linked").ToList()
+                .GroupBy(x => x.EmployeeId!.Value).ToDictionary(x => x.Key, x => string.Join(", ", x.Select(e => e.EnrollCode))),
             Employees = query.OrderBy(employee => employee.FirstName).ThenBy(employee => employee.LastName).ToList(),
             TotalEmployees = _dbContext.Employees.Count(),
             ActiveEmployees = _dbContext.Employees.Count(employee => employee.IsActive),
@@ -437,7 +440,13 @@ public class EmployeeController : Controller
                 }
 
                 var deviceMappings = await _dbContext.EmployeeDeviceMappings.Where(mapping => mapping.EmployeeId == id).ToListAsync();
-                foreach (var code in deviceMappings.Select(x => x.DeviceUserId.Trim().ToUpperInvariant()).Distinct())
+                var sourceEnrollments = await _dbContext.BiometricEnrollments.Where(x => x.EmployeeId == id).ToListAsync();
+                foreach (var enrollment in sourceEnrollments)
+                {
+                    enrollment.EmployeeId = null; enrollment.Status = "Excluded";
+                    enrollment.ReviewReason = "This enrollment was deleted by HR.";
+                }
+                foreach (var code in deviceMappings.Select(x => x.DeviceUserId.Trim().ToUpperInvariant()).Concat(sourceEnrollments.Select(x => x.EnrollCode)).Distinct())
                     if (!await _dbContext.BiometricEmployeeExclusions.AnyAsync(x => x.DeviceUserCode == code))
                         _dbContext.BiometricEmployeeExclusions.Add(new BiometricEmployeeExclusion { DeviceUserCode = code });
                 var attendanceLogs = await _dbContext.AttendanceLogs.Where(log => log.EmployeeId == id).ToListAsync();
@@ -565,7 +574,9 @@ public class EmployeeController : Controller
             .Where(mapping => mapping.EmployeeId == employeeId)
             .OrderBy(mapping => mapping.BiometricDevice.Name)
             .Select(mapping => mapping.DeviceUserId + " (" + mapping.BiometricDevice.Name + ")")
-            .Distinct().ToList();
+            .ToList().Concat(_dbContext.BiometricEnrollments.AsNoTracking()
+                .Where(x => x.EmployeeId == employeeId && x.Status == "Linked")
+                .Select(x => x.EnrollCode + " (WDMS)").ToList()).Distinct().ToList();
 
     private bool TrySave(string errorMessage)
     {

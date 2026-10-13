@@ -1,4 +1,4 @@
-:root {
+﻿:root {
     --erp-bg: #07111f;
     --erp-surface: #0f172a;
     --erp-surface-soft: #111c30;
@@ -656,3 +656,6 @@ body > .container [class*="dialog-body"] {
     flex: 0 0 36px;
     padding: 0;
 }
+
+/* Shared attendance holiday status across employee and management pages. */
+.holiday, .holiday-status { color: #93c5fd !important; background: rgba(59, 130, 246, .12); border-radius: 6px; padding: 3px 8px; }

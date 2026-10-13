@@ -24,7 +24,7 @@ static class SalaryGenerationChecks
         {
             var http = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) }, "test")) };
             http.Request.Form = new FormCollection(values ?? new());
-            return new HrController(context, null!, NullLogger<HrController>.Instance, null!) { ControllerContext = new() { HttpContext = http }, TempData = new TempDataDictionary(http, new MemoryTempData()) };
+            return new HrController(context, new EmployeeCreationChecks.TestEnvironment(), NullLogger<HrController>.Instance, null!) { ControllerContext = new() { HttpContext = http }, TempData = new TempDataDictionary(http, new MemoryTempData()) };
         }
         Dictionary<string, StringValues> Values(string days = "22.5") => new()
         {

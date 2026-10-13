@@ -35,7 +35,7 @@ static class EmployeeCreationChecks
             HrController Controller()
             {
                 var http = new DefaultHttpContext { Session = new MemorySession() };
-                return new HrController(db, null!, NullLogger<HrController>.Instance, protection)
+                return new HrController(db, new TestEnvironment(), NullLogger<HrController>.Instance, protection)
                 {
                     ControllerContext = new ControllerContext { HttpContext = http },
                     TempData = new TempDataDictionary(http, new MemoryTempData())
@@ -149,6 +149,15 @@ static class EmployeeCreationChecks
         }
     }
 
+    internal sealed class TestEnvironment : Microsoft.AspNetCore.Hosting.IWebHostEnvironment
+    {
+        public string ApplicationName { get; set; } = "Vertex ERP";
+        public string EnvironmentName { get; set; } = "Development";
+        public string ContentRootPath { get; set; } = Directory.GetCurrentDirectory();
+        public string WebRootPath { get; set; } = Directory.GetCurrentDirectory();
+        public Microsoft.Extensions.FileProviders.IFileProvider ContentRootFileProvider { get; set; } = new Microsoft.Extensions.FileProviders.NullFileProvider();
+        public Microsoft.Extensions.FileProviders.IFileProvider WebRootFileProvider { get; set; } = new Microsoft.Extensions.FileProviders.NullFileProvider();
+    }
     sealed class MemoryTempData : ITempDataProvider
     {
         public IDictionary<string, object> LoadTempData(HttpContext context) => new Dictionary<string, object>();

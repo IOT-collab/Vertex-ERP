@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 @inject VertexERP.Data.ApplicationDbContext LayoutDb
 <html lang="en">
 <head>
@@ -30,6 +30,14 @@
             Context.Session.Remove("welcomeGender");
         }
         var pendingBankRequestCount = isHr ? LayoutDb.BankDetailUpdateRequests.Count(request => request.Status == "Pending") : 0;
+        int? sidebarManagerId = null;
+        if (isManager && int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var sidebarUserId))
+        {
+            sidebarManagerId = LayoutDb.AppUsers.Where(user => user.Id == sidebarUserId && user.IsActive).Select(user => user.EmployeeId).FirstOrDefault();
+        }
+        var assignedTeamCount = sidebarManagerId.HasValue ? LayoutDb.Employees.Count(employee => employee.IsActive && employee.ReportingManagerId == sidebarManagerId && employee.Id != sidebarManagerId) : 0;
+        var teamLeavePendingCount = sidebarManagerId.HasValue ? LayoutDb.LeaveRequests.Count(request => request.AssignedApproverEmployeeId == sidebarManagerId && request.EmployeeId != sidebarManagerId && request.Status == "Pending" && request.ApprovalLevel == "Manager") : 0;
+        var teamQueryCount = sidebarManagerId.HasValue ? LayoutDb.QueryTickets.Count(ticket => ticket.ReportingManagerId == sidebarManagerId && ticket.EmployeeId != sidebarManagerId && ticket.Status != "Resolved" && ticket.Status != "Closed") : 0;
         var homeUrl = isEmployee ? "/Main/EmployeeHome" : isManager ? "/Main/Manager" : "/Main/Dashboard";
     }
 
@@ -91,14 +99,24 @@
                 else if (isManager)
                 {
                     <li><a href="/Main/Manager"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Manager Dashboard</span></a></li>
-                    <li><a href="/Main/Employees"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Employees</span></a></li>
+                    <li><a href="/Main/MyTeam"><i class="fa-solid fa-users" aria-hidden="true"></i><span>My Team (@assignedTeamCount)</span></a></li>
                     <li><a href="/Main/ManagerAttendance"><i class="fa-solid fa-users-viewfinder" aria-hidden="true"></i><span>Team Attendance</span></a></li>
                     <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Site Employee Location</span></a></li>
-                    <li><a href="/Main/ManagerLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Team Leave</span></a></li>
+                    <li><a href="/Main/ManagerLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Team Leave Requests (@teamLeavePendingCount)</span></a></li>
                     <li><a asp-controller="Expense" asp-action="Index"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Team Expenses</span></a></li>
-                    <li><a href="/Main/ManagerQueries"><i class="fa-regular fa-circle-question" aria-hidden="true"></i><span>Queries</span></a></li>
+                    <li><a asp-controller="Expense" asp-action="Index" asp-route-view="self"><i class="fa-solid fa-receipt"></i><span>My Expenses</span></a></li>
+                    <li><a href="/Main/ManagerQueries"><i class="fa-regular fa-circle-question" aria-hidden="true"></i><span>Team Queries (@teamQueryCount)</span></a></li>
                     <li><a href="/Main/TaskMgm"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Task Management</span></a></li>
                     <li><a href="/Main/ManagerProjects"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Project Management</span></a></li>
+                    <li><a href="/Main/EmployeeAttendance"><i class="fa-regular fa-clock"></i><span>My Attendance</span></a></li>
+                    <li><a href="/Main/FieldAttendance"><i class="fa-solid fa-location-dot"></i><span>Mark Attendance</span></a></li>
+                    <li><a href="/Main/EmployeeLeaves"><i class="fa-solid fa-plane-departure"></i><span>My Leave</span></a></li>
+                    <li><a href="/Main/EmployeeQueries"><i class="fa-regular fa-circle-question"></i><span>My Queries</span></a></li>
+                    <li><a href="/Main/EmployeeNotifications"><i class="fa-regular fa-bell"></i><span>My Notifications</span></a></li>
+                    <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user"></i><span>My Profile</span></a></li>
+                    <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar"></i><span>Salary Slip</span></a></li>
+                    <li><a href="/Main/EmployeeAssets"><i class="fa-solid fa-laptop"></i><span>My Assets</span></a></li>
+                    <li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns"></i><span>My Bank Details</span></a></li>
                     <li><a href="/Main/OrderTracking"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i><span>Shipment Tracking</span></a></li>
                 }
                 else

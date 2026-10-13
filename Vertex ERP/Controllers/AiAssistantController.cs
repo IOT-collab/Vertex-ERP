@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -171,7 +171,9 @@ public sealed class AiAssistantController(ApplicationDbContext db) : Controller
                     .Select(leave => leave.EmployeeId)
                     .Distinct()
                     .ToListAsync(cancellationToken)).ToHashSet();
-            var isWeeklyOff = AttendanceRules.IsWeeklyOff(todayDate);
+            var isWeeklyOff = AttendanceRules.IsHoliday(todayDate);
+            onLeaveIds.ExceptWith(presentIds);
+            if (isWeeklyOff) onLeaveIds.Clear();
 
             context["attendanceSummary"] = new
             {
@@ -191,7 +193,7 @@ public sealed class AiAssistantController(ApplicationDbContext db) : Controller
                     employee.Name,
                     status = presentIds.Contains(employee.Id) ? "Present"
                         : onLeaveIds.Contains(employee.Id) ? "On approved leave"
-                        : isWeeklyOff ? "Weekly off" : "No attendance recorded",
+                        : isWeeklyOff ? "Holiday" : "No attendance recorded",
                     firstPunch = punchesByEmployee.TryGetValue(employee.Id, out var punch) ? punch.ToString("hh:mm tt") : null,
                     late = lateIds.Contains(employee.Id)
                 }).Take(60).ToList();
@@ -202,12 +204,12 @@ public sealed class AiAssistantController(ApplicationDbContext db) : Controller
                 employee.Name,
                 Status = presentIds.Contains(employee.Id) ? "Present"
                     : onLeaveIds.Contains(employee.Id) ? "On approved leave"
-                    : isWeeklyOff ? "Weekly off" : "No attendance recorded",
+                    : isWeeklyOff ? "Holiday" : "No attendance recorded",
                 FirstPunch = punchesByEmployee.TryGetValue(employee.Id, out var punch) ? punch : (DateTime?)null,
                 Late = lateIds.Contains(employee.Id)
             }).ToList();
             var attendanceSummary = $"Attendance for {asOf}: {presentIds.Count} present, {lateIds.Count} late (after 10:00 AM), {onLeaveIds.Count} on approved leave, {(isWeeklyOff ? 0 : attendanceRows.Count(row => row.Status == "No attendance recorded"))} with no attendance record."
-                + (isWeeklyOff ? " It is a weekly off." : string.Empty);
+                + (isWeeklyOff ? " It is a holiday." : string.Empty);
             if (isSpecificEmployeeQuestion || HasAny(question, "who", "list", "team", "names", "kaun", "कौन", "show", "kaun present", "who is present"))
             {
                 var lines = attendanceRows.Take(60).Select(row => $"{row.Name}: {row.Status}{(row.FirstPunch.HasValue ? $", first punch {row.FirstPunch.Value:hh:mm tt}" : string.Empty)}{(row.Late ? ", late" : string.Empty)}");

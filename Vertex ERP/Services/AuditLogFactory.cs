@@ -52,6 +52,14 @@ public static class AuditLogFactory
             if (entry.State == EntityState.Modified && assignee.IsModified && !Equals(assignee.OriginalValue, assignee.CurrentValue))
                 detail += $" · Reassigned: employee #{assignee.OriginalValue} → #{assignee.CurrentValue}";
         }
+        else if (entry.Entity is LeaveCalculation calculation)
+        {
+            detail = $"Employee #{calculation.EmployeeId}, year {calculation.Year}, revision {calculation.Revision}; Opening EL {calculation.OpeningEL}, EW {calculation.OpeningEW}; Monthly entries: {calculation.MonthsJson}";
+        }
+        else if (entry.Entity is ManualLeaveBalance balance)
+        {
+            detail = $"Employee #{balance.EmployeeId}, year {balance.Year}, {balance.Category}; Total entitlement {balance.TotalDays}; Additional usage {balance.UsedDays}; Revision {balance.Revision}";
+        }
         else if (entry.State == EntityState.Modified)
         {
             detail += " · Fields: " + string.Join(", ", entry.Properties.Where(p => p.IsModified).Select(p => p.Metadata.Name));

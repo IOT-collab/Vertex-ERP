@@ -1,4 +1,4 @@
-using VertexERP.Services;
+﻿using VertexERP.Services;
 
 await AttendanceExportChecks.Run();
 
@@ -26,6 +26,13 @@ Check("current day open punch", At(9, 10), null, today,
 Check("past day missing punch", At(10, 0).AddDays(-1), null, today.AddDays(-1),
     "Late", true, "Late arrival", 0);
 Check("no punches", null, null, today, "Absent", false, "No punches recorded", 0);
+Check("Sunday without punches", null, null, new DateOnly(2026, 10, 11), "Holiday", false, "Sunday", 0);
+Check("company holiday without punches", null, null, new DateOnly(2026, 10, 2), "Holiday", false, "Gandhi Jayanti", 0);
+foreach (var date in new[] { 9, 10, 11 })
+    Check("multi-day Diwali holiday " + date, null, null, new DateOnly(2026, 11, date), "Holiday", false, "Diwali, Gowardhan Puja & Bhai Dooj", 0);
+Check("after Diwali", null, null, new DateOnly(2026, 11, 12), "Absent", false, "No punches recorded", 0);
+Check("holiday list does not repeat into another year", null, null, new DateOnly(2027, 10, 2), "Absent", false, "No punches recorded", 0);
+Check("actual work on holiday retained", new DateTime(2026, 10, 2, 9, 0, 0), new DateTime(2026, 10, 2, 18, 0, 0), new DateOnly(2026, 10, 2), "Present", false, "On time", 540);
 Check("invalid punch order", At(10, 0), At(9, 0), today,
     "Late", true, "Late arrival", 0);
 Check("extra hours", At(9, 0), At(19, 0), today,
@@ -44,3 +51,15 @@ Check("09:31:01 is late", At(9, 31).AddSeconds(1), null, today, "Late", true, "L
 var onTimePunches = AttendanceRules.PairPunches(new[] { (At(9, 30).AddSeconds(59), (string?)"IN"), (At(18, 0), (string?)"OUT") });
 Check("evening checkout does not make an on-time employee late", onTimePunches.CheckIn, onTimePunches.CheckOut, today, "Present", false, "On time", (At(18, 0) - At(9, 30).AddSeconds(59)).TotalMinutes);
 Check("short attendance still present", At(9, 0), At(9, 1), today, "Present", false, "On time", 1);
+
+var holidayCalendar = new VertexERP.Models.CompanyHolidayCalendar(DateTimeOffset.UtcNow);
+foreach (var holiday in holidayCalendar.Holidays)
+    for (var date = holiday.Start; date <= holiday.End; date = date.AddDays(1))
+        Check("Company calendar coverage: " + holiday.Name + " " + date, null, null, date, "Holiday", false, holiday.Name, 0);
+var octoberDays = Enumerable.Range(1, 13).Select(day => {
+    var date = new DateOnly(2026, 10, day);
+    return new VertexERP.Models.EmployeeAttendanceDay(date, null, null, AttendanceRules.NoPunchStatus(date), "--");
+}).ToList();
+var employeeMonth = new VertexERP.Models.EmployeeAttendanceViewModel { Days = octoberDays };
+if (employeeMonth.Holidays != 3 || employeeMonth.Absent != 10) throw new Exception("Employee October summary must exclude Gandhi Jayanti and Sundays from absences.");
+Console.WriteLine("PASS: Employee month summary separates holidays from absent days");

@@ -39,6 +39,9 @@ public sealed class SubmitExpenseClaimViewModel
 
 public sealed class ExpenseClaimPageViewModel
 {
+    public int? CurrentEmployeeId { get; init; }
+    public IReadOnlyList<ExpenseAdvance> Advances { get; init; } = Array.Empty<ExpenseAdvance>();
+    public IReadOnlyList<Employee> AdvanceEmployees { get; init; } = Array.Empty<Employee>();
     public string Mode { get; init; } = "Employee";
     public IReadOnlyList<ExpenseClaim> Claims { get; init; } = Array.Empty<ExpenseClaim>();
     public decimal TotalAmount => Claims.Sum(x => x.Amount);

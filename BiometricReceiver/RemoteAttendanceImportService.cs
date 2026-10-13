@@ -107,6 +107,24 @@ public sealed class RemoteAttendanceImportService : BackgroundService
         var terminals = await GetTerminalsAsync(client, baseUri, cancellationToken);
         await EnsureDevicesAsync(terminals, cancellationToken);
 
+        SetStatus("Syncing", "Loading WDMS enroll codes and employee names.");
+        var identities = new List<VertexERP.Services.EnrollmentIdentity>();
+        Uri? directoryPage = new Uri(baseUri, "personnel/api/employees/?page_size=1000");
+        var visited = new HashSet<string>(StringComparer.Ordinal);
+        while (directoryPage != null)
+        {
+            if (!visited.Add(directoryPage.AbsoluteUri)) throw new InvalidOperationException("WDMS employee pagination repeated a page.");
+            using var response = await client.GetAsync(directoryPage, cancellationToken);
+            response.EnsureSuccessStatusCode();
+            var page = await response.Content.ReadFromJsonAsync<ApiPage<RemoteEmployee>>(JsonOptions, cancellationToken)
+                ?? throw new InvalidOperationException("WDMS employee directory returned an empty response.");
+            identities.AddRange(page.Data.Select(x => new VertexERP.Services.EnrollmentIdentity(x.EnrollCode,
+                string.Join(" ", new[] { x.FirstName, x.LastName }.Where(part => !string.IsNullOrWhiteSpace(part))))));
+            directoryPage = ValidateNextUri(baseUri, page.Next);
+        }
+        await using (var scope = _scopeFactory.CreateAsyncScope())
+            await VertexERP.Services.BiometricEnrollmentService.SyncAsync(scope.ServiceProvider.GetRequiredService<ApplicationDbContext>(), identities, cancellationToken);
+
         var checkpoint = await LoadCheckpointAsync(cancellationToken);
         SetStatus("Syncing", "Loading punches and saving attendance to this ERP database.");
         var transactionUri = new Uri(baseUri, "iclock/api/transactions/");
@@ -127,7 +145,12 @@ public sealed class RemoteAttendanceImportService : BackgroundService
             next = ValidateNextUri(baseUri, page.Next);
         }
 
-        Volatile.Write(ref _status, Status with { State = "Connected", Message = "Attendance sync completed.", LastSuccessUtc = DateTime.UtcNow, LastImportedCount = imported });
+        int reviewCount;
+        await using (var scope = _scopeFactory.CreateAsyncScope())
+            reviewCount = await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().BiometricEnrollments
+                .CountAsync(x => x.Status == "Needs review", cancellationToken);
+        Volatile.Write(ref _status, Status with { State = "Connected", Message = reviewCount == 0 ? "Attendance and enroll-code sync completed."
+            : $"Attendance sync completed. {reviewCount} enroll codes need HR review in Employee Directory → WDMS Enroll Codes.", LastSuccessUtc = DateTime.UtcNow, LastImportedCount = imported });
         _logger.LogInformation("Remote attendance sync completed: {Imported} new punches imported.", imported);
     }
 
@@ -219,6 +242,7 @@ public sealed class RemoteAttendanceImportService : BackgroundService
         var existingHashes = existingHashList.ToHashSet(StringComparer.Ordinal);
         var mappingLookup = await db.EmployeeDeviceMappings.AsNoTracking().Where(item => deviceIds.Contains(item.BiometricDeviceId) && item.IsActive)
             .ToDictionaryAsync(item => $"{item.BiometricDeviceId}|{item.DeviceUserId}", StringComparer.OrdinalIgnoreCase, cancellationToken);
+        var enrollments = await db.BiometricEnrollments.AsNoTracking().ToDictionaryAsync(x => x.EnrollCode, StringComparer.OrdinalIgnoreCase, cancellationToken);
         var added = 0;
         foreach (var parsed in valid)
         {
@@ -227,10 +251,12 @@ public sealed class RemoteAttendanceImportService : BackgroundService
             if (!existingHashes.Add(hash)) continue;
             var employeeCode = parsed.Item.EmployeeCode.Trim();
             mappingLookup.TryGetValue($"{device.Id}|{employeeCode}", out var mapping);
+            enrollments.TryGetValue(employeeCode, out var enrollment);
             db.AttendanceLogs.Add(new AttendanceLog
             {
                 BiometricDeviceId = device.Id,
-                EmployeeId = mapping?.EmployeeId,
+                // Registered enrollments are resolved below under the shared reconciliation lock.
+                EmployeeId = enrollment != null ? null : mapping?.EmployeeId,
                 DeviceUserId = employeeCode,
                 PunchTime = parsed.PunchTime,
                 PunchState = Limit(parsed.Item.PunchState, 30),
@@ -266,7 +292,7 @@ public sealed class RemoteAttendanceImportService : BackgroundService
     private static Uri? ValidateNextUri(Uri baseUri, string? next)
     {
         if (string.IsNullOrWhiteSpace(next)) return null;
-        var uri = new Uri(next, UriKind.Absolute);
+        var uri = new Uri(baseUri, next);
         if (!string.Equals(uri.Scheme, baseUri.Scheme, StringComparison.OrdinalIgnoreCase) || !string.Equals(uri.Host, baseUri.Host, StringComparison.OrdinalIgnoreCase) || uri.Port != baseUri.Port)
             throw new InvalidOperationException("Remote API returned an unsafe pagination URL.");
         return uri;
@@ -280,6 +306,10 @@ public sealed class RemoteAttendanceImportService : BackgroundService
     private sealed record ImportCheckpoint(DateTime PunchTime, long TransactionId);
     private sealed record ApiPage<T>([property: JsonPropertyName("next")] string? Next, [property: JsonPropertyName("data")] List<T> Data);
     private sealed record RemoteArea([property: JsonPropertyName("area_name")] string? Name);
+    private sealed record RemoteEmployee(
+        [property: JsonPropertyName("emp_code")] string EnrollCode,
+        [property: JsonPropertyName("first_name")] string? FirstName,
+        [property: JsonPropertyName("last_name")] string? LastName);
     private sealed record RemoteTerminal(
         [property: JsonPropertyName("sn")] string SerialNumber,
         [property: JsonPropertyName("alias")] string? Alias,

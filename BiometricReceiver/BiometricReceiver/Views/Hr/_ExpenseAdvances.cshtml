@@ -1,0 +1,71 @@
+@model VertexERP.Models.ExpenseClaimPageViewModel
+@{
+    string Ist(DateTime value) => DateTime.SpecifyKind(value, DateTimeKind.Utc).AddMinutes(330).ToString("dd MMM yyyy, hh:mm tt");
+}
+<section class="exp-main-panel exp-advances" aria-labelledby="advanceHeading">
+    <div class="exp-header">
+        <div><h2 id="advanceHeading">Advance Payments</h2><p class="exp-subtitle">Payment receipts and employee confirmation · All times in IST</p></div>
+        <span class="badge">@Model.Advances.Count(x => x.ConfirmationStatus == "Pending") awaiting confirmation</span>
+    </div>
+    @if (Model.Mode == "HR")
+    {
+        <details class="exp-advance-entry">
+            <summary class="exp-link">+ Record Advance Payment</summary>
+            <form asp-controller="Expense" asp-action="RecordAdvance" method="post" enctype="multipart/form-data" class="exp-advance-form">
+                <div class="exp-form-row">
+                    <div class="exp-form-group"><label for="advanceEmployee">Employee</label><select id="advanceEmployee" name="EmployeeId" class="exp-input" required><option value="">Select employee</option>@foreach(var employee in Model.AdvanceEmployees){<option value="@employee.Id">@employee.FullName — @employee.EmployeeCode</option>}</select></div>
+                    <div class="exp-form-group"><label for="advancePurpose">Site / visit / purpose</label><input id="advancePurpose" name="Purpose" class="exp-input" maxlength="150" required placeholder="Example: Mumbai site visit" /></div>
+                </div>
+                <div class="exp-form-row">
+                    <div class="exp-form-group"><label for="advanceAmount">Advance paid (₹)</label><input id="advanceAmount" name="Amount" type="number" class="exp-input" min="0.01" max="10000000" step="0.01" required /></div>
+                    <div class="exp-form-group"><label for="advanceMode">Payment mode</label><select id="advanceMode" name="PaymentMode" class="exp-input" required><option value="">Select mode</option><option>Bank Transfer</option><option>UPI</option><option>Cash</option><option>Cheque</option></select></div>
+                </div>
+                <div class="exp-form-row">
+                    <div class="exp-form-group"><label for="advanceTransaction">Transaction ID / cash voucher reference</label><input id="advanceTransaction" name="TransactionId" class="exp-input" maxlength="100" required /></div>
+                    <div class="exp-form-group"><label for="advanceDate">Payment date &amp; time (IST)</label><input id="advanceDate" name="PaidAtIst" type="datetime-local" class="exp-input" max="@DateTime.UtcNow.AddMinutes(330).ToString("yyyy-MM-ddTHH:mm")" required /></div>
+                </div>
+                <div class="exp-form-group"><label for="advanceReceipt">Transaction receipt / payment proof</label><input id="advanceReceipt" name="ReceiptFile" type="file" class="exp-input" accept=".pdf,.jpg,.jpeg,.png" required /><small>PDF, JPG or PNG · Maximum 10 MB</small></div>
+                <p class="exp-subtitle">Record each payment separately. The employee must confirm receipt from their own account.</p>
+                <button class="exp-btn-primary" type="submit">Save Advance Payment</button>
+            </form>
+        </details>
+    }
+    <div class="exp-table-responsive"><table class="exp-table"><thead><tr><th>Employee / purpose</th><th>Payment</th><th>Transaction ID &amp; date</th><th>Receipt</th><th>Employee confirmation</th></tr></thead><tbody>
+    @if(Model.Advances.Count == 0){<tr><td colspan="5"><div class="exp-empty"><strong>No advance payments recorded</strong><span>Payments will appear here for employee confirmation.</span></div></td></tr>}
+    @foreach(var advance in Model.Advances)
+    {
+        <tr>
+            <td><div class="exp-claim-info"><strong>@advance.Employee.FullName</strong><span>@advance.Employee.EmployeeCode</span><small>@advance.Purpose</small></div></td>
+            <td><div class="exp-claim-info"><strong class="exp-amount">₹@advance.Amount.ToString("N2")</strong><span>@advance.PaymentMode · Paid</span></div></td>
+            <td><div class="exp-claim-info"><strong>@advance.TransactionId</strong><span>@Ist(advance.PaidAtUtc) IST</span><small>Recorded: @Ist(advance.RecordedAtUtc) IST</small></div></td>
+            <td><a class="exp-link" asp-controller="Expense" asp-action="AdvanceReceipt" asp-route-id="@advance.Id">Download receipt</a></td>
+            <td>
+                <span class="status-badge @(advance.ConfirmationStatus == "Received" ? "status-approved" : advance.ConfirmationStatus == "Pending" ? "status-pending" : "status-rejected")">@advance.ConfirmationStatus</span>
+                @if(advance.RespondedAtUtc.HasValue){<div class="exp-manager-update"><span>@Ist(advance.RespondedAtUtc.Value) IST</span><span>Received: ₹@advance.ReceivedAmount?.ToString("N2")</span><small>@advance.EmployeeNote</small></div>}
+                @if(Model.CurrentEmployeeId == advance.EmployeeId && advance.ConfirmationStatus != "Received")
+                {
+                    <form asp-controller="Expense" asp-action="ConfirmAdvance" method="post" class="exp-decision-form">
+                        <input type="hidden" name="Id" value="@advance.Id" />
+                        <label for="advanceResponse-@advance.Id">Your response</label>
+                        <select id="advanceResponse-@advance.Id" name="Response" class="exp-input" required onchange="toggleAdvanceResponse(this)"><option value="">Select response</option><option value="Received">Payment Received — ₹@advance.Amount.ToString("N2")</option><option>Amount Mismatch</option><option>Not Received</option></select>
+                        <div data-advance-amount hidden><label for="advanceReceived-@advance.Id">Actual amount received (₹)</label><input id="advanceReceived-@advance.Id" name="ReceivedAmount" class="exp-input" type="number" min="0" max="10000000" step="0.01" disabled /></div>
+                        <label for="advanceNote-@advance.Id">Remarks (required for payment issues)</label><textarea id="advanceNote-@advance.Id" name="Note" maxlength="500" placeholder="Describe any payment issue"></textarea>
+                        <button class="exp-approve" type="submit">Submit Confirmation</button>
+                    </form>
+                }
+            </td>
+        </tr>
+    }
+    </tbody></table></div>
+    <p class="exp-subtitle">Confirmation acknowledges payment receipt. Advance adjustment against expenses is separate.</p>
+</section>
+<script>
+function toggleAdvanceResponse(select) {
+    const form = select.form, amount = form.querySelector('[data-advance-amount]');
+    const mismatch = select.value === 'Amount Mismatch';
+    amount.hidden = !mismatch;
+    amount.querySelector('input').disabled = !mismatch;
+    amount.querySelector('input').required = mismatch;
+    form.querySelector('textarea').required = select.value !== '' && select.value !== 'Received';
+}
+</script>

@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Collections.Concurrent;
@@ -104,7 +104,7 @@ namespace VertexERP.Controllers
                 return View();
             }
 
-            var role = AccountRoleService.Normalize(user.Role);
+            var role = await AccountRoleService.ResolveAsync(_dbContext, user);
             if (role == null || ((role == AccountRoleService.Manager || role == AccountRoleService.Employee) && !user.EmployeeId.HasValue))
             {
                 ViewBag.ErrorMessage = "This login account is not correctly linked to an employee role. Please contact HR.";
@@ -631,6 +631,8 @@ namespace VertexERP.Controllers
                 .Select(request => request.EmployeeId).Distinct().ToListAsync()).ToHashSet();
             presentIds.IntersectWith(activeEmployeeIds);
             onLeaveIds.IntersectWith(activeEmployeeIds);
+            onLeaveIds.ExceptWith(presentIds);
+            if (AttendanceRules.IsHoliday(DateOnly.FromDateTime(today))) onLeaveIds.Clear();
             var lateCount = todayLogs.Where(log => log.EmployeeId.HasValue && activeEmployeeIds.Contains(log.EmployeeId.Value))
                 .GroupBy(log => log.EmployeeId!.Value)
                 .Count(group => group.Min(log => log.PunchTime).TimeOfDay > new TimeSpan(10, 0, 0));
@@ -643,7 +645,7 @@ namespace VertexERP.Controllers
                 PresentToday = presentIds.Count,
                 LateToday = lateCount,
                 OnLeaveToday = employees.Count(employee => onLeaveIds.Contains(employee.Id)),
-                AbsentToday = AttendanceRules.IsWeeklyOff(DateOnly.FromDateTime(today)) ? 0 : employees.Count(employee => !presentIds.Contains(employee.Id) && !onLeaveIds.Contains(employee.Id)),
+                AbsentToday = AttendanceRules.IsHoliday(DateOnly.FromDateTime(today)) ? 0 : employees.Count(employee => !presentIds.Contains(employee.Id) && !onLeaveIds.Contains(employee.Id)),
                 OpenTasks = taskHealth.OpenTasks,
                 OverdueTasks = taskHealth.OverdueTasks,
                 CompletedTasks = taskHealth.CompletedTasks,
@@ -691,12 +693,12 @@ namespace VertexERP.Controllers
             IEnumerable<Employee> filteredEmployees = normalizedStatus switch
             {
                 "Present" => employees.Where(employee => presentEmployeeIds.Contains(employee.Id)),
-                "Absent" => AttendanceRules.IsWeeklyOff(todayDate)
+                "Absent" => AttendanceRules.IsHoliday(todayDate)
                     ? Enumerable.Empty<Employee>()
                     : employees.Where(employee => employee.IsActive && !presentEmployeeIds.Contains(employee.Id) && !leaveEmployeeIds.Contains(employee.Id)),
                 "Late" => employees.Where(employee => firstPunchByEmployee.TryGetValue(employee.Id, out var firstPunch)
                     && firstPunch.TimeOfDay > new TimeSpan(10, 0, 0)),
-                "Leave" => employees.Where(employee => employee.IsActive && leaveEmployeeIds.Contains(employee.Id)),
+                "Leave" => employees.Where(employee => !AttendanceRules.IsHoliday(todayDate) && !presentEmployeeIds.Contains(employee.Id) && leaveEmployeeIds.Contains(employee.Id)),
                 _ => Enumerable.Empty<Employee>()
             };
 
@@ -770,6 +772,7 @@ namespace VertexERP.Controllers
         [Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> EmployeeAttendance()
         {
+            Response.Headers.CacheControl = "no-store";
             var employee = await LoadLoggedInEmployeeAsync();
             if (employee == null) return RedirectToAction(nameof(AccessDenied));
             var now = FieldAttendanceClock.Now.Date;
@@ -780,6 +783,9 @@ namespace VertexERP.Controllers
                 .OrderBy(log => log.PunchTime)
                 .Select(log => new { log.PunchTime, log.PunchState, log.VerificationMode, log.BiometricDevice.CommunicationMode })
                 .ToListAsync();
+            var approvedLeaves = await _dbContext.LeaveRequests.AsNoTracking()
+                .Where(request => request.EmployeeId == employee.Id && request.Status == "Approved"
+                    && request.FromDate <= DateOnly.FromDateTime(now) && request.ToDate >= DateOnly.FromDateTime(start)).ToListAsync();
             var lastDay = end.AddDays(-1) < now ? end.AddDays(-1) : now;
             var days = new List<EmployeeAttendanceDay>();
             for (var date = start; date <= lastDay; date = date.AddDays(1))
@@ -794,9 +800,8 @@ namespace VertexERP.Controllers
                         : punches.All(punch => string.Equals(punch.VerificationMode, "Manual Approved", StringComparison.OrdinalIgnoreCase))
                             ? "Manual Approved"
                             : "Biometric / Thumb";
-                var attendanceStatus = paired.CheckIn.HasValue
-                    ? AttendanceRules.IsLateArrival(paired.CheckIn.Value) ? "Late" : "Present"
-                    : "Absent";
+                var attendanceStatus = AttendanceRules.StatusFor(paired.CheckIn, dateOnly,
+                    approvedLeaves.Any(request => request.FromDate <= dateOnly && request.ToDate >= dateOnly));
                 days.Add(new EmployeeAttendanceDay(dateOnly, paired.CheckIn, paired.CheckOut, attendanceStatus, source));
             }
             return View(new EmployeeAttendanceViewModel { Employee = employee, StartDate = DateOnly.FromDateTime(start), EndDate = DateOnly.FromDateTime(now), Days = days.OrderByDescending(day => day.Date).ToList() });
@@ -951,8 +956,12 @@ namespace VertexERP.Controllers
             if (selectedYear is < 2000 or > 2100) return BadRequest();
             var employee = await LoadLoggedInEmployeeAsync();
             if (employee == null) return RedirectToAction(nameof(AccessDenied));
-            var requests = await _dbContext.LeaveRequests.AsNoTracking().Where(request => request.EmployeeId == employee.Id).OrderByDescending(request => request.AppliedAtUtc).ToListAsync();
+            var requests = await _dbContext.LeaveRequests.AsNoTracking().Include(request => request.DecidedByUser).Where(request => request.EmployeeId == employee.Id).OrderByDescending(request => request.AppliedAtUtc).ToListAsync();
             var balances = await _dbContext.ManualLeaveBalances.AsNoTracking().Where(x => x.EmployeeId == employee.Id && x.Year == selectedYear).OrderBy(x => x.Category).ToListAsync();
+            VertexERP.Services.LeaveBalanceCalculator.IncludeUnfilled(balances, requests, selectedYear);
+            var calculation = await _dbContext.LeaveCalculations.AsNoTracking().SingleOrDefaultAsync(x => x.EmployeeId == employee.Id && x.Year == selectedYear);
+            foreach (var balance in balances) balance.OpeningDays = balance.Category == "EL" ? calculation?.OpeningEL ?? 0 : balance.Category == "EW" ? calculation?.OpeningEW ?? 0 : 0;
+            Response.Headers.CacheControl = "no-store";
             return View(new EmployeeLeaveViewModel { Employee = employee, Requests = requests, Balances = balances, Year = selectedYear });
         }
 
@@ -1020,7 +1029,7 @@ namespace VertexERP.Controllers
             return RedirectToAction(nameof(EmployeeProfile));
         }
 
-        [Authorize(Roles = "Employee,User")]
+        [Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> EmployeeNotifications()
         {
             var employee = await LoadLoggedInEmployeeAsync();
@@ -1029,13 +1038,13 @@ namespace VertexERP.Controllers
             var ownLeaves = await _dbContext.LeaveRequests.AsNoTracking().Where(request => request.EmployeeId == employee.Id).ToListAsync();
             var dismissed = (await _dbContext.EmployeeNotificationDismissals.AsNoTracking().Where(x => x.EmployeeId == employee.Id).Select(x => new { x.SourceType, x.SourceId }).ToListAsync()).Select(x => $"{x.SourceType}:{x.SourceId}").ToHashSet(StringComparer.OrdinalIgnoreCase);
             var taskItems = assignedTasks.Where(task => !dismissed.Contains($"Task:{task.Id}")).Select(task => new EmployeeNotificationItem(task.Id, "Task assigned: " + task.Title, "Status: " + task.Status + " · Due " + task.DueDate.ToString("dd MMM yyyy"), task.CreatedAtUtc, "Task"));
-            var leaveItems = ownLeaves.Where(request => !dismissed.Contains($"Leave:{request.Id}")).Select(request => new EmployeeNotificationItem(request.Id, "Leave request " + request.Status, request.LeaveType + " · " + request.FromDate.ToString("dd MMM") + " - " + request.ToDate.ToString("dd MMM yyyy"), request.AppliedAtUtc, "Leave"));
+            var leaveItems = ownLeaves.Where(request => !dismissed.Contains($"Leave:{request.Id}")).Select(request => new EmployeeNotificationItem(request.Id, "Leave request " + request.DisplayStatus, request.LeaveType + " · " + request.FromDate.ToString("dd MMM") + " - " + request.ToDate.ToString("dd MMM yyyy"), request.DecidedAtUtc ?? request.ManagerDecidedAtUtc ?? request.AppliedAtUtc, "Leave"));
             var ownTickets = await _dbContext.QueryTickets.AsNoTracking().Where(ticket => ticket.EmployeeId == employee.Id).ToListAsync();
             var ticketItems = ownTickets.Where(ticket => !dismissed.Contains($"Query:{ticket.Id}")).Select(ticket => new EmployeeNotificationItem(ticket.Id, "Query: " + ticket.Subject, "Status: " + ticket.Status + (string.IsNullOrWhiteSpace(ticket.Resolution) ? string.Empty : " · " + ticket.Resolution), ticket.UpdatedAtUtc ?? ticket.CreatedAtUtc, "Query"));
             return View(new EmployeeNotificationsViewModel { Employee = employee, Items = taskItems.Concat(leaveItems).Concat(ticketItems).OrderByDescending(item => item.CreatedAt).ToList() });
         }
 
-        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Employee,User")]
+        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> DeleteNotification(string type, int sourceId)
         {
             var employee = await LoadLoggedInEmployeeAsync();
@@ -1054,7 +1063,7 @@ namespace VertexERP.Controllers
             return RedirectToAction(nameof(EmployeeNotifications));
         }
 
-        [Authorize(Roles = "Employee,User")]
+        [Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> EmployeeQueries()
         {
             var employee = await LoadLoggedInEmployeeAsync();
@@ -1064,14 +1073,14 @@ namespace VertexERP.Controllers
             return View(new EmployeeQueryViewModel { Employee = employee, Tickets = tickets });
         }
 
-        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Employee,User")]
+        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> RaiseQuery(string subject, string category, string description)
         {
             var employee = await LoadLoggedInEmployeeAsync();
             if (employee == null) return RedirectToAction(nameof(AccessDenied));
-            if (string.IsNullOrWhiteSpace(subject) || string.IsNullOrWhiteSpace(description))
+            if (!ModelState.IsValid || string.IsNullOrWhiteSpace(subject) || subject.Trim().Length > 150 || string.IsNullOrWhiteSpace(description) || description.Trim().Length > 1500 || category?.Trim().Length > 40)
             {
-                TempData["QueryError"] = "Subject and query details are required.";
+                TempData["QueryError"] = "Enter a subject up to 150 characters, details up to 1500 characters and category up to 40 characters.";
                 return RedirectToAction(nameof(EmployeeQueries));
             }
             _dbContext.QueryTickets.Add(new QueryTicket { EmployeeId = employee.Id, ReportingManagerId = employee.ReportingManagerId, Subject = subject.Trim(), Category = string.IsNullOrWhiteSpace(category) ? "General" : category.Trim(), Description = description.Trim() });
@@ -1080,7 +1089,7 @@ namespace VertexERP.Controllers
             return RedirectToAction(nameof(EmployeeQueries));
         }
 
-        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Employee,User")]
+        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Employee,User,Manager,HR")]
         public async Task<IActionResult> DeleteMyQuery(int id)
         {
             var employee = await LoadLoggedInEmployeeAsync();
@@ -1151,17 +1160,21 @@ namespace VertexERP.Controllers
         }
 
 
+        [Authorize(Roles = "Manager")]
+        public Task<IActionResult> MyTeam() => Employees(null, true);
+
         [Authorize(Roles = "Employee,User,Admin,HR,Manager")]
-        public async Task<IActionResult> Employees(int? id)
+        public async Task<IActionResult> Employees(int? id, bool team = false)
         {
+            if (User.IsInRole("Manager") && !team) return RedirectToAction(nameof(Manager));
             if (User.IsInRole("Admin") || User.IsInRole("HR") || User.IsInRole("Manager"))
             {
                 var employeesQuery = _dbContext.Employees.AsNoTracking().Where(employee => employee.IsActive);
                 if (User.IsInRole("Manager"))
                 {
                     var managerEmployeeId = await GetLoggedInEmployeeIdAsync();
-                    var managerDepartmentId = await _dbContext.Employees.AsNoTracking().Where(employee => employee.Id == managerEmployeeId).Select(employee => employee.DepartmentId).FirstOrDefaultAsync();
-                    employeesQuery = employeesQuery.Where(employee => managerDepartmentId.HasValue && employee.Id != managerEmployeeId && employee.DepartmentId == managerDepartmentId && !_dbContext.AppUsers.Any(user => user.EmployeeId == employee.Id && user.IsActive && user.Role == "Manager"));
+                    if (!managerEmployeeId.HasValue) return Forbid();
+                    employeesQuery = employeesQuery.Where(employee => employee.Id != managerEmployeeId && employee.ReportingManagerId == managerEmployeeId);
                 }
                 var employees = await employeesQuery.OrderBy(employee => employee.FullName).ToListAsync();
                 var employeeIds = employees.Select(employee => employee.Id).ToList();
@@ -1175,7 +1188,7 @@ namespace VertexERP.Controllers
                     .Select(request => request.EmployeeId).Distinct().ToListAsync();
                 var tasks = await _dbContext.WorkTasks.AsNoTracking().Include(task => task.Assignee)
                     .Where(task => employeeIds.Contains(task.AssigneeId)).OrderByDescending(task => task.CreatedAtUtc).ToListAsync();
-                return View("EmployeeOverview", new WorkforceOverviewViewModel { Employees = employees, Tasks = tasks, PresentEmployeeIds = presentIds.ToHashSet(), OnLeaveEmployeeIds = onLeaveIds.ToHashSet(), IsWeeklyOff = AttendanceRules.IsWeeklyOff(DateOnly.FromDateTime(today)) });
+                return View("EmployeeOverview", new WorkforceOverviewViewModel { Employees = employees, Tasks = tasks, PresentEmployeeIds = presentIds.ToHashSet(), OnLeaveEmployeeIds = onLeaveIds.ToHashSet(), IsWeeklyOff = AttendanceRules.IsHoliday(DateOnly.FromDateTime(today)) });
             }
 
             Employee? employee;
@@ -1205,7 +1218,7 @@ namespace VertexERP.Controllers
                 .Where(task => task.AssigneeId == employee.Id).OrderByDescending(task => task.CreatedAtUtc).ToListAsync();
             var employeeLeaves = await _dbContext.LeaveRequests.AsNoTracking().Where(request => request.EmployeeId == employee.Id)
                 .OrderByDescending(request => request.AppliedAtUtc).ToListAsync();
-            var todayStart = DateTime.Today;
+            var todayStart = FieldAttendanceClock.Now.Date;
             var punches = await _dbContext.AttendanceLogs.AsNoTracking().Where(log => log.EmployeeId == employee.Id
                     && log.PunchTime >= todayStart && log.PunchTime < todayStart.AddDays(1)
                     && log.BiometricDevice.CommunicationMode != "Field")
@@ -1222,7 +1235,7 @@ namespace VertexERP.Controllers
             var employeeId = await GetLoggedInEmployeeIdAsync();
             if (!employeeId.HasValue) return Forbid();
 
-            var today = DateTime.Today;
+            var today = FieldAttendanceClock.Now.Date;
             var punches = await _dbContext.AttendanceLogs.AsNoTracking()
                 .Where(log => log.EmployeeId == employeeId.Value
                     && log.PunchTime >= today && log.PunchTime < today.AddDays(1)
@@ -1232,13 +1245,14 @@ namespace VertexERP.Controllers
                 .ToListAsync(cancellationToken);
 
             var pairedPunches = AttendanceRules.PairPunches(punches.Select(punch => (punch.PunchTime, punch.PunchState)));
+            var attendanceDate = DateOnly.FromDateTime(today);
+            var approvedLeave = await _dbContext.LeaveRequests.AsNoTracking().AnyAsync(request => request.EmployeeId == employeeId.Value
+                && request.Status == "Approved" && request.FromDate <= attendanceDate && request.ToDate >= attendanceDate, cancellationToken);
             return Ok(new
             {
                 checkIn = pairedPunches.CheckIn?.ToString("hh:mm tt"),
                 checkOut = pairedPunches.CheckOut?.ToString("hh:mm tt"),
-                status = pairedPunches.CheckIn.HasValue
-                    ? AttendanceRules.IsLateArrival(pairedPunches.CheckIn.Value) ? "Late" : "Present"
-                    : "Absent"
+                status = AttendanceRules.StatusFor(pairedPunches.CheckIn, attendanceDate, approvedLeave)
             });
         }
 
@@ -1317,7 +1331,7 @@ namespace VertexERP.Controllers
             static string X(string? value) => System.Security.SecurityElement.Escape(value ?? string.Empty) ?? string.Empty;
             var month = dates[0];
             var xml = new StringBuilder("<?xml version=\"1.0\"?><Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\" xmlns:x=\"urn:schemas-microsoft-com:office:excel\">");
-            xml.Append("<Styles><Style ss:ID=\"Default\"><Alignment ss:Vertical=\"Center\"/><Font ss:FontName=\"Calibri\" ss:Size=\"10\"/></Style><Style ss:ID=\"Title\"><Alignment ss:Horizontal=\"Center\"/><Font ss:Bold=\"1\" ss:Size=\"16\" ss:Color=\"#FFFFFF\"/><Interior ss:Color=\"#1D4ED8\" ss:Pattern=\"Solid\"/></Style><Style ss:ID=\"Header\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Font ss:Bold=\"1\" ss:Color=\"#FFFFFF\"/><Interior ss:Color=\"#1E3A5F\" ss:Pattern=\"Solid\"/></Style><Style ss:ID=\"Text\"><Alignment ss:Vertical=\"Top\" ss:WrapText=\"1\"/><Borders><Border ss:Position=\"Bottom\" ss:LineStyle=\"Continuous\" ss:Weight=\"1\" ss:Color=\"#DCE3EA\"/></Borders></Style><Style ss:ID=\"Present\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Interior ss:Color=\"#DCFCE7\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#166534\"/></Style><Style ss:ID=\"Late\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Interior ss:Color=\"#FEF3C7\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#92400E\"/></Style><Style ss:ID=\"Absent\"><Alignment ss:Horizontal=\"Center\"/><Interior ss:Color=\"#FEE2E2\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#991B1B\"/></Style></Styles>");
+            xml.Append("<Styles><Style ss:ID=\"Default\"><Alignment ss:Vertical=\"Center\"/><Font ss:FontName=\"Calibri\" ss:Size=\"10\"/></Style><Style ss:ID=\"Title\"><Alignment ss:Horizontal=\"Center\"/><Font ss:Bold=\"1\" ss:Size=\"16\" ss:Color=\"#FFFFFF\"/><Interior ss:Color=\"#1D4ED8\" ss:Pattern=\"Solid\"/></Style><Style ss:ID=\"Header\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Font ss:Bold=\"1\" ss:Color=\"#FFFFFF\"/><Interior ss:Color=\"#1E3A5F\" ss:Pattern=\"Solid\"/></Style><Style ss:ID=\"Text\"><Alignment ss:Vertical=\"Top\" ss:WrapText=\"1\"/><Borders><Border ss:Position=\"Bottom\" ss:LineStyle=\"Continuous\" ss:Weight=\"1\" ss:Color=\"#DCE3EA\"/></Borders></Style><Style ss:ID=\"Present\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Interior ss:Color=\"#DCFCE7\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#166534\"/></Style><Style ss:ID=\"Late\"><Alignment ss:Horizontal=\"Center\" ss:WrapText=\"1\"/><Interior ss:Color=\"#FEF3C7\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#92400E\"/></Style><Style ss:ID=\"Absent\"><Alignment ss:Horizontal=\"Center\"/><Interior ss:Color=\"#FEE2E2\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#991B1B\"/></Style><Style ss:ID=\"Holiday\"><Alignment ss:Horizontal=\"Center\"/><Interior ss:Color=\"#DBEAFE\" ss:Pattern=\"Solid\"/><Font ss:Color=\"#1E40AF\"/></Style></Styles>");
             xml.Append($"<Worksheet ss:Name=\"{X(month.ToString("MMM-yyyy"))}\"><Table><Column ss:Width=\"65\"/><Column ss:Width=\"145\"/><Column ss:Width=\"100\"/><Column ss:Width=\"55\" ss:Span=\"2\"/><Column ss:Width=\"70\" ss:Span=\"1\"/>");
             foreach (var _ in dates) xml.Append("<Column ss:Width=\"82\"/>");
             var columnCount = 8 + dates.Count;
@@ -1339,7 +1353,7 @@ namespace VertexERP.Controllers
                         xml.Append("<Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">—</Data></Cell>");
                         continue;
                     }
-                    var style = item.Status == "Present" ? "Present" : item.Status == "Absent" ? "Absent" : "Late";
+                    var style = item.Status == "Leave" ? "Holiday" : item.Status == "Holiday" ? "Holiday" : item.Status == "Present" ? "Present" : item.Status == "Absent" ? "Absent" : "Late";
                     var code = X(item.Status);
                     var timing = item.CheckIn.HasValue ? $"&#10;{item.CheckIn:hh:mm tt}-{(item.CheckOut.HasValue ? item.CheckOut.Value.ToString("hh:mm tt") : "—")}" : string.Empty;
                     xml.Append($"<Cell ss:StyleID=\"{style}\"><Data ss:Type=\"String\">{code}{timing}&#10;{X(item.TotalHoursDisplay)}&#10;OT: {X(item.OvertimeDisplay)}&#10;{X(item.Remark)}</Data></Cell>");
@@ -1468,8 +1482,8 @@ namespace VertexERP.Controllers
             {
                 TotalEmployees = activeEmployeeIdList.Count,
                 PresentToday = presentEmployeeIds.Count,
-                OnLeaveToday = onLeaveEmployeeIds.Count,
-                AbsentToday = AttendanceRules.IsWeeklyOff(today) ? 0 : activeEmployeeIdList.Except(presentEmployeeIds).Except(onLeaveEmployeeIds).Count()
+                OnLeaveToday = AttendanceRules.IsHoliday(today) ? 0 : onLeaveEmployeeIds.Except(presentEmployeeIds).Count(),
+                AbsentToday = AttendanceRules.IsHoliday(today) ? 0 : activeEmployeeIdList.Except(presentEmployeeIds).Except(onLeaveEmployeeIds).Count()
             };
 
             return View(model);
@@ -1482,7 +1496,8 @@ namespace VertexERP.Controllers
                 .Include(employee => employee.DepartmentEntity)
                 .Include(employee => employee.ReportingManager)
                 .Where(employee => employee.IsActive && _dbContext.AppUsers
-                    .Any(user => user.EmployeeId == employee.Id && user.IsActive && user.Role == "Manager"));
+                    .Any(user => user.EmployeeId == employee.Id && user.IsActive && (user.Role == "Manager" || user.Role == "Supervisor"
+                        || ((user.Role == "Employee" || user.Role == "User") && _dbContext.Employees.Any(report => report.IsActive && report.ReportingManagerId == employee.Id && report.Id != employee.Id)))));
             if (User.IsInRole("Manager"))
             {
                 var loggedInManagerId = await GetLoggedInEmployeeIdAsync();
@@ -1513,10 +1528,10 @@ namespace VertexERP.Controllers
                 .OrderByDescending(task => task.CreatedAtUtc).ToListAsync();
             var leaveRequests = await _dbContext.LeaveRequests.AsNoTracking()
                 .Include(request => request.Employee)
-                .Where(request => teamMemberIds.Contains(request.EmployeeId))
+                .Where(request => !managerLogin || (request.AssignedApproverEmployeeId.HasValue && managerIds.Contains(request.AssignedApproverEmployeeId.Value) && !managerIds.Contains(request.EmployeeId)))
                 .OrderByDescending(request => request.AppliedAtUtc).ToListAsync();
             var queryTickets = await _dbContext.QueryTickets.AsNoTracking().Include(ticket => ticket.Employee)
-                .Where(ticket => managerIds.Contains(ticket.ReportingManagerId ?? 0)).OrderByDescending(ticket => ticket.CreatedAtUtc).ToListAsync();
+                .Where(ticket => !managerLogin || (managerIds.Contains(ticket.ReportingManagerId ?? 0) && !managerIds.Contains(ticket.EmployeeId))).OrderByDescending(ticket => ticket.CreatedAtUtc).ToListAsync();
             var expenseClaims = await _dbContext.ExpenseClaims.AsNoTracking().Include(claim => claim.Employee)
                 .Where(claim => claim.Status == "Pending" && (managerIds.Contains(claim.ReportingManagerId ?? 0) || (!managerLogin && claim.RequiresHrApproval)))
                 .OrderByDescending(claim => claim.SubmittedAtUtc).ToListAsync();
@@ -1619,8 +1634,8 @@ namespace VertexERP.Controllers
         [Authorize(Roles = "Employee,User,Admin,HR")]
         public IActionResult LeaveManagement()
         {
-            if (User.IsInRole("HR") || User.IsInRole("Admin")) return RedirectToAction("Index", "AttendanceRequests");
-            return View();
+            if (User.IsInRole("HR") || User.IsInRole("Admin")) return RedirectToAction(nameof(WorkflowManagement));
+            return RedirectToAction(nameof(EmployeeLeaves));
         }
 
         [HttpGet]
@@ -1681,7 +1696,7 @@ namespace VertexERP.Controllers
                     employee.EmployeeCode,
                     employee.Department,
                     employee.Designation,
-                    status = model.OnLeaveIds.Contains(employee.Id) ? "On Leave" : model.PresentIds.Contains(employee.Id) ? "Present" : model.IsWeeklyOff ? "Sunday Off" : "Absent",
+                    status = model.PresentIds.Contains(employee.Id) ? "Present" : model.IsWeeklyOff ? "Holiday" : model.OnLeaveIds.Contains(employee.Id) ? "Leave" : "Absent",
                     lastPunch = lastPunches.TryGetValue(employee.Id, out var punch) ? punch.ToString("hh:mm tt") : null
                 }),
                 teamMembersCount = model.TeamMembers.Count,
@@ -1699,7 +1714,7 @@ namespace VertexERP.Controllers
             {
                 var managerId = await GetLoggedInEmployeeIdAsync();
                 if (!managerId.HasValue) return Json(new { count = 0 });
-                var newLeave = await _dbContext.LeaveRequests.AnyAsync(x => x.Status == "Pending" && x.AssignedApproverEmployeeId == managerId && x.AppliedAtUtc > sinceUtc);
+                var newLeave = await _dbContext.LeaveRequests.AnyAsync(x => x.Status == "Pending" && x.ApprovalLevel == "Manager" && x.AssignedApproverEmployeeId == managerId && x.AppliedAtUtc > sinceUtc);
                 var newQuery = await _dbContext.QueryTickets.AnyAsync(x => x.ReportingManagerId == managerId && x.Status != "Resolved" && x.Status != "Closed" && x.CreatedAtUtc > sinceUtc);
                 var newExpense = await _dbContext.ExpenseClaims.AnyAsync(x => !x.RequiresHrApproval && x.ReportingManagerId == managerId && x.Status == "Pending" && x.SubmittedAtUtc > sinceUtc);
                 return Json(new { hasNew = newLeave || newQuery || newExpense });
@@ -1717,7 +1732,7 @@ namespace VertexERP.Controllers
             {
                 var managerId = await GetLoggedInEmployeeIdAsync();
                 if (!managerId.HasValue) return Json(new { count = 0 });
-                var leaveCount = await _dbContext.LeaveRequests.CountAsync(x => x.Status == "Pending" && x.AssignedApproverEmployeeId == managerId);
+                var leaveCount = await _dbContext.LeaveRequests.CountAsync(x => x.Status == "Pending" && x.ApprovalLevel == "Manager" && x.AssignedApproverEmployeeId == managerId);
                 var queryCount = await _dbContext.QueryTickets.CountAsync(x => x.ReportingManagerId == managerId && x.Status != "Resolved" && x.Status != "Closed");
                 var expenseCount = await _dbContext.ExpenseClaims.CountAsync(x => !x.RequiresHrApproval && x.ReportingManagerId == managerId && x.Status == "Pending");
                 var overdueCount = await _dbContext.WorkTasks.CountAsync(x => x.ManagerId == managerId && x.Status != "Completed" && x.DueDate < DateOnly.FromDateTime(DateTime.Today));
@@ -1741,7 +1756,7 @@ namespace VertexERP.Controllers
             var today = DateTime.Today;
             var presentIds = await _dbContext.AttendanceLogs.AsNoTracking().Where(log => log.EmployeeId.HasValue && teamIds.Contains(log.EmployeeId.Value) && log.PunchTime >= today && log.PunchTime < today.AddDays(1)).Select(log => log.EmployeeId!.Value).Distinct().ToListAsync();
             var leaveIds = await _dbContext.LeaveRequests.AsNoTracking().Where(request => teamIds.Contains(request.EmployeeId) && request.Status == "Approved" && request.FromDate <= DateOnly.FromDateTime(today) && request.ToDate >= DateOnly.FromDateTime(today)).Select(request => request.EmployeeId).Distinct().ToListAsync();
-            return new ManagerAttendanceViewModel { TeamMembers = team, PresentIds = presentIds.ToHashSet(), OnLeaveIds = leaveIds.ToHashSet(), IsWeeklyOff = AttendanceRules.IsWeeklyOff(DateOnly.FromDateTime(today)) };
+            return new ManagerAttendanceViewModel { TeamMembers = team, PresentIds = presentIds.ToHashSet(), OnLeaveIds = leaveIds.ToHashSet(), IsWeeklyOff = AttendanceRules.IsHoliday(DateOnly.FromDateTime(today)) };
         }
 
         [Authorize(Roles = "Manager")]
@@ -1749,7 +1764,7 @@ namespace VertexERP.Controllers
         {
             var managerId = await GetLoggedInEmployeeIdAsync();
             if (!managerId.HasValue) return RedirectToAction(nameof(AccessDenied));
-            var requests = await _dbContext.LeaveRequests.AsNoTracking().Include(request => request.Employee)
+            var requests = await _dbContext.LeaveRequests.AsNoTracking().Include(request => request.Employee).Include(request => request.DecidedByUser)
                 .Where(request => request.AssignedApproverEmployeeId == managerId && request.EmployeeId != managerId).OrderByDescending(request => request.AppliedAtUtc).ToListAsync();
             return View(new ManagerSectionViewModel { LeaveRequests = requests });
         }
@@ -1758,8 +1773,9 @@ namespace VertexERP.Controllers
         public async Task<IActionResult> ManagerQueries()
         {
             var managerId = await GetLoggedInEmployeeIdAsync();
-            var tickets = await _dbContext.QueryTickets.AsNoTracking().Include(ticket => ticket.Employee)
-                .Where(ticket => ticket.ReportingManagerId == managerId && ticket.Status != "Resolved" && ticket.Status != "Closed")
+            if (!managerId.HasValue) return Forbid();
+            var tickets = await _dbContext.QueryTickets.AsNoTracking().Include(ticket => ticket.Employee).Include(ticket => ticket.ResolvedByUser)
+                .Where(ticket => ticket.ReportingManagerId == managerId && ticket.EmployeeId != managerId)
                 .OrderByDescending(ticket => ticket.CreatedAtUtc).ToListAsync();
             return View(new ManagerSectionViewModel { QueryTickets = tickets });
         }
@@ -1782,25 +1798,28 @@ namespace VertexERP.Controllers
                 TempData["WorkflowMessage"] = "This leave request is no longer assigned to you. The list has been refreshed.";
                 return RedirectToAction(nameof(ManagerLeaves));
             }
-            if (request.Status != "Pending")
+            if (request.Status != "Pending" || request.ApprovalLevel != "Manager")
             {
                 TempData["WorkflowMessage"] = $"This request has already been {request.Status.ToLowerInvariant()}.";
                 return RedirectToAction(nameof(ManagerLeaves));
             }
-            request.Status = normalizedDecision;
-            request.DecidedByUserId = userId; request.DecidedAtUtc = DateTime.UtcNow; request.DecisionNote = CleanProfileValue(note);
+            var managerName = await _dbContext.AppUsers.Where(x => x.Id == userId).Select(x => x.FullName).SingleAsync();
+            LeaveApprovalWorkflow.DecideManager(request, normalizedDecision, userId, managerName, note);
             await _dbContext.SaveChangesAsync();
-            TempData["WorkflowMessage"] = $"Leave request {request.Status.ToLowerInvariant()}. HR can now see the updated status.";
+            TempData["WorkflowMessage"] = normalizedDecision == "Approved" ? "Manager approval recorded. Request sent to HR/Admin for final approval." : "Leave request rejected. HR/Admin can see the updated status.";
             return RedirectToAction(nameof(ManagerLeaves));
         }
 
         [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Manager,HR,Admin")]
         public async Task<IActionResult> UpdateQueryTicket(int id, string status, string? resolution)
         {
+            if (status is not ("In Progress" or "Resolved" or "Closed") || resolution?.Trim().Length > 1500)
+                return BadRequest("Choose a valid status and keep the response within 1500 characters.");
+            var managerId = await GetLoggedInEmployeeIdAsync();
+            if (User.IsInRole("Manager") && !managerId.HasValue) return Forbid();
             var ticket = await _dbContext.QueryTickets.FirstOrDefaultAsync(item => item.Id == id);
             if (ticket == null) return NotFound();
-            var managerId = await GetLoggedInEmployeeIdAsync();
-            if (User.IsInRole("Manager") && ticket.ReportingManagerId != managerId) return Forbid();
+            if (User.IsInRole("Manager") && (ticket.ReportingManagerId != managerId || ticket.EmployeeId == managerId)) return Forbid();
             ticket.Status = status is "Resolved" or "Closed" ? status : "In Progress";
             ticket.Resolution = CleanProfileValue(resolution);
             ticket.UpdatedAtUtc = DateTime.UtcNow;
@@ -1850,6 +1869,7 @@ namespace VertexERP.Controllers
         {
             var isManager = User.IsInRole("Manager");
             var managerId = isManager ? await GetLoggedInEmployeeIdAsync() : null;
+            if (isManager && !managerId.HasValue) return Forbid();
             var baseQuery = _dbContext.QueryTickets.AsNoTracking()
                 .Where(ticket => (ticket.Status == "Resolved" || ticket.Status == "Closed")
                     && (!isManager || ticket.ReportingManagerId == managerId));
@@ -1883,8 +1903,7 @@ namespace VertexERP.Controllers
         [Authorize(Roles = "HR,Admin")]
         public async Task<IActionResult> LeaveStatus(string? search, string? department, string? status)
         {
-            var baseQuery = _dbContext.LeaveRequests.AsNoTracking()
-                .Where(request => request.Status == "Approved" || request.Status == "Rejected");
+            var baseQuery = _dbContext.LeaveRequests.AsNoTracking();
             var departments = await baseQuery.Select(request => request.Employee.Department)
                 .Distinct().OrderBy(name => name).ToListAsync();
             IQueryable<LeaveRequest> query = baseQuery
@@ -1902,7 +1921,7 @@ namespace VertexERP.Controllers
             }
             if (!string.IsNullOrWhiteSpace(department))
                 query = query.Where(request => request.Employee.Department == department);
-            if (status is "Approved" or "Rejected")
+            if (status is "Pending" or "Approved" or "Rejected" or "Cancelled")
                 query = query.Where(request => request.Status == status);
 
             var requests = await query.OrderByDescending(request => request.DecidedAtUtc ?? request.AppliedAtUtc).ToListAsync();
@@ -1914,13 +1933,27 @@ namespace VertexERP.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "HR,Admin")]
-        public async Task<IActionResult> DecideManagerLeave(int id, string decision, string? note)
+        public async Task<IActionResult> CancelApprovedLeave(int id, string? note)
+        {
+            if (string.IsNullOrWhiteSpace(note) || note.Trim().Length > 500) return BadRequest("Enter a cancellation reason, up to 500 characters.");
+            var request = await _dbContext.LeaveRequests.SingleOrDefaultAsync(x => x.Id == id && x.Status == "Approved");
+            if (request == null) return NotFound();
+            request.Status = "Cancelled";
+            request.DecisionNote = note.Trim();
+            request.DecidedAtUtc = DateTime.UtcNow;
+            request.DecidedByUserId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId) ? userId : null;
+            await _dbContext.SaveChangesAsync();
+            return RedirectToAction(nameof(LeaveStatus));
+        }
+
+        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "HR,Admin")]
+        public async Task<IActionResult> DecideManagerLeave(int id, string? decision, string? note)
         {
             var request = await _dbContext.LeaveRequests.Include(item => item.Employee).FirstOrDefaultAsync(item => item.Id == id && item.ApprovalLevel == "HR/Admin" && item.Status == "Pending");
             if (request == null) return NotFound();
-            request.Status = decision.Equals("Approved", StringComparison.OrdinalIgnoreCase) ? "Approved" : "Rejected";
-            request.DecidedByUserId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId) ? userId : null;
-            request.DecidedAtUtc = DateTime.UtcNow; request.DecisionNote = CleanProfileValue(note);
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return Forbid();
+            if (!LeaveApprovalWorkflow.DecideFinal(request, decision, userId, note))
+                return BadRequest("Select Approve or Reject and enter a note of at most 500 characters.");
             await _dbContext.SaveChangesAsync();
             return RedirectToAction(nameof(WorkflowManagement));
         }
@@ -1935,7 +1968,7 @@ namespace VertexERP.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Employee,User,Manager,HR")]
-        public async Task<IActionResult> ApplyLeave(string leaveType, DateOnly fromDate, DateOnly toDate, string reason)
+        public async Task<IActionResult> ApplyLeave(string leaveType, DateOnly fromDate, DateOnly toDate, string reason, bool isHalfDay = false)
         {
             var userIdText = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var employeeId = int.TryParse(userIdText, out var userId)
@@ -1946,16 +1979,21 @@ namespace VertexERP.Controllers
                 TempData["LeaveError"] = "Your login is not linked to an employee profile.";
                 return RedirectToAction(nameof(EmployeeLeaves));
             }
-            if (string.IsNullOrWhiteSpace(leaveType) || string.IsNullOrWhiteSpace(reason) || fromDate < DateOnly.FromDateTime(DateTime.Today) || toDate < fromDate)
+            if (!ModelState.IsValid || !LeaveApprovalWorkflow.ValidApplication(leaveType, fromDate, toDate, reason, isHalfDay))
             {
                 TempData["LeaveError"] = "Please enter a valid leave type, date range and reason.";
                 return RedirectToAction(nameof(EmployeeLeaves));
             }
             var employee = await _dbContext.Employees.AsNoTracking().FirstAsync(item => item.Id == employeeId.Value);
             var seniorApplicant = User.IsInRole("Manager") || User.IsInRole("HR");
-            _dbContext.LeaveRequests.Add(new LeaveRequest { EmployeeId = employee.Id, LeaveType = leaveType.Trim(), FromDate = fromDate, ToDate = toDate, Reason = reason.Trim(), ApprovalLevel = seniorApplicant ? "HR/Admin" : "Manager", AssignedApproverEmployeeId = seniorApplicant ? null : employee.ReportingManagerId });
+            if (!seniorApplicant && !employee.ReportingManagerId.HasValue)
+            {
+                TempData["LeaveError"] = "Please contact HR to assign your reporting manager before applying for leave.";
+                return RedirectToAction(nameof(EmployeeLeaves));
+            }
+            _dbContext.LeaveRequests.Add(new LeaveRequest { EmployeeId = employee.Id, LeaveType = leaveType!.Trim().ToUpperInvariant(), FromDate = fromDate, ToDate = toDate, IsHalfDay = isHalfDay, Reason = reason.Trim(), ApprovalLevel = seniorApplicant ? "HR/Admin" : "Manager", AssignedApproverEmployeeId = seniorApplicant ? null : employee.ReportingManagerId });
             await _dbContext.SaveChangesAsync();
-            TempData["LeaveMessage"] = "Leave request submitted to your manager.";
+            TempData["LeaveMessage"] = seniorApplicant ? "Leave request submitted to HR/Admin." : "Leave request submitted to your manager. HR/Admin approval will follow.";
             return RedirectToAction(nameof(EmployeeLeaves));
         }
 

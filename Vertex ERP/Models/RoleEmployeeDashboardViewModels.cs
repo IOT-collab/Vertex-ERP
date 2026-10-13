@@ -1,4 +1,4 @@
-namespace VertexERP.Models;
+﻿namespace VertexERP.Models;
 
 using System.ComponentModel.DataAnnotations;
 
@@ -46,6 +46,8 @@ public sealed class EmployeeAttendanceViewModel
     public IReadOnlyList<EmployeeAttendanceDay> Days { get; init; } = Array.Empty<EmployeeAttendanceDay>();
     public int Present => Days.Count(day => day.Status == "Present");
     public int Absent => Days.Count(day => day.Status == "Absent");
+    public int Holidays => Days.Count(day => day.Status == "Holiday");
+    public int Leave => Days.Count(day => day.Status == "Leave");
     public int Late => Days.Count(day => day.Status == "Late");
 }
 
@@ -56,7 +58,7 @@ public sealed class EmployeeLeaveViewModel
     public int Year { get; init; } = DateTime.Today.Year;
     public IReadOnlyList<ManualLeaveBalance> Balances { get; init; } = Array.Empty<ManualLeaveBalance>();
     public decimal TotalDays => Balances.Sum(x => x.TotalDays);
-    public decimal UsedDays => Balances.Sum(x => x.UsedDays);
+    public decimal UsedDays => Balances.Sum(x => x.EffectiveUsedDays);
     public decimal PendingDays => VertexERP.Services.LeaveBalanceCalculator.Days(Requests, Year, "Pending");
     public decimal RemainingDays => Balances.Sum(x => x.AvailableDays);
 }

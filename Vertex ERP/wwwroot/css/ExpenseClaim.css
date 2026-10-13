@@ -540,3 +540,9 @@
     .exp-modal-footer { flex-direction: column-reverse; }
     .exp-modal-footer button { width: 100%; justify-content: center; }
 }
+.exp-advances { margin-bottom: 24px; }
+.exp-advance-entry { margin-bottom: 20px; }
+.exp-advance-entry summary { cursor: pointer; padding: 12px 0; font-weight: 600; }
+.exp-advance-form { max-width: 850px; padding: 16px 0; }
+.exp-advances .exp-decision-form { min-width: 240px; margin-top: 12px; }
+.exp-advances td { overflow-wrap: anywhere; }

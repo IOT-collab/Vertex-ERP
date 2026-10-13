@@ -1,4 +1,4 @@
-namespace VertexERP.Models;
+﻿namespace VertexERP.Models;
 
 public sealed class ManagerAttendanceViewModel
 {
@@ -7,7 +7,7 @@ public sealed class ManagerAttendanceViewModel
     public IReadOnlySet<int> OnLeaveIds { get; init; } = new HashSet<int>();
     public bool IsWeeklyOff { get; init; }
     public int Present => PresentIds.Count;
-    public int OnLeave => OnLeaveIds.Count;
+    public int OnLeave => IsWeeklyOff ? 0 : OnLeaveIds.Except(PresentIds).Count();
     public int Absent => IsWeeklyOff ? 0 : TeamMembers.Count(employee => !PresentIds.Contains(employee.Id) && !OnLeaveIds.Contains(employee.Id));
 }
 

@@ -13,6 +13,7 @@ namespace VertexERP.Data
         }
 
         public DbSet<BiometricEmployeeExclusion> BiometricEmployeeExclusions => Set<BiometricEmployeeExclusion>();
+        public DbSet<BiometricEnrollment> BiometricEnrollments => Set<BiometricEnrollment>();
         public DbSet<ModuleState> ModuleStates => Set<ModuleState>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
@@ -28,6 +29,7 @@ namespace VertexERP.Data
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
+            SynchronizeMasterLabelsAsync(false).GetAwaiter().GetResult();
             var logs = CaptureAuditLogs();
             try { return base.SaveChanges(acceptAllChangesOnSuccess); }
             catch { foreach (var log in logs) Entry(log).State = EntityState.Detached; throw; }
@@ -35,9 +37,35 @@ namespace VertexERP.Data
 
         public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
+            await SynchronizeMasterLabelsAsync(true, cancellationToken);
             var logs = CaptureAuditLogs();
             try { return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken); }
             catch { foreach (var log in logs) Entry(log).State = EntityState.Detached; throw; }
+        }
+
+        private async Task SynchronizeMasterLabelsAsync(bool asyncQueries, CancellationToken cancellationToken = default)
+        {
+            ChangeTracker.DetectChanges();
+            var renamedDepartments = ChangeTracker.Entries<Department>()
+                .Where(entry => entry.State == EntityState.Modified && entry.Property(x => x.DepartmentName).IsModified)
+                .Select(entry => entry.Entity).ToList();
+            foreach (var department in renamedDepartments)
+            {
+                var query = Employees.Where(employee => employee.DepartmentId == department.Id);
+                var employees = asyncQueries ? await query.ToListAsync(cancellationToken) : query.ToList();
+                foreach (var employee in employees.Where(employee => employee.DepartmentId == department.Id))
+                    employee.Department = department.DepartmentName;
+            }
+            var renamedEmployees = ChangeTracker.Entries<Employee>()
+                .Where(entry => entry.State == EntityState.Modified && entry.Property(x => x.FullName).IsModified)
+                .Select(entry => entry.Entity).ToList();
+            foreach (var employee in renamedEmployees)
+            {
+                var query = AppUsers.Where(user => user.EmployeeId == employee.Id);
+                var users = asyncQueries ? await query.ToListAsync(cancellationToken) : query.ToList();
+                foreach (var user in users.Where(user => user.EmployeeId == employee.Id))
+                    user.FullName = employee.FullName;
+            }
         }
 
         public DbSet<AppUser> AppUsers => Set<AppUser>();
@@ -59,6 +87,7 @@ namespace VertexERP.Data
         public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
         public DbSet<EmployeeLeaveBalance> EmployeeLeaveBalances => Set<EmployeeLeaveBalance>();
         public DbSet<ManualLeaveBalance> ManualLeaveBalances => Set<ManualLeaveBalance>();
+        public DbSet<LeaveCalculation> LeaveCalculations => Set<LeaveCalculation>();
         public DbSet<QueryTicket> QueryTickets => Set<QueryTicket>();
         public DbSet<EmployeeBankDetail> EmployeeBankDetails => Set<EmployeeBankDetail>();
         public DbSet<BankDetailUpdateRequest> BankDetailUpdateRequests => Set<BankDetailUpdateRequest>();
@@ -67,6 +96,7 @@ namespace VertexERP.Data
         public DbSet<EmployeeAsset> EmployeeAssets => Set<EmployeeAsset>();
         public DbSet<AttendanceRequest> AttendanceRequests => Set<AttendanceRequest>();
         public DbSet<ExpenseClaim> ExpenseClaims => Set<ExpenseClaim>();
+        public DbSet<ExpenseAdvance> ExpenseAdvances => Set<ExpenseAdvance>();
         public DbSet<RecruitmentHiringRecord> RecruitmentHiringRecords => Set<RecruitmentHiringRecord>();
         public DbSet<GeneratedSalarySlip> GeneratedSalarySlips => Set<GeneratedSalarySlip>();
         public DbSet<EmployeeNotificationDismissal> EmployeeNotificationDismissals => Set<EmployeeNotificationDismissal>();
@@ -74,6 +104,8 @@ namespace VertexERP.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<BiometricEnrollment>().HasOne(x => x.Employee).WithMany()
+                .HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<EmployeeCompany>().HasData(
                 new EmployeeCompany { Code = "VAS", Name = "Vertex Automation System Pvt. Ltd.", LastIssuedNumber = 179 },
                 new EmployeeCompany { Code = "VPC", Name = "Vertex Power Controls Pvt. Ltd.", LastIssuedNumber = 177 });
@@ -141,6 +173,13 @@ modelBuilder.Entity<EmployeeLeaveBalance>(entity =>
                 entity.HasOne(request => request.Employee).WithMany()
                     .HasForeignKey(request => request.EmployeeId).OnDelete(DeleteBehavior.Restrict);
             });
+            modelBuilder.Entity<LeaveCalculation>(entity =>
+            {
+                entity.HasIndex(x => new { x.EmployeeId, x.Year }).IsUnique();
+                entity.Property(x => x.OpeningEL).HasPrecision(10, 2);
+                entity.Property(x => x.OpeningEW).HasPrecision(10, 2);
+                entity.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade);
+            });
             modelBuilder.Entity<EmployeeAsset>(entity =>
             {
                 entity.HasIndex(asset => asset.AssetTag).IsUnique().HasFilter("\"Status\" <> 'Declined'");
@@ -177,6 +216,13 @@ modelBuilder.Entity<EmployeeLeaveBalance>(entity =>
                 entity.ToTable("PasswordResetTokens");
                 entity.HasIndex(token => new { token.AppUserId, token.ExpiresAtUtc });
                 entity.HasOne(token => token.AppUser).WithMany().HasForeignKey(token => token.AppUserId).OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<ExpenseAdvance>(entity =>
+            {
+                entity.Property(x => x.Amount).HasPrecision(18, 2);
+                entity.Property(x => x.ReceivedAmount).HasPrecision(18, 2);
+                entity.HasIndex(x => new { x.EmployeeId, x.PaidAtUtc });
+                entity.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Restrict);
             });
             modelBuilder.Entity<ExpenseClaim>(entity =>
             {

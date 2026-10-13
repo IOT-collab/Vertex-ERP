@@ -7,6 +7,40 @@ using VertexERP.Services;
 using VertexERP.Controllers;
 using Vertex_ERP.Controllers;
 
+if (args.Length == 1 && args[0] == "--query-visibility")
+{
+    await QueryVisibilityChecks.Run();
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--manager-access")
+{
+    await ManagerAccessChecks.Run();
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--back-date-leave")
+{
+    BackDateLeaveChecks.Run();
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--leave-calculator")
+{
+    LeaveCalculatorChecks.Run();
+    return;
+}
+
+if (args.Length == 2 && args[0] == "--enrollments")
+{
+    await EnrollmentChecks.Run(args[1]);
+    return;
+}
+if (args.Length == 1 && args[0] == "--expense-advances")
+{
+    await ExpenseAdvanceChecks.Run();
+    return;
+}
 if (args.Length == 2 && args[0] == "--manual-approval")
 {
     await ManualApprovalChecks.Run(args[1]);

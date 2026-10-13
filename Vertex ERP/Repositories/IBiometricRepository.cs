@@ -18,6 +18,8 @@ public interface IBiometricRepository
     Task AddAttendanceLogsAsync(IEnumerable<AttendanceLog> logs, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<AttendanceLog>> GetAttendanceLogsAsync(DateTime from, DateTime to, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Employee>> GetActiveEmployeesAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<BiometricEnrollment>> GetEnrollmentsAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<EmployeeDeviceMapping>> GetActiveMappingsAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlySet<int>> GetApprovedLeaveEmployeeIdsAsync(DateOnly date, CancellationToken cancellationToken = default);
     Task<bool> DeviceHasAttendanceAsync(int deviceId, CancellationToken cancellationToken = default);
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

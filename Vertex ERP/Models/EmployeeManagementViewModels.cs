@@ -5,6 +5,7 @@ namespace VertexERP.Models;
 
 public class EmployeeDirectoryViewModel
 {
+    public IReadOnlyDictionary<int, string> EnrollCodes { get; init; } = new Dictionary<int, string>();
     public string? CompanyCode { get; init; }
     public IReadOnlyList<Employee> Employees { get; init; } = Array.Empty<Employee>();
     public int TotalEmployees { get; init; }

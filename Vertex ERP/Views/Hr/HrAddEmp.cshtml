@@ -144,9 +144,9 @@
                     <p id="employeeIdPreviewNotice" role="status" aria-live="polite">Select a company to see the next Employee ID.</p>
                 </div>
                 <div class="form-group">
-                    <label asp-for="PendingBiometricEmployeeId">Biometric Enrollment Number / Emp ID</label>
+                    <label asp-for="PendingBiometricEmployeeId">Biometric Enroll Code / Name</label>
                     <select asp-for="PendingBiometricEmployeeId">
-                        <option value="">New employee � biometric not linked</option>
+                        <option value="">New employee — biometric not linked</option>
                         @foreach (var profile in Model.BiometricOptions)
                         {
                             <option value="@profile.EmployeeId">@profile.Label</option>
@@ -877,14 +877,22 @@
         const current = ++revision;
         code.value = '';
         enrollments.replaceChildren();
-        notice.textContent = 'Loading employee IDs�';
+        notice.textContent = 'Loading employee IDs…';
         save.disabled = true;
         const query = new URLSearchParams();
         if (company.value) query.set('companyCode', company.value);
         if (biometric.value) query.set('biometricEmployeeId', biometric.value);
         try {
             const response = await fetch('@Url.Action("EmployeeIdentityPreview", "Hr")?' + query, { credentials: 'same-origin', cache: 'no-store' });
-            if (!response.ok) throw new Error('Unable to load employee IDs');
+            if (current !== revision) return;
+            if (response.status === 400) {
+                const problem = await response.json();
+                if (current !== revision) return;
+                notice.textContent = problem.message || 'This biometric profile is unavailable. Refresh and select another profile.';
+                save.disabled = true;
+                return;
+            }
+            if (!response.ok || response.redirected) throw new Error('Unable to load employee IDs');
             const result = await response.json();
             if (current !== revision) return;
             code.value = result.employeeCode || '';
@@ -901,8 +909,10 @@
             save.disabled = false;
         } catch {
             if (current !== revision) return;
-            notice.textContent = 'Could not load employee IDs. Select the company again to retry, or refresh the page.';
-            save.disabled = true;
+            // Preview does not allocate an ID. A temporary preview failure must not
+            // prevent a valid submission; the server validates the link on save.
+            notice.textContent = 'ID preview is unavailable. You can save after selecting a company; the ID and biometric link will be checked when saved.';
+            save.disabled = !company.value;
         }
     }
     company.addEventListener('change', refreshIdentity);
