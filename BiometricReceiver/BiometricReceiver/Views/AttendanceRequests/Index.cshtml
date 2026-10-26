@@ -20,7 +20,7 @@
         <tbody>@foreach (var request in Model) {
             <tr><td>@request.Employee.FullName<small>@request.Employee.EmployeeCode</small></td><td>@request.AttendanceDate.ToString("dd MMM yyyy")</td>
             <td>@request.CheckInTime.ToString("HH:mm") / @(request.CheckOutTime?.ToString("HH:mm") ?? "--")</td>
-            <td>@request.Reason</td><td><span class="employee-badge @request.Status.ToLowerInvariant()">@request.Status</span></td>
+            <td data-no-localize>@request.Reason</td><td><span class="employee-badge @request.Status.ToLowerInvariant()">@request.Status</span></td>
             <td>@(request.ReviewReason ?? "--") @if (request.ReviewedAtUtc.HasValue) { <small>@VertexERP.Services.FieldAttendanceClock.IndiaTime(new DateTimeOffset(request.ReviewedAtUtc.Value)).ToString("dd MMM yyyy HH:mm") IST</small> }</td>
             @if (User.IsInRole("Admin")) { <td>@if (request.Status == "Pending") {
                 <form asp-action="Review" method="post"><input type="hidden" name="id" value="@request.Id" />

@@ -16,6 +16,7 @@ namespace VertexERP.Data
         public DbSet<BiometricEnrollment> BiometricEnrollments => Set<BiometricEnrollment>();
         public DbSet<ModuleState> ModuleStates => Set<ModuleState>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+        public DbSet<EmployeeFeedback> EmployeeFeedbacks => Set<EmployeeFeedback>();
 
         private List<AuditLog> CaptureAuditLogs()
         {
@@ -267,6 +268,12 @@ modelBuilder.Entity<EmployeeLeaveBalance>(entity =>
                 entity.HasOne(ticket => ticket.Employee).WithMany().HasForeignKey(ticket => ticket.EmployeeId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(ticket => ticket.ReportingManager).WithMany().HasForeignKey(ticket => ticket.ReportingManagerId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(ticket => ticket.ResolvedByUser).WithMany().HasForeignKey(ticket => ticket.ResolvedByUserId).OnDelete(DeleteBehavior.SetNull);
+            });
+            modelBuilder.Entity<EmployeeFeedback>(entity =>
+            {
+                entity.ToTable("EmployeeFeedbacks");
+                entity.HasIndex(x => x.SubmittedAtUtc);
+                entity.HasOne(x => x.SubmittedByUser).WithMany().HasForeignKey(x => x.SubmittedByUserId).OnDelete(DeleteBehavior.SetNull);
             });
             modelBuilder.Entity<EmployeeBankDetail>(entity => { entity.ToTable("EmployeeBankDetails"); entity.HasIndex(x => x.EmployeeId).IsUnique(); entity.HasOne(x => x.Employee).WithOne().HasForeignKey<EmployeeBankDetail>(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade); });
             modelBuilder.Entity<BankDetailUpdateRequest>(entity => { entity.ToTable("BankDetailUpdateRequests"); entity.HasIndex(x => new { x.EmployeeId, x.Status }); entity.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade); });

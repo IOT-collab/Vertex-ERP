@@ -18,7 +18,7 @@
 <div class="manual-list-heading"><h2>All Employees <small>(@Model.Employees.Count)</small></h2><form asp-action="Index" method="get" class="manual-filters"><label>Year<input type="number" name="year" value="@Model.Year" min="2000" max="2100" required/></label><label>Employee<input name="search" value="@Model.Search" placeholder="Name or employee ID"/></label><button type="submit">Search</button><a asp-action="Index" asp-route-year="@Model.Year">Clear</a></form></div>
 <div class="manual-table"><table><thead><tr><th>Employee</th><th>EL</th><th>CL</th><th>ML</th><th>EW</th><th>Action</th></tr></thead><tbody>
 @foreach(var employee in Model.Employees){
-    <tr><td><strong>@employee.FullName</strong><small>@employee.EmployeeCode · @employee.Department</small>@if(!employee.IsActive){<small>Inactive</small>}</td>
+    <tr><td><strong data-no-localize>@employee.FullName</strong><small data-no-localize>@employee.EmployeeCode · @employee.Department</small>@if(!employee.IsActive){<small>Inactive</small>}</td>
     @foreach(var category in ManualLeavePage.Categories){
         var balance = saved.GetValueOrDefault((employee.Id, category));
         <td>@if(balance == null){<span class="manual-unfilled">Not filled</span>}else if(balance.Revision==0){<div>Approved @N(balance.ApprovedDays)</div><div>Pending @N(balance.PendingDays)</div><span class="manual-unfilled">Entitlement not filled</span>}else{@if(category is "EL" or "EW"){<div>Carry forward <strong>@N(balance.OpeningDays)</strong></div>}<div>Used <strong>@N(balance.EffectiveUsedDays)</strong></div><div class="manual-available">Available <strong>@N(balance.AvailableDays)</strong></div>}</td>

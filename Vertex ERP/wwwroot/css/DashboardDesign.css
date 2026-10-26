@@ -1,0 +1,314 @@
+/* Presentation only: preserve the dashboard's routes, datasets and live controls. */
+.dashboard-studio-shell {
+    --studio-surface: var(--erp-surface);
+    --studio-page: var(--erp-bg);
+    --studio-border: var(--erp-border);
+    --studio-soft: var(--erp-surface-soft);
+}
+html[data-theme="dark"] .dashboard-studio-shell {
+    --studio-surface: #05172f;
+    --studio-page: #020b1c;
+    --studio-border: #164a79;
+    --studio-soft: #092449;
+}
+html[data-theme] .dashboard-studio-shell .page-content {
+    padding: 22px 26px !important;
+    background: var(--studio-page) !important;
+}
+html[data-theme] .dashboard-studio-shell .page-content > .dashboard.dashboard-studio {
+    max-width: 1680px !important;
+    padding: 0 0 20px !important;
+    background: transparent !important;
+}
+html[data-theme] .dashboard.dashboard-studio .page-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+    padding: 0 !important;
+    margin-bottom: 16px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+html[data-theme] .dashboard.dashboard-studio .header-actions { grid-row: 1; gap: 10px !important; }
+html[data-theme] .dashboard.dashboard-studio .header-text {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 26px !important;
+    border: 1px solid var(--studio-border);
+    border-radius: 14px;
+    background: linear-gradient(110deg, color-mix(in srgb, var(--erp-primary) 15%, var(--studio-surface)), var(--studio-surface) 65%);
+}
+html[data-theme] .dashboard.dashboard-studio .header-text::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: -22px 0 -18px auto;
+    width: 46%;
+    background: url('/images/dashboard-workspace.svg') center right / contain no-repeat;
+    pointer-events: none;
+}
+html[data-theme] .dashboard.dashboard-studio .header-text :is(h2, p) { max-width: 60%; }
+html[data-theme] .dashboard.dashboard-studio .header-text h2 { font-size: clamp(26px, 2.4vw, 36px) !important; letter-spacing: -.8px !important; }
+html[data-theme] .dashboard.dashboard-studio .header-text p { margin-top: 8px !important; line-height: 1.6 !important; }
+html[data-theme] .dashboard.dashboard-studio .system-badge { font-size: 10px !important; letter-spacing: .8px !important; padding: 4px 10px !important; }
+html[data-theme] .dashboard.dashboard-studio :is(.search-bar, .date-box, .btn-icon-bell, .btn-ai-mic) {
+    background: var(--studio-surface) !important;
+    border: 1px solid var(--studio-border) !important;
+    box-shadow: none !important;
+}
+html[data-theme] .dashboard.dashboard-studio .search-bar { border-radius: 11px !important; width: min(320px, 34vw) !important; }
+html[data-theme] .dashboard.dashboard-studio .date-box { border-radius: 11px !important; }
+html[data-theme] .dashboard.dashboard-studio .card-row { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 14px !important; margin-bottom: 16px !important; }
+html[data-theme] .dashboard.dashboard-studio .dashboard-card {
+    min-height: 166px !important;
+    padding: 18px !important;
+    border-radius: 13px !important;
+    border: 1px solid color-mix(in srgb, var(--card-accent) 45%, var(--studio-border)) !important;
+    background: linear-gradient(125deg, color-mix(in srgb, var(--card-accent) 15%, var(--studio-surface)), var(--studio-surface)) !important;
+    box-shadow: 0 5px 18px rgba(0,0,0,.07) !important;
+    text-decoration: none !important;
+}
+html[data-theme] .dashboard.dashboard-studio .dashboard-card:hover { transform: translateY(-3px) !important; border-color: var(--card-accent) !important; box-shadow: 0 8px 22px color-mix(in srgb, var(--card-accent) 18%, transparent) !important; }
+html[data-theme] .dashboard.dashboard-studio .dashboard-card::before { display: block !important; width: 100% !important; height: 2px !important; box-shadow: none !important; }
+html[data-theme] .dashboard.dashboard-studio .card-meta { flex-direction: row-reverse !important; justify-content: flex-end !important; gap: 12px !important; margin-bottom: 6px !important; }
+html[data-theme] .dashboard.dashboard-studio .card-meta span { color: var(--erp-text) !important; }
+html[data-theme] .dashboard.dashboard-studio .card-icon { width: 38px !important; height: 38px !important; border-radius: 10px !important; font-size: 16px !important; box-shadow: 0 5px 16px color-mix(in srgb, var(--card-accent) 22%, transparent) !important; }
+html[data-theme] .dashboard.dashboard-studio .card-body-metrics { margin-left: 50px !important; margin-bottom: 10px !important; }
+html[data-theme] .dashboard.dashboard-studio .dashboard-card h2 { font-size: 34px !important; letter-spacing: -1px !important; font-variant-numeric: tabular-nums; }
+html[data-theme] .dashboard.dashboard-studio .card-footer-info { padding-top: 10px !important; font-size: 11px !important; }
+html[data-theme] .dashboard.dashboard-studio :is(.analytics-row, .content-row, .bottom-row) { gap: 16px !important; margin-bottom: 16px !important; }
+html[data-theme] .dashboard.dashboard-studio .analytics-row { grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr) minmax(0, .9fr) !important; }
+html[data-theme] .dashboard.dashboard-studio :is(.table-box, .attendance-box, .alerts-box, .activity-box, .quick-box, .analytics-card) {
+    background: linear-gradient(140deg, color-mix(in srgb, var(--erp-primary) 4%, var(--studio-surface)), var(--studio-surface)) !important;
+    border: 1px solid var(--studio-border) !important;
+    border-radius: 13px !important;
+    padding: 18px !important;
+    box-shadow: 0 5px 20px rgba(0,0,0,.06) !important;
+}
+html[data-theme] .dashboard.dashboard-studio .box-header { align-items: flex-start !important; gap: 10px !important; margin-bottom: 18px !important; }
+html[data-theme] .dashboard.dashboard-studio h3 { font-size: 15px !important; line-height: 1.4 !important; }
+html[data-theme] .dashboard.dashboard-studio .section-icon { color: var(--erp-primary) !important; margin-right: 7px !important; }
+html[data-theme] .dashboard.dashboard-studio .sub-text { font-size: 11px !important; line-height: 1.55 !important; }
+html[data-theme] .dashboard.dashboard-studio .analytics-wide { min-height: 260px !important; }
+html[data-theme] .dashboard.dashboard-studio .line-chart { min-height: 175px !important; }
+html[data-theme] .dashboard.dashboard-studio .dashboard-week-grid { height: 175px !important; padding-top: 20px !important; background: repeating-linear-gradient(to top, transparent 0 39px, color-mix(in srgb, var(--studio-border) 65%, transparent) 39px 40px); }
+html[data-theme] .dashboard.dashboard-studio .dashboard-week-item > span { width: min(28px, 70%) !important; border-radius: 5px 5px 0 0 !important; background: linear-gradient(0deg, #2563eb, #38bdf8) !important; box-shadow: 0 0 15px #2563eb20 !important; }
+html[data-theme] .dashboard.dashboard-studio .dashboard-week-item { justify-items: center; }
+html[data-theme] .dashboard.dashboard-studio .department-load-track { height: 8px !important; background: var(--studio-soft) !important; }
+html[data-theme] .dashboard.dashboard-studio .department-load-item:nth-child(3n+2) .department-load-track > span { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+html[data-theme] .dashboard.dashboard-studio .department-load-item:nth-child(3n) .department-load-track > span { background: linear-gradient(90deg, #059669, #2dd4bf); }
+html[data-theme] .dashboard.dashboard-studio .radial-ring { --ring-size: 112px; background: radial-gradient(circle at center, var(--studio-surface) 58%, transparent 60%), conic-gradient(from 180deg, #10b981 calc(var(--progress) * 1%), var(--studio-border) 0) !important; box-shadow: 0 0 24px #10b98112 !important; }
+html[data-theme] .dashboard.dashboard-studio .radial-ring span { color: var(--erp-text) !important; font-size: 25px !important; }
+html[data-theme] .dashboard.dashboard-studio .radial-details div { background: var(--studio-soft) !important; border-color: var(--studio-border) !important; border-radius: 9px !important; }
+html[data-theme] .dashboard.dashboard-studio .side-panel { gap: 16px !important; }
+html[data-theme] .dashboard.dashboard-studio .table-responsive-container { border-radius: 10px !important; background: var(--studio-surface) !important; }
+html[data-theme] .dashboard.dashboard-studio .modern-table :is(th, td) { border-color: var(--studio-border) !important; }
+html[data-theme] .dashboard.dashboard-studio .modern-table th { background: var(--studio-soft) !important; font-size: 10px !important; padding: 11px 13px !important; }
+html[data-theme] .dashboard.dashboard-studio .modern-table td { background: var(--studio-surface) !important; padding: 11px 13px !important; font-size: 12px !important; }
+html[data-theme] .dashboard.dashboard-studio .modern-table tbody tr:hover td { background: var(--studio-soft) !important; }
+html[data-theme] .dashboard.dashboard-studio .user-meta small { font-size: 10px !important; }
+html[data-theme] .dashboard.dashboard-studio :is(.attendance-item, .alert-item) { background: var(--studio-soft) !important; border-color: var(--studio-border) !important; border-radius: 9px !important; }
+html[data-theme] .dashboard.dashboard-studio .alerts-box { border-color: color-mix(in srgb, #ef4444 30%, var(--studio-border)) !important; }
+html[data-theme] .dashboard.dashboard-studio .label-group { color: var(--erp-text-muted) !important; }
+html[data-theme] .dashboard.dashboard-studio .metric-val { color: var(--erp-text) !important; }
+html[data-theme="light"] .dashboard.dashboard-studio .status-active { color: #166534 !important; }
+html[data-theme="light"] .dashboard.dashboard-studio .status-absent { color: #b91c1c !important; }
+html[data-theme="dark"] .dashboard-studio-shell :is(.topbar, .sidebar, .logo) { background: linear-gradient(125deg, #061a38, #061228) !important; border-color: var(--studio-border) !important; }
+html[data-theme] .dashboard-studio-shell .sidebar-menu a[href="/Main/Dashboard"] { background: var(--erp-primary); color: var(--theme-accent-text) !important; box-shadow: 0 4px 14px color-mix(in srgb, var(--erp-primary) 24%, transparent); }
+html[data-theme] .dashboard.dashboard-studio :is(a, button, [role="link"]):focus-visible { outline: 3px solid var(--erp-primary) !important; outline-offset: 3px !important; }
+/* Use the shared hamburger drawer on desktop as well as mobile. */
+.dashboard-studio-shell .main-content { margin-left: 0; }
+.dashboard-studio-shell .sidebar-menu li a { padding: 11px 15px; font-size: 12px; border-radius: 9px; }
+html[data-theme] .dashboard.dashboard-studio .card-meta span { min-width: 0; overflow-wrap: anywhere; }
+html[data-theme] .dashboard.dashboard-studio :is(.header-actions, .table-controls, .box-header) { min-width: 0; flex-wrap: wrap !important; }
+@media(max-width: 1199px) {
+    html[data-theme] .dashboard.dashboard-studio .analytics-row { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    html[data-theme] .dashboard.dashboard-studio .analytics-wide { grid-column: 1 / -1; }
+}
+@media(max-width: 760px) {
+    html[data-theme] .dashboard-studio-shell .page-content { padding: 16px !important; }
+    html[data-theme] .dashboard.dashboard-studio .card-row { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    html[data-theme] .dashboard.dashboard-studio .header-actions { justify-content: flex-start !important; }
+    html[data-theme] .dashboard.dashboard-studio .header-text { padding: 22px !important; }
+    html[data-theme] .dashboard.dashboard-studio .header-text::after { opacity: .22; width: 60%; }
+    html[data-theme] .dashboard.dashboard-studio .header-text :is(h2, p) { max-width: 100%; }
+    html[data-theme] .dashboard.dashboard-studio .search-bar { width: 100% !important; flex: 1 1 200px; }
+    html[data-theme] .dashboard.dashboard-studio .content-row { grid-template-columns: minmax(0, 1fr) !important; }
+}
+@media(max-width: 480px) {
+    html[data-theme] .dashboard.dashboard-studio .analytics-row { grid-template-columns: minmax(0, 1fr) !important; }
+    html[data-theme] .dashboard.dashboard-studio .dashboard-card { padding: 14px !important; min-height: 158px !important; }
+    html[data-theme] .dashboard.dashboard-studio .card-body-metrics { margin-left: 0 !important; }
+    html[data-theme] .dashboard.dashboard-studio .dashboard-card h2 { font-size: 30px !important; }
+}
+@media(max-width: 380px) {
+    html[data-theme] .dashboard.dashboard-studio .card-row { grid-template-columns: minmax(0, 1fr) !important; }
+    html[data-theme] .dashboard.dashboard-studio .header-actions { display: flex !important; }
+    html[data-theme] .dashboard.dashboard-studio .header-text { padding: 18px !important; }
+    html[data-theme] .dashboard.dashboard-studio .header-text::after { opacity: .12; }
+}
+@media(prefers-reduced-motion: reduce) {
+    html[data-theme] .dashboard.dashboard-studio *, .dashboard-studio-shell .main-content { animation: none !important; transition: none !important; }
+}
+
+/* Reference dashboard finish: layered lighting and tighter information density.
+   Artwork is decorative; chart heights and all displayed metrics stay data-driven. */
+html[data-theme] .dashboard.dashboard-studio .header-text {
+    padding: 21px 24px !important;
+    background: radial-gradient(ellipse at 65% 0%, color-mix(in srgb, var(--erp-primary) 32%, transparent), transparent 60%), linear-gradient(115deg, var(--studio-soft), var(--studio-surface) 70%) !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--erp-primary) 25%, transparent), 0 8px 24px #0000000c;
+}
+html[data-theme] .dashboard.dashboard-studio .header-text::before {
+    content: ""; position: absolute; z-index: -1; width: 65%; height: 230%;
+    right: -12%; top: -85%; border: 1px solid color-mix(in srgb, var(--erp-primary) 40%, transparent);
+    border-radius: 48%; transform: rotate(-18deg);
+    box-shadow: 0 18px 0 color-mix(in srgb, var(--erp-primary) 9%, transparent), 0 38px 0 color-mix(in srgb, var(--erp-primary) 6%, transparent);
+    pointer-events: none;
+}
+html[data-theme] .dashboard.dashboard-studio .header-text h2 {
+    background: linear-gradient(100deg, var(--erp-text) 25%, var(--erp-primary) 90%);
+    background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    width: fit-content; margin-top: 9px !important;
+}
+html[data-theme] .dashboard.dashboard-studio .dashboard-card {
+    position: relative; isolation: isolate; overflow: hidden;
+    min-height: 154px !important; padding: 15px 17px !important;
+    background: radial-gradient(ellipse at 10% 0%, color-mix(in srgb, var(--card-accent) 32%, transparent), transparent 75%), linear-gradient(125deg, color-mix(in srgb, var(--card-accent) 13%, var(--studio-surface)), var(--studio-surface)) !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--card-accent) 35%, transparent), 0 6px 24px #00000016 !important;
+}
+/* Contour highlights are background ornament, not a fabricated trend chart. */
+html[data-theme] .dashboard.dashboard-studio .dashboard-card::after {
+    content: ""; position: absolute; z-index: -1; pointer-events: none;
+    width: 220px; height: 220px; right: -90px; top: -100px;
+    border-radius: 50%; border: 1px solid color-mix(in srgb, var(--card-accent) 30%, transparent);
+    box-shadow: 0 0 0 18px color-mix(in srgb, var(--card-accent) 5%, transparent), 0 0 0 40px color-mix(in srgb, var(--card-accent) 4%, transparent), 0 0 55px color-mix(in srgb, var(--card-accent) 14%, transparent);
+}
+html[data-theme] .dashboard.dashboard-studio .card-icon {
+    width: 42px !important; height: 42px !important; font-size: 19px !important;
+    background: linear-gradient(140deg, color-mix(in srgb, var(--card-accent) 65%, white), var(--card-accent)) !important;
+    border: 1px solid #ffffff40 !important;
+    box-shadow: 0 0 22px color-mix(in srgb, var(--card-accent) 40%, transparent), inset 0 1px 0 #ffffff45 !important;
+}
+html[data-theme] .dashboard.dashboard-studio .card-body-metrics { margin-left: 54px !important; margin-bottom: 8px !important; }
+html[data-theme] .dashboard.dashboard-studio .dashboard-card h2 { font-size: 36px !important; line-height: 1 !important; }
+html[data-theme] .dashboard.dashboard-studio .trend { font-size: 10px !important; padding: 4px 10px !important; }
+html[data-theme] .dashboard.dashboard-studio .card-footer-info { border-color: color-mix(in srgb, var(--card-accent) 22%, transparent) !important; line-height: 1.4 !important; }
+html[data-theme] .dashboard.dashboard-studio :is(.analytics-card, .table-box, .attendance-box, .activity-box) {
+    padding: 15px !important;
+    background: radial-gradient(ellipse at top left, color-mix(in srgb, var(--erp-primary) 9%, transparent), transparent 70%), var(--studio-surface) !important;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--erp-primary) 13%, transparent), 0 6px 22px #00000010 !important;
+}
+html[data-theme] .dashboard.dashboard-studio .box-header { margin-bottom: 12px !important; }
+html[data-theme] .dashboard.dashboard-studio .analytics-wide { min-height: 225px !important; }
+html[data-theme] .dashboard.dashboard-studio .line-chart { min-height: 145px !important; padding: 0 !important; }
+html[data-theme] .dashboard.dashboard-studio .dashboard-week-grid {
+    height: 145px !important; padding: 8px 10px 0 !important; gap: 12px !important;
+    background: repeating-linear-gradient(to top, transparent 0 31px, color-mix(in srgb, var(--studio-border) 55%, transparent) 31px 32px);
+    border-bottom: 1px solid var(--studio-border);
+}
+html[data-theme] .dashboard.dashboard-studio .dashboard-week-item {
+    display: flex !important; flex-direction: column !important; justify-content: flex-end !important; align-items: center !important;
+    min-height: 0; gap: 4px;
+}
+html[data-theme] .dashboard.dashboard-studio .dashboard-week-item > span {
+    flex-shrink: 1; max-height: calc(100% - 38px); width: min(24px, 70%) !important;
+    background: linear-gradient(0deg, #1254dd, #32c7ff) !important;
+    box-shadow: 0 0 14px #229eff40, inset 1px 0 0 #ffffff35 !important;
+}
+html[data-theme] .dashboard.dashboard-studio .dashboard-week-item strong { color: var(--erp-text) !important; font-size: 11px !important; }
+html[data-theme] .dashboard.dashboard-studio .dashboard-week-item small { font-size: 10px !important; }
+html[data-theme] .dashboard.dashboard-studio .department-load-list { gap: 14px !important; padding-top: 7px !important; }
+html[data-theme] .dashboard.dashboard-studio .department-load-heading { font-size: 11px !important; margin-bottom: 6px !important; }
+html[data-theme] .dashboard.dashboard-studio .department-load-track > span { box-shadow: 0 0 12px #328aff30; }
+html[data-theme] .dashboard.dashboard-studio .radial-chart { min-height: 0 !important; gap: 10px !important; padding-top: 0 !important; }
+html[data-theme] .dashboard.dashboard-studio .radial-ring { --ring-size: 100px; }
+html[data-theme] .dashboard.dashboard-studio .radial-details div { padding: 6px 4px !important; }
+html[data-theme] .dashboard.dashboard-studio .radial-details span { font-size: 10px !important; }
+html[data-theme] .dashboard.dashboard-studio .modern-table td { padding: 8px 11px !important; }
+html[data-theme] .dashboard.dashboard-studio .modern-table th { padding: 9px 11px !important; letter-spacing: .4px; }
+html[data-theme] .dashboard.dashboard-studio .avatar-placeholder { width: 30px !important; height: 30px !important; box-shadow: 0 0 12px #6366f130; }
+html[data-theme] .dashboard.dashboard-studio .attendance-item { padding: 7px 9px !important; }
+html[data-theme] .dashboard.dashboard-studio .alerts-box {
+    background: radial-gradient(ellipse at top left, #ef44441a, transparent 80%), var(--studio-surface) !important;
+}
+@media(min-width: 1200px) {
+    html[data-theme] .dashboard.dashboard-studio .content-row { grid-template-columns: minmax(0, 2.5fr) minmax(270px, 1fr) !important; }
+}
+@media(max-width: 600px) {
+    html[data-theme] .dashboard.dashboard-studio .header-text h2 { font-size: 27px !important; }
+    html[data-theme] .dashboard.dashboard-studio .card-body-metrics { margin-left: 0 !important; }
+    html[data-theme] .dashboard.dashboard-studio .dashboard-card h2 { font-size: 30px !important; }
+    html[data-theme] .dashboard.dashboard-studio .dashboard-card { padding: 14px !important; }
+    html[data-theme] .dashboard.dashboard-studio .card-meta { gap: 8px !important; }
+    html[data-theme] .dashboard.dashboard-studio .card-icon { width: 34px !important; height: 34px !important; font-size: 15px !important; }
+    html[data-theme] .dashboard.dashboard-studio .card-meta span { font-size: 12px !important; }
+}
+/* Data-driven area sparklines and grouped attendance columns. */
+html[data-theme] .dashboard.dashboard-studio .kpi-sparkline { display: block; width: 100%; height: 58px; margin: 7px 0 2px; overflow: visible; color: var(--card-accent); filter: drop-shadow(0 3px 7px color-mix(in srgb, var(--card-accent) 40%, transparent)); }
+html[data-theme] .dashboard.dashboard-studio .dashboard-card { min-height: 200px !important; }
+html[data-theme] .dashboard.dashboard-studio .card-footer-info { padding-top: 4px !important; border-top: 0 !important; }
+html[data-theme] .dashboard.dashboard-studio .status-blue .kpi-sparkline { color: #32b6ff; }
+html[data-theme] .dashboard.dashboard-studio .status-red .kpi-sparkline { color: #ff527e; }
+html[data-theme] .dashboard.dashboard-studio .status-orange .kpi-sparkline { color: #ffb52e; }
+html[data-theme] .dashboard.dashboard-studio .status-purple .kpi-sparkline { color: #aa6bff; }
+html[data-theme] .dashboard.dashboard-studio .workforce-legend { display: flex; justify-content: flex-end; gap: 14px; flex-wrap: wrap; margin: 0 0 9px; font-size: 10px; color: var(--erp-text-muted); }
+html[data-theme] .dashboard.dashboard-studio .workforce-legend > span::before { content: ''; display: inline-block; width: 7px; height: 7px; background: var(--series-color); border-radius: 50%; margin-right: 5px; }
+.dashboard-studio .series-present { --series-color: #32adff; }
+.dashboard-studio .series-absent { --series-color: #ff5273; }
+.dashboard-studio .series-late { --series-color: #ffb52e; }
+.dashboard-studio .series-leave { --series-color: #9256ff; }
+html[data-theme] .dashboard.dashboard-studio .workforce-grouped { height: 153px !important; gap: 13px !important; padding-top: 15px !important; }
+.dashboard-studio .workforce-day { min-width: 0; height: 100%; display: grid; grid-template-rows: minmax(0, 1fr) 20px; text-align: center; }
+.dashboard-studio .workforce-day > small { font-size: 10px; color: var(--erp-text-muted); padding-top: 5px; }
+.dashboard-studio .workforce-bars { display: flex; align-items: flex-end; justify-content: center; gap: 3px; min-height: 0; }
+.dashboard-studio .workforce-bar { height: max(2px, var(--bar-height)); max-height: 100%; width: 18px; position: relative; flex: 0 1 18px; }
+.dashboard-studio .workforce-bar > span { display: block; width: 100%; height: 100%; border-radius: 4px 4px 0 0; background: linear-gradient(0deg, color-mix(in srgb, var(--series-color) 65%, #06316a), var(--series-color)); box-shadow: inset 1px 1px 0 #ffffff40, 0 0 10px color-mix(in srgb, var(--series-color) 18%, transparent); }
+.dashboard-studio .workforce-bar > strong { position: absolute; bottom: calc(100% + 3px); left: 50%; transform: translateX(-50%); color: var(--erp-text); font-size: 9px; line-height: 1; font-variant-numeric: tabular-nums; }
+@media(max-width: 480px) {
+ html[data-theme] .dashboard.dashboard-studio .workforce-grouped { gap: 7px !important; padding-left: 0 !important; padding-right: 0 !important; }
+ .dashboard-studio .workforce-bars { gap: 2px; }
+ .dashboard-studio .workforce-bar > strong { font-size: 8px; }
+ html[data-theme] .dashboard.dashboard-studio .workforce-legend { gap: 8px; }
+}
+html[data-theme] .dashboard.dashboard-studio .attendance-box { display: grid; grid-template-columns: 120px minmax(0, 1fr); align-items: center; gap: 8px 14px; }
+html[data-theme] .dashboard.dashboard-studio .attendance-box > .box-header { grid-column: 1 / -1; }
+html[data-theme] .dashboard.dashboard-studio .attendance-box > .progress-stacked { display: none !important; }
+html[data-theme] .dashboard.dashboard-studio .attendance-list { margin: 0 !important; gap: 4px !important; }
+html[data-theme] .dashboard.dashboard-studio .attendance-item { background: transparent !important; border: 0 !important; padding: 5px 0 !important; font-size: 11px !important; }
+.dashboard-studio .attendance-donut { position: relative; width: 120px; height: 120px; }
+.dashboard-studio .attendance-donut svg { width: 100%; height: 100%; }
+.dashboard-studio .attendance-donut > div { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--erp-text); }
+.dashboard-studio .attendance-donut strong { font-size: 28px; line-height: 1.2; }
+.dashboard-studio .attendance-donut small { font-size: 11px; color: var(--erp-text-muted); }
+@media(max-width: 380px) {
+ html[data-theme] .dashboard.dashboard-studio .attendance-box { grid-template-columns: 95px minmax(0, 1fr); gap: 8px; }
+ .dashboard-studio .attendance-donut { width: 95px; height: 95px; }
+}
+/* Approved simple weekly chart: one attendance total per day, RGB palette. */
+html[data-theme] .dashboard.dashboard-studio .workforce-simple-caption { display: flex; align-items: center; gap: 7px; margin: 2px 0 22px; font-size: 11px; color: var(--erp-text-muted); }
+.dashboard-studio .workforce-simple-caption > span { width: 7px; height: 7px; border-radius: 50%; background: rgb(53, 150, 255); }
+.dashboard-studio .workforce-simple-chart { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 9px; padding-top: 12px; }
+.dashboard-studio .workforce-axis { display: flex; flex-direction: column; justify-content: space-between; height: 160px; color: var(--erp-text-muted); font-size: 10px; text-align: right; }
+.dashboard-studio .workforce-simple-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(8px, 2vw, 24px); height: 184px; background: linear-gradient(var(--studio-border),var(--studio-border)) left top / 100% 1px no-repeat, linear-gradient(var(--studio-border),var(--studio-border)) left 80px / 100% 1px no-repeat, linear-gradient(var(--studio-border),var(--studio-border)) left 160px / 100% 1px no-repeat; }
+.dashboard-studio .workforce-simple-day { display: grid; grid-template-rows: 160px 24px; min-width: 0; text-align: center; }
+.dashboard-studio .workforce-simple-column { display: flex; align-items: flex-end; justify-content: center; min-height: 0; }
+.dashboard-studio .workforce-simple-bar { --bar-color: rgb(53, 150, 255); height: var(--bar-height); width: 72%; max-width: 56px; position: relative; }
+.dashboard-studio .workforce-simple-day:nth-child(3n+2) .workforce-simple-bar { --bar-color: rgb(44, 199, 136); }
+.dashboard-studio .workforce-simple-day:nth-child(3n) .workforce-simple-bar { --bar-color: rgb(242, 91, 111); }
+.dashboard-studio .workforce-simple-bar > span { display: block; width: 100%; height: 100%; border-radius: 8px 8px 0 0; background: linear-gradient(to top, color-mix(in srgb, var(--bar-color) 80%, black), var(--bar-color)); }
+.dashboard-studio .workforce-simple-bar > strong { position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 12px; line-height: 1; color: var(--erp-text); font-variant-numeric: tabular-nums; }
+.dashboard-studio .workforce-simple-bar.is-zero { height: 0; }
+.dashboard-studio .workforce-simple-bar.is-zero > span { width: 5px; height: 5px; border-radius: 50%; position: absolute; bottom: -2px; left: calc(50% - 2px); }
+.dashboard-studio .workforce-simple-day > small { padding-top: 8px; font-size: 10px; color: var(--erp-text-muted); }
+@media(max-width: 480px) {
+ .dashboard-studio .workforce-simple-chart { grid-template-columns: 22px minmax(0, 1fr); gap: 5px; }
+ .dashboard-studio .workforce-simple-grid { gap: 8px; }
+ .dashboard-studio .workforce-simple-bar { width: 85%; }
+ .dashboard-studio .workforce-simple-bar > strong { font-size: 11px; }
+}
+html[data-theme] .dashboard.dashboard-studio .attendance-count-note { grid-column: 1 / -1; grid-row: 3; margin: 6px 0 0; color: var(--erp-text-muted); font-size: 11px; line-height: 1.5; }
+html[data-theme] .dashboard.dashboard-studio .attendance-box > .attendance-list { grid-column: 2; grid-row: 2; }
+html[data-theme] .dashboard.dashboard-studio .attendance-box > .attendance-donut { grid-column: 1; grid-row: 2; }

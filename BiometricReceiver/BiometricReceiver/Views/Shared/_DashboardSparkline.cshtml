@@ -1,0 +1,33 @@
+@model (string Key, int[] Values)
+@using System.Globalization
+@{
+    var values = Model.Values;
+    var maximum = Math.Max(1, values.DefaultIfEmpty(0).Max());
+    var points = values.Select((value, index) => (
+        X: values.Length <= 1 ? 160d : 4d + index * 312d / (values.Length - 1),
+        Y: 51d - value * 43d / maximum)).ToArray();
+    string N(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+    var path = points.Length == 0 ? "" : $"M {N(points[0].X)} {N(points[0].Y)}";
+    for (var index = 1; index < points.Length; index++)
+    {
+        var previous = points[index - 1];
+        var current = points[index];
+        var middle = (previous.X + current.X) / 2;
+        path += $" C {N(middle)} {N(previous.Y)}, {N(middle)} {N(current.Y)}, {N(current.X)} {N(current.Y)}";
+    }
+    var area = points.Length == 0 ? "" : path + $" L {N(points[^1].X)} 64 L {N(points[0].X)} 64 Z";
+}
+<svg class="kpi-sparkline" viewBox="0 0 320 64" preserveAspectRatio="none" role="img" aria-label="@Model.Key attendance trend for the current week">
+    <defs>
+        <linearGradient id="spark-@Model.Key" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="currentColor" stop-opacity=".65" />
+            <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
+        </linearGradient>
+    </defs>
+    <path d="@area" fill="url(#spark-@Model.Key)" />
+    <path d="@path" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" />
+    @foreach (var point in points)
+    {
+        <circle cx="@N(point.X)" cy="@N(point.Y)" r="2.6" fill="currentColor" />
+    }
+</svg>

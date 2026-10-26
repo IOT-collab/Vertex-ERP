@@ -39,15 +39,15 @@
             {
                 <article class="closed-ticket">
                     <div class="ticket-top">
-                        <div><span class="ticket-number">#@ticket.Id · @ticket.Category</span><h2>@ticket.Subject</h2></div>
+                        <div><span class="ticket-number">#@ticket.Id · @ticket.Category</span><h2 data-no-localize>@ticket.Subject</h2></div>
                         <span class="status-pill @ticket.Status.ToLowerInvariant()"><i class="fa-solid @(ticket.Status == "Closed" ? "fa-lock" : "fa-circle-check")"></i> @ticket.Status</span>
                     </div>
                     <div class="ticket-people">
-                        <div><span class="avatar">@ticket.Employee.FullName.Substring(0, 1).ToUpperInvariant()</span><p><small>Raised by</small><strong>@ticket.Employee.FullName</strong><em>@ticket.Employee.EmployeeCode · @ticket.Employee.Department</em></p></div>
+                        <div><span class="avatar" data-no-localize>@ticket.Employee.FullName.Substring(0, 1).ToUpperInvariant()</span><p><small>Raised by</small><strong data-no-localize>@ticket.Employee.FullName</strong><em>@ticket.Employee.EmployeeCode · @ticket.Employee.Department</em></p></div>
                         <div><i class="fa-solid fa-user-tie"></i><p><small>Manager</small><strong>@(ticket.ReportingManager?.FullName ?? "Not assigned")</strong></p></div>
                         <div><i class="fa-solid fa-user-check"></i><p><small>@ticket.Status by</small><strong>@(ticket.ResolvedByUser?.FullName ?? "Not recorded")</strong><em>@((ticket.UpdatedAtUtc ?? ticket.CreatedAtUtc).ToLocalTime().ToString("dd MMM yyyy, hh:mm tt"))</em></p></div>
                     </div>
-                    <div class="ticket-content"><div><small>Employee's issue</small><p>@ticket.Description</p></div><div class="resolution-box"><small>Final response / resolution</small><p>@(string.IsNullOrWhiteSpace(ticket.Resolution) ? "No resolution note provided." : ticket.Resolution)</p></div></div>
+                    <div class="ticket-content"><div><small>Employee's issue</small><p data-no-localize>@ticket.Description</p></div><div class="resolution-box"><small>Final response / resolution</small><p>@(string.IsNullOrWhiteSpace(ticket.Resolution) ? "No resolution note provided." : ticket.Resolution)</p></div></div>
                     <footer>Raised on @ticket.CreatedAtUtc.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</footer>
                 </article>
             }

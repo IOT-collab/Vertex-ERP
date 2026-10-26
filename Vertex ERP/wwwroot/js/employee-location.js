@@ -14,8 +14,8 @@
     function saveSession() { localStorage.setItem(key, JSON.stringify(session)); }
     function tickClock() {
         const now = new Date();
-        $('liveClock').textContent = now.toLocaleTimeString([], { hour12: true });
-        $('liveDate').textContent = now.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'short' });
+        $('liveClock').textContent = now.toLocaleTimeString(window.VertexLanguage?.locale || 'en-IN', { hour12: true });
+        $('liveDate').textContent = now.toLocaleDateString(window.VertexLanguage?.locale || 'en-IN', { weekday: 'long', day: 'numeric', month: 'short' });
         if (session?.active) {
             const mins = Math.floor((Date.now() - new Date(session.punchIn).getTime()) / 60000);
             $('workingTime').textContent = `${String(Math.floor(mins / 60)).padStart(2, '0')}h ${String(mins % 60).padStart(2, '0')}m`;
@@ -77,7 +77,7 @@
         $('trackedPoints').textContent = `${session?.points?.length || 0} locations`;
         renderTimeline();
     }
-    function formatTime(value) { return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+    function formatTime(value) { return new Date(value).toLocaleTimeString(window.VertexLanguage?.locale || 'en-IN', { hour: '2-digit', minute: '2-digit' }); }
     function renderTimeline() {
         const timeline = $('timeline');
         if (!session) return;

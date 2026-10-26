@@ -11,20 +11,34 @@ public static class SalarySlipPdfService
 
     public static byte[] Create(Employee employee, GeneratedSalarySlip salary, EmployeeBankDetail? bank)
     {
+        // Render a detached copy: preview/download must agree with the saved monthly
+        // baseline without changing a tracked entity or prorating actual amounts twice.
+        if (!string.IsNullOrWhiteSpace(salary.MonthlyEarningsJson) && salary.SalaryDays.HasValue)
+        {
+            salary = salary.CopyForCalculation();
+            SalaryDayCalculation.Apply(salary, SalaryDayCalculation.MonthlyEarnings(salary));
+        }
         var year = salary.Year;
         var month = salary.Month;
+        var automation = employee.CompanyCode == "VAS";
+        var templateRelativePath = automation
+            ? Path.Combine("DocumentTemplates", "Automation-Letterhead.jpg")
+            : Path.Combine("DocumentTemplates", "Power-Header.jpg");
         var templatePath = new[]
         {
-            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "templates", "salary-slip-master.jpg"),
-            Path.Combine(AppContext.BaseDirectory, "wwwroot", "templates", "salary-slip-master.jpg"),
-            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "wwwroot", "templates", "salary-slip-master.jpg"))
+            Path.Combine(Directory.GetCurrentDirectory(), templateRelativePath),
+            Path.Combine(AppContext.BaseDirectory, templateRelativePath),
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", templateRelativePath))
         }.FirstOrDefault(File.Exists) ?? string.Empty;
+        if (!File.Exists(templatePath)) throw new FileNotFoundException("Company salary letterhead is missing.");
         var template = File.Exists(templatePath) ? File.ReadAllBytes(templatePath) : Array.Empty<byte>();
         var label = new DateTime(year, month, 1).ToString("MMMM yyyy", CultureInfo.InvariantCulture).ToUpperInvariant();
         var content = new StringBuilder();
 
-        // Keep only the company header from the reference image; exclude its sample body and CIN footer.
-        if (template.Length > 0) content.Append("q 0 525 597 75 re W n 597 0 0 600 0 0 cm /Im1 Do Q\n");
+        // Draw the company header; no company footer is included.
+        if (template.Length > 0) content.Append(automation
+            ? "q 541 0 0 100.423125 28 535 cm /Im1 Do Q\n"
+            : "q 541 0 0 65.019266 28 530 cm /Im1 Do Q\n");
         void Fill(double x, double y, double w, double h, string colour = "1 1 1") => content.Append($"{colour} rg {x} {y} {w} {h} re f\n");
         void Text(double x, double y, string value, double size = 7.5, bool bold = false, string align = "L")
         {
@@ -35,8 +49,7 @@ public static class SalarySlipPdfService
         void Line(double x1, double y1, double x2, double y2, double width = .65) => content.Append($"0.39 0.47 0.60 RG {width} w {x1} {y1} m {x2} {y2} l S\n");
         void Box(double x, double y, double w, double h) { Line(x, y, x + w, y); Line(x, y + h, x + w, y + h); Line(x, y, x, y + h); Line(x + w, y, x + w, y + h); }
 
-        // Remove every sample value baked into the approved reference. Only its branded
-        // company header remains; the complete payslip body is drawn live with no bottom CIN footer.
+        // The complete payslip body is drawn live below the company header.
         Fill(0, 0, PageWidth, 525);
 
         const double left = 56.7, right = 540.3, width = right - left;
@@ -53,14 +66,16 @@ public static class SalarySlipPdfService
         foreach (var x in columns.Skip(1).SkipLast(1)) Line(x, tableBottom, x, tableTop);
         for (var i = 1; i < 6; i++) Line(left, tableTop - rowH * i, right, tableTop - rowH * i);
         Text((columns[0] + columns[1]) / 2, 359, "EARNINGS", 8, true, "C"); Text((columns[1] + columns[2]) / 2, 359, "MASTER", 8, true, "C"); Text((columns[2] + columns[3]) / 2, 359, "ACTUAL", 8, true, "C"); Text((columns[3] + columns[4]) / 2, 359, "DEDUCTIONS", 8, true, "C"); Text((columns[4] + columns[5]) / 2, 359, "ACTUAL", 8, true, "C");
+        var monthlyEarnings = SalaryDayCalculation.MonthlyEarnings(salary);
+        var monthlyAmounts = SalaryDayCalculation.Earnings.Select(f => monthlyEarnings[f]).ToArray();
         var rows = new[] { ("BASIC", salary.BasicSalary, "PROVIDENT FUND", salary.ProvidentFund), ("HRA", salary.HouseRentAllowance, "ESIC", salary.ProfessionalTax), ("CONVEYANCE ALLOWANCE", salary.ConveyanceAllowance, "TDS", salary.Tds), ("SPECIAL ALLOWANCE", salary.SpecialAllowance, "OTHER / AMOUNT DED.", salary.OtherDeductions + salary.LeaveDeduction) };
-        for (var i = 0; i < 4; i++) { var y = 339 - i * rowH; Text(64, y, rows[i].Item1, 7.2); Text(229, y, Money(rows[i].Item2), 7.2, false, "R"); Text(289, y, Money(rows[i].Item2), 7.2, false, "R"); Text(302, y, rows[i].Item3, 7.2); Text(531, y, Money(rows[i].Item4), 7.2, false, "R"); }
-        Text(64, 261, "TOTAL EARNINGS: INR", 7.1, true); Text(229, 261, Money(salary.GrossSalary), 7.1, true, "R"); Text(289, 261, Money(salary.GrossSalary), 7.1, true, "R"); Text(302, 261, "TOTAL DEDUCTIONS: INR", 7.1, true); Text(531, 261, Money(salary.TotalDeductions), 7.1, true, "R");
+        for (var i = 0; i < 4; i++) { var y = 339 - i * rowH; Text(64, y, rows[i].Item1, 7.2); Text(229, y, Money(monthlyAmounts[i]), 7.2, false, "R"); Text(289, y, Money(rows[i].Item2), 7.2, false, "R"); Text(302, y, rows[i].Item3, 7.2); Text(531, y, Money(rows[i].Item4), 7.2, false, "R"); }
+        Text(64, 261, "TOTAL EARNINGS: INR", 7.1, true); Text(229, 261, Money(monthlyAmounts.Sum()), 7.1, true, "R"); Text(289, 261, Money(salary.GrossSalary), 7.1, true, "R"); Text(302, 261, "TOTAL DEDUCTIONS: INR", 7.1, true); Text(531, 261, Money(salary.TotalDeductions), 7.1, true, "R");
 
         Text(63, 218, "Net Pay for the month:", 9); Text(198, 218, $"INR {Money(salary.NetSalary)}", 10, true);
         Text(63, 197, $"({AmountInWords(salary.NetSalary)} Only)", 8, true);
         Line(left, 171, right, 171); Text(PageWidth / 2, 154, "This is a system-generated payslip and does not require a signature.", 7.3, false, "C");
-        return BuildPdf(content.ToString(), template);
+        return BuildPdf(content.ToString(), template, automation);
     }
 
     private static string Money(decimal value) => value.ToString("N2", CultureInfo.InvariantCulture);
@@ -89,15 +104,15 @@ public static class SalarySlipPdfService
     private static double CenteredX(string value, double size, bool bold) => PageWidth / 2 - ApproxWidth(value, size, bold) / 2;
     private static string Escape(string value) => (value ?? "").Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)");
 
-    private static byte[] BuildPdf(string stream, byte[] image)
+    private static byte[] BuildPdf(string stream, byte[] image, bool automation)
     {
         var imageResource = image.Length > 0 ? "/XObject << /Im1 7 0 R >>" : "";
         var objects = new List<byte[]> {
             Bytes("<< /Type /Catalog /Pages 2 0 R >>"), Bytes("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"),
-            Bytes($"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {PageWidth} {PageHeight}] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> {imageResource} >> /Contents 4 0 R >>"),
+            Bytes($"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {PageWidth} {(automation ? 650 : PageHeight)}] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> {imageResource} >> /Contents 4 0 R >>"),
             Stream(Bytes(stream)), Bytes("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"), Bytes("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>")
         };
-        if (image.Length > 0) objects.Add(Stream(image, " /Type /XObject /Subtype /Image /Width 1194 /Height 1200 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode"));
+        if (image.Length > 0) objects.Add(Stream(image, $" /Type /XObject /Subtype /Image /Width {(automation ? 1600 : 1090)} /Height {(automation ? 297 : 131)} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode"));
         using var output = new MemoryStream(); void Write(string text) { var data = Bytes(text); output.Write(data); }
         Write("%PDF-1.4\n"); var offsets = new List<long> { 0 };
         for (var i = 0; i < objects.Count; i++) { offsets.Add(output.Position); Write($"{i + 1} 0 obj\n"); output.Write(objects[i]); Write("\nendobj\n"); }

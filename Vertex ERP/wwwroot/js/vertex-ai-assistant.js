@@ -211,7 +211,7 @@ async function loadAdminBriefing(forceRefresh = false) {
         const response = await fetch('/AiAssistant/AdminBriefing', { credentials: 'same-origin', cache: 'no-store' });
         if (!response.ok) throw new Error(response.status === 403 ? 'Admin briefing is available to Admin accounts only.' : 'Could not load the live ERP briefing.');
         const data = await response.json();
-        const leaveLines = (data.pendingLeaves ?? []).map(item => `• ${item.employee} (${item.employeeCode}) — ${item.leaveType}, ${item.from} to ${item.to}; ${item.approvalLevel} approval · submitted ${new Date(item.submittedAt).toLocaleDateString()}`);
+        const leaveLines = (data.pendingLeaves ?? []).map(item => `• ${item.employee} (${item.employeeCode}) — ${item.leaveType}, ${item.from} to ${item.to}; ${item.approvalLevel} approval · submitted ${new Date(item.submittedAt).toLocaleDateString(window.VertexLanguage?.locale || 'en-IN')}`);
         const taskLines = (data.priorityTasks ?? []).map(item => `• ${item.title} — ${item.assignee}; ${item.priority} priority, ${item.status}, due ${item.due}${item.overdue ? ' (OVERDUE)' : ''}`);
         const answer = [
             `Admin briefing · ${data.asOf}`,

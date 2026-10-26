@@ -1,0 +1,38 @@
+using Microsoft.EntityFrameworkCore;
+using VertexERP.Data;
+using VertexERP.Models;
+using VertexERP.Services;
+
+void Check(bool ok, string name) { if (!ok) throw new Exception(name); Console.WriteLine("PASS: " + name); }
+var date = new DateOnly(2026, 10, 21);
+var employee = new Employee { Id = 7, ShiftStartTime = new(9, 30), ShiftEndTime = new(18, 30), OvertimeEnabled = true };
+AttendanceLog Punch(int h, int m, int s = 0, string? mode = null) => new() { EmployeeId = 7, PunchTime = date.ToDateTime(new TimeOnly(h, m, s)), VerificationMode = mode, BiometricDevice = new BiometricDevice() };
+EmployeeAttendanceDay Day(params AttendanceLog[] punches) => EmployeeAttendanceReader.BuildDays(employee, date, date, punches, []).Single();
+var day = Day(Punch(9, 44, 59), Punch(19, 44, 59));
+Check(day.Status == "Present" && day.CheckIn!.Value.Second == 59 && day.PunchCount == 2, "Seconds and on-time arrival retained");
+Check(day.WorkingHours.TotalHours == 10 && day.Overtime.TotalHours == 1, "Worked hours and assigned-shift overtime");
+Check(Day(Punch(9, 45)).Status == "Late", "Confirmed 09:45 cutoff retained");
+var open = Day(Punch(9, 0));
+Check(open.CheckOut is null && open.WorkingHours == TimeSpan.Zero && open.Overtime == TimeSpan.Zero, "Single punch cannot invent a checkout or completed hours");
+var field = Punch(9, 0, 0, AttendanceRules.FieldVerificationMode); field.FieldSiteName = "Customer <Site>";
+var mixed = Day(field, Punch(18, 0));
+Check(mixed.Source.Contains("Field Attendance") && mixed.Source.Contains("Biometric / Thumb") && mixed.SiteDetails.Contains("Customer <Site>"), "Mixed source and site details retained as data");
+var leave = new LeaveRequest { EmployeeId = 7, FromDate = date, ToDate = date, Status = "Approved" };
+Check(EmployeeAttendanceReader.BuildDays(employee, date, date, [], [leave]).Single().Status == "Leave", "Approved leave is not absence");
+leave.EmployeeId = 8;
+Check(EmployeeAttendanceReader.BuildDays(employee, date, date, [], [leave]).Single().Status == "Absent", "Another employee's leave cannot affect own status");
+var sunday = new DateOnly(2026, 10, 18);
+Check(EmployeeAttendanceReader.BuildDays(employee, sunday, sunday, [], []).Single().Status == "Holiday", "Sunday stays a holiday");
+employee.ShiftStartTime = new(22, 0); employee.ShiftEndTime = new(6, 0);
+var nightIn = Punch(22, 0); var nightOut = Punch(7, 0); nightOut.PunchTime = nightOut.PunchTime.AddDays(1);
+var night = Day(nightIn, nightOut);
+Check(night.CheckOut!.Value.Date == date.AddDays(1).ToDateTime(TimeOnly.MinValue).Date && night.WorkingHours.TotalHours == 9, "Overnight shift contains next-day checkout");
+employee.OvertimeEnabled = false;
+Check(Day(nightIn, nightOut).Overtime == TimeSpan.Zero, "Overtime opt-in respected");
+var range = EmployeeAttendanceReader.BuildDays(employee, date.AddDays(-2), date, [], []);
+Check(range.Count == 3 && range[0].Date == date, "Inclusive history date range, newest first");
+var model = new EmployeeAttendanceViewModel { Days = [day, Day(nightIn, nightOut)] };
+Check(model.AttendedDays == 2, "Present summary includes actual arrivals");
+using var db = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>().UseNpgsql("Host=localhost;Database=unused;Username=unused").Options);
+var sql = new EmployeeAttendanceReader(db).OwnPunches(7).ToQueryString();
+Check(sql.Contains("BiometricEnrollments") && sql.Contains("EmployeeDeviceMapping") && sql.Contains("IS NULL") && sql.Contains("Linked") && !sql.Contains("FullName"), "Ownership and verified-code lookup translates to PostgreSQL without name matching");

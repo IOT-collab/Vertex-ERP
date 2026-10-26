@@ -17,6 +17,7 @@ public sealed class GeneratedSalarySlip
     public decimal OtherDeductions { get; set; }
     public decimal LeaveDeduction { get; set; }
     public decimal? SalaryDays { get; set; }
+    public string? MonthlyEarningsJson { get; set; }
     public decimal ApprovedLeaveDays { get; set; }
     [MaxLength(300)] public string? DeductionNote { get; set; }
     [MaxLength(50)] public string? PfNumber { get; set; }
@@ -28,4 +29,5 @@ public sealed class GeneratedSalarySlip
     public decimal GrossSalary => BasicSalary + HouseRentAllowance + ConveyanceAllowance + SpecialAllowance;
     public decimal TotalDeductions => ProvidentFund + ProfessionalTax + Tds + OtherDeductions + LeaveDeduction;
     public decimal NetSalary => GrossSalary - TotalDeductions;
+    public GeneratedSalarySlip CopyForCalculation() => (GeneratedSalarySlip)MemberwiseClone();
 }

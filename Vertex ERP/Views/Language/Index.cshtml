@@ -1,0 +1,18 @@
+@{
+    Layout = "_LayoutMaster";
+    ViewBag.Title = "Language";
+    var selected = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+}
+<section class="theme-settings language-settings" aria-labelledby="language-title">
+    <h1 id="language-title">Language</h1>
+    <p>Choose the language for your workspace.</p>
+    <form asp-controller="Language" asp-action="Save" method="post">
+        <fieldset class="theme-options">
+            <legend>Choose your language</legend>
+            <label data-no-localize><input type="radio" name="language" value="hi" checked="@(selected == "hi")" /><strong lang="hi">हिन्दी</strong><span>ऐप का उपयोग हिन्दी में करें।</span></label>
+            <label data-no-localize><input type="radio" name="language" value="en" checked="@(selected != "hi")" /><strong lang="en">English</strong><span>Use the app in English.</span></label>
+        </fieldset>
+        <p>Your language preference is saved for your account in this browser.</p>
+        <div class="theme-actions"><button type="submit">Save language</button></div>
+    </form>
+</section>

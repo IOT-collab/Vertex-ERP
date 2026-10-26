@@ -23,6 +23,7 @@ public sealed class SalarySlipAdminViewModel
 public sealed class SalarySlipAdminRow
 {
     public int? SlipId { get; init; }
+    public long Version { get; init; }
     public int EmployeeId { get; init; }
     public string EmployeeCode { get; init; } = string.Empty;
     public string EmployeeName { get; init; } = string.Empty;

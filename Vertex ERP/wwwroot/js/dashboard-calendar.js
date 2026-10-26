@@ -8,9 +8,10 @@
     let current = new Date(year, month - 1, 1);
     let previousOverflow;
     const key = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    const label = new Intl.DateTimeFormat('en-IN', { dateStyle: 'full' });
+    const locale = window.VertexLanguage?.locale || 'en-IN';
+    const label = new Intl.DateTimeFormat(locale, { dateStyle: 'full' });
     function render() {
-        document.getElementById('dc-month').textContent = current.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+        document.getElementById('dc-month').textContent = current.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
         const grid = document.getElementById('dc-grid');
         grid.replaceChildren();
         const days = new Date(current.getFullYear(), current.getMonth() + 1, 0).getDate();

@@ -13,7 +13,7 @@
             <summary class="exp-link">+ Record Advance Payment</summary>
             <form asp-controller="Expense" asp-action="RecordAdvance" method="post" enctype="multipart/form-data" class="exp-advance-form">
                 <div class="exp-form-row">
-                    <div class="exp-form-group"><label for="advanceEmployee">Employee</label><select id="advanceEmployee" name="EmployeeId" class="exp-input" required><option value="">Select employee</option>@foreach(var employee in Model.AdvanceEmployees){<option value="@employee.Id">@employee.FullName — @employee.EmployeeCode</option>}</select></div>
+                    <div class="exp-form-group"><label for="advanceEmployee">Employee</label><select id="advanceEmployee" name="EmployeeId" class="exp-input" required><option value="">Select employee</option>@foreach(var employee in Model.AdvanceEmployees){<option value="@employee.Id" data-no-localize>@employee.FullName — @employee.EmployeeCode</option>}</select></div>
                     <div class="exp-form-group"><label for="advancePurpose">Site / visit / purpose</label><input id="advancePurpose" name="Purpose" class="exp-input" maxlength="150" required placeholder="Example: Mumbai site visit" /></div>
                 </div>
                 <div class="exp-form-row">

@@ -36,10 +36,19 @@ public sealed class EmployeeTasksViewModel
     public int Pending => Tasks.Count - Completed - InProgress;
 }
 
-public sealed record EmployeeAttendanceDay(DateOnly Date, DateTime? CheckIn, DateTime? CheckOut, string Status, string Source);
+public sealed record EmployeeAttendanceDay(DateOnly Date, DateTime? CheckIn, DateTime? CheckOut, string Status, string Source)
+{
+    public int PunchCount { get; init; }
+    public TimeSpan WorkingHours { get; init; }
+    public TimeSpan Overtime { get; init; }
+    public string SiteDetails { get; init; } = string.Empty;
+}
 
 public sealed class EmployeeAttendanceViewModel
 {
+    public string? StatusFilter { get; init; }
+    public string? SourceFilter { get; init; }
+    public int AttendedDays => Days.Count(day => day.CheckIn.HasValue);
     public Employee Employee { get; init; } = null!;
     public DateOnly StartDate { get; init; }
     public DateOnly EndDate { get; init; }

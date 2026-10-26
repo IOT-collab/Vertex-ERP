@@ -6,6 +6,10 @@ public class Employee
 {
     public int Id { get; set; }
 
+    public bool OvertimeEnabled { get; set; }
+    public TimeOnly ShiftStartTime { get; set; } = new(9, 30);
+    public TimeOnly ShiftEndTime { get; set; } = new(18, 30);
+
     [MaxLength(3)] public string? CompanyCode { get; set; }
 
     [ConcurrencyCheck]

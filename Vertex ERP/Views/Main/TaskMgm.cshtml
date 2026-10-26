@@ -433,7 +433,7 @@
         }
     }
 
-    function formatDate(value) { return new Date(`${value}T00:00:00`).toLocaleDateString(); }
+    function formatDate(value) { return new Date(`${value}T00:00:00`).toLocaleDateString(window.VertexLanguage?.locale || 'en-IN'); }
     function escapeHtml(value) {
         const element = document.createElement('div');
         element.textContent = value || '';

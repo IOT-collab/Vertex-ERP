@@ -4,6 +4,7 @@ public class DashboardViewModel
 {
     public int TotalWorkforce { get; init; }
     public int ActiveWorkforce { get; init; }
+    public int AttendanceRosterCount { get; init; }
     public int PresentToday { get; init; }
     public int LateToday { get; init; }
     public int OnLeaveToday { get; init; }
@@ -20,7 +21,7 @@ public class DashboardViewModel
 
 public record DashboardEmployeeRow(int Id, string EmployeeId, string FullName, string Email, string Department, string Designation, bool IsActive, string? PhotoPath);
 public record DashboardDepartmentMetric(string Name, int Count);
-public record DashboardDayMetric(string Label, int Count);
+public record DashboardDayMetric(string Label, int Count, int Absent = 0, int Late = 0, int Leave = 0);
 public record DashboardActivityItem(string Title, string Detail, DateTime OccurredAt);
 
 public sealed class DashboardAttendanceListViewModel

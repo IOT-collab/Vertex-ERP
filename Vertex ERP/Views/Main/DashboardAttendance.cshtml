@@ -52,8 +52,8 @@
                         @foreach (var employee in Model.Employees)
                         {
                             <tr>
-                                <td><strong>@employee.FullName</strong></td>
-                                <td><span class="employee-code">@employee.EmployeeCode</span></td>
+                                <td><strong data-no-localize>@employee.FullName</strong></td>
+                                <td><span class="employee-code" data-no-localize>@employee.EmployeeCode</span></td>
                                 <td>@(string.IsNullOrWhiteSpace(employee.Department) ? "—" : employee.Department)</td>
                                 <td>@(string.IsNullOrWhiteSpace(employee.Designation) ? "—" : employee.Designation)</td>
                                 @if (Model.Status == "Leave")

@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Collections.Concurrent;
@@ -608,7 +608,6 @@ namespace VertexERP.Controllers
         public async Task<IActionResult> Dashboard()
         {
             var today = FieldAttendanceClock.Now.Date;
-            var tomorrow = today.AddDays(1);
             var weekStart = today.AddDays(-(((int)today.DayOfWeek + 6) % 7));
             var employees = await _dbContext.Employees.AsNoTracking()
                 .Where(employee => employee.IsActive)
@@ -617,35 +616,26 @@ namespace VertexERP.Controllers
                 .Where(department => department.IsActive)
                 .OrderBy(department => department.DepartmentName)
                 .ToListAsync();
-            var todayLogs = await _dbContext.AttendanceLogs.AsNoTracking()
-                .Where(log => log.EmployeeId != null && log.PunchTime >= today && log.PunchTime < tomorrow)
-                .ToListAsync();
-            var weekLogs = await _dbContext.AttendanceLogs.AsNoTracking()
-                .Where(log => log.EmployeeId != null && log.PunchTime >= weekStart && log.PunchTime < tomorrow)
-                .ToListAsync();
+            // Use the same WDMS roster and attendance rules as the Attendance screen.
+            var attendance = await _attendanceProcessingService.GetDailyAttendanceAsync(DateOnly.FromDateTime(today), null, null, null);
+            var weeklyAttendance = new List<DashboardDayMetric>();
+            foreach (var day in Enumerable.Range(0, 6).Select(offset => weekStart.AddDays(offset)))
+            {
+                var daily = day == today ? attendance : await _attendanceProcessingService.GetDailyAttendanceAsync(DateOnly.FromDateTime(day), null, null, null);
+                weeklyAttendance.Add(new DashboardDayMetric(day.ToString("ddd"), daily.PresentCount, daily.AbsentCount, daily.LateCount, daily.LeaveCount));
+            }
             var tasks = await _dbContext.WorkTasks.AsNoTracking().ToListAsync();
-            var activeEmployeeIds = employees.Select(employee => employee.Id).ToHashSet();
-            var presentIds = todayLogs.Where(log => log.EmployeeId.HasValue).Select(log => log.EmployeeId!.Value).Distinct().ToHashSet();
-            var onLeaveIds = (await _dbContext.LeaveRequests.AsNoTracking()
-                .Where(request => request.Status == "Approved" && request.FromDate <= DateOnly.FromDateTime(today) && request.ToDate >= DateOnly.FromDateTime(today))
-                .Select(request => request.EmployeeId).Distinct().ToListAsync()).ToHashSet();
-            presentIds.IntersectWith(activeEmployeeIds);
-            onLeaveIds.IntersectWith(activeEmployeeIds);
-            onLeaveIds.ExceptWith(presentIds);
-            if (AttendanceRules.IsHoliday(DateOnly.FromDateTime(today))) onLeaveIds.Clear();
-            var lateCount = todayLogs.Where(log => log.EmployeeId.HasValue && activeEmployeeIds.Contains(log.EmployeeId.Value))
-                .GroupBy(log => log.EmployeeId!.Value)
-                .Count(group => group.Min(log => log.PunchTime).TimeOfDay > new TimeSpan(10, 0, 0));
             var taskHealth = TaskHealthSummary.From(tasks, DateOnly.FromDateTime(today));
 
             var model = new DashboardViewModel
             {
                 TotalWorkforce = employees.Count,
                 ActiveWorkforce = employees.Count,
-                PresentToday = presentIds.Count,
-                LateToday = lateCount,
-                OnLeaveToday = employees.Count(employee => onLeaveIds.Contains(employee.Id)),
-                AbsentToday = AttendanceRules.IsHoliday(DateOnly.FromDateTime(today)) ? 0 : employees.Count(employee => !presentIds.Contains(employee.Id) && !onLeaveIds.Contains(employee.Id)),
+                AttendanceRosterCount = attendance.Records.Count(record => record.EmployeeId == 0 || employees.Any(employee => employee.Id == record.EmployeeId)),
+                PresentToday = attendance.PresentCount,
+                LateToday = attendance.LateCount,
+                OnLeaveToday = attendance.LeaveCount,
+                AbsentToday = attendance.AbsentCount,
                 OpenTasks = taskHealth.OpenTasks,
                 OverdueTasks = taskHealth.OverdueTasks,
                 CompletedTasks = taskHealth.CompletedTasks,
@@ -655,8 +645,7 @@ namespace VertexERP.Controllers
                 Departments = departments.Select(department => new DashboardDepartmentMetric(
                     department.DepartmentName,
                     employees.Count(employee => employee.DepartmentId == department.Id))).ToList(),
-                WeeklyAttendance = Enumerable.Range(0, 6).Select(offset => weekStart.AddDays(offset))
-                    .Select(day => new DashboardDayMetric(day.ToString("ddd"), weekLogs.Where(log => log.PunchTime.Date == day.Date && log.EmployeeId.HasValue && activeEmployeeIds.Contains(log.EmployeeId.Value)).Select(log => log.EmployeeId).Distinct().Count())).ToList(),
+                WeeklyAttendance = weeklyAttendance,
                 RecentActivity = Array.Empty<DashboardActivityItem>()
             };
             return View(model);
@@ -670,53 +659,22 @@ namespace VertexERP.Controllers
             if (normalizedStatus is not ("Present" or "Absent" or "Late" or "Leave"))
                 return BadRequest();
 
-            var today = FieldAttendanceClock.Now.Date;
-            var tomorrow = today.AddDays(1);
-            var todayDate = DateOnly.FromDateTime(today);
-            var logs = await _dbContext.AttendanceLogs.AsNoTracking()
-                .Where(log => log.EmployeeId != null && log.PunchTime >= today && log.PunchTime < tomorrow)
-                .OrderBy(log => log.PunchTime)
-                .ToListAsync(cancellationToken);
-            var firstPunchByEmployee = logs.GroupBy(log => log.EmployeeId!.Value)
-                .ToDictionary(group => group.Key, group => group.Min(log => log.PunchTime));
-            var approvedLeaveRequests = await _dbContext.LeaveRequests.AsNoTracking()
-                .Where(request => request.Status == "Approved" && request.FromDate <= todayDate && request.ToDate >= todayDate)
-                .ToListAsync(cancellationToken);
-            var employees = await _dbContext.Employees.AsNoTracking()
-                .Where(employee => employee.IsActive)
-                .OrderBy(employee => employee.FirstName).ThenBy(employee => employee.LastName)
-                .ToListAsync(cancellationToken);
-            var activeEmployeeIds = employees.Select(employee => employee.Id).ToHashSet();
-            var leaveEmployeeIds = approvedLeaveRequests.Select(request => request.EmployeeId).Where(activeEmployeeIds.Contains).ToHashSet();
-            var presentEmployeeIds = firstPunchByEmployee.Keys.Where(activeEmployeeIds.Contains).ToHashSet();
-
-            IEnumerable<Employee> filteredEmployees = normalizedStatus switch
-            {
-                "Present" => employees.Where(employee => presentEmployeeIds.Contains(employee.Id)),
-                "Absent" => AttendanceRules.IsHoliday(todayDate)
-                    ? Enumerable.Empty<Employee>()
-                    : employees.Where(employee => employee.IsActive && !presentEmployeeIds.Contains(employee.Id) && !leaveEmployeeIds.Contains(employee.Id)),
-                "Late" => employees.Where(employee => firstPunchByEmployee.TryGetValue(employee.Id, out var firstPunch)
-                    && firstPunch.TimeOfDay > new TimeSpan(10, 0, 0)),
-                "Leave" => employees.Where(employee => !AttendanceRules.IsHoliday(todayDate) && !presentEmployeeIds.Contains(employee.Id) && leaveEmployeeIds.Contains(employee.Id)),
-                _ => Enumerable.Empty<Employee>()
-            };
-
-            var leaveTypes = approvedLeaveRequests.GroupBy(request => request.EmployeeId)
+            var todayDate = DateOnly.FromDateTime(FieldAttendanceClock.Now);
+            var attendance = await _attendanceProcessingService.GetDailyAttendanceAsync(todayDate, null, null, normalizedStatus, cancellationToken);
+            var ids = attendance.Records.Where(row => row.EmployeeId > 0).Select(row => row.EmployeeId).Distinct().ToList();
+            var employees = await _dbContext.Employees.AsNoTracking().Where(employee => ids.Contains(employee.Id))
+                .ToDictionaryAsync(employee => employee.Id, cancellationToken);
+            var approvedLeaves = normalizedStatus == "Leave"
+                ? await _dbContext.LeaveRequests.AsNoTracking().Where(request => ids.Contains(request.EmployeeId)
+                    && request.Status == "Approved" && request.FromDate <= todayDate && request.ToDate >= todayDate).ToListAsync(cancellationToken)
+                : new List<LeaveRequest>();
+            var leaveTypes = approvedLeaves.GroupBy(request => request.EmployeeId)
                 .ToDictionary(group => group.Key, group => string.Join(", ", group.Select(request => request.LeaveType).Distinct()));
-            var rows = filteredEmployees.Select(employee =>
-            {
-                DateTime? firstPunch = firstPunchByEmployee.TryGetValue(employee.Id, out var punch) ? punch : null;
-                return new DashboardAttendanceEmployeeRow(
-                    employee.Id,
-                    employee.EmployeeCode,
-                    employee.FullName,
-                    employee.Department,
-                    employee.Designation,
-                    firstPunch,
-                    leaveTypes.GetValueOrDefault(employee.Id));
-            }).ToList();
-
+            var rows = attendance.Records.Select(row => new DashboardAttendanceEmployeeRow(
+                row.EmployeeId, row.EmpId, row.EmployeeName, row.Department,
+                employees.GetValueOrDefault(row.EmployeeId)?.Designation ?? "",
+                row.CheckIn.HasValue ? todayDate.ToDateTime(row.CheckIn.Value) : null,
+                leaveTypes.GetValueOrDefault(row.EmployeeId))).ToList();
             return View(new DashboardAttendanceListViewModel { Status = normalizedStatus, Date = todayDate, Employees = rows });
         }
 
@@ -770,41 +728,20 @@ namespace VertexERP.Controllers
         }
 
         [Authorize(Roles = "Employee,User,Manager,HR")]
-        public async Task<IActionResult> EmployeeAttendance()
+        public async Task<IActionResult> EmployeeAttendance(DateOnly? fromDate = null, DateOnly? toDate = null, string? status = null, string? source = null, bool refresh = false)
         {
             Response.Headers.CacheControl = "no-store";
             var employee = await LoadLoggedInEmployeeAsync();
             if (employee == null) return RedirectToAction(nameof(AccessDenied));
-            var now = FieldAttendanceClock.Now.Date;
-            var start = new DateTime(now.Year, now.Month, 1);
-            var end = now.AddDays(1);
-            var logs = await _dbContext.AttendanceLogs.AsNoTracking()
-                .Where(log => log.EmployeeId == employee.Id && log.PunchTime >= start && log.PunchTime < end)
-                .OrderBy(log => log.PunchTime)
-                .Select(log => new { log.PunchTime, log.PunchState, log.VerificationMode, log.BiometricDevice.CommunicationMode })
-                .ToListAsync();
-            var approvedLeaves = await _dbContext.LeaveRequests.AsNoTracking()
-                .Where(request => request.EmployeeId == employee.Id && request.Status == "Approved"
-                    && request.FromDate <= DateOnly.FromDateTime(now) && request.ToDate >= DateOnly.FromDateTime(start)).ToListAsync();
-            var lastDay = end.AddDays(-1) < now ? end.AddDays(-1) : now;
-            var days = new List<EmployeeAttendanceDay>();
-            for (var date = start; date <= lastDay; date = date.AddDays(1))
-            {
-                var punches = logs.Where(log => log.PunchTime.Date == date.Date).ToList();
-                var dateOnly = DateOnly.FromDateTime(date);
-                var paired = AttendanceRules.PairPunches(punches.Select(punch => (punch.PunchTime, punch.PunchState)));
-                var source = punches.Count == 0
-                    ? "--"
-                    : punches.Any(punch => string.Equals(punch.CommunicationMode, AttendanceRules.FieldCommunicationMode, StringComparison.OrdinalIgnoreCase))
-                        ? "Field Attendance"
-                        : punches.All(punch => string.Equals(punch.VerificationMode, "Manual Approved", StringComparison.OrdinalIgnoreCase))
-                            ? "Manual Approved"
-                            : "Biometric / Thumb";
-                var attendanceStatus = AttendanceRules.StatusFor(paired.CheckIn, dateOnly,
-                    approvedLeaves.Any(request => request.FromDate <= dateOnly && request.ToDate >= dateOnly));
-                days.Add(new EmployeeAttendanceDay(dateOnly, paired.CheckIn, paired.CheckOut, attendanceStatus, source));
-            }
-            return View(new EmployeeAttendanceViewModel { Employee = employee, StartDate = DateOnly.FromDateTime(start), EndDate = DateOnly.FromDateTime(now), Days = days.OrderByDescending(day => day.Date).ToList() });
+            var today = AttendanceRules.ShiftDate(FieldAttendanceClock.Now, employee.ShiftStartTime, employee.ShiftEndTime);
+            var from = fromDate ?? new DateOnly(today.Year, today.Month, 1);
+            var to = toDate ?? today;
+            if (!ModelState.IsValid || to < from || to > today || to.DayNumber - from.DayNumber > 365) return BadRequest("Choose a valid date range of up to 366 days, ending today or earlier.");
+            var days = await new EmployeeAttendanceReader(_dbContext).ReadAsync(employee, from, to, HttpContext.RequestAborted);
+            if (!string.IsNullOrEmpty(status)) days = days.Where(x => x.Status == status).ToList();
+            if (!string.IsNullOrEmpty(source)) days = days.Where(x => x.Source.Contains(source, StringComparison.Ordinal)).ToList();
+            var model = new EmployeeAttendanceViewModel { Employee = employee, StartDate = from, EndDate = to, Days = days, StatusFilter = status, SourceFilter = source };
+            return refresh ? PartialView("_EmployeeAttendanceContent", model) : View(model);
         }
 
         [HttpGet]
@@ -1218,13 +1155,9 @@ namespace VertexERP.Controllers
                 .Where(task => task.AssigneeId == employee.Id).OrderByDescending(task => task.CreatedAtUtc).ToListAsync();
             var employeeLeaves = await _dbContext.LeaveRequests.AsNoTracking().Where(request => request.EmployeeId == employee.Id)
                 .OrderByDescending(request => request.AppliedAtUtc).ToListAsync();
-            var todayStart = FieldAttendanceClock.Now.Date;
-            var punches = await _dbContext.AttendanceLogs.AsNoTracking().Where(log => log.EmployeeId == employee.Id
-                    && log.PunchTime >= todayStart && log.PunchTime < todayStart.AddDays(1)
-                    && log.BiometricDevice.CommunicationMode != "Field")
-                .OrderBy(log => log.PunchTime).Select(log => new { log.PunchTime, log.PunchState }).ToListAsync();
-            var pairedPunches = AttendanceRules.PairPunches(punches.Select(punch => (punch.PunchTime, punch.PunchState)));
-            return View("EmployeeDashboard", new EmployeePortalViewModel { Employee = employee, Tasks = employeeTasks, LeaveRequests = employeeLeaves, CheckIn = pairedPunches.CheckIn, CheckOut = pairedPunches.CheckOut });
+            var shiftDate = AttendanceRules.ShiftDate(FieldAttendanceClock.Now, employee.ShiftStartTime, employee.ShiftEndTime);
+            var day = (await new EmployeeAttendanceReader(_dbContext).ReadAsync(employee, shiftDate, shiftDate)).Single();
+            return View("EmployeeDashboard", new EmployeePortalViewModel { Employee = employee, Tasks = employeeTasks, LeaveRequests = employeeLeaves, CheckIn = day.CheckIn, CheckOut = day.CheckOut });
         }
 
         [HttpGet]
@@ -1235,24 +1168,16 @@ namespace VertexERP.Controllers
             var employeeId = await GetLoggedInEmployeeIdAsync();
             if (!employeeId.HasValue) return Forbid();
 
-            var today = FieldAttendanceClock.Now.Date;
-            var punches = await _dbContext.AttendanceLogs.AsNoTracking()
-                .Where(log => log.EmployeeId == employeeId.Value
-                    && log.PunchTime >= today && log.PunchTime < today.AddDays(1)
-                    && log.BiometricDevice.CommunicationMode != "Field")
-                .OrderBy(log => log.PunchTime)
-                .Select(log => new { log.PunchTime, log.PunchState })
-                .ToListAsync(cancellationToken);
-
-            var pairedPunches = AttendanceRules.PairPunches(punches.Select(punch => (punch.PunchTime, punch.PunchState)));
-            var attendanceDate = DateOnly.FromDateTime(today);
-            var approvedLeave = await _dbContext.LeaveRequests.AsNoTracking().AnyAsync(request => request.EmployeeId == employeeId.Value
-                && request.Status == "Approved" && request.FromDate <= attendanceDate && request.ToDate >= attendanceDate, cancellationToken);
+            var employee = await _dbContext.Employees.AsNoTracking().SingleAsync(e => e.Id == employeeId.Value, cancellationToken);
+            var attendanceDate = AttendanceRules.ShiftDate(FieldAttendanceClock.Now, employee.ShiftStartTime, employee.ShiftEndTime);
+            var day = (await new EmployeeAttendanceReader(_dbContext).ReadAsync(employee, attendanceDate, attendanceDate, cancellationToken)).Single();
             return Ok(new
             {
-                checkIn = pairedPunches.CheckIn?.ToString("hh:mm tt"),
-                checkOut = pairedPunches.CheckOut?.ToString("hh:mm tt"),
-                status = AttendanceRules.StatusFor(pairedPunches.CheckIn, attendanceDate, approvedLeave)
+                checkIn = day.CheckIn?.ToString("hh:mm:ss tt"), checkOut = day.CheckOut?.ToString("hh:mm:ss tt"),
+                status = day.Status, source = day.Source, punchCount = day.PunchCount,
+                workingHours = day.CheckOut.HasValue ? AttendanceRules.FormatHours(day.WorkingHours) : "--",
+                overtime = day.CheckOut.HasValue ? AttendanceRules.FormatHours(day.Overtime) : "--",
+                date = attendanceDate.ToString("dd MMM yyyy"), updatedAt = FieldAttendanceClock.Now.ToString("hh:mm:ss tt")
             });
         }
 
@@ -1265,14 +1190,14 @@ namespace VertexERP.Controllers
         [Authorize(Roles = "Admin,HR")]
         public async Task<IActionResult> Attendence(string? searchQuery, string? department, DateOnly? filterDate, string? status, CancellationToken cancellationToken)
         {
-            var date = filterDate ?? DateOnly.FromDateTime(DateTime.Today);
+            var date = filterDate ?? DateOnly.FromDateTime(FieldAttendanceClock.Now);
             return View(await _attendanceProcessingService.GetDailyAttendanceAsync(date, searchQuery, department, status, cancellationToken));
         }
 
         [Authorize(Roles = "Admin,HR")]
         public async Task<IActionResult> ExportAttendance(string? searchQuery, string? department, DateOnly? filterDate, string? status, string exportPeriod = "day", string? exportMonth = null, CancellationToken cancellationToken = default)
         {
-            var date = filterDate ?? DateOnly.FromDateTime(DateTime.Today);
+            var date = filterDate ?? DateOnly.FromDateTime(FieldAttendanceClock.Now);
             var isMonthlyExport = string.Equals(exportPeriod, "month", StringComparison.OrdinalIgnoreCase);
             var dates = new List<DateOnly>();
             if (isMonthlyExport)

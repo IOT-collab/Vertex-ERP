@@ -14,7 +14,7 @@
                 const item = document.createElement('div'); item.className = 'alert-item';
                 const title = document.createElement('strong'); title.textContent = log.title;
                 const detail = document.createElement('p'); detail.className = 'sub-text';
-                detail.textContent = `${log.detail} · ${new Date(log.occurredAt).toLocaleString()}`;
+                detail.textContent = `${log.detail} · ${new Date(log.occurredAt).toLocaleString(window.VertexLanguage?.locale || 'en-IN')}`;
                 item.append(title, detail); return item;
             });
             if (!items.length) { const empty = document.createElement('p'); empty.textContent = 'No activity recorded yet.'; items.push(empty); }

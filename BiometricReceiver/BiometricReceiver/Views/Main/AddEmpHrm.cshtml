@@ -17,51 +17,7 @@
         <div class="employee-biometric-notice error" role="alert">@employeeError</div>
     }
     <div class="form-container-wrapper">
-        @if (editing)
-        {
-            <section class="form-main-section employee-biometric-editor" aria-labelledby="biometric-enrollment-heading">
-                <div class="section-divider"><span id="biometric-enrollment-heading">Biometric Enrollment Links</span></div>
-                <p>Select the enrollment number reported by each machine. Confirm a transfer when the enrollment is linked to someone else. Previous attendance records will remain unchanged.</p>
-                @if (Model.BiometricDeviceLinks.Count == 0)
-                {
-                    <p>No active biometric enrollments are available from the connected machines.</p>
-                }
-                else
-                {
-                    <form class="employee-biometric-batch-form" asp-controller="Employee" asp-action="UpdateBiometricMapping" asp-route-id="@Model.Id" method="post">
-                        @Html.AntiForgeryToken()
-                        <div class="employee-biometric-scroll" role="region" aria-label="Biometric machines and enrollment links" tabindex="0">
-                            @for (var linkIndex = 0; linkIndex < Model.BiometricDeviceLinks.Count; linkIndex++)
-                            {
-                                var deviceLink = Model.BiometricDeviceLinks[linkIndex];
-                                <div class="employee-biometric-link-row">
-                                    <input type="hidden" name="DeviceLinks[@linkIndex].DeviceId" value="@deviceLink.DeviceId" />
-                                    <div class="employee-biometric-link-details">
-                                        <span class="employee-biometric-device-icon" aria-hidden="true">●</span>
-                                        <div><strong>@deviceLink.DeviceName</strong><span>Current link: @(deviceLink.CurrentEnrollmentLabel ?? "Not linked")</span></div>
-                                    </div>
-                                    <div class="employee-biometric-link-controls">
-                                        <label for="biometric-enrollment-@deviceLink.DeviceId">Enrollment number</label>
-                                        <select id="biometric-enrollment-@deviceLink.DeviceId" name="DeviceLinks[@linkIndex].SelectedMappingId">
-                                            <option value="">No change</option>
-                                            @foreach (var option in deviceLink.Options)
-                                            {
-                                                <option value="@option.MappingId" selected="@(option.MappingId == deviceLink.CurrentMappingId)">
-                                                    @option.DeviceUserId@(option.LinkedEmployeeName == "This employee" ? " — linked here" : $" — linked to {option.LinkedEmployeeName}")
-                                                </option>
-                                            }
-                                        </select>
-                                        <label class="employee-biometric-confirm"><input type="checkbox" name="DeviceLinks[@linkIndex].ConfirmTransfer" value="true" /> Confirm transfer if linked to another employee</label>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                        <div class="employee-biometric-actions"><span>Choose enrollment changes above, then save once.</span><button type="submit" class="btn-submit">Save enrollment links</button></div>
-                    </form>
-                }
-            </section>
-        }
-        else
+        @if (!editing)
         {
             <div class="form-group">
                 <label>Source Enrollment Number / Emp ID</label>
@@ -138,6 +94,21 @@
                 <div class="form-side-section">
                     <div class="config-card">
                         <h3>Organizational Mapping</h3>
+                <div class="form-group">
+                    <label asp-for="OvertimeEnabled"></label>
+                    <select asp-for="OvertimeEnabled"><option value="false">Inactive</option><option value="true">Active</option></select>
+                    <small>Active: count hours worked beyond the assigned shift duration. Inactive: overtime stays zero. Saved settings also apply when viewing previous attendance.</small>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ShiftStartTime"></label><input asp-for="ShiftStartTime" type="time" asp-format="{0:HH:mm}" required />
+                    <span asp-validation-for="ShiftStartTime" class="field-validation"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ShiftEndTime"></label><input asp-for="ShiftEndTime" type="time" asp-format="{0:HH:mm}" required />
+                    <span asp-validation-for="ShiftEndTime" class="field-validation"></span>
+                    <small>An end time earlier than the start means the shift ends the next day.</small>
+                </div>
+
                         <div class="form-group"><label asp-for="JoiningDate"></label><input asp-for="JoiningDate" type="date" /><span asp-validation-for="JoiningDate" class="field-validation"></span></div>
                         <div class="form-group">
                             <label asp-for="DepartmentId"></label>

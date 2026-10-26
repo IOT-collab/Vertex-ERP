@@ -65,7 +65,7 @@
                 </form>
             </section>
         }
-        <section class="pw-panel"><h2>Teams</h2><div class="pw-cards">@foreach(var team in Model.Teams){var members=Model.TeamMembers.Where(m=>m.TeamId==team.Id).ToList();<article><h3>@team.Name</h3><p>@team.Description</p><span class="pw-badge">@(team.IsActive?"Active":"Inactive") · @members.Count members</span><ul>@foreach(var member in members){<li>@member.Employee.FullName (@member.Employee.EmployeeCode)</li>}</ul>@if(Model.CanManageProjects){<a asp-action="Index" asp-route-section="teams" asp-route-editId="@team.Id">Edit team</a>}</article>}</div>@if(Model.Teams.Count==0){<p>No teams created yet.</p>}</section>
+        <section class="pw-panel"><h2>Teams</h2><div class="pw-cards">@foreach(var team in Model.Teams){var members=Model.TeamMembers.Where(m=>m.TeamId==team.Id).ToList();<article><h3 data-no-localize>@team.Name</h3><p data-no-localize>@team.Description</p><span class="pw-badge">@(team.IsActive?"Active":"Inactive") · @members.Count members</span><ul>@foreach(var member in members){<li>@member.Employee.FullName (@member.Employee.EmployeeCode)</li>}</ul>@if(Model.CanManageProjects){<a asp-action="Index" asp-route-section="teams" asp-route-editId="@team.Id">Edit team</a>}</article>}</div>@if(Model.Teams.Count==0){<p>No teams created yet.</p>}</section>
     }
     @if (Model.Section == "tasks")
     {

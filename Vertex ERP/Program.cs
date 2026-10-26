@@ -329,6 +329,19 @@ app.UseSession();
 
 app.UseAuthentication();
 
+// Account-scoped preference: shared computers must not inherit another user's language.
+app.UseRequestLocalization(new RequestLocalizationOptions()
+    .SetDefaultCulture("en-IN")
+    .AddSupportedCultures("en-IN", "hi-IN")
+    .AddSupportedUICultures("en-IN", "hi-IN")
+    .AddInitialRequestCultureProvider(new Microsoft.AspNetCore.Localization.CustomRequestCultureProvider(context =>
+    {
+        var id = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var language = id is null ? "en" : context.Request.Cookies["vertex.language." + id];
+        return Task.FromResult<Microsoft.AspNetCore.Localization.ProviderCultureResult?>(
+            new(language == "hi" ? "hi-IN" : "en-IN"));
+    })));
+
 // ============================================================
 // AUTHORIZATION
 // ============================================================

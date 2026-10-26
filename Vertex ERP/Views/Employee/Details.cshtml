@@ -12,12 +12,12 @@
             {
                 <img src="@Url.Content(Model.PhotoPath)" alt="@Model.FullName profile photo" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #334155;" />
             }
-            <div class="header-text"><h2>@Model.FullName</h2><p>@Model.EmployeeCode · @Model.Designation · @Model.Department</p></div>
+            <div class="header-text"><h2 data-no-localize>@Model.FullName</h2><p data-no-localize>@Model.EmployeeCode · @Model.Designation · @Model.Department</p></div>
         </div>
     </div>
     <div class="form-container-wrapper">
         <div class="form-group"><label>Company</label><strong>@VertexERP.Models.EmployeeCompany.DisplayName(Model.CompanyCode)</strong></div>
-        <div class="form-group"><label>Employee ID</label><strong>@Model.EmployeeCode</strong></div>
+        <div class="form-group"><label>Employee ID</label><strong data-no-localize>@Model.EmployeeCode</strong></div>
         <div class="form-group">
             <label>Biometric Enroll Code (separate from ERP Employee ID)</label>
             @{ var enrollments = ViewData["SourceEnrollments"] as IReadOnlyList<string> ?? Array.Empty<string>(); }
@@ -32,7 +32,7 @@
         <div class="form-grid">
             <div class="form-main-section">
                 <div class="section-divider"><span>Personal Details</span></div>
-                <div class="form-row"><div class="form-group"><label>Email</label><strong>@Model.Email</strong></div><div class="form-group"><label>Phone Number</label><strong>@Model.PhoneNumber</strong></div></div>
+                <div class="form-row"><div class="form-group"><label>Email</label><strong data-no-localize>@Model.Email</strong></div><div class="form-group"><label>Phone Number</label><strong data-no-localize>@Model.PhoneNumber</strong></div></div>
                 <div class="form-row"><div class="form-group"><label>Date of Birth</label><strong>@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Not provided")</strong></div><div class="form-group"><label>Gender</label><strong>@(Model.Gender ?? "Not provided")</strong></div></div>
                 <div class="form-group"><label>Address</label><strong>@(string.Join(", ", new[] { Model.Address, Model.City, Model.State }.Where(value => !string.IsNullOrWhiteSpace(value))) is var address && address.Length > 0 ? address : "Not provided")</strong></div>
             </div>

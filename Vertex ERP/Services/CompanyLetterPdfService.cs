@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using PdfSharp.Drawing;
@@ -69,8 +69,7 @@ public sealed class CompanyLetterPdfService(string contentRoot)
         var values=Values(model);
         using var document=new PdfDocument();
         document.Info.Title=$"{model.CompanyName} - {model.DocumentType}";
-        using var stationery=XImage.FromFile(Path.Combine(contentRoot,"DocumentTemplates","Vertex-Offer-Letter-Stationery.png"));
-        using var powerHeader=XImage.FromFile(Path.Combine(contentRoot,"DocumentTemplates","CompanyLetters","Power-Header.jpeg"));
+        using var stationery=XImage.FromFile(Path.Combine(contentRoot,"DocumentTemplates",model.CompanyCode=="VAS" ? "Automation-Letterhead.jpg" : "Power-Header.jpg"));
         var regular=new XFont("VertexSans",10.5); var bold=new XFont("VertexSans",10.5,XFontStyleEx.Bold);
         var title=new XFont("VertexSans",14,XFontStyleEx.Bold); var small=new XFont("VertexSans",8.2);
         var ink=new XSolidBrush(XColor.FromArgb(25,35,52));
@@ -82,7 +81,7 @@ public sealed class CompanyLetterPdfService(string contentRoot)
             graphics?.Dispose();
             var page=document.AddPage();page.Width=XUnit.FromPoint(597);page.Height=XUnit.FromPoint(843);
             graphics=XGraphics.FromPdfPage(page);
-            DrawLetterhead(graphics,stationery,powerHeader,model.CompanyCode!);
+            DrawLetterhead(graphics,stationery,model.CompanyCode!);
             y=130;
         }
         void Ensure(double height) { if(y+height>bottom) NewPage(); }
@@ -165,7 +164,7 @@ public sealed class CompanyLetterPdfService(string contentRoot)
         if(!string.IsNullOrWhiteSpace(model.AdditionalNotes))
         { Paragraph(new(){Text="Additional Information",Bold=true});Paragraph(new(){Text=model.AdditionalNotes}); }
         graphics!.Dispose();graphics=null;
-        for(var i=0;i<document.PageCount;i++)
+        for(var i=0;model.CompanyCode!="VPC" && i<document.PageCount;i++)
         {
             using var footer=XGraphics.FromPdfPage(document.Pages[i],XGraphicsPdfPageOptions.Append);
             footer.DrawString($"Page {i+1} of {document.PageCount}",small,ink,new XRect(left,785,width,14),XStringFormats.TopRight);
@@ -173,21 +172,10 @@ public sealed class CompanyLetterPdfService(string contentRoot)
         using var output=new MemoryStream();document.Save(output,false);return output.ToArray();
     }
 
-    public static void DrawLetterhead(XGraphics graphics,XImage stationery,XImage powerHeader,string companyCode)
+    public static void DrawLetterhead(XGraphics graphics,XImage header,string companyCode)
     {
-        graphics.DrawImage(stationery,0,0,597,843);
-        if(companyCode=="VPC")
-        {
-            graphics.DrawRectangle(XBrushes.White,60,8,490,70);
-            graphics.DrawImage(powerHeader,68,14,481,481d*powerHeader.PixelHeight/powerHeader.PixelWidth);
-        }
-        else
-        {
-            // Retain the app's logo, tagline, address and footer; correct only the company title.
-            graphics.DrawRectangle(XBrushes.White,190,11,350,20);
-            var font=new XFont("VertexSans",16,XFontStyleEx.Bold);
-            graphics.DrawString(EmployeeCompany.DisplayName("VAS"),font,new XSolidBrush(XColor.FromArgb(35,40,85)),new XRect(192,12,340,20),XStringFormats.TopCenter);
-        }
+        // Both company assets contain only the approved header, never footer stationery.
+        graphics.DrawImage(header,28,14,541,541d*header.PixelHeight/header.PixelWidth);
     }
 
     private static LetterTemplate IncrementTemplate(EmployeeDocumentFormViewModel m)

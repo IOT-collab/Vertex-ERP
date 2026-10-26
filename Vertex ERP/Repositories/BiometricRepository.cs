@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
 using VertexERP.Models;
 
@@ -50,7 +50,7 @@ public sealed class BiometricRepository : IBiometricRepository
     public async Task<IReadOnlyList<Employee>> GetActiveEmployeesAsync(CancellationToken cancellationToken = default) =>
         await _db.Employees.AsNoTracking().Where(employee => employee.IsActive).OrderBy(employee => employee.FullName).ToListAsync(cancellationToken);
     public async Task<IReadOnlyList<BiometricEnrollment>> GetEnrollmentsAsync(CancellationToken cancellationToken = default) =>
-        await _db.BiometricEnrollments.AsNoTracking().ToListAsync(cancellationToken);
+        await _db.BiometricEnrollments.AsNoTracking().Include(x => x.Employee).ToListAsync(cancellationToken);
     public async Task<IReadOnlyList<EmployeeDeviceMapping>> GetActiveMappingsAsync(CancellationToken cancellationToken = default) =>
         await _db.EmployeeDeviceMappings.AsNoTracking().Where(x => x.IsActive
             && !_db.BiometricEmployeeExclusions.Any(e => e.DeviceUserCode == x.DeviceUserId.Trim().ToUpper()))

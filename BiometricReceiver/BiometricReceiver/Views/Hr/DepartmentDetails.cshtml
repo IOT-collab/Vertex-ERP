@@ -8,7 +8,7 @@
 <link href="~/css/AddDepartment.css" rel="stylesheet" asp-append-version="true" />
 <div class="add-department-page">
     <div class="department-form-card">
-        <div class="department-form-header"><h1>@Model.DepartmentName</h1><p>@Model.DepartmentCode</p></div>
+        <div class="department-form-header"><h1 data-no-localize>@Model.DepartmentName</h1><p data-no-localize>@Model.DepartmentCode</p></div>
         <div class="department-detail-grid">
             <div><span>Description</span><strong>@(Model.Description ?? "Not provided")</strong></div>
             <div><span>Status</span><strong>@(Model.IsActive ? "Active" : "Inactive")</strong></div>

@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Company Holiday";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
-    var culture = CultureInfo.GetCultureInfo("en-IN");
+    var culture = CultureInfo.CurrentUICulture;
     string DateLabel(DateOnly date) => date.ToString("dd MMM yyyy", culture);
     var next = Model.NextHoliday;
 }

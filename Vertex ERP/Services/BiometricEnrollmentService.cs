@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
@@ -20,6 +20,11 @@ public static class BiometricEnrollmentService
             await using var transaction = await db.Database.BeginTransactionAsync(ct);
             await db.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock({BiometricEmployeeReconciliationService.LockId})", ct);
             var registry = await db.BiometricEnrollments.Include(x => x.Employee).ToDictionaryAsync(x => x.EnrollCode, ct);
+            // This method receives a complete directory only after all WDMS pages succeed.
+            // Clear membership for removed codes without deleting profiles or punch history.
+            var currentCodes = identities.Select(x => x.EnrollCode.Trim().ToUpperInvariant()).ToHashSet();
+            foreach (var old in registry.Values.Where(x => !currentCodes.Contains(x.EnrollCode)))
+                old.LastSeenUtc = null;
             foreach (var group in identities.Where(x => !string.IsNullOrWhiteSpace(x.EnrollCode)).GroupBy(x => x.EnrollCode.Trim().ToUpperInvariant()))
             {
                 if (group.Key.Length is 0 or > 50) continue;
@@ -33,6 +38,7 @@ public static class BiometricEnrollmentService
                 enrollment.LastSeenUtc = DateTime.UtcNow;
                 if (names.Count != 1)
                 {
+                    enrollment.WdmsName = null;
                     enrollment.Status = "Needs review";
                     enrollment.ReviewReason = "WDMS supplied a missing or conflicting name for this enroll code.";
                     continue;

@@ -55,6 +55,7 @@ public class EmployeeSelfServiceViewModel
             Department = employee.Department,
             Initials = lastInitial == '\0' ? firstInitial.ToString().ToUpperInvariant() : $"{firstInitial}{lastInitial}".ToUpperInvariant(),
             Status = employee.EmployeeStatus,
+            ShiftTime = employee.ShiftStartTime.ToString("hh:mm tt") + " - " + employee.ShiftEndTime.ToString("hh:mm tt") + (employee.ShiftEndTime < employee.ShiftStartTime ? " (next day)" : ""),
             EmploymentType = employee.EmploymentType,
             EmployeeId = employee.EmployeeCode,
             Email = employee.Email,
@@ -91,6 +92,13 @@ public class EmployeeLoginAccessViewModel
 
 public class EmployeeFormViewModel : IValidatableObject
 {
+    [Display(Name = "Overtime")]
+    public bool OvertimeEnabled { get; set; }
+    [Required, Display(Name = "Shift Start Time"), DataType(DataType.Time)]
+    public TimeOnly? ShiftStartTime { get; set; } = new TimeOnly(9, 30);
+    [Required, Display(Name = "Shift End Time"), DataType(DataType.Time)]
+    public TimeOnly? ShiftEndTime { get; set; } = new TimeOnly(18, 30);
+
     [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
     public IReadOnlyList<string> SourceEnrollments { get; set; } = Array.Empty<string>();
     [Microsoft.AspNetCore.Mvc.ModelBinding.BindNever]
@@ -244,6 +252,8 @@ public class EmployeeFormViewModel : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
+        if (ShiftStartTime.HasValue && ShiftEndTime.HasValue && ShiftStartTime == ShiftEndTime)
+            yield return new ValidationResult("Shift start and end must be different. For a night shift, choose an end time on the next morning.", new[] { nameof(ShiftEndTime) });
         var today = DateOnly.FromDateTime(DateTime.Today);
         if (!string.IsNullOrWhiteSpace(DateOfBirthText))
         {
@@ -341,6 +351,13 @@ public class BiometricOnboardingOption
 
 public class HrAddEmployeeViewModel : IValidatableObject
 {
+    [Display(Name = "Overtime")]
+    public bool OvertimeEnabled { get; set; }
+    [Required, Display(Name = "Shift Start Time"), DataType(DataType.Time)]
+    public TimeOnly? ShiftStartTime { get; set; } = new TimeOnly(9, 30);
+    [Required, Display(Name = "Shift End Time"), DataType(DataType.Time)]
+    public TimeOnly? ShiftEndTime { get; set; } = new TimeOnly(18, 30);
+
     [Required(ErrorMessage = "Please select a company.")]
     [RegularExpression("^(VAS|VPC)$", ErrorMessage = "Please select a valid company.")]
     [Display(Name = "Company")]
@@ -474,6 +491,8 @@ public class HrAddEmployeeViewModel : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
+        if (ShiftStartTime.HasValue && ShiftEndTime.HasValue && ShiftStartTime == ShiftEndTime)
+            yield return new ValidationResult("Shift start and end must be different. For a night shift, choose an end time on the next morning.", new[] { nameof(ShiftEndTime) });
         var today = DateOnly.FromDateTime(DateTime.Today);
         if (DateOfBirth.HasValue && DateOfBirth.Value >= today)
             yield return new ValidationResult("Date of Birth must be in the past.", new[] { nameof(DateOfBirth) });

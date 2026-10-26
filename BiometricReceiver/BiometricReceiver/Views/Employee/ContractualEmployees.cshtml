@@ -13,7 +13,7 @@
     @foreach (var employee in Model)
     {
         <details class="ce-employee" data-search="@($"{employee.FullName} {employee.EmployeeCode} {employee.Department} {employee.Designation} {employee.Email} {employee.PhoneNumber} {VertexERP.Models.EmployeeCompany.DisplayName(employee.CompanyCode)}".ToLowerInvariant())" data-status="@(employee.IsActive ? "active" : "inactive")">
-            <summary><div class="ce-avatar">@(employee.FullName.Length > 0 ? employee.FullName[..1].ToUpperInvariant() : "E")</div><div class="ce-identity"><h2>@employee.FullName</h2><p>@employee.EmployeeCode · @employee.Designation · @employee.Department</p></div><span class="ce-badge @(employee.IsActive ? "ce-active" : "")">@(employee.IsActive ? "Active" : "Inactive")</span><span class="ce-expand">Details <i class="fa-solid fa-chevron-down" aria-hidden="true"></i></span></summary>
+            <summary><div class="ce-avatar">@(employee.FullName.Length > 0 ? employee.FullName[..1].ToUpperInvariant() : "E")</div><div class="ce-identity"><h2 data-no-localize>@employee.FullName</h2><p data-no-localize>@employee.EmployeeCode · @employee.Designation · @employee.Department</p></div><span class="ce-badge @(employee.IsActive ? "ce-active" : "")">@(employee.IsActive ? "Active" : "Inactive")</span><span class="ce-expand">Details <i class="fa-solid fa-chevron-down" aria-hidden="true"></i></span></summary>
             <div class="ce-details">
                 <section><h3>Employment details</h3><dl>
                     <dt>Company</dt><dd>@VertexERP.Models.EmployeeCompany.DisplayName(employee.CompanyCode)</dd>

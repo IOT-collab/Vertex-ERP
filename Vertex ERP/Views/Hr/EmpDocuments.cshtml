@@ -31,7 +31,7 @@
                 {
                     <a asp-action="EmpDocuments" asp-route-employeeId="@item.Id" class="document-employee-card" data-employee-search="@($"{item.Name} {item.EmployeeCode} {item.Department}")">
                         <span class="employee-avatar"><i class="fa-solid fa-user"></i></span>
-                        <span><strong>@item.Name</strong><small>@item.EmployeeCode · @item.Department</small><small>@item.DocumentCount document(s) uploaded</small></span>
+                        <span><strong data-no-localize>@item.Name</strong><small data-no-localize>@item.EmployeeCode · @item.Department</small><small>@item.DocumentCount document(s) uploaded</small></span>
                         <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                     </a>
                 }

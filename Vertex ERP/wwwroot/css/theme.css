@@ -1,0 +1,307 @@
+/* Account appearance is scoped to authenticated layouts. */
+html[lang="hi"] body { line-height: 1.65 !important; }
+html[lang="hi"] :is(button, .btn, .sidebar-menu a, label, th) { line-height: 1.5 !important; }
+html[lang="hi"] .sidebar-menu a span { white-space: normal; overflow-wrap: anywhere; }
+html[data-theme] { background: var(--erp-bg) !important; }
+html[data-theme] .page-content .dashboard {
+    background: var(--erp-bg) !important;
+    padding: 8px 0 24px !important;
+    min-height: auto !important;
+}
+html[data-theme] .dashboard::before { display: none !important; }
+html[data-theme] .dashboard :is(.page-header, .dashboard-card, .table-box, .attendance-box, .alerts-box, .activity-box, .quick-box, .analytics-card) {
+    background: var(--erp-surface) !important;
+    border: 1px solid var(--erp-border) !important;
+    box-shadow: var(--erp-shadow-soft) !important;
+    backdrop-filter: none !important;
+    border-radius: 16px !important;
+}
+html[data-theme] .dashboard .page-header { padding: 24px !important; gap: 24px !important; flex-wrap: wrap !important; }
+html[data-theme] .dashboard .header-text h2 { font-size: clamp(24px, 2vw, 30px) !important; line-height: 1.25 !important; }
+html[data-theme] .dashboard .dashboard-card { padding: 22px !important; transform: none !important; }
+html[data-theme] .dashboard .dashboard-card:hover { border-color: var(--erp-primary) !important; box-shadow: var(--erp-shadow) !important; }
+html[data-theme] .dashboard .dashboard-card::before,
+html[data-theme] .dashboard .dashboard-card::after { display: none !important; }
+html[data-theme] .dashboard .card-meta { color: var(--erp-text-muted) !important; }
+html[data-theme] .dashboard .dashboard-card h2 { font-size: 36px !important; line-height: 1.2 !important; color: var(--erp-text) !important; }
+html[data-theme] .dashboard .card-footer-info { color: var(--erp-text-muted) !important; border-color: var(--erp-border) !important; font-size: 12px !important; }
+html[data-theme] .dashboard :is(.search-bar, .search-shortcut, .date-box, .btn-icon-bell, .btn-ai-mic, .attendance-item, .alert-item, .radial-details div, .table-responsive-container) {
+    background: var(--erp-surface-soft) !important;
+    border-color: var(--erp-border) !important;
+    box-shadow: none !important;
+    color: var(--erp-text) !important;
+}
+html[data-theme] .dashboard .search-bar input { background: transparent !important; }
+html[data-theme] .dashboard .search-bar input::placeholder { color: var(--erp-text-muted) !important; opacity: 1; }
+html[data-theme] .dashboard :is(.date-box strong, .dashboard-week-item strong, .select-filter option) { color: var(--erp-text) !important; }
+html[data-theme] .dashboard :is(.modern-table th, .select-filter option) { background: var(--erp-surface-soft) !important; }
+html[data-theme] .dashboard .modern-table tbody tr:hover td { background: var(--erp-surface-soft) !important; color: var(--erp-text) !important; }
+html[data-theme] .dashboard :is(.system-badge, .trend, .badge-count, .btn-action, .dept-tag) {
+    color: var(--erp-primary) !important;
+    background: color-mix(in srgb, var(--erp-primary) 10%, var(--erp-surface)) !important;
+    border-color: color-mix(in srgb, var(--erp-primary) 22%, var(--erp-surface)) !important;
+}
+html[data-theme] .topbar .logout-btn { color: #b91c1c !important; background: #fff1f2 !important; border: 1px solid #fecdd3 !important; }
+html[data-theme="dark"] .topbar .logout-btn { color: #fecaca !important; background: #451a23 !important; border-color: #7f1d1d !important; }
+html[data-theme] body,
+html[data-theme] .main-content,
+html[data-theme] .page-content,
+html[data-theme] body > .container {
+    background: var(--erp-bg) !important;
+    color: var(--erp-text) !important;
+}
+html[data-theme] :is(.sidebar, .topbar, .logo, .vertex-welcome-card) {
+    background: var(--erp-surface) !important;
+    color: var(--erp-text) !important;
+    border-color: var(--erp-border) !important;
+}
+html[data-theme] :is(.sidebar a, .sidebar-close-btn, .topbar-brand, .profile-text, .vertex-welcome-name) {
+    color: var(--erp-text) !important;
+}
+html[data-theme] .sidebar-menu a:hover,
+html[data-theme] .sidebar-menu a:focus-visible {
+    background: var(--erp-primary) !important;
+    color: var(--theme-accent-text) !important;
+}
+html[data-theme] .hamburger-menu-btn span { background: var(--erp-text) !important; }
+html[data-theme] .page-content :is(th, input, select, textarea, label, legend) { color: var(--erp-text) !important; }
+html[data-theme] .page-content :is(.card, .panel, .form-card, .table-card, .summary-card, .stat-card, .employee-panel, .employee-summary article, .profile-field, .notification-item, .leave-balance) {
+    background: var(--erp-surface) !important;
+    color: var(--erp-text) !important;
+    border-color: var(--erp-border) !important;
+}
+html[data-theme] .page-content :is(.employee-summary strong, .profile-field strong, .leave-balance strong) { color: var(--erp-text) !important; }
+html[data-theme] .page-content :is(input, select, textarea) { background-color: var(--erp-surface) !important; accent-color: var(--erp-primary); }
+.theme-settings { padding: clamp(16px, 3vw, 32px); background: var(--erp-surface); border: 1px solid var(--erp-border); border-radius: 18px; }
+.theme-settings > p { margin: 12px 0 24px; }
+.theme-settings fieldset { border: 0; padding: 0; margin: 0 0 24px; min-width: 0; }
+.theme-settings legend { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+.theme-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.theme-options legend { grid-column: 1 / -1; }
+.theme-options label { display: grid; grid-template-columns: 22px 1fr; gap: 6px 10px; padding: 20px; border: 2px solid var(--erp-border); border-radius: 12px; cursor: pointer; }
+.theme-options label:has(input:checked) { border-color: var(--erp-primary); }
+.theme-options input { width: 18px; height: 18px; }
+.theme-options span { grid-column: 2; font-size: 13px; line-height: 1.6; }
+.theme-colors { display: flex; flex-wrap: wrap; gap: 20px; }
+.theme-colors label { display: flex; flex-direction: column; gap: 10px; }
+.theme-colors input[type="color"] { width: 100px; height: 44px; padding: 3px; cursor: pointer; border: 1px solid var(--erp-border); border-radius: 8px; }
+.theme-colors:disabled { opacity: .5; }
+.theme-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+html[data-theme] .theme-actions button { padding: 12px 20px; border-radius: 8px; background: var(--erp-primary) !important; color: var(--theme-accent-text) !important; border: 1px solid var(--erp-border); cursor: pointer; font-weight: 700; }
+.theme-settings :focus-visible { outline: 3px solid var(--erp-primary); outline-offset: 4px; }
+@media (max-width: 600px) { .theme-options { grid-template-columns: 1fr; } }
+
+/* Shared navigation must follow the same palette as the page, including icons. */
+html[data-theme] .common-back-nav > .common-back-button {
+    background: var(--erp-surface) !important;
+    color: var(--erp-text) !important;
+    border-color: var(--erp-border) !important;
+    box-shadow: var(--erp-shadow-soft) !important;
+}
+html[data-theme] .common-back-nav > .common-back-button:hover {
+    background: var(--erp-surface-soft) !important;
+    border-color: var(--erp-primary) !important;
+    color: var(--erp-primary) !important;
+}
+html[data-theme] .common-back-button :is(span, svg) { color: inherit !important; }
+html[data-theme] .page-content a:not([class]) { color: var(--erp-primary); }
+html[data-theme] :is(.workflow-nav-actions, .employee-extra-actions) a {
+    background: var(--erp-primary) !important;
+    border-color: var(--erp-primary) !important;
+    color: var(--theme-accent-text) !important;
+    box-shadow: var(--erp-shadow-soft) !important;
+}
+html[data-theme] :is(.workflow-nav-actions, .employee-extra-actions) a:hover { filter: brightness(.94); }
+
+/* Location tracking has inline legacy dark rules: override their full selectors. */
+html[data-theme] .location-page { color: var(--erp-text) !important; }
+html[data-theme] .location-page :is(.location-title, .employee-count, .employee-name, .profile-name, .punch-title, .punch-value, .map-card-title, .empty-state h3) {
+    color: var(--erp-text) !important;
+}
+html[data-theme] .location-page :is(.location-subtitle, .breadcrumb, .breadcrumb span, .employee-meta, .profile-description, .profile-contact, .punch-label, .no-checkout, .empty-state, .empty-state p) {
+    color: var(--erp-text-muted) !important;
+}
+html[data-theme] .location-page :is(.location-card, .employee-item) {
+    background: var(--erp-surface) !important;
+    border-color: var(--erp-border) !important;
+    box-shadow: var(--erp-shadow-soft) !important;
+}
+html[data-theme] .location-page .employee-item:hover,
+html[data-theme] .location-page .employee-item.selected {
+    background: color-mix(in srgb, var(--erp-primary) 10%, var(--erp-surface)) !important;
+    border-color: var(--erp-primary) !important;
+}
+html[data-theme] .location-page :is(.date-input, .status-none, .punch-status.pending, .map-placeholder) {
+    background: var(--erp-surface-soft) !important;
+    color: var(--erp-text-muted) !important;
+    border-color: var(--erp-border) !important;
+}
+html[data-theme] .location-page .date-input { color: var(--erp-text) !important; }
+html[data-theme] .location-page .map-placeholder strong { color: var(--erp-text) !important; }
+html[data-theme] .location-page .map-link { color: var(--erp-primary) !important; }
+html[data-theme] .location-page .view-btn {
+    background: var(--erp-primary) !important;
+    color: var(--theme-accent-text) !important;
+}
+html[data-theme] .location-page .view-btn:hover { filter: brightness(.94); }
+
+/* Approval cards, summaries, empty states and the linked history screens. */
+html[data-theme] :is(.clear-workflow-page, .issues-page) { color: var(--erp-text) !important; }
+html[data-theme] :is(.clear-section-card, .issue-stats article, .closed-ticket) {
+    background: var(--erp-surface) !important;
+    color: var(--erp-text) !important;
+    border-color: var(--erp-border) !important;
+    box-shadow: var(--erp-shadow-soft) !important;
+}
+html[data-theme] :is(.clear-summary span, .clear-empty, .count-pill, .scope-chip, .issue-filters, .ticket-content > div, .issues-empty) {
+    background: var(--erp-surface-soft) !important;
+    color: var(--erp-text) !important;
+    border-color: var(--erp-border) !important;
+}
+html[data-theme] :is(.clear-summary b, .ticket-people strong, .clear-empty h3, .issues-empty h3) { color: var(--erp-text) !important; }
+html[data-theme] :is(.clear-page-header p, .clear-section-title p, .clear-empty p, .issues-empty p, .ticket-people small, .ticket-people em, .ticket-content small, .closed-ticket footer, .issue-stats span) { color: var(--erp-text-muted) !important; }
+html[data-theme] :is(.clear-kicker, .issues-eyebrow, .ticket-number, .success-empty a, .clear-empty > i) { color: var(--erp-primary) !important; }
+html[data-theme] :is(.clear-response-form input, .clear-response-form select, .issue-filters label, .issue-filters select) {
+    background: var(--erp-surface) !important;
+    color: var(--erp-text) !important;
+    border-color: var(--erp-border) !important;
+}
+html[data-theme] :is(.approve-btn, .clear-response-form button, .issue-filters button) {
+    background: var(--erp-primary) !important;
+    color: var(--theme-accent-text) !important;
+}
+html[data-theme] .reject-btn { background: var(--erp-surface-soft) !important; color: var(--erp-text) !important; border: 1px solid var(--erp-border) !important; }
+
+/* Shipment surfaces and local tokens also serve the results/history state. */
+html[data-theme] .tracking-page {
+    --panel: var(--erp-surface);
+    --panel2: var(--erp-surface-soft);
+    --line: var(--erp-border);
+    --muted: var(--erp-text-muted);
+    --ink: var(--erp-text);
+    color: var(--erp-text) !important;
+}
+html[data-theme] .tracking-page :is(.tracking-hero, .tracking-card, .history) {
+    background: var(--erp-surface) !important;
+    color: var(--erp-text) !important;
+    border-color: var(--erp-border) !important;
+    box-shadow: var(--erp-shadow-soft) !important;
+}
+html[data-theme] .tracking-page :is(.tracking-form, .tracking-input, .tracking-stat) { background: var(--erp-surface-soft) !important; color: var(--erp-text) !important; }
+html[data-theme] .tracking-page .tracking-input input { color: var(--erp-text) !important; background: transparent !important; }
+html[data-theme] .tracking-page .tracking-input input::placeholder { color: var(--erp-text-muted) !important; opacity: 1; }
+html[data-theme] .tracking-page :is(.tracking-button, .official-link) {
+    background: var(--erp-primary) !important;
+    color: var(--theme-accent-text) !important;
+}
+html[data-theme] .tracking-page :is(.tracking-button, .official-link):hover { filter: brightness(.94); }
+html[data-theme] .tracking-page .tracking-alert {
+    background: color-mix(in srgb, #dc2626 8%, var(--erp-surface)) !important;
+    color: var(--erp-text) !important;
+    border-color: color-mix(in srgb, #dc2626 40%, var(--erp-border)) !important;
+}
+html[data-theme] .tracking-page .tracking-setup {
+    background: color-mix(in srgb, #f59e0b 10%, var(--erp-surface)) !important;
+    color: var(--erp-text) !important;
+    border-color: color-mix(in srgb, #f59e0b 45%, var(--erp-border)) !important;
+}
+html[data-theme] .tracking-page .scan::before { background: var(--erp-surface) !important; border-color: var(--erp-primary) !important; }
+html[data-theme] .tracking-page .scan-list { border-color: var(--erp-border) !important; }
+html[data-theme] .location-page :is(.status-in, .status-out, .profile-status, .punch-status:not(.pending)),
+html[data-theme] .tracking-page .status,
+html[data-theme] .issues-page .status-pill {
+    background: color-mix(in srgb, #16a34a 12%, var(--erp-surface)) !important;
+    color: var(--erp-text) !important;
+    border-color: color-mix(in srgb, #16a34a 35%, var(--erp-border)) !important;
+}
+html[data-theme] :is(.common-back-button, .workflow-nav-actions a, .employee-extra-actions a, .tracking-button, .official-link, .view-btn):focus-visible {
+    outline: 3px solid var(--erp-primary) !important;
+    outline-offset: 3px !important;
+}
+
+/* One shared attendance detail view serves Present, Absent, Late and Leave. */
+html[data-theme] .dashboard-attendance-page { color: var(--erp-text) !important; }
+html[data-theme] .dashboard-attendance-page :is(.dashboard-attendance-header, .dashboard-attendance-card) {
+    background: var(--erp-surface) !important;
+    border-color: var(--erp-border) !important;
+    box-shadow: var(--erp-shadow-soft) !important;
+}
+html[data-theme] .dashboard-attendance-page :is(h1, h2, td, td strong) { color: var(--erp-text) !important; }
+html[data-theme] .dashboard-attendance-page :is(.dashboard-attendance-header p, .dashboard-attendance-empty p) { color: var(--erp-text-muted) !important; }
+html[data-theme] .dashboard-attendance-page .dashboard-attendance-eyebrow { color: var(--erp-primary) !important; }
+html[data-theme] .dashboard-attendance-page .dashboard-attendance-back {
+    color: var(--erp-text) !important;
+    background: var(--erp-surface-soft) !important;
+    border-color: var(--erp-border) !important;
+}
+html[data-theme] .dashboard-attendance-page .dashboard-attendance-back:hover {
+    color: var(--erp-primary) !important;
+    border-color: var(--erp-primary) !important;
+    background: color-mix(in srgb, var(--erp-primary) 8%, var(--erp-surface)) !important;
+}
+html[data-theme] .dashboard-attendance-page .dashboard-attendance-back:focus-visible { outline: 3px solid var(--erp-primary); outline-offset: 3px; }
+html[data-theme] .dashboard-attendance-page :is(th, td) { border-color: var(--erp-border) !important; }
+html[data-theme] .dashboard-attendance-page table tbody tr:hover td {
+    background: var(--erp-surface-soft) !important;
+    color: var(--erp-text) !important;
+}
+html[data-theme] .dashboard-attendance-page table tbody tr:hover td strong { color: var(--erp-text) !important; }
+html[data-theme] .dashboard-attendance-page :is(.employee-code, .empty-icon) {
+    color: var(--erp-primary) !important;
+    background: color-mix(in srgb, var(--erp-primary) 10%, var(--erp-surface)) !important;
+}
+html[data-theme] .dashboard-attendance-page .attendance-status {
+    color: var(--erp-text) !important;
+    background: color-mix(in srgb, var(--status-color) 12%, var(--erp-surface)) !important;
+}
+html[data-theme] .dashboard-attendance-page .attendance-status.present { --status-color: #16a34a; }
+html[data-theme] .dashboard-attendance-page .attendance-status.absent { --status-color: #dc2626; }
+html[data-theme] .dashboard-attendance-page .attendance-status.late { --status-color: #d97706; }
+html[data-theme] .dashboard-attendance-page .attendance-status.leave { --status-color: #7c3aed; }
+html[data-theme="light"] .dashboard-attendance-page .attendance-status.present { color: #166534 !important; }
+html[data-theme="light"] .dashboard-attendance-page .attendance-status.absent { color: #b91c1c !important; }
+html[data-theme="light"] .dashboard-attendance-page .attendance-status.late { color: #92400e !important; }
+html[data-theme="light"] .dashboard-attendance-page .attendance-status.leave { color: #6d28d9 !important; }
+.request-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.attendance-filters { display: flex; flex-wrap: wrap; gap: 14px; align-items: end; margin-bottom: 14px; }
+.attendance-filters label { display: grid; gap: 6px; flex: 1 1 160px; }
+.attendance-filters :is(input, select) { min-height: 42px; width: 100%; }
+.attendance-history-panel { overflow-x: auto; }
+.attendance-history { min-width: 1000px; }
+@media (max-width: 760px) { .attendance-history { min-width: 0; } }
+.live-attendance-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; color: var(--erp-text-muted); font-size: 12px; }
+.live-attendance-details strong { color: var(--erp-text); }
+.feedback-page { width: 100%; max-width: 1100px; margin: 12px auto 32px; color: var(--erp-text); }
+.feedback-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin: 18px 0 24px; }
+.feedback-heading h1 { margin-bottom: 8px; }
+.feedback-card { background: var(--erp-surface); border: 1px solid var(--erp-border); border-radius: 16px; padding: clamp(20px, 3vw, 32px); box-shadow: var(--erp-shadow-soft); }
+.feedback-card h2, .feedback-meta > div { overflow-wrap: anywhere; min-width: 0; }
+.feedback-form { display: grid; gap: 10px; margin-top: 22px; }
+.feedback-form label { font-weight: 650; margin-top: 8px; }
+.feedback-form :is(input, textarea), .feedback-search input { width: 100%; min-width: 0; padding: 12px 14px; border: 1px solid var(--erp-border); border-radius: 9px; background: var(--erp-surface-soft); color: var(--erp-text); }
+.feedback-form textarea { resize: vertical; min-height: 170px; }
+.feedback-form small, .feedback-meta { color: var(--erp-text-muted); }
+html[data-theme] .feedback-submit { display: inline-flex; justify-content: center; align-items: center; gap: 9px; padding: 12px 20px; border: 0; border-radius: 9px; background: var(--erp-primary) !important; color: var(--theme-accent-text) !important; font-weight: 700; cursor: pointer; }
+.feedback-form .feedback-submit { justify-self: start; margin-top: 12px; }
+.feedback-success { padding: 14px; margin-bottom: 20px; border: 1px solid var(--erp-primary); border-radius: 9px; background: var(--erp-surface-soft); color: var(--erp-text); }
+.feedback-error, .feedback-form .field-validation-error { color: #b91c1c; }
+html[data-theme="dark"] .feedback-error { color: #fca5a5; }
+html[data-theme="custom"] .feedback-error { color: var(--erp-text); }
+.feedback-total { padding: 10px 14px; border-radius: 9px; background: var(--erp-surface-soft); border: 1px solid var(--erp-border); }
+.feedback-search { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 20px; }
+.feedback-search input { flex: 1 1 260px; width: auto; }
+.feedback-search a, .feedback-pagination a { color: var(--erp-primary) !important; }
+.feedback-list { display: grid; gap: 16px; }
+.feedback-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; padding-bottom: 16px; margin-bottom: 18px; border-bottom: 1px solid var(--erp-border); font-size: 13px; }
+.feedback-meta strong { color: var(--erp-text); font-size: 16px; }
+.feedback-meta :is(span, small) { display: block; margin-top: 4px; }
+.feedback-meta time span { display: inline; }
+html[data-theme] .feedback-card .feedback-body { color: var(--erp-text) !important; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; }
+.feedback-empty { padding: 50px 20px; text-align: center; }
+.feedback-empty > i { font-size: 32px; color: var(--erp-primary); margin-bottom: 16px; }
+.feedback-pagination { display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 24px; }
+.feedback-page :focus-visible { outline: 3px solid var(--erp-primary); outline-offset: 3px; }
+@media(max-width: 600px) { .feedback-heading { align-items: flex-start; flex-direction: column; }.feedback-search label { flex-basis: 100%; } }
+.request-actions form { margin: 0; }
+.request-actions :is(a, button) { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+html[data-theme] .request-actions .btn-secondary { background: var(--erp-surface-soft) !important; color: var(--erp-text) !important; border: 1px solid var(--erp-border) !important; }

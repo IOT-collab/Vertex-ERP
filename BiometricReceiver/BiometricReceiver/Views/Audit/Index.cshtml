@@ -35,7 +35,7 @@
             <tbody>
             @foreach (var log in Model.Logs)
             {
-                <tr><td>@log.OccurredAtUtc.ToString("dd MMM yyyy HH:mm:ss")</td><td>@log.ActorName</td><td>@log.ActorRole</td><td>@log.Action</td><td>@log.Detail</td><td>
+                <tr><td>@log.OccurredAtUtc.ToString("dd MMM yyyy HH:mm:ss")</td><td data-no-localize>@log.ActorName</td><td>@log.ActorRole</td><td>@log.Action</td><td data-no-localize>@log.Detail</td><td>
                     <form method="post" asp-action="Delete" data-confirm="Permanently delete this audit entry? This cannot be undone.">
                         <input type="hidden" name="id" value="@log.Id" /><input type="hidden" name="from" value="@from" /><input type="hidden" name="to" value="@to" />
                         <button type="submit" class="report-secondary" aria-label="Delete log @log.Id">Delete</button>

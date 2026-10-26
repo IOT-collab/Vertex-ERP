@@ -1,0 +1,36 @@
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
+using VertexERP.Data;
+using VertexERP.Models;
+using Vertex_ERP.Controllers;
+
+void Check(bool ok, string label) { if (!ok) throw new Exception(label); Console.WriteLine("PASS: " + label); }
+bool Valid(FeedbackForm form) => Validator.TryValidateObject(form, new ValidationContext(form), new List<ValidationResult>(), true);
+Check(!Valid(new()), "Blank feedback rejected");
+Check(!Valid(new() { Subject = "   ", Message = "Test" }), "Whitespace-only subject rejected");
+Check(!Valid(new() { Subject = "Test", Message = "\n  " }), "Whitespace-only message rejected");
+Check(Valid(new() { Subject = new string('s', 150), Message = new string('m', 2000) }), "Exact field length limits accepted");
+Check(!Valid(new() { Subject = new string('s', 151), Message = "Feedback" }), "Oversized subject rejected");
+Check(!Valid(new() { Subject = "Test", Message = new string('m', 2001) }), "Oversized message rejected");
+Check(Valid(new() { Subject = "सुझाव", Message = "हिन्दी में प्रतिक्रिया" }), "Hindi feedback accepted");
+var controllerAuth = typeof(FeedbackController).GetCustomAttributes(typeof(AuthorizeAttribute), true).Cast<AuthorizeAttribute>().Single();
+Check(new[] { "Employee", "User", "Manager", "HR", "Admin" }.All(x => controllerAuth.Roles!.Split(',').Contains(x)), "Every login role can submit feedback");
+var inbox = typeof(FeedbackController).GetMethod("Inbox")!;
+var inboxAuth = inbox.GetCustomAttributes(typeof(AuthorizeAttribute), true).Cast<AuthorizeAttribute>().Single();
+Check(inboxAuth.Roles!.Split(',').Order().SequenceEqual(new[] { "Admin", "HR" }), "Feedback inbox restricted to HR and Admin");
+var post = typeof(FeedbackController).GetMethods().Single(x => x.Name == "Index" && Attribute.IsDefined(x, typeof(HttpPostAttribute)));
+Check(Attribute.IsDefined(post, typeof(ValidateAntiForgeryTokenAttribute)), "Feedback submission requires CSRF validation");
+Check(post.GetParameters().All(x => x.ParameterType != typeof(EmployeeFeedback)), "Database entity and author fields cannot be posted directly");
+using var db = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>().UseNpgsql("Host=localhost;Database=unused;Username=unused").Options);
+var entity = db.Model.FindEntityType(typeof(EmployeeFeedback))!;
+Check(entity.FindProperty(nameof(EmployeeFeedback.Message))!.GetMaxLength() == 2000, "Database feedback length matches form validation");
+Check(entity.GetForeignKeys().Single().DeleteBehavior == DeleteBehavior.SetNull, "Feedback history survives deletion of sender account");
+var sql = db.GetService<IMigrator>().GenerateScript("20261016110000_AddSalaryMonthlyEarnings", "20261022090000_AddEmployeeFeedback");
+Check(sql.Contains("CREATE TABLE \"EmployeeFeedbacks\"") && sql.Contains("ON DELETE SET NULL") && sql.Contains("IX_EmployeeFeedbacks_SubmittedAtUtc"), "Migration generates feedback storage and date index without touching a live database");
+var query = db.EmployeeFeedbacks.OrderByDescending(x => x.SubmittedAtUtc).ThenByDescending(x => x.Id).Skip(25).Take(25).ToQueryString();
+Check(query.Contains("LIMIT") && query.Contains("OFFSET"), "Inbox pagination executes in the database");
+Check(new FeedbackInboxViewModel { Total = 26, PageSize = 25 }.TotalPages == 2, "All submissions remain accessible across pages");

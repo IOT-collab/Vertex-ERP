@@ -60,7 +60,7 @@
                         <thead><tr><th>Employee</th><th>Employee ID</th><th>Department</th><th>Designation</th><th>Email</th><th>Phone</th></tr></thead>
                         <tbody>@foreach (var employee in team)
                         {
-                            <tr><td><b>@employee.FullName</b></td><td>@employee.EmployeeCode</td><td>@employee.Department</td><td>@employee.Designation</td><td>@employee.Email</td><td>@employee.PhoneNumber</td></tr>
+                            <tr><td><b>@employee.FullName</b></td><td data-no-localize>@employee.EmployeeCode</td><td>@employee.Department</td><td>@employee.Designation</td><td data-no-localize>@employee.Email</td><td data-no-localize>@employee.PhoneNumber</td></tr>
                         }</tbody>
                     </table></div>
                 }

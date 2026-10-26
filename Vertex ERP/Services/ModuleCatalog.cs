@@ -23,7 +23,7 @@ public static class ModuleCatalog
         if (c is "biometricapi" or "zkadms") return null;
         if (c is "biometricdevices" or "attendancerequests") return "attendance";
         if (c == "expense") return "expenses";
-        if (c == "leavebalances") return "leave";
+        if (c is "leavebalances" or "myrequests") return "leave";
         if (c == "salarysliprevision") return "payroll";
         if (c == "taskmanagement") return "tasks";
         if (c is "projectmgm" or "projectworkspace") return "projects";

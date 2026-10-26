@@ -9,7 +9,7 @@
 }
 <link href="~/css/LeaveBalances.css" rel="stylesheet" asp-append-version="true" />
 <section class="manual-leave-page">
-<header><h1>Calculate Leave · @Model.Year</h1><p>@Model.EmployeeName · @Model.EmployeeCode</p><a asp-action="Index" asp-route-year="@Model.Year">Back to leave balances</a></header>
+<header><h1>Calculate Leave · @Model.Year</h1><p data-no-localize>@Model.EmployeeName · @Model.EmployeeCode</p><a asp-action="Index" asp-route-year="@Model.Year">Back to leave balances</a></header>
 <div asp-validation-summary="All" class="manual-error" role="alert"></div>
 <form asp-action="Calculate" method="post" class="manual-card" id="calculator">
 <input asp-for="EmployeeId" type="hidden"/><input asp-for="Year" type="hidden"/><input asp-for="Revision" type="hidden"/>

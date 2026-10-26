@@ -25,7 +25,7 @@
             <p class="reports-filter-note">Choose both dates here and delete directly. Includes both dates and every page.</p>
         </form>
         <form method="post" asp-action="DeleteAll" data-confirm="Permanently delete ALL audit logs across ALL dates and pages, ignoring the current filters? This cannot be undone.">
-            <button type="submit" class="report-primary" style="background:#a52b3a;border-color:#c64353">Delete All Logs</button>
+            <button type="submit" class="report-primary report-danger">Delete All Logs</button>
         </form>
         <p class="reports-applied">Deleted entries are removed from the database and dashboard. New activity after deletion will create new logs. Previously downloaded PDFs are unaffected.</p>
     </section>
@@ -35,7 +35,7 @@
             <tbody>
             @foreach (var log in Model.Logs)
             {
-                <tr><td>@log.OccurredAtUtc.ToString("dd MMM yyyy HH:mm:ss")</td><td>@log.ActorName</td><td>@log.ActorRole</td><td>@log.Action</td><td>@log.Detail</td><td>
+                <tr><td>@log.OccurredAtUtc.ToString("dd MMM yyyy HH:mm:ss")</td><td data-no-localize>@log.ActorName</td><td>@log.ActorRole</td><td>@log.Action</td><td data-no-localize>@log.Detail</td><td>
                     <form method="post" asp-action="Delete" data-confirm="Permanently delete this audit entry? This cannot be undone.">
                         <input type="hidden" name="id" value="@log.Id" /><input type="hidden" name="from" value="@from" /><input type="hidden" name="to" value="@to" />
                         <button type="submit" class="report-secondary" aria-label="Delete log @log.Id">Delete</button>

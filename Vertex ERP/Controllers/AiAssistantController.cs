@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -110,7 +110,7 @@ public sealed class AiAssistantController(ApplicationDbContext db) : Controller
 
         var employees = await employeesQuery
             .OrderBy(employee => employee.FullName)
-            .Select(employee => new AssistantEmployee(employee.Id, employee.FullName, employee.EmployeeCode))
+            .Select(employee => new AssistantEmployee(employee.Id, employee.FullName, employee.EmployeeCode, employee.ShiftStartTime, employee.ShiftEndTime))
             .ToListAsync(cancellationToken);
 
         var matchedEmployees = employees
@@ -156,12 +156,14 @@ public sealed class AiAssistantController(ApplicationDbContext db) : Controller
             var logs = employeeIds.Count == 0
                 ? new List<AssistantPunch>()
                 : await db.AttendanceLogs.AsNoTracking()
-                    .Where(log => log.EmployeeId.HasValue && employeeIds.Contains(log.EmployeeId.Value) && log.PunchTime >= today && log.PunchTime < tomorrow)
+                    .Where(log => log.EmployeeId.HasValue && employeeIds.Contains(log.EmployeeId.Value) && log.PunchTime >= today && log.PunchTime < tomorrow.AddDays(1))
                     .Select(log => new AssistantPunch(log.EmployeeId!.Value, log.PunchTime))
                     .ToListAsync(cancellationToken);
-            var punchesByEmployee = logs.GroupBy(log => log.EmployeeId)
+            var employeeById = targetEmployees.ToDictionary(e => e.Id);
+            var punchesByEmployee = logs.Where(log => employeeById.TryGetValue(log.EmployeeId, out var e)
+                    && AttendanceRules.ShiftDate(log.PunchTime, e.ShiftStartTime, e.ShiftEndTime) == todayDate).GroupBy(log => log.EmployeeId)
                 .ToDictionary(group => group.Key, group => group.Min(log => log.PunchTime));
-            var lateIds = punchesByEmployee.Where(pair => pair.Value.TimeOfDay > new TimeSpan(10, 0, 0))
+            var lateIds = punchesByEmployee.Where(pair => !AttendanceRules.IsWeeklyOff(todayDate) && AttendanceRules.IsLateArrival(pair.Value, todayDate, employeeById[pair.Key].ShiftStartTime))
                 .Select(pair => pair.Key).ToHashSet();
             var presentIds = punchesByEmployee.Keys.ToHashSet();
             var onLeaveIds = employeeIds.Count == 0
@@ -352,7 +354,7 @@ public sealed class AiAssistantController(ApplicationDbContext db) : Controller
             .Any(token => normalizedQuestion.Contains($" {token} ", StringComparison.Ordinal));
     }
 
-    private sealed record AssistantEmployee(int Id, string Name, string EmployeeCode);
+    private sealed record AssistantEmployee(int Id, string Name, string EmployeeCode, TimeOnly ShiftStartTime, TimeOnly ShiftEndTime);
     private sealed record AssistantPunch(int EmployeeId, DateTime PunchTime);
     private sealed record AssistantLeave(string EmployeeName, string Type, DateOnly From, DateOnly To, string Status);
     private sealed record AssistantTask(string Title, string Assignee, string Status, string Priority, DateOnly DueDate);

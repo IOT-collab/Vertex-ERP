@@ -15,7 +15,7 @@
     </div>
     @if (VertexERP.Services.AttendanceRules.HolidayName(Model.FilterDate) is string holidayName)
     {
-        <p class="holiday">@Model.FilterDate.ToString("dd MMM yyyy") · Holiday: @holidayName</p>
+        <p class="holiday" data-no-localize>@Model.FilterDate.ToString("dd MMM yyyy") · Holiday: @holidayName</p>
     }
     <div class="dashboard-cards">
         <a asp-action="Attendence" asp-route-searchQuery="@Model.SearchQuery" asp-route-department="@Model.Department" asp-route-filterDate="@filterDateValue" asp-route-status="Present" class="card present @(Model.Status == "Present" ? "active-filter" : "")"><h3>@Model.PresentCount</h3><span>Present</span><small>All checked-in employees, including late arrivals</small></a>
@@ -31,7 +31,7 @@
             <div class="filter-field action-field"><button type="submit" class="btn-search">Apply Filter</button></div>
         </div>
     </form>
-    <p>Emp ID shows the WDMS Enroll Code. Blank IDs need a verified numeric WDMS link in <a asp-controller="BiometricEnrollments" asp-action="Index">WDMS Enroll Codes / Review</a>.</p>
+    <p>Only employees in the last synced WDMS directory are shown, using their WDMS name and original enrollment number. Manage ERP links in <a asp-controller="BiometricEnrollments" asp-action="Index">WDMS Enroll Codes / Review</a>.</p>
     <div class="table-box" tabindex="0" role="region" aria-label="Employee attendance; scroll horizontally to view all columns">
         <table>
             <thead><tr><th>Emp ID</th><th>Employee Name</th><th>Department</th><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Action</th></tr></thead>
@@ -40,7 +40,7 @@
             {
                 @foreach (var item in Model.Records)
                 {
-                    <tr><td>@item.EmpId</td><td>@item.EmployeeName</td><td>@item.Department</td><td>@item.Date.ToString("yyyy-MM-dd")</td><td>@(item.CheckIn?.ToString("hh:mm tt") ?? "—")</td><td>@(item.CheckOut?.ToString("hh:mm tt") ?? "—")</td><td><span class="status @(item.Status.ToLowerInvariant().Replace(" ", "-"))-status">@item.Status</span></td><td><span>@item.PunchCount punches</span></td></tr>
+                    <tr><td>@item.EmpId</td><td data-no-localize>@item.EmployeeName</td><td>@item.Department</td><td>@item.Date.ToString("yyyy-MM-dd")</td><td>@(item.CheckIn?.ToString("hh:mm tt") ?? "—")</td><td>@(item.CheckOut?.ToString("hh:mm tt") ?? "—")</td><td><span class="status @(item.Status.ToLowerInvariant().Replace(" ", "-"))-status">@item.Status</span></td><td><span>@item.PunchCount punches</span></td></tr>
                 }
             }
             else

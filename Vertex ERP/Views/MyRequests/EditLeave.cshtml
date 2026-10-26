@@ -1,0 +1,16 @@
+@model VertexERP.Models.LeaveRequest
+@{ Layout = "_LayoutMaster"; ViewBag.Title = "Edit Leave"; ViewData["BackController"] = "Main"; ViewData["BackAction"] = "EmployeeLeaves"; }
+<link href="~/css/EmployeeSections.css" rel="stylesheet" asp-append-version="true" />
+<section class="employee-section"><article class="employee-panel">
+    <h1>Edit Leave</h1><p>Changes will be sent for approval again.</p>
+    @if (TempData["LeaveError"] is string error) { <p role="alert">@error</p> }
+    <form asp-controller="MyRequests" asp-action="EditLeave" method="post" class="leave-form">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <label>Leave Type<select name="leaveType" required>@foreach (var category in new[] { "EL", "CL", "ML", "EW" }) { <option value="@category" selected="@(category == Model.LeaveType)">@category</option> }</select></label>
+        <label>From Date<input type="date" name="fromDate" value="@Model.FromDate.ToString("yyyy-MM-dd")" required /></label>
+        <label>To Date<input type="date" name="toDate" value="@Model.ToDate.ToString("yyyy-MM-dd")" required /></label>
+        <label>Duration<select name="isHalfDay"><option value="false" selected="@(!Model.IsHalfDay)">Full day(s)</option><option value="true" selected="@Model.IsHalfDay">Half day (same start and end date)</option></select></label>
+        <label class="wide">Reason<textarea name="reason" maxlength="500" rows="3" required>@Model.Reason</textarea></label>
+        <div class="request-actions"><button class="btn btn-primary" type="submit">Save Changes</button><a class="btn btn-secondary" asp-controller="Main" asp-action="EmployeeLeaves">Cancel</a></div>
+    </form>
+</article></section>

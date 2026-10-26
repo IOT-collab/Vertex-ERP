@@ -143,23 +143,7 @@
                     <span asp-validation-for="EmployeeId" class="field-validation"></span>
                     <p id="employeeIdPreviewNotice" role="status" aria-live="polite">Select a company to see the next Employee ID.</p>
                 </div>
-                <div class="form-group">
-                    <label asp-for="PendingBiometricEmployeeId">Biometric Enroll Code / Name</label>
-                    <select asp-for="PendingBiometricEmployeeId">
-                        <option value="">New employee — biometric not linked</option>
-                        @foreach (var profile in Model.BiometricOptions)
-                        {
-                            <option value="@profile.EmployeeId">@profile.Label</option>
-                        }
-                    </select>
-                    <div id="biometricEnrollmentValues">
-                        @foreach (var enrollment in Model.SourceEnrollments)
-                        {
-                            <input type="text" value="@enrollment" readonly aria-label="Biometric enrollment number" />
-                        }
-                    </div>
-                    <small>Select the enrollment received from the biometric device to link this employee's attendance.</small>
-                </div>
+                <input asp-for="PendingBiometricEmployeeId" type="hidden" />
 
                 <!-- First Name -->
                 <div class="form-group">
@@ -459,6 +443,22 @@
 
                 </div>
 
+
+
+                <div class="form-group">
+                    <label asp-for="OvertimeEnabled"></label>
+                    <select asp-for="OvertimeEnabled"><option value="false">Inactive</option><option value="true">Active</option></select>
+                    <small>Active: count hours worked beyond the assigned shift duration. Inactive: overtime stays zero.</small>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ShiftStartTime"></label><input asp-for="ShiftStartTime" type="time" asp-format="{0:HH:mm}" required />
+                    <span asp-validation-for="ShiftStartTime" class="field-validation"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ShiftEndTime"></label><input asp-for="ShiftEndTime" type="time" asp-format="{0:HH:mm}" required />
+                    <span asp-validation-for="ShiftEndTime" class="field-validation"></span>
+                    <small>An end time earlier than the start means the shift ends the next day.</small>
+                </div>
 
                 <!-- Employment Type -->
                 <div class="form-group">
@@ -870,13 +870,11 @@
     const biometric = document.getElementById('PendingBiometricEmployeeId');
     const code = document.getElementById('EmployeeId');
     const notice = document.getElementById('employeeIdPreviewNotice');
-    const enrollments = document.getElementById('biometricEnrollmentValues');
     const save = document.querySelector('.employee-form .btn-save');
     let revision = 0;
     async function refreshIdentity() {
         const current = ++revision;
         code.value = '';
-        enrollments.replaceChildren();
         notice.textContent = 'Loading employee IDs…';
         save.disabled = true;
         const query = new URLSearchParams();
@@ -897,12 +895,6 @@
             if (current !== revision) return;
             code.value = result.employeeCode || '';
             if (result.companyCode) company.value = result.companyCode;
-            for (const value of result.enrollments) {
-                const input = document.createElement('input');
-                input.type = 'text'; input.value = value; input.readOnly = true;
-                input.setAttribute('aria-label', 'Biometric enrollment number');
-                enrollments.appendChild(input);
-            }
             notice.textContent = !code.value ? 'Select a company to see the next Employee ID.'
                 : result.isPreview ? 'Next available ID. The final ID is confirmed when saved.' : 'Existing Employee ID.';
             save.textContent = biometric.value ? 'Complete Employee Profile' : 'Add Employee';
@@ -916,7 +908,6 @@
         }
     }
     company.addEventListener('change', refreshIdentity);
-    biometric.addEventListener('change', refreshIdentity);
     refreshIdentity();
 })();
 </script>

@@ -40,7 +40,7 @@
                     {
                         foreach (var project in Model!.Projects)
                         {
-                            <option value="@project.Id" selected="@(project.Id == Model.SelectedProjectId)">
+                            <option value="@project.Id" selected="@(project.Id == Model.SelectedProjectId)" data-no-localize>
                                 @project.Name (@project.Code)
                             </option>
                         }

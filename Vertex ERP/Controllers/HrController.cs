@@ -73,7 +73,7 @@ namespace Vertex_ERP.Controllers
 
         public async Task<IActionResult> SalarySlips(int? year, int? month, string? department, int? employeeId)
         {
-            var previous = DateTime.Today.AddMonths(-1);
+            var previous = FieldAttendanceClock.Now.AddMonths(-1);
             var selectedYear = year is >= 2020 and <= 2100 ? year.Value : previous.Year;
             var selectedMonth = month is >= 1 and <= 12 ? month.Value : previous.Month;
             var periodStart = new DateOnly(selectedYear, selectedMonth, 1);
@@ -97,13 +97,13 @@ namespace Vertex_ERP.Controllers
                     ApprovedLeaveDays = slip?.ApprovedLeaveDays ?? leaves.Where(l => l.EmployeeId == x.Id).Sum(l => ((decimal)(l.ToDate < periodEnd ? l.ToDate : periodEnd).DayNumber - (l.FromDate > periodStart ? l.FromDate : periodStart).DayNumber + 1) * (l.IsHalfDay ? .5m : 1m)),
                     SalaryDays = slip != null ? slip.SalaryDays : null,
                     LeaveDeduction = slip?.LeaveDeduction ?? 0, DeductionNote = slip?.DeductionNote,
-                    SlipId = slip?.Id, IsGenerated = slip != null, GeneratedAtUtc = slip?.GeneratedAtUtc
+                    Version = slip?.UpdatedAtUtc.Ticks ?? 0, SlipId = slip?.Id, IsGenerated = slip != null, GeneratedAtUtc = slip?.GeneratedAtUtc
                 };
             }).ToList();
             return View(new SalarySlipAdminViewModel
             {
                 Year = selectedYear, Month = selectedMonth, Department = department, EmployeeId = employeeId,
-                CanGenerate = selectedYear == previous.Year && selectedMonth == previous.Month,
+                CanGenerate = SalaryDayCalculation.CanGenerate(selectedYear, selectedMonth),
                 Departments = await _dbContext.Employees.AsNoTracking().Where(x => x.IsActive).Select(x => x.Department).Distinct().OrderBy(x => x).ToListAsync(),
                 EmployeeOptions = rows,
                 Employees = rows.Where(x => !employeeId.HasValue || x.EmployeeId == employeeId).ToList()
@@ -114,8 +114,8 @@ namespace Vertex_ERP.Controllers
         public async Task<IActionResult> GenerateSalarySlips(int year, int month, List<int> employeeIds, string? department, int? employeeId = null, int? singleEmployeeId = null)
         {
             IActionResult Back() => RedirectToAction(nameof(SalarySlips), new { year, month, department, employeeId });
-            var previous = DateTime.Today.AddMonths(-1);
-            if (year != previous.Year || month != previous.Month)
+            var previous = FieldAttendanceClock.Now.AddMonths(-1);
+            if (!SalaryDayCalculation.CanGenerate(year, month))
             {
                 TempData["SalaryError"] = "Salary slips can only be generated for the previous month.";
                 return Back();
@@ -154,7 +154,7 @@ namespace Vertex_ERP.Controllers
                     TempData["SalaryError"] = $"Enter valid salary days (0–{end.Day}) and deduction for {salary.Employee.FullName}. No slips were generated.";
                     return Back();
                 }
-                pending.Add(new GeneratedSalarySlip
+                var newSlip = new GeneratedSalarySlip
                 {
                     EmployeeId = salary.EmployeeId, Year = year, Month = month, SalaryDays = days,
                     BasicSalary = salary.BasicSalary, HouseRentAllowance = salary.HouseRentAllowance,
@@ -164,7 +164,14 @@ namespace Vertex_ERP.Controllers
                     LeaveDeduction = deduction, DeductionNote = string.IsNullOrWhiteSpace(note) ? null : note,
                     ApprovedLeaveDays = leaves.Where(x => x.EmployeeId == salary.EmployeeId).Sum(x => ((decimal)(x.ToDate < end ? x.ToDate : end).DayNumber - (x.FromDate > start ? x.FromDate : start).DayNumber + 1) * (x.IsHalfDay ? .5m : 1m)),
                     GeneratedByUserId = userId, GeneratedAtUtc = DateTime.UtcNow, UpdatedAtUtc = DateTime.UtcNow
-                });
+                };
+                SalaryDayCalculation.Apply(newSlip, SalaryDayCalculation.MonthlyEarnings(newSlip));
+                if (newSlip.TotalDeductions > newSlip.GrossSalary)
+                {
+                    TempData["SalaryError"] = $"Deductions exceed salary for the entered days for {salary.Employee.FullName}. Adjust deductions using Update. No slips were generated.";
+                    return Back();
+                }
+                pending.Add(newSlip);
             }
             if (pending.Count == 0)
             {
@@ -980,6 +987,9 @@ namespace Vertex_ERP.Controllers
                 model.EmployeeId = employee.EmployeeCode;
                 model.CompanyCode = employee.CompanyCode ?? (employee.EmployeeCode.StartsWith("VAS") ? "VAS" : employee.EmployeeCode.StartsWith("VPC") ? "VPC" : string.Empty);
                 model.JoiningDate = employee.JoiningDate;
+                model.OvertimeEnabled = employee.OvertimeEnabled;
+                model.ShiftStartTime = employee.ShiftStartTime;
+                model.ShiftEndTime = employee.ShiftEndTime;
             }
             ApplyEmployeeExtraDrafts(model);
             return View(await PopulateManagersAsync(model));
@@ -1181,6 +1191,9 @@ namespace Vertex_ERP.Controllers
                     DepartmentId = selectedDepartment.Id,
                     Designation = model.Designation.Trim(),
                     JoiningDate = model.JoiningDate,
+                    OvertimeEnabled = model.OvertimeEnabled,
+                    ShiftStartTime = model.ShiftStartTime!.Value,
+                    ShiftEndTime = model.ShiftEndTime!.Value,
                     EmploymentType = Clean(model.EmploymentType) ?? "Permanent",
                     ReportingManagerId = model.ReportingManagerId,
                     WorkLocation = Clean(model.WorkLocation),

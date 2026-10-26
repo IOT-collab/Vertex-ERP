@@ -618,6 +618,9 @@ public class EmployeeController : Controller
         employee.PinCode = Clean(model.PinCode);
         employee.WorkLocation = Clean(model.WorkLocation);
         employee.JoiningDate = model.JoiningDate;
+        employee.OvertimeEnabled = model.OvertimeEnabled;
+        employee.ShiftStartTime = model.ShiftStartTime!.Value;
+        employee.ShiftEndTime = model.ShiftEndTime!.Value;
         employee.Department = model.Department.Trim();
         employee.DepartmentId = model.DepartmentId;
         employee.Designation = model.Designation.Trim();
@@ -655,6 +658,9 @@ public class EmployeeController : Controller
         WorkLocation = employee.WorkLocation,
         PhotoPath = employee.PhotoPath,
         JoiningDate = employee.JoiningDate,
+        OvertimeEnabled = employee.OvertimeEnabled,
+        ShiftStartTime = employee.ShiftStartTime,
+        ShiftEndTime = employee.ShiftEndTime,
         Department = employee.Department,
         DepartmentId = employee.DepartmentId,
         Designation = employee.Designation,

@@ -17,6 +17,6 @@
         <div class="reports-form-actions"><button class="report-primary" type="submit">Save project</button></div>
     </form>
     <section class="reports-results"><h2>Saved projects</h2><div class="reports-table-scroll"><table><thead><tr><th>Code</th><th>Project</th><th>Manager</th><th>Dates</th><th>Status</th></tr></thead><tbody>
-    @foreach (VertexERP.Models.ErpProject project in ViewBag.Projects) { <tr><td>@project.ProjectCode</td><td>@project.ProjectName</td><td>@(project.Manager?.FullName ?? "Not assigned")</td><td>@project.StartDate.ToString("dd MMM yyyy") – @project.EndDate.ToString("dd MMM yyyy")</td><td>@project.Status</td></tr> }
+    @foreach (VertexERP.Models.ErpProject project in ViewBag.Projects) { <tr><td data-no-localize>@project.ProjectCode</td><td data-no-localize>@project.ProjectName</td><td>@(project.Manager?.FullName ?? "Not assigned")</td><td>@project.StartDate.ToString("dd MMM yyyy") – @project.EndDate.ToString("dd MMM yyyy")</td><td>@project.Status</td></tr> }
     </tbody></table></div></section>
 </div>

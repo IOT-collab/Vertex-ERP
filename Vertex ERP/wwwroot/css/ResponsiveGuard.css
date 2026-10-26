@@ -1,0 +1,84 @@
+/* Screen-only layout rules. Do not change printed letters, invoices or PDFs. */
+@media screen {
+    body.erp-shell, body.erp-document-shell { width: 100%; max-width: 100%; }
+    body.erp-shell .layout, body.erp-shell .main-content { min-width: 0; max-width: 100%; }
+    body.erp-shell .page-content { min-width: 0; min-height: 0; overscroll-behavior: contain; }
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) *,
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) *::before,
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) *::after { box-sizing: border-box; }
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) :is(input, select, textarea) { min-width: 0; max-width: 100%; }
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) :is(fieldset, form, article, section) { min-width: 0; }
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) :is(img, video, canvas, iframe) { max-width: 100%; }
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) :is(h1, h2, h3, p, label, dd, strong) { overflow-wrap: anywhere; }
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) :is(.table-responsive, .table-responsive-container, .table-wrapper, .table-wrap, .table-container, .bio-table-wrap, .clear-table-wrap, .portal-table-wrap, .attendance-history-panel, .pw-table-wrap, .kanban-board, .gantt-container, .timeline-wrapper) {
+        min-width: 0; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    }
+    body.erp-shell .sidebar { max-width: min(320px, 88vw); }
+    body.erp-shell .sidebar-menu { min-height: 0; overscroll-behavior: contain; }
+    body.erp-shell .sidebar-menu a span { min-width: 0; overflow-wrap: anywhere; white-space: normal; }
+    body.erp-shell .topbar-left, body.erp-shell .profile { min-width: 0; }
+    body.erp-shell .topbar :is(.hamburger-menu-btn, .logout-btn) { flex-shrink: 0; }
+    :is(body.erp-shell, body.erp-document-shell) :is(dialog, .modal-content, .report-modal, .leave-dialog) {
+        max-width: calc(100vw - 24px) !important;
+        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px) !important;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+    :is(body.erp-shell, body.erp-document-shell) :is(dialog, .modal-content, .report-modal, .leave-dialog) :is(input, select, textarea) { min-width: 0; max-width: 100%; }
+    body.erp-shell .ai-assistant .ai-panel { max-width: calc(100vw - 24px); max-height: calc(100dvh - 110px); }
+    body.erp-shell .ai-assistant .ai-messages { min-height: 0; overflow-y: auto; }
+}
+@media screen and (max-width: 1024px) {
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) :is(.content-grid, .main-content-grid, .vault-layout-grid, .location-grid, .tracking-workspace, .profile-cover) { grid-template-columns: minmax(0, 1fr) !important; }
+    body.erp-shell .location-page .employee-sidebar { position: static; height: auto; max-height: 340px; }
+    body.erp-shell .location-page .location-grid > *, body.erp-shell .tracking-workspace > * { min-width: 0; max-width: 100%; }
+    body.erp-shell .tracking-workspace .route-details { grid-column: auto; }
+}
+@media screen and (max-width: 768px) {
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) :is(.employee-section header, .portal-title, .bio-header, .manual-hero, .clear-page-header, .issues-hero, .tracking-header, .feedback-heading) {
+        flex-wrap: wrap !important; gap: 12px; align-items: flex-start;
+    }
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) :is(.form-row, .form-row.triple-row, .form-grid, .bio-form-grid, .bio-map-form, .bank-form, .manual-grid.two, .manual-grid.three, .employee-biometric-link-row, .profile-edit-grid, .leave-form, .date-fields) {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) :is(.form-row, .form-grid, .bio-form-grid, .bank-form, .manual-grid, .leave-form) > * { min-width: 0; max-width: 100%; }
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) :is(.decision-actions, .workflow-actions, .request-actions, .bank-actions, .bio-form-actions, .form-actions, .header-actions, .table-controls, .filter-bar, .toolbar, .feedback-search, .attendance-filters) { flex-wrap: wrap !important; max-width: 100%; gap: 8px; }
+    body.erp-shell .clear-response-form { min-width: 0; width: 100%; flex-wrap: wrap; gap: 6px; }
+    body.erp-shell .clear-response-form :is(input, select, button) { min-width: 0; border-radius: 8px; }
+    body.erp-shell .clear-response-form input { flex: 1 1 180px; }
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) table:not(.attendance-history) { min-width: 0 !important; max-width: 100%; overflow-x: auto; }
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) :is(input[type="date"], input[type="datetime-local"], input[type="time"]) { min-width: 0 !important; max-width: 100%; }
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) :is(button, .btn) { white-space: normal; }
+    body.erp-shell .tracking-page .tracking-grid, body.erp-shell .location-page .punch-grid { grid-template-columns: minmax(0, 1fr) !important; }
+    body.erp-shell .employee-section, body.erp-shell .bio-page { padding-inline: 12px; }
+}
+@media screen and (max-width: 600px) {
+    body.erp-shell .page-content .attendance-history { min-width: 0 !important; }
+    body.erp-shell .page-content .attendance-history td { white-space: normal !important; overflow-wrap: anywhere; gap: 12px; }
+    body.erp-shell .page-content .attendance-history td::before { flex: 0 0 38%; }
+    :is(body.erp-shell .page-content, body.erp-document-shell > .container) :is(.profile-grid, .profile-grid-four, .profile-quick, .profile-sections, .ce-details, .bio-summary, .ch-summary, .bank-grid, .document-employee-grid, .document-type-grid, .issue-stats, .ticket-people, .ticket-content, .issue-filters, .pw-form, .pw-members, .pw-cards) { grid-template-columns: minmax(0, 1fr) !important; }
+    body.erp-shell :is(.profile-wide, .pw-wide, .bio-wide, .bio-checkbox) { grid-column: 1 / -1 !important; }
+    body.erp-shell .workflow-nav-actions, body.erp-shell .employee-extra-actions { width: 100%; margin-left: 0; flex-wrap: wrap; }
+    body.erp-shell :is(.workflow-nav-actions, .employee-extra-actions) a { flex: 1 1 160px; justify-content: center; white-space: normal; }
+    body.erp-shell .clear-summary { flex-wrap: wrap; }
+    body.erp-shell .clear-summary span { flex: 1 1 130px; }
+    body.erp-shell .location-page .profile-top { flex-wrap: wrap; }
+    body.erp-shell .location-page .punch-row { flex-wrap: wrap; }
+    body.erp-shell .tracking-page :is(.tracking-setup, .tracking-top, .scan-head) { align-items: stretch; flex-direction: column; }
+    body.erp-shell .tracking-page .official-link { min-width: 0; width: 100%; white-space: normal; text-align: center; }
+}
+@media screen and (max-width: 420px) {
+    body.erp-shell .topbar { padding-inline: 10px; gap: 8px; }
+    body.erp-shell .topbar-left, body.erp-shell .profile { gap: 8px; }
+    body.erp-shell .topbar .topbar-brand { max-width: 24vw; }
+    body.erp-shell .topbar .profile-text { max-width: 22vw; font-size: 11px; }
+    body.erp-shell .topbar .logout-btn { min-height: 36px; padding: 7px 9px; }
+    body.erp-shell .page-content :is(.stats-grid, .stats-row, .metrics-grid, .portal-stats, .workforce-stats, .employee-summary, .tracking-stats, .pw-stats) { grid-template-columns: minmax(0, 1fr) !important; }
+    body.erp-shell .attendance-times, body.erp-shell .live-attendance-details { grid-template-columns: minmax(0, 1fr); }
+}
+@media screen and (max-height: 500px) and (max-width: 900px) {
+    body.erp-shell .ai-assistant .ai-panel { position: fixed; inset: 12px 12px auto auto; height: calc(100dvh - 24px); max-height: calc(100dvh - 24px); }
+    body.erp-shell .ai-assistant .ai-panel-header { max-height: 30dvh; overflow-y: auto; flex-shrink: 0; }
+    body.erp-shell .ai-assistant .ai-file-note { max-height: 20dvh; overflow-y: auto; }
+}
