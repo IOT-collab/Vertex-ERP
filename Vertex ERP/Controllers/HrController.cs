@@ -84,7 +84,7 @@ namespace Vertex_ERP.Controllers
             var ids = employees.Select(x => x.Id).ToList();
             var salaries = await _dbContext.EmployeeSalaryDetails.AsNoTracking().Where(x => ids.Contains(x.EmployeeId) && x.IsActive).ToDictionaryAsync(x => x.EmployeeId);
             var slips = await _dbContext.GeneratedSalarySlips.AsNoTracking().Where(x => ids.Contains(x.EmployeeId) && x.Year == selectedYear && x.Month == selectedMonth).ToDictionaryAsync(x => x.EmployeeId);
-            var leaves = await _dbContext.LeaveRequests.AsNoTracking().Where(x => ids.Contains(x.EmployeeId) && x.Status == "Approved" && x.FromDate <= periodEnd && x.ToDate >= periodStart).ToListAsync();
+            var leaves = await _dbContext.LeaveRequests.AsNoTracking().Where(x => ids.Contains(x.EmployeeId) && !x.IsExtraFacility && x.Status == "Approved" && x.FromDate <= periodEnd && x.ToDate >= periodStart).ToListAsync();
             var rows = employees.Where(x => salaries.ContainsKey(x.Id) || slips.ContainsKey(x.Id)).Select(x =>
             {
                 salaries.TryGetValue(x.Id, out var salary);
@@ -141,7 +141,7 @@ namespace Vertex_ERP.Controllers
                 .Where(x => ids.Contains(x.EmployeeId) && x.Year == year && x.Month == month).Select(x => x.EmployeeId).ToListAsync();
             var start = new DateOnly(year, month, 1);
             var end = start.AddMonths(1).AddDays(-1);
-            var leaves = await _dbContext.LeaveRequests.AsNoTracking().Where(x => ids.Contains(x.EmployeeId) && x.Status == "Approved" && x.FromDate <= end && x.ToDate >= start).ToListAsync();
+            var leaves = await _dbContext.LeaveRequests.AsNoTracking().Where(x => ids.Contains(x.EmployeeId) && !x.IsExtraFacility && x.Status == "Approved" && x.FromDate <= end && x.ToDate >= start).ToListAsync();
             var pending = new List<GeneratedSalarySlip>();
             foreach (var salary in salaries.Where(x => !existing.Contains(x.EmployeeId)))
             {
@@ -986,6 +986,7 @@ namespace Vertex_ERP.Controllers
                 model.PendingBiometricEmployeeId = employee.Id;
                 model.EmployeeId = employee.EmployeeCode;
                 model.CompanyCode = employee.CompanyCode ?? (employee.EmployeeCode.StartsWith("VAS") ? "VAS" : employee.EmployeeCode.StartsWith("VPC") ? "VPC" : string.Empty);
+                model.EmployeeCategory = employee.EmployeeCategory;
                 model.JoiningDate = employee.JoiningDate;
                 model.OvertimeEnabled = employee.OvertimeEnabled;
                 model.ShiftStartTime = employee.ShiftStartTime;
@@ -1195,6 +1196,7 @@ namespace Vertex_ERP.Controllers
                     ShiftStartTime = model.ShiftStartTime!.Value,
                     ShiftEndTime = model.ShiftEndTime!.Value,
                     EmploymentType = Clean(model.EmploymentType) ?? "Permanent",
+                    EmployeeCategory = Clean(model.EmployeeCategory),
                     ReportingManagerId = model.ReportingManagerId,
                     WorkLocation = Clean(model.WorkLocation),
                     Address = Clean(model.Address),
@@ -1220,6 +1222,8 @@ namespace Vertex_ERP.Controllers
                     // Update the existing row so device mappings and attendance keep the same key.
                     employee.Id = pendingEmployee.Id;
 
+                    employee.CanManageManualAttendance = pendingEmployee.CanManageManualAttendance;
+                    employee.CanReceiveExpenseClaims = pendingEmployee.CanReceiveExpenseClaims;
                     employee.CreatedDate = pendingEmployee.CreatedDate;
                     employee.PhotoPath ??= pendingEmployee.PhotoPath;
                     employee.UpdatedDate = DateTime.UtcNow;

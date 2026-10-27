@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
@@ -199,6 +199,11 @@ builder.Services
             var db = context.HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
             var currentUser = await db.AppUsers.AsNoTracking()
                 .SingleOrDefaultAsync(user => user.Id == userId && user.IsActive);
+            if (currentUser?.EmployeeId is int linkedEmployeeId)
+            {
+                var linkedEmployee = await db.Employees.AsNoTracking().SingleOrDefaultAsync(employee => employee.Id == linkedEmployeeId);
+                if (linkedEmployee != null) currentUser.FullName = linkedEmployee.FullName;
+            }
             var currentRole = currentUser == null ? null : await AccountRoleService.ResolveAsync(db, currentUser);
             if (currentUser == null || currentRole == null ||
                 (currentUser.PasswordChangedAtUtc.HasValue && context.Properties.IssuedUtc.HasValue &&
@@ -212,6 +217,7 @@ builder.Services
             var cookieRole = context.Principal?.FindFirstValue(ClaimTypes.Role);
             var cookieName = context.Principal?.FindFirstValue(ClaimTypes.Name);
             var cookieUsername = context.Principal?.FindFirstValue("username");
+            context.HttpContext.Session.SetString("fullName", currentUser.FullName);
             if (cookieRole == currentRole && cookieName == currentUser.FullName && cookieUsername == currentUser.Username)
                 return;
 
@@ -232,7 +238,10 @@ builder.Services
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddScoped<ManualAttendanceAccess>();
+builder.Services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, ManualAttendanceOperatorHandler>();
+builder.Services.AddAuthorization(options => options.AddPolicy(ManualAttendanceAccess.Policy,
+    policy => policy.RequireAuthenticatedUser().AddRequirements(new ManualAttendanceOperatorRequirement())));
 
 // ============================================================
 // POSTGRESQL / ENTITY FRAMEWORK CORE
@@ -328,6 +337,23 @@ app.UseSession();
 // ============================================================
 
 app.UseAuthentication();
+
+// Employee pages and report downloads must be rebuilt from current master data.
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        context.Response.OnStarting(() =>
+        {
+            context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+            context.Response.Headers.Pragma = "no-cache";
+            context.Response.Headers.Expires = "0";
+            return Task.CompletedTask;
+        });
+    }
+    await next();
+});
+
 
 // Account-scoped preference: shared computers must not inherit another user's language.
 app.UseRequestLocalization(new RequestLocalizationOptions()

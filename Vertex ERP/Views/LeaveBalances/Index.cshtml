@@ -21,7 +21,7 @@
     <tr><td><strong data-no-localize>@employee.FullName</strong><small data-no-localize>@employee.EmployeeCode · @employee.Department</small>@if(!employee.IsActive){<small>Inactive</small>}</td>
     @foreach(var category in ManualLeavePage.Categories){
         var balance = saved.GetValueOrDefault((employee.Id, category));
-        <td>@if(balance == null){<span class="manual-unfilled">Not filled</span>}else if(balance.Revision==0){<div>Approved @N(balance.ApprovedDays)</div><div>Pending @N(balance.PendingDays)</div><span class="manual-unfilled">Entitlement not filled</span>}else{@if(category is "EL" or "EW"){<div>Carry forward <strong>@N(balance.OpeningDays)</strong></div>}<div>Used <strong>@N(balance.EffectiveUsedDays)</strong></div><div class="manual-available">Available <strong>@N(balance.AvailableDays)</strong></div>}</td>
+        <td>@if(balance == null){<span class="manual-unfilled">Not filled</span>}else if(balance.Revision==0){<div>Approved @N(balance.ApprovedDays)</div><div>Pending @N(balance.PendingDays)</div><span class="manual-unfilled">Entitlement not filled</span>}else{@if(Model.CalculatedEmployeeIds.Contains(employee.Id)){<div>Carry forward <strong>@N(balance.OpeningDays)</strong></div>}<div>Used <strong>@N(balance.EffectiveUsedDays)</strong></div><div class="manual-available">Available <strong>@N(balance.AvailableDays)</strong></div>}</td>
     }
     <td><a class="calculate-leave-button" asp-action="Calculate" asp-route-employeeId="@employee.Id" asp-route-year="@Model.Year" aria-label="Calculate leave for @employee.FullName for @Model.Year"><i class="fa-solid fa-calculator" aria-hidden="true"></i><span>Calculate Leave</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a></td></tr>
 }

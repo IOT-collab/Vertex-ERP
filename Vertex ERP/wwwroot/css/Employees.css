@@ -2,14 +2,14 @@
    DARK THEME VARIABLES & BASE CONTAINER
    ========================================================================== */
 :root {
-    --emp-bg: #0b0e14;
-    --emp-card-bg: #151921;
-    --emp-card-inner: #0d1117;
-    --emp-border: #262c36;
-    --emp-border-light: #21262d;
-    --emp-text-main: #f0f6fc;
-    --emp-text-muted: #8b949e;
-    --emp-text-sub: #c9d1d9;
+    --emp-bg: var(--erp-bg, #0b0e14);
+    --emp-card-bg: var(--erp-surface, #151921);
+    --emp-card-inner: var(--erp-bg, #0d1117);
+    --emp-border: var(--erp-border, #262c36);
+    --emp-border-light: var(--erp-border, #21262d);
+    --emp-text-main: var(--erp-text, #f0f6fc);
+    --emp-text-muted: var(--erp-text-muted, #8b949e);
+    --emp-text-sub: var(--erp-text, #c9d1d9);
     --emp-blue: #1f6beb;
     --emp-blue-hover: #388bfd;
     --emp-green: #238636;
@@ -79,7 +79,7 @@
     justify-content: center;
     font-size: 22px;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--theme-accent-text, #ffffff);
     flex-shrink: 0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
@@ -178,7 +178,7 @@
 
 .emp-v2-btn-green {
     background: var(--emp-green);
-    color: #ffffff;
+    color: var(--theme-accent-text, #ffffff);
 }
 
     .emp-v2-btn-green:hover {
@@ -188,7 +188,7 @@
 
 .emp-v2-btn-blue {
     background: var(--emp-blue);
-    color: #ffffff;
+    color: var(--theme-accent-text, #ffffff);
 }
 
     .emp-v2-btn-blue:hover {
@@ -197,14 +197,14 @@
     }
 
 .emp-v2-btn-dark {
-    background: #21262d;
+    background: var(--erp-surface, #21262d);
     color: var(--emp-text-sub);
     border-color: var(--emp-border-light);
 }
 
     .emp-v2-btn-dark:hover {
-        background: #30363d;
-        color: #ffffff;
+        background: var(--erp-surface-soft, #30363d);
+        color: var(--erp-text, #ffffff);
     }
 
 .emp-v2-btn-icon {
@@ -386,7 +386,7 @@
 }
 
     .filter-btn.active {
-        background: #21262d;
+        background: var(--erp-surface, #21262d);
         color: var(--emp-text-main);
         font-weight: 600;
     }
@@ -400,7 +400,7 @@
 .emp-v2-task-item {
     background: var(--emp-card-inner);
     border: 1px solid var(--emp-border-light);
-    border-left: 4px solid #30363d;
+    border-left: 4px solid var(--erp-border, #30363d);
     border-radius: 8px;
     padding: 12px 14px;
     display: flex;
@@ -575,7 +575,7 @@
         gap: 10px;
         font-size: 12px;
         padding: 8px 0;
-        border-bottom: 1px solid #1c212a;
+        border-bottom: 1px solid var(--erp-border, #1c212a);
     }
 
         .emp-v2-info-list li:last-child {
@@ -682,7 +682,7 @@
 .emp-v2-progress-track {
     width: 100%;
     height: 6px;
-    background: #21262d;
+    background: var(--erp-surface, #21262d);
     border-radius: 4px;
     overflow: hidden;
 }

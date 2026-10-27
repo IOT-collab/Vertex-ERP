@@ -17,11 +17,11 @@ public sealed class LeaveBalancesController(ApplicationDbContext db) : Controlle
         if (employee == null) return NotFound();
         var saved = await db.LeaveCalculations.AsNoTracking().SingleOrDefaultAsync(x => x.EmployeeId == employeeId && x.Year == year);
         var input = new LeaveCalculationEdit { EmployeeId = employeeId, Year = year,
-            Revision = saved?.Revision ?? 0, OpeningEL = saved?.OpeningEL ?? 0, OpeningEW = saved?.OpeningEW ?? 0,
+            Revision = saved?.Revision ?? 0, OpeningEL = saved?.OpeningEL ?? 0, OpeningEW = saved?.OpeningEW ?? 0, OpeningCL = saved?.OpeningCL ?? 0, OpeningML = saved?.OpeningML ?? 0,
             Months = saved == null ? Enumerable.Range(1, 12).Select(m => new LeaveMonth { Month = m }).ToList() : JsonSerializer.Deserialize<List<LeaveMonth>>(saved.MonthsJson)! };
         await Populate(input);
         input.BalanceRevisions = ManualLeavePage.Categories.Select(c => input.Balances.FirstOrDefault(x => x.Category == c)?.Revision ?? 0).ToList();
-        if (saved == null) { input.OpeningEL = Math.Max(0, input.PreviousEL ?? 0); input.OpeningEW = Math.Max(0, input.PreviousEW ?? 0); }
+        if (saved == null) { input.OpeningEL = Math.Max(0, input.PreviousEL ?? 0); input.OpeningEW = Math.Max(0, input.PreviousEW ?? 0); input.OpeningCL = Math.Max(0, input.PreviousCL ?? 0); input.OpeningML = Math.Max(0, input.PreviousML ?? 0); }
         return View(input);
     }
 
@@ -35,7 +35,7 @@ public sealed class LeaveBalancesController(ApplicationDbContext db) : Controlle
             if (month.WorkingDays > DateTime.DaysInMonth(input.Year, month.Month)) ModelState.AddModelError("", "Working days cannot exceed calendar days in the month.");
             if (new[] { month.WorkingDays, month.AdjustedEL, month.AdjustedCL, month.AdjustedML, month.EarnedEW, month.AdjustedEW }.Any(x => x % .5m != 0)) ModelState.AddModelError("", "Use whole or half days.");
         }
-        if (input.OpeningEL % .5m != 0 || input.OpeningEW % .5m != 0) ModelState.AddModelError("", "Opening balances must use whole or half days.");
+        if (input.OpeningEL % .5m != 0 || input.OpeningEW % .5m != 0 || input.OpeningCL % .5m != 0 || input.OpeningML % .5m != 0) ModelState.AddModelError("", "Opening balances must use whole or half days.");
         var saved = await db.LeaveCalculations.SingleOrDefaultAsync(x => x.EmployeeId == input.EmployeeId && x.Year == input.Year);
         var balances = await db.ManualLeaveBalances.Where(x => x.EmployeeId == input.EmployeeId && x.Year == input.Year).ToListAsync();
         if (saved == null && balances.Count > 0 && !input.ConfirmReplaceManual)
@@ -45,14 +45,14 @@ public sealed class LeaveBalancesController(ApplicationDbContext db) : Controlle
         if (!ModelState.IsValid) { await Populate(input); return View(input); }
         if (saved == null) { saved = new LeaveCalculation { EmployeeId = input.EmployeeId, Year = input.Year }; db.LeaveCalculations.Add(saved); }
         saved.MonthsJson = JsonSerializer.Serialize(input.Months.OrderBy(x => x.Month));
-        saved.OpeningEL = input.OpeningEL; saved.OpeningEW = input.OpeningEW;
+        saved.OpeningEL = input.OpeningEL; saved.OpeningEW = input.OpeningEW; saved.OpeningCL = input.OpeningCL; saved.OpeningML = input.OpeningML;
         saved.Revision++; saved.UpdatedAtUtc = DateTime.UtcNow;
         foreach (var category in ManualLeavePage.Categories)
         {
             var balance = balances.FirstOrDefault(x => x.Category == category);
             if (balance == null) { balance = new ManualLeaveBalance { EmployeeId = input.EmployeeId, Year = input.Year, Category = category }; db.ManualLeaveBalances.Add(balance); }
             var result = LeaveBalanceCalculator.Calculate(input.Months, category);
-            balance.TotalDays = result.Earned + (category == "EL" ? input.OpeningEL : category == "EW" ? input.OpeningEW : 0);
+            balance.TotalDays = result.Earned + LeaveBalanceCalculator.Opening(saved, category);
             balance.UsedDays = result.Adjustment;
             balance.Revision++; balance.UpdatedAtUtc = DateTime.UtcNow;
         }
@@ -74,6 +74,8 @@ public sealed class LeaveBalancesController(ApplicationDbContext db) : Controlle
         foreach (var category in ManualLeavePage.Categories.Where(c => input.Balances.All(x => x.Category != c))) input.Balances.Add(new ManualLeaveBalance { EmployeeId = input.EmployeeId, Year = input.Year, Category = category });
         LeaveBalanceCalculator.ApplyRequests(input.Balances, requests);
         input.PreviousEL = balances.FirstOrDefault(x => x.Year == input.Year - 1 && x.Category == "EL")?.AvailableDays;
+        input.PreviousCL = balances.FirstOrDefault(x => x.Year == input.Year - 1 && x.Category == "CL")?.AvailableDays;
+        input.PreviousML = balances.FirstOrDefault(x => x.Year == input.Year - 1 && x.Category == "ML")?.AvailableDays;
         input.PreviousEW = balances.FirstOrDefault(x => x.Year == input.Year - 1 && x.Category == "EW")?.AvailableDays;
     }
     [HttpGet]
@@ -148,7 +150,7 @@ public sealed class LeaveBalancesController(ApplicationDbContext db) : Controlle
         LeaveBalanceCalculator.IncludeUnfilled(balances, requests, year);
         var calculations = await db.LeaveCalculations.AsNoTracking().Where(x => x.Year == year).ToDictionaryAsync(x => x.EmployeeId);
         foreach (var balance in balances)
-            balance.OpeningDays = balance.Category == "EL" ? calculations.GetValueOrDefault(balance.EmployeeId)?.OpeningEL ?? 0 : balance.Category == "EW" ? calculations.GetValueOrDefault(balance.EmployeeId)?.OpeningEW ?? 0 : 0;
+            balance.OpeningDays = LeaveBalanceCalculator.Opening(calculations.GetValueOrDefault(balance.EmployeeId), balance.Category);
         return new ManualLeavePage { Year = year, Search = search, Draft = draft,
             Employees = await query.OrderBy(x => x.FullName).ToListAsync(),
             CalculatedEmployeeIds = calculations.Keys.ToList(),

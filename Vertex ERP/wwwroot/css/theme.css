@@ -305,3 +305,31 @@ html[data-theme] .feedback-card .feedback-body { color: var(--erp-text) !importa
 .request-actions form { margin: 0; }
 .request-actions :is(a, button) { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 html[data-theme] .request-actions .btn-secondary { background: var(--erp-surface-soft) !important; color: var(--erp-text) !important; border: 1px solid var(--erp-border) !important; }
+
+/* Components loaded after the layout share the account palette, including native dialogs. */
+html[data-theme] {
+    --bg-primary: var(--erp-bg);
+    --bg-secondary: var(--erp-surface);
+    --bg-tertiary: var(--erp-surface-soft);
+    --text-primary: var(--erp-text);
+    --text-secondary: var(--erp-text-muted);
+    --text-muted: var(--erp-text-muted);
+    --border-color: var(--erp-border);
+}
+html[data-theme] dialog,
+html[data-theme] .page-content :is(option, optgroup) {
+    background-color: var(--erp-surface);
+    color: var(--erp-text);
+    border-color: var(--erp-border);
+}
+html[data-theme] :is(dialog, .report-modal, .modal-content, .facility-dialog, .attendance-export-card) :is(input, select, textarea) {
+    background-color: var(--erp-surface) !important;
+    color: var(--erp-text) !important;
+    border-color: var(--erp-border) !important;
+    accent-color: var(--erp-primary);
+}
+html[data-theme] :is(input, textarea)::placeholder { color: var(--erp-text-muted); opacity: 1; }
+html[data-theme] .page-content :is(.validation-summary, .validation-summary-errors, .field-validation-error, .manual-error, .feedback-error) { color: var(--erp-danger) !important; }
+@media print {
+    html[data-theme] { --erp-bg: #fff !important; --erp-surface: #fff !important; --erp-surface-soft: #f1f5f9 !important; --erp-text: #172033 !important; --erp-text-muted: #52627a !important; --erp-border: #dce4ef !important; color-scheme: light !important; }
+}

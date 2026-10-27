@@ -1,7 +1,7 @@
-﻿/* Base Theme Setup */
+/* Base Theme Setup */
 .payroll-dashboard-wrapper {
-    background-color: #0b0f19;
-    color: #e2e8f0;
+    background-color: var(--erp-bg, #0b0f19);
+    color: var(--erp-text, #e2e8f0);
     min-height: 100vh;
     padding: 2rem;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -32,9 +32,9 @@
 }
 
 .back-arrow-btn {
-    background: #111827;
-    border: 1px solid #1f293d;
-    color: #cbd5e1;
+    background: var(--erp-surface, #111827);
+    border: 1px solid var(--erp-border, #1f293d);
+    color: var(--erp-text, #cbd5e1);
     width: 42px;
     height: 42px;
     border-radius: 12px;
@@ -52,20 +52,20 @@
     }
 
     .back-arrow-btn:hover {
-        background: #1e293b;
-        color: #ffffff;
-        border-color: #334155;
+        background: var(--erp-surface-soft, #1e293b);
+        color: var(--erp-text, #ffffff);
+        border-color: var(--erp-border, #334155);
     }
 
 .dashboard-header h2 {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
     margin: 0;
 }
 
 .dashboard-header p {
-    color: #94a3b8;
+    color: var(--erp-text-muted, #94a3b8);
     margin: 0.3rem 0 0 0;
     font-size: 0.95rem;
 }
@@ -79,8 +79,8 @@
 }
 
 .stat-card {
-    background: #111827;
-    border: 1px solid #1f293d;
+    background: var(--erp-surface, #111827);
+    border: 1px solid var(--erp-border, #1f293d);
     border-radius: 16px;
     padding: 1.25rem;
     display: flex;
@@ -91,7 +91,7 @@
 
     .stat-card.accent-green {
         border-color: rgba(16, 185, 129, 0.3);
-        background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, #111827 100%);
+        background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, var(--erp-surface, #111827) 100%);
     }
 
 .stat-icon {
@@ -116,12 +116,12 @@
 
 .icon-gross {
     background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
+    color: var(--erp-primary, #60a5fa);
 }
 
 .icon-deduction {
     background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
+    color: var(--erp-warning, #fbbf24);
 }
 
 .icon-ytd {
@@ -137,7 +137,7 @@
 
 .stat-label {
     font-size: 0.8rem;
-    color: #94a3b8;
+    color: var(--erp-text-muted, #94a3b8);
     margin-bottom: 0.25rem;
     white-space: nowrap;
     overflow: hidden;
@@ -147,13 +147,13 @@
 .stat-value {
     font-size: 1.4rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
     word-break: break-word;
 }
 
 .stat-meta {
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
     margin-top: 0.2rem;
 }
 
@@ -167,8 +167,8 @@
 
 /* Glassmorphism Cards */
 .glass-card {
-    background: #111827;
-    border: 1px solid #1f293d;
+    background: var(--erp-surface, #111827);
+    border: 1px solid var(--erp-border, #1f293d);
     border-radius: 18px;
     padding: 1.5rem;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
@@ -187,7 +187,7 @@
     .card-header h3 {
         margin: 0;
         font-size: 1.15rem;
-        color: #f8fafc;
+        color: var(--erp-text, #f8fafc);
         font-weight: 600;
     }
 
@@ -219,15 +219,15 @@
         display: flex;
         justify-content: space-between;
         font-size: 0.88rem;
-        color: #cbd5e1;
+        color: var(--erp-text, #cbd5e1);
         padding-bottom: 0.5rem;
-        border-bottom: 1px dashed #1e293b;
+        border-bottom: 1px dashed var(--erp-border, #1e293b);
         gap: 1rem;
     }
 
         .breakdown-list li.col-total {
             border-bottom: none;
-            border-top: 1px solid #334155;
+            border-top: 1px solid var(--erp-border, #334155);
             padding-top: 0.75rem;
             font-weight: 700;
         }
@@ -245,7 +245,7 @@
 }
 
     .net-payout-banner span {
-        color: #94a3b8;
+        color: var(--erp-text-muted, #94a3b8);
         font-size: 0.95rem;
         font-weight: 500;
     }
@@ -265,10 +265,10 @@
 }
 
 .detail-group {
-    background: #0f172a;
+    background: var(--erp-surface, #0f172a);
     padding: 0.75rem 1rem;
     border-radius: 10px;
-    border: 1px solid #1e293b;
+    border: 1px solid var(--erp-border, #1e293b);
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
@@ -276,12 +276,12 @@
 
     .detail-group label {
         font-size: 0.75rem;
-        color: #64748b;
+        color: var(--erp-text-muted, #64748b);
     }
 
     .detail-group span {
         font-size: 0.9rem;
-        color: #f8fafc;
+        color: var(--erp-text, #f8fafc);
         font-weight: 600;
         word-break: break-all;
     }
@@ -292,8 +292,8 @@
 }
 
 .tax-declaration-banner {
-    background: #0f172a;
-    border: 1px solid #1e293b;
+    background: var(--erp-surface, #0f172a);
+    border: 1px solid var(--erp-border, #1e293b);
     border-radius: 12px;
     padding: 1rem;
     display: flex;
@@ -305,21 +305,21 @@
 
 .tax-info h5 {
     margin: 0;
-    color: #f8fafc;
+    color: var(--erp-text, #f8fafc);
     font-size: 0.9rem;
 }
 
 .tax-info p {
     margin: 0.2rem 0 0 0;
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
     font-size: 0.75rem;
 }
 
 /* Buttons & Badges */
 .btn-secondary-glow {
-    background: #1e293b;
-    color: #ffffff;
-    border: 1px solid #334155;
+    background: var(--erp-surface-soft, #1e293b);
+    color: var(--erp-text, #ffffff);
+    border: 1px solid var(--erp-border, #334155);
     padding: 0.65rem 1.25rem;
     border-radius: 10px;
     font-weight: 600;
@@ -337,12 +337,12 @@
     }
 
     .btn-secondary-glow:hover {
-        background: #334155;
+        background: var(--erp-surface-soft, #334155);
     }
 
 .btn-sm-primary {
-    background: #2563eb;
-    color: #ffffff;
+    background: var(--erp-primary, var(--erp-primary, #2563eb));
+    color: var(--theme-accent-text, #ffffff);
     border: none;
     padding: 0.5rem 0.85rem;
     border-radius: 8px;
@@ -352,9 +352,9 @@
 }
 
 .btn-action {
-    background: #0f172a;
-    color: #60a5fa;
-    border: 1px solid #1e293b;
+    background: var(--erp-surface, #0f172a);
+    color: var(--erp-primary, #60a5fa);
+    border: 1px solid var(--erp-border, #1e293b);
     padding: 0.45rem 0.85rem;
     border-radius: 8px;
     font-size: 0.8rem;
@@ -373,8 +373,8 @@
     }
 
     .btn-action:hover {
-        background: #2563eb;
-        color: #fff;
+        background: var(--erp-primary, var(--erp-primary, #2563eb));
+        color: var(--theme-accent-text, #fff);
         border-color: #2563eb;
     }
 
@@ -387,7 +387,7 @@
 }
 
 .text-amber {
-    color: #fbbf24 !important;
+    color: var(--erp-warning, #fbbf24) !important;
 }
 
 .text-right {
@@ -396,7 +396,7 @@
 
 .badge-month {
     background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
+    color: var(--erp-primary, #60a5fa);
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 0.75rem;
@@ -425,9 +425,9 @@
 }
 
 .year-select {
-    background: #0f172a;
-    color: #cbd5e1;
-    border: 1px solid #334155;
+    background: var(--erp-surface, #0f172a);
+    color: var(--erp-text, #cbd5e1);
+    border: 1px solid var(--erp-border, #334155);
     padding: 0.45rem 0.85rem;
     border-radius: 8px;
     font-size: 0.85rem;
@@ -444,17 +444,17 @@
 }
 
     .modern-table th {
-        background: #0f172a;
-        color: #94a3b8;
+        background: var(--erp-surface, #0f172a);
+        color: var(--erp-text-muted, #94a3b8);
         padding: 0.85rem 1rem;
         font-weight: 600;
-        border-bottom: 1px solid #1e293b;
+        border-bottom: 1px solid var(--erp-border, #1e293b);
     }
 
     .modern-table td {
         padding: 1rem;
-        border-bottom: 1px solid #1e293b;
-        color: #cbd5e1;
+        border-bottom: 1px solid var(--erp-border, #1e293b);
+        color: var(--erp-text, #cbd5e1);
     }
 
 .table-responsive {

@@ -3,15 +3,15 @@
    ========================================================================== */
 
 :root {
-    --bg-main: #0B0F19;
-    --bg-card: rgba(19, 27, 46, 0.85);
-    --bg-card-hover: rgba(25, 36, 61, 0.95);
-    --bg-input: #162035;
-    --border-color: rgba(255, 255, 255, 0.08);
+    --bg-main: var(--erp-bg, #0B0F19);
+    --bg-card: color-mix(in srgb, var(--erp-surface, rgba(19, 27, 46, 0.85)) 85%, transparent);
+    --bg-card-hover: color-mix(in srgb, var(--erp-surface-soft, rgba(25, 36, 61, 0.95)) 95%, transparent);
+    --bg-input: var(--erp-surface, #162035);
+    --border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.08)) 8%, transparent);
     --border-focus: #3B82F6;
-    --text-primary: #F8FAFC;
-    --text-secondary: #94A3B8;
-    --text-muted: #64748B;
+    --text-primary: var(--erp-text, #F8FAFC);
+    --text-secondary: var(--erp-text-muted, #94A3B8);
+    --text-muted: var(--erp-text-muted, #64748B);
     --accent-blue: #2563EB;
     --accent-blue-hover: #1D4ED8;
     --accent-green: #10B981;
@@ -55,7 +55,7 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 1.25rem;
-    background: linear-gradient(135deg, rgba(19, 27, 46, 0.9) 0%, rgba(30, 41, 67, 0.9) 100%);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--erp-surface, rgba(19, 27, 46, 0.9)) 90%, transparent) 0%, color-mix(in srgb, var(--erp-surface-soft, rgba(30, 41, 67, 0.9)) 90%, transparent) 100%);
     backdrop-filter: blur(10px);
     padding: 1.25rem 1.5rem;
     border-radius: var(--radius-lg);
@@ -85,7 +85,7 @@ body {
 }
 
     .btn-back:hover {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.1)) 10%, transparent);
         color: var(--accent-blue);
         border-color: var(--border-focus);
     }
@@ -99,7 +99,7 @@ body {
 .icon-circle {
     width: 46px;
     height: 46px;
-    background: radial-gradient(circle, #EEF2FF 0%, #C7D2FE 100%);
+    background: radial-gradient(circle, var(--erp-surface-soft, #EEF2FF) 0%, var(--erp-surface-soft, #C7D2FE) 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -112,7 +112,7 @@ body {
     width: 24px;
     height: 24px;
     color: var(--accent-green);
-    background-color: #D1FAE5;
+    background-color: var(--erp-surface-soft, #D1FAE5);
     padding: 3px;
     border-radius: 6px;
 }
@@ -154,7 +154,7 @@ body {
 
 .btn-primary {
     background-color: var(--accent-blue);
-    color: #FFFFFF;
+    color: var(--theme-accent-text, #FFFFFF);
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
 }
 
@@ -171,7 +171,7 @@ body {
 }
 
     .btn-secondary:hover {
-        background-color: rgba(255, 255, 255, 0.08);
+        background-color: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.08)) 8%, transparent);
     }
 
 .btn-outline {
@@ -182,7 +182,7 @@ body {
 
     .btn-outline:hover {
         color: var(--text-primary);
-        background-color: rgba(255, 255, 255, 0.05);
+        background-color: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.05)) 5%, transparent);
     }
 
 /* --- Stats Grid --- */
@@ -206,7 +206,7 @@ body {
     .stat-card:hover {
         background: var(--bg-card-hover);
         transform: translateY(-3px);
-        border-color: rgba(255, 255, 255, 0.15);
+        border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.15)) 15%, transparent);
     }
 
 .stat-icon {
@@ -222,12 +222,12 @@ body {
 
     .stat-icon.total {
         background: rgba(37, 99, 235, 0.15);
-        color: #60A5FA;
+        color: var(--erp-primary, #60A5FA);
     }
 
     .stat-icon.pending {
         background: rgba(245, 158, 11, 0.15);
-        color: #FBBF24;
+        color: var(--erp-warning, #FBBF24);
     }
 
     .stat-icon.completed {
@@ -387,7 +387,7 @@ body {
 }
 
     .task-table th {
-        background-color: rgba(255, 255, 255, 0.02);
+        background-color: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.02)) 2%, transparent);
         color: var(--text-muted);
         padding: 0.85rem 1.25rem;
         font-weight: 600;
@@ -408,7 +408,7 @@ body {
     }
 
         .task-table tbody tr:hover {
-            background-color: rgba(255, 255, 255, 0.03);
+            background-color: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.03)) 3%, transparent);
         }
 
 .task-name {
@@ -434,7 +434,7 @@ body {
     height: 28px;
     border-radius: 50%;
     background-color: var(--accent-blue);
-    color: white;
+    color:var(--erp-text, white);
     font-size: 0.7rem;
     font-weight: 700;
     display: flex;
@@ -455,7 +455,7 @@ body {
 
 .badge-high, .badge-urgent {
     background: rgba(239, 68, 68, 0.15);
-    color: #FCA5A5;
+    color: var(--erp-danger, #FCA5A5);
 }
 
 .badge-medium {
@@ -481,11 +481,11 @@ body {
     }
 
 .status-progress, .status-inprogress {
-    color: #60A5FA;
+    color: var(--erp-primary, #60A5FA);
 }
 
 .status-pending {
-    color: #FBBF24;
+    color: var(--erp-warning, #FBBF24);
 }
 
 .status-completed {
@@ -520,7 +520,7 @@ body {
 
     .btn-icon:hover {
         color: var(--text-primary);
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.1)) 10%, transparent);
     }
 
 /* ==========================================================================
@@ -614,7 +614,7 @@ body {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.04)) 4%, transparent);
             padding: 0.6rem 0.5rem;
             text-align: right;
         }

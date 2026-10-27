@@ -1,6 +1,6 @@
 @model VertexERP.Models.SalarySlipRevisionViewModel
 @{ ViewData["Title"] = "Update Salary Slip"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
-<section style="max-width:950px;margin:24px auto;padding:24px;background:#111c31;color:#edf4ff;border-radius:16px">
+<section style="max-width:950px;margin:24px auto;padding:24px;background:var(--erp-surface, #111c31);color:var(--erp-text, #edf4ff);border-radius:16px">
     <h1>Update Salary Slip</h1>
     <a asp-controller="SalarySlipReview" asp-action="Preview" asp-route-id="@Model.Id" target="_blank" rel="noopener">Preview saved slip</a>
     <p data-no-localize>@Model.EmployeeName · @Model.Month/@Model.Year</p>

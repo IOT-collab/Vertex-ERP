@@ -373,7 +373,7 @@ namespace VertexERP.Controllers
             if (updated != 1) return RedirectToAction(nameof(ForgotPassword));
             await _dbContext.PasswordResetTokens.Where(item => item.AppUserId == grant.AppUserId && item.UsedAtUtc == null)
                 .ExecuteUpdateAsync(update => update.SetProperty(item => item.UsedAtUtc, now));
-            _dbContext.AuditLogs.Add(AuditLogFactory.CreateEvent("AppUser", "Account password reset", $"Account #{grant.AppUserId} · Password reset completed", new ClaimsPrincipal(new ClaimsIdentity(new[]
+            _dbContext.AuditLogs.Add(AuditLogFactory.CreateEvent("AppUser", "Account password reset", $"Account #{grant.AppUserId} Â· Password reset completed", new ClaimsPrincipal(new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, grant.AppUserId.ToString()),
                 new Claim(ClaimTypes.Name, grant.AppUser.Username),
@@ -618,6 +618,11 @@ namespace VertexERP.Controllers
                 .ToListAsync();
             // Use the same WDMS roster and attendance rules as the Attendance screen.
             var attendance = await _attendanceProcessingService.GetDailyAttendanceAsync(DateOnly.FromDateTime(today), null, null, null);
+            var attendanceEmployeeIds = attendance.Records.Where(row => row.EmployeeId > 0)
+                .Select(row => row.EmployeeId).Distinct().ToList();
+            var attendanceCategories = await _dbContext.Employees.AsNoTracking()
+                .Where(employee => attendanceEmployeeIds.Contains(employee.Id))
+                .ToDictionaryAsync(employee => employee.Id, employee => employee.EmployeeCategory);
             var weeklyAttendance = new List<DashboardDayMetric>();
             foreach (var day in Enumerable.Range(0, 6).Select(offset => weekStart.AddDays(offset)))
             {
@@ -632,6 +637,7 @@ namespace VertexERP.Controllers
                 TotalWorkforce = employees.Count,
                 ActiveWorkforce = employees.Count,
                 AttendanceRosterCount = attendance.Records.Count(record => record.EmployeeId == 0 || employees.Any(employee => employee.Id == record.EmployeeId)),
+                AttendanceCategories = DashboardAttendanceCategories.Build(attendance.Records, attendanceCategories),
                 PresentToday = attendance.PresentCount,
                 LateToday = attendance.LateCount,
                 OnLeaveToday = attendance.LeaveCount,
@@ -666,7 +672,7 @@ namespace VertexERP.Controllers
                 .ToDictionaryAsync(employee => employee.Id, cancellationToken);
             var approvedLeaves = normalizedStatus == "Leave"
                 ? await _dbContext.LeaveRequests.AsNoTracking().Where(request => ids.Contains(request.EmployeeId)
-                    && request.Status == "Approved" && request.FromDate <= todayDate && request.ToDate >= todayDate).ToListAsync(cancellationToken)
+                    && request.LeaveType != ExtraLeaveFacility.ShortLeave && request.Status == "Approved" && request.FromDate <= todayDate && request.ToDate >= todayDate).ToListAsync(cancellationToken)
                 : new List<LeaveRequest>();
             var leaveTypes = approvedLeaves.GroupBy(request => request.EmployeeId)
                 .ToDictionary(group => group.Key, group => string.Join(", ", group.Select(request => request.LeaveType).Distinct()));
@@ -739,7 +745,11 @@ namespace VertexERP.Controllers
             if (!ModelState.IsValid || to < from || to > today || to.DayNumber - from.DayNumber > 365) return BadRequest("Choose a valid date range of up to 366 days, ending today or earlier.");
             var days = await new EmployeeAttendanceReader(_dbContext).ReadAsync(employee, from, to, HttpContext.RequestAborted);
             if (!string.IsNullOrEmpty(status)) days = days.Where(x => x.Status == status).ToList();
-            if (!string.IsNullOrEmpty(source)) days = days.Where(x => x.Source.Contains(source, StringComparison.Ordinal)).ToList();
+            if (!string.IsNullOrEmpty(source))
+            {
+                source = AttendanceUiPresentation.Source(source);
+                days = days.Where(x => AttendanceUiPresentation.Source(x.Source).Contains(source, StringComparison.Ordinal)).ToList();
+            }
             var model = new EmployeeAttendanceViewModel { Employee = employee, StartDate = from, EndDate = to, Days = days, StatusFilter = status, SourceFilter = source };
             return refresh ? PartialView("_EmployeeAttendanceContent", model) : View(model);
         }
@@ -824,7 +834,7 @@ namespace VertexERP.Controllers
             if (request.Latitude.Value == 0 && request.Longitude.Value == 0)
                 return BadRequest(new { message = "A valid GPS position is required. Turn on precise location and try again." });
             if (request.AccuracyMetres.Value > 50)
-                return BadRequest(new { message = $"GPS accuracy is only ±{request.AccuracyMetres.Value:F0} metres. Attendance requires accuracy within 50 metres. Move outdoors or near a window and try again." });
+                return BadRequest(new { message = $"GPS accuracy is only Â±{request.AccuracyMetres.Value:F0} metres. Attendance requires accuracy within 50 metres. Move outdoors or near a window and try again." });
             if (!request.CapturedAtUtc.HasValue || Math.Abs((DateTimeOffset.UtcNow - request.CapturedAtUtc.Value).TotalMinutes) > 2)
                 return BadRequest(new { message = "Your GPS reading is no longer fresh. Capture the current location again." });
 
@@ -897,7 +907,7 @@ namespace VertexERP.Controllers
             var balances = await _dbContext.ManualLeaveBalances.AsNoTracking().Where(x => x.EmployeeId == employee.Id && x.Year == selectedYear).OrderBy(x => x.Category).ToListAsync();
             VertexERP.Services.LeaveBalanceCalculator.IncludeUnfilled(balances, requests, selectedYear);
             var calculation = await _dbContext.LeaveCalculations.AsNoTracking().SingleOrDefaultAsync(x => x.EmployeeId == employee.Id && x.Year == selectedYear);
-            foreach (var balance in balances) balance.OpeningDays = balance.Category == "EL" ? calculation?.OpeningEL ?? 0 : balance.Category == "EW" ? calculation?.OpeningEW ?? 0 : 0;
+            foreach (var balance in balances) balance.OpeningDays = LeaveBalanceCalculator.Opening(calculation, balance.Category);
             Response.Headers.CacheControl = "no-store";
             return View(new EmployeeLeaveViewModel { Employee = employee, Requests = requests, Balances = balances, Year = selectedYear });
         }
@@ -974,10 +984,10 @@ namespace VertexERP.Controllers
             var assignedTasks = await _dbContext.WorkTasks.AsNoTracking().Where(task => task.AssigneeId == employee.Id).ToListAsync();
             var ownLeaves = await _dbContext.LeaveRequests.AsNoTracking().Where(request => request.EmployeeId == employee.Id).ToListAsync();
             var dismissed = (await _dbContext.EmployeeNotificationDismissals.AsNoTracking().Where(x => x.EmployeeId == employee.Id).Select(x => new { x.SourceType, x.SourceId }).ToListAsync()).Select(x => $"{x.SourceType}:{x.SourceId}").ToHashSet(StringComparer.OrdinalIgnoreCase);
-            var taskItems = assignedTasks.Where(task => !dismissed.Contains($"Task:{task.Id}")).Select(task => new EmployeeNotificationItem(task.Id, "Task assigned: " + task.Title, "Status: " + task.Status + " · Due " + task.DueDate.ToString("dd MMM yyyy"), task.CreatedAtUtc, "Task"));
-            var leaveItems = ownLeaves.Where(request => !dismissed.Contains($"Leave:{request.Id}")).Select(request => new EmployeeNotificationItem(request.Id, "Leave request " + request.DisplayStatus, request.LeaveType + " · " + request.FromDate.ToString("dd MMM") + " - " + request.ToDate.ToString("dd MMM yyyy"), request.DecidedAtUtc ?? request.ManagerDecidedAtUtc ?? request.AppliedAtUtc, "Leave"));
+            var taskItems = assignedTasks.Where(task => !dismissed.Contains($"Task:{task.Id}")).Select(task => new EmployeeNotificationItem(task.Id, "Task assigned: " + task.Title, "Status: " + task.Status + " Â· Due " + task.DueDate.ToString("dd MMM yyyy"), task.CreatedAtUtc, "Task"));
+            var leaveItems = ownLeaves.Where(request => !dismissed.Contains($"Leave:{request.Id}")).Select(request => new EmployeeNotificationItem(request.Id, "Leave request " + request.DisplayStatus, request.LeaveType + " Â· " + request.FromDate.ToString("dd MMM") + " - " + request.ToDate.ToString("dd MMM yyyy"), request.DecidedAtUtc ?? request.ManagerDecidedAtUtc ?? request.AppliedAtUtc, "Leave"));
             var ownTickets = await _dbContext.QueryTickets.AsNoTracking().Where(ticket => ticket.EmployeeId == employee.Id).ToListAsync();
-            var ticketItems = ownTickets.Where(ticket => !dismissed.Contains($"Query:{ticket.Id}")).Select(ticket => new EmployeeNotificationItem(ticket.Id, "Query: " + ticket.Subject, "Status: " + ticket.Status + (string.IsNullOrWhiteSpace(ticket.Resolution) ? string.Empty : " · " + ticket.Resolution), ticket.UpdatedAtUtc ?? ticket.CreatedAtUtc, "Query"));
+            var ticketItems = ownTickets.Where(ticket => !dismissed.Contains($"Query:{ticket.Id}")).Select(ticket => new EmployeeNotificationItem(ticket.Id, "Query: " + ticket.Subject, "Status: " + ticket.Status + (string.IsNullOrWhiteSpace(ticket.Resolution) ? string.Empty : " Â· " + ticket.Resolution), ticket.UpdatedAtUtc ?? ticket.CreatedAtUtc, "Query"));
             return View(new EmployeeNotificationsViewModel { Employee = employee, Items = taskItems.Concat(leaveItems).Concat(ticketItems).OrderByDescending(item => item.CreatedAt).ToList() });
         }
 
@@ -1120,7 +1130,7 @@ namespace VertexERP.Controllers
                     .Where(log => log.EmployeeId.HasValue && employeeIds.Contains(log.EmployeeId.Value) && log.PunchTime >= today && log.PunchTime < today.AddDays(1))
                     .Select(log => log.EmployeeId!.Value).Distinct().ToListAsync();
                 var onLeaveIds = await _dbContext.LeaveRequests.AsNoTracking()
-                    .Where(request => employeeIds.Contains(request.EmployeeId) && request.Status == "Approved"
+                    .Where(request => employeeIds.Contains(request.EmployeeId) && request.LeaveType != ExtraLeaveFacility.ShortLeave && request.Status == "Approved"
                         && request.FromDate <= DateOnly.FromDateTime(today) && request.ToDate >= DateOnly.FromDateTime(today))
                     .Select(request => request.EmployeeId).Distinct().ToListAsync();
                 var tasks = await _dbContext.WorkTasks.AsNoTracking().Include(task => task.Assignee)
@@ -1174,7 +1184,7 @@ namespace VertexERP.Controllers
             return Ok(new
             {
                 checkIn = day.CheckIn?.ToString("hh:mm:ss tt"), checkOut = day.CheckOut?.ToString("hh:mm:ss tt"),
-                status = day.Status, source = day.Source, punchCount = day.PunchCount,
+                status = day.Status, source = AttendanceUiPresentation.Source(day.Source), punchCount = day.PunchCount,
                 workingHours = day.CheckOut.HasValue ? AttendanceRules.FormatHours(day.WorkingHours) : "--",
                 overtime = day.CheckOut.HasValue ? AttendanceRules.FormatHours(day.Overtime) : "--",
                 date = attendanceDate.ToString("dd MMM yyyy"), updatedAt = FieldAttendanceClock.Now.ToString("hh:mm:ss tt")
@@ -1203,25 +1213,23 @@ namespace VertexERP.Controllers
             if (isMonthlyExport)
             {
                 if (!DateOnly.TryParseExact($"{exportMonth}-01", "yyyy-MM-dd", out var monthStart)) return BadRequest("Select a valid month.");
-                if (monthStart > DateOnly.FromDateTime(DateTime.Today)) return BadRequest("Future month attendance cannot be exported.");
+                if (monthStart > DateOnly.FromDateTime(FieldAttendanceClock.Now)) return BadRequest("Future month attendance cannot be exported.");
                 var lastDay = monthStart.AddMonths(1).AddDays(-1);
-                if (lastDay > DateOnly.FromDateTime(DateTime.Today)) lastDay = DateOnly.FromDateTime(DateTime.Today);
+                if (lastDay > DateOnly.FromDateTime(FieldAttendanceClock.Now)) lastDay = DateOnly.FromDateTime(FieldAttendanceClock.Now);
                 for (var day = monthStart; day <= lastDay; day = day.AddDays(1)) dates.Add(day);
             }
             else
             {
-                if (date > DateOnly.FromDateTime(DateTime.Today)) return BadRequest("Future attendance cannot be exported.");
+                if (date > DateOnly.FromDateTime(FieldAttendanceClock.Now)) return BadRequest("Future attendance cannot be exported.");
                 dates.Add(date);
             }
             var csv = new StringBuilder();
             var exportRecords = new List<DailyAttendanceViewModel>();
-            foreach (var exportDate in dates)
-            {
-                var attendance = await _attendanceProcessingService.GetDailyAttendanceAsync(exportDate,
-                    isMonthlyExport ? null : searchQuery, isMonthlyExport ? null : department, isMonthlyExport ? null : status, cancellationToken);
-                exportRecords.AddRange(attendance.Records.Where(item => item.EmployeeId > 0));
-            }
-            var monthlySummary = exportRecords.GroupBy(item => item.EmployeeId).ToDictionary(group => group.Key, group => new
+            if (isMonthlyExport)
+                exportRecords.AddRange(await _attendanceProcessingService.GetAttendanceRangeAsync(dates[0], dates[^1], cancellationToken));
+            else
+                exportRecords.AddRange((await _attendanceProcessingService.GetDailyAttendanceAsync(date, searchQuery, department, status, cancellationToken)).Records);
+            var monthlySummary = exportRecords.GroupBy(item => item.EmpId).ToDictionary(group => group.Key, group => new
             {
                 Present = group.Count(item => item.CheckIn.HasValue),
                 Absent = group.Count(item => item.Status == "Absent"),
@@ -1233,7 +1241,7 @@ namespace VertexERP.Controllers
             csv.AppendLine("Emp ID,Employee Name,Department,Date,Day,Check In,Check Out,Total Hours,Punch Count,Status,Remark,Late Arrival,Month Present Days,Month Absent Days,Month Late Days,Month Total Hours,Overtime,Site Check In - Time / Location / GPS,Site Check Out - Time / Location / GPS");
             foreach (var item in exportRecords.OrderBy(item => item.EmployeeName).ThenBy(item => item.EmpId).ThenBy(item => item.Date))
             {
-                var summary = monthlySummary[item.EmployeeId];
+                var summary = monthlySummary[item.EmpId];
                 csv.AppendLine(string.Join(',', new[]
                 {
                     Csv(item.EmpId), Csv(item.EmployeeName), Csv(item.Department), Csv(item.Date.ToString("dd-MMM-yyyy")), Csv(item.Date.DayOfWeek.ToString()),
@@ -1251,7 +1259,7 @@ namespace VertexERP.Controllers
 
         private static string Csv(string value) => $"\"{value.Replace("\"", "\"\"")}\"";
 
-        private FileContentResult BuildMonthlyAttendanceWorkbook(List<DailyAttendanceViewModel> records, List<DateOnly> dates, Dictionary<int, (int Present, int Absent, int Late, TimeSpan Work)> summaries)
+        private FileContentResult BuildMonthlyAttendanceWorkbook(List<DailyAttendanceViewModel> records, List<DateOnly> dates, Dictionary<string, (int Present, int Absent, int Late, TimeSpan Work)> summaries)
         {
             static string X(string? value) => System.Security.SecurityElement.Escape(value ?? string.Empty) ?? string.Empty;
             var month = dates[0];
@@ -1265,7 +1273,7 @@ namespace VertexERP.Controllers
             xml.Append("<Cell><Data ss:Type=\"String\">Overtime</Data></Cell>");
             foreach (var day in dates) xml.Append($"<Cell><Data ss:Type=\"String\">{day:dd MMM}\n{day:ddd}</Data></Cell>");
             xml.Append("</Row>");
-            foreach (var employee in records.GroupBy(x => x.EmployeeId).OrderBy(x => x.First().EmployeeName))
+            foreach (var employee in records.GroupBy(x => x.EmpId).OrderBy(x => x.First().EmployeeName))
             {
                 var first = employee.First(); var summary = summaries[employee.Key]; var byDate = employee.ToDictionary(x => x.Date);
                 xml.Append($"<Row ss:Height=\"90\"><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.EmpId)}</Data></Cell><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.EmployeeName)}</Data></Cell><Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(first.Department)}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Present}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Absent}</Data></Cell><Cell><Data ss:Type=\"Number\">{summary.Late}</Data></Cell><Cell><Data ss:Type=\"String\">{(int)summary.Work.TotalHours:D2}:{summary.Work.Minutes:D2}</Data></Cell>");
@@ -1275,25 +1283,25 @@ namespace VertexERP.Controllers
                 {
                     if (!byDate.TryGetValue(day, out var item))
                     {
-                        xml.Append("<Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">—</Data></Cell>");
+                        xml.Append("<Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">â€”</Data></Cell>");
                         continue;
                     }
                     var style = item.Status == "Leave" ? "Holiday" : item.Status == "Holiday" ? "Holiday" : item.Status == "Present" ? "Present" : item.Status == "Absent" ? "Absent" : "Late";
                     var code = X(item.Status);
-                    var timing = item.CheckIn.HasValue ? $"&#10;{item.CheckIn:hh:mm tt}-{(item.CheckOut.HasValue ? item.CheckOut.Value.ToString("hh:mm tt") : "—")}" : string.Empty;
+                    var timing = item.CheckIn.HasValue ? $"&#10;{item.CheckIn:hh:mm tt}-{(item.CheckOut.HasValue ? item.CheckOut.Value.ToString("hh:mm tt") : "â€”")}" : string.Empty;
                     xml.Append($"<Cell ss:StyleID=\"{style}\"><Data ss:Type=\"String\">{code}{timing}&#10;{X(item.TotalHoursDisplay)}&#10;OT: {X(item.OvertimeDisplay)}&#10;{X(item.Remark)}</Data></Cell>");
                 }
                 xml.Append("</Row>");
             }
             xml.Append("</Table><WorksheetOptions xmlns=\"urn:schemas-microsoft-com:office:excel\"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>2</SplitHorizontal><TopRowBottomPane>2</TopRowBottomPane><SplitVertical>3</SplitVertical><LeftColumnRightPane>3</LeftColumnRightPane><ProtectObjects>False</ProtectObjects><ProtectScenarios>False</ProtectScenarios></WorksheetOptions></Worksheet>");
             xml.Append("<Worksheet ss:Name=\"Daily Details\"><Table><Column ss:Width=\"75\"/><Column ss:Width=\"140\" ss:Span=\"1\"/><Column ss:Width=\"85\" ss:Span=\"5\"/><Column ss:Width=\"360\" ss:Span=\"1\"/><Row ss:StyleID=\"Header\">");
-            foreach (var heading in new[] { "Emp ID", "Employee Name", "Department", "Date", "Check In", "Check Out", "Total Hours", "Overtime", "Status", "Site Check In - Time / Location / GPS", "Site Check Out - Time / Location / GPS" })
+            foreach (var heading in new[] { "Emp ID", "Employee Name", "Department", "Date", "Check In", "Check Out", "Total Hours", "Overtime", "Status", "Site Check In - Time / Location / GPS", "Site Check Out - Time / Location / GPS", "Attendance Remarks" })
                 xml.Append($"<Cell><Data ss:Type=\"String\">{X(heading)}</Data></Cell>");
             xml.Append("</Row>");
             foreach (var item in records.OrderBy(item => item.EmployeeName).ThenBy(item => item.EmployeeId).ThenBy(item => item.Date))
             {
                 xml.Append("<Row>");
-                foreach (var value in new[] { item.EmpId, item.EmployeeName, item.Department, item.Date.ToString("dd-MMM-yyyy"), item.CheckIn?.ToString("hh:mm tt") ?? "", item.CheckOut?.ToString("hh:mm tt") ?? "", item.TotalHoursDisplay, item.OvertimeDisplay, item.Status, item.SiteCheckIns, item.SiteCheckOuts })
+                foreach (var value in new[] { item.EmpId, item.EmployeeName, item.Department, item.Date.ToString("dd-MMM-yyyy"), item.CheckIn?.ToString("hh:mm tt") ?? "", item.CheckOut?.ToString("hh:mm tt") ?? "", item.TotalHoursDisplay, item.OvertimeDisplay, item.Status, item.SiteCheckIns, item.SiteCheckOuts, item.Remark })
                     xml.Append($"<Cell ss:StyleID=\"Text\"><Data ss:Type=\"String\">{X(value)}</Data></Cell>");
                 xml.Append("</Row>");
             }
@@ -1301,76 +1309,59 @@ namespace VertexERP.Controllers
             return File(new UTF8Encoding(true).GetBytes(xml.ToString()), "application/vnd.ms-excel", $"Attendance-Pivot-{month:yyyy-MM}.xls");
         }
 
-        [Authorize(Roles = "Admin,HR,Manager")]
+        [Authorize(Policy = ManualAttendanceAccess.Policy)]
         public async Task<IActionResult> AddAttendance()
         {
+            if (!await new ManualAttendanceAccess(_dbContext).CanMarkAsync(User)) return Forbid();
             return View(await BuildManualAttendanceViewModelAsync(new ManualAttendanceViewModel()));
         }
 
-        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Admin,HR,Manager")]
+        [HttpPost, ValidateAntiForgeryToken, Authorize(Policy = ManualAttendanceAccess.Policy)]
         public async Task<IActionResult> AddAttendance(ManualAttendanceViewModel model)
         {
-            if (string.IsNullOrWhiteSpace(model.Remarks) || model.Remarks.Length > 300) ModelState.AddModelError(nameof(model.Remarks), "Enter a reason of up to 300 characters.");
-            if (string.IsNullOrWhiteSpace(model.Department)) ModelState.AddModelError(nameof(model.Department), "Select a department.");
-            if (!model.EmployeeId.HasValue) ModelState.AddModelError(nameof(model.EmployeeId), "Select an employee.");
-            if (!model.CheckInTime.HasValue) ModelState.AddModelError(nameof(model.CheckInTime), "Enter check-in time.");
-            if (model.CheckOutTime.HasValue && model.CheckInTime.HasValue && model.CheckOutTime <= model.CheckInTime)
-                ModelState.AddModelError(nameof(model.CheckOutTime), "Check-out time must be after check-in time.");
-            if (model.AttendanceDate > DateOnly.FromDateTime(DateTime.Today))
-                ModelState.AddModelError(nameof(model.AttendanceDate), "Future attendance cannot be marked.");
-
-            var employee = model.EmployeeId.HasValue
-                ? await _dbContext.Employees.FirstOrDefaultAsync(item => item.Id == model.EmployeeId && item.IsActive)
-                : null;
-            if (employee == null || !string.Equals(employee.Department, model.Department, StringComparison.OrdinalIgnoreCase))
-                ModelState.AddModelError(nameof(model.EmployeeId), "The selected employee does not belong to this department.");
-
-            if (User.IsInRole("Manager"))
+            if (!await new ManualAttendanceAccess(_dbContext).CanMarkAsync(User)) return Forbid();
+            return await _dbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
             {
-                var managerId = await GetLoggedInEmployeeIdAsync();
-                var managerDepartment = await _dbContext.Employees.AsNoTracking()
-                    .Where(item => item.Id == managerId).Select(item => item.Department).FirstOrDefaultAsync();
-                if (employee == null || string.IsNullOrWhiteSpace(managerDepartment)
-                    || !string.Equals(employee.Department, managerDepartment, StringComparison.OrdinalIgnoreCase))
-                    return Forbid();
-            }
-
-            if (employee != null && model.CheckInTime.HasValue)
-            {
-                var dayStart = model.AttendanceDate.ToDateTime(TimeOnly.MinValue);
-                var dayEnd = dayStart.AddDays(1);
-                if (await _dbContext.AttendanceLogs.AnyAsync(log => log.EmployeeId == employee.Id && log.PunchTime >= dayStart && log.PunchTime < dayEnd))
-                    ModelState.AddModelError(string.Empty, "Attendance already exists for this employee on the selected date.");
-            }
-
-            if (!ModelState.IsValid) return View(await BuildManualAttendanceViewModelAsync(model));
-
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var actorUserId)) return Forbid();
-            _dbContext.AttendanceRequests.Add(new AttendanceRequest
-            {
-                EmployeeId = employee!.Id, AttendanceDate = model.AttendanceDate,
-                CheckInTime = model.CheckInTime!.Value, CheckOutTime = model.CheckOutTime,
-                Reason = model.Remarks!.Trim(), RequestedByUserId = actorUserId
+                _dbContext.ChangeTracker.Clear();
+                if (!model.EmployeeId.HasValue) ModelState.AddModelError(nameof(model.EmployeeId), "Select an employee.");
+                if ((model.ModificationMode != "CheckOut") && !model.CheckInTime.HasValue) ModelState.AddModelError(nameof(model.CheckInTime), "Enter check-in time.");
+                if (model.ModificationMode != "CheckIn" && !model.CheckOutTime.HasValue) ModelState.AddModelError(nameof(model.CheckOutTime), "Enter check-out time to calculate the working duration.");
+                if (model.AttendanceDate == default || model.AttendanceDate > DateOnly.FromDateTime(FieldAttendanceClock.Now))
+                    ModelState.AddModelError(nameof(model.AttendanceDate), "Select today or a past attendance date.");
+                var employee = model.EmployeeId.HasValue ? await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == model.EmployeeId && x.IsActive) : null;
+                if (employee != null && model.CheckInTime.HasValue && model.CheckOutTime.HasValue
+                    && AttendanceRules.CheckOutAt(model.AttendanceDate, model.CheckInTime.Value, model.CheckOutTime.Value, employee.ShiftStartTime, employee.ShiftEndTime) <= AttendanceRules.CheckInAt(model.AttendanceDate, model.CheckInTime.Value, employee.ShiftStartTime, employee.ShiftEndTime))
+                    ModelState.AddModelError(nameof(model.CheckOutTime), "Check-out must follow check-in. Next-day checkout is allowed for an assigned night shift.");
+                if (employee == null || (!string.IsNullOrWhiteSpace(model.Department) && !string.Equals(employee.Department, model.Department, StringComparison.OrdinalIgnoreCase)))
+                    ModelState.AddModelError(nameof(model.EmployeeId), "Select an active employee from this department.");
+                if (!ModelState.IsValid) return View(await BuildManualAttendanceViewModelAsync(model));
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+                await ManualAttendance.LockAsync(_dbContext);
+                var error = await ManualAttendance.CorrectAsync(_dbContext, employee!, model.AttendanceDate,
+                    model.ModificationMode, model.CheckInTime, model.CheckOutTime);
+                if (error != null) { ModelState.AddModelError("", error); return View(await BuildManualAttendanceViewModelAsync(model)); }
+                await _dbContext.SaveChangesAsync(); await transaction.CommitAsync();
+                TempData["AttendanceRequestMessage"] = "Attendance saved. Actual times and duration are now included in employee attendance, Present counts and exports.";
+                return RedirectToAction(nameof(AddAttendance));
             });
-            try { await _dbContext.SaveChangesAsync(); }
-            catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException { SqlState: "23505" })
-            {
-                ModelState.AddModelError(string.Empty, "A pending request already exists for this employee and date.");
-                return View(await BuildManualAttendanceViewModelAsync(model));
-            }
-            TempData["AttendanceRequestMessage"] = "Request sent to Admin. Attendance will be marked only after approval.";
-            return RedirectToAction("Index", "AttendanceRequests");
         }
+        [HttpGet, Authorize(Policy = ManualAttendanceAccess.Policy)]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        public async Task<IActionResult> ManualAttendanceTimes(int employeeId, DateOnly date)
+        {
+            if (!await new ManualAttendanceAccess(_dbContext).CanMarkAsync(User)) return Forbid();
+            var employee = await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == employeeId && x.IsActive);
+            if (employee == null || date == default) return NotFound();
+            var window = AttendanceRules.PunchWindow(date, employee.ShiftStartTime, employee.ShiftEndTime);
+            var logs = await new EmployeeAttendanceReader(_dbContext).OwnPunches(employee.Id)
+                .Where(x => x.PunchTime >= window.From && x.PunchTime < window.To).ToListAsync();
+            var times = ManualAttendance.EffectivePunches(logs);
+            return Json(new { checkIn = times.CheckIn?.ToString("HH:mm:ss"), checkOut = times.CheckOut?.ToString("HH:mm:ss") });
+        }
+
         private async Task<ManualAttendanceViewModel> BuildManualAttendanceViewModelAsync(ManualAttendanceViewModel model)
         {
             var employeeQuery = _dbContext.Employees.AsNoTracking().Where(employee => employee.IsActive);
-            if (User.IsInRole("Manager"))
-            {
-                var managerId = await GetLoggedInEmployeeIdAsync();
-                var managerDepartment = await _dbContext.Employees.AsNoTracking().Where(employee => employee.Id == managerId).Select(employee => employee.Department).FirstOrDefaultAsync();
-                employeeQuery = employeeQuery.Where(employee => employee.Id != managerId && employee.Department == managerDepartment);
-                model.IsManagerView = true;
-            }
             model.Employees = await employeeQuery.OrderBy(employee => employee.FullName).ToListAsync();
             model.Departments = model.Employees.Select(employee => employee.Department).Where(name => !string.IsNullOrWhiteSpace(name)).Distinct(StringComparer.OrdinalIgnoreCase).Order().ToList();
             return model;
@@ -1395,7 +1386,7 @@ namespace VertexERP.Controllers
                 .Distinct()
                 .ToListAsync();
             var onLeaveEmployeeIds = await _dbContext.LeaveRequests.AsNoTracking()
-                .Where(request => request.Status == "Approved"
+                .Where(request => request.LeaveType != ExtraLeaveFacility.ShortLeave && request.Status == "Approved"
                     && activeEmployeeIdList.Contains(request.EmployeeId)
                     && request.FromDate <= today
                     && request.ToDate >= today)
@@ -1458,20 +1449,25 @@ namespace VertexERP.Controllers
             var queryTickets = await _dbContext.QueryTickets.AsNoTracking().Include(ticket => ticket.Employee)
                 .Where(ticket => !managerLogin || (managerIds.Contains(ticket.ReportingManagerId ?? 0) && !managerIds.Contains(ticket.EmployeeId))).OrderByDescending(ticket => ticket.CreatedAtUtc).ToListAsync();
             var expenseClaims = await _dbContext.ExpenseClaims.AsNoTracking().Include(claim => claim.Employee)
-                .Where(claim => claim.Status == "Pending" && (managerIds.Contains(claim.ReportingManagerId ?? 0) || (!managerLogin && claim.RequiresHrApproval)))
+                .Where(claim => claim.Status == "Pending" && ((managerIds.Contains(claim.ReportingManagerId ?? 0) && (!managerLogin || !claim.RequiresHrApproval)) || (!managerLogin && claim.RequiresHrApproval)))
                 .OrderByDescending(claim => claim.SubmittedAtUtc).ToListAsync();
             var notifications = new List<DashboardNotification>();
-            notifications.AddRange(leaveRequests.Where(x => x.Status == "Pending").Select(x => new DashboardNotification(
+            notifications.AddRange(leaveRequests.Where(x => ManagerDashboardPresentation.AwaitingAction(x, managerLogin)).Select(x => new DashboardNotification(
                 "Leave", $"Leave request from {x.Employee.FullName}", $"{x.LeaveType}: {x.FromDate:dd MMM} - {x.ToDate:dd MMM}", managerLogin ? "/Main/ManagerLeaves" : "/Main/WorkflowManagement", x.AppliedAtUtc)));
             notifications.AddRange(queryTickets.Where(x => x.Status != "Resolved" && x.Status != "Closed").Select(x => new DashboardNotification(
                 "Query", $"Query from {x.Employee.FullName}", x.Subject, managerLogin ? "/Main/ManagerQueries" : "/Main/WorkflowManagement", x.CreatedAtUtc)));
             notifications.AddRange(expenseClaims.Select(x => new DashboardNotification(
-                "Expense", $"Expense claim from {x.Employee.FullName}", $"{x.Title} · ₹{x.Amount:N2}", "/Expense/Index", x.SubmittedAtUtc)));
-            notifications.AddRange(tasks.Where(x => !x.Status.Equals("Completed", StringComparison.OrdinalIgnoreCase) && x.DueDate < DateOnly.FromDateTime(DateTime.Today)).Select(x => new DashboardNotification(
-                "Task", $"Overdue task: {x.Title}", $"Assigned to {x.Assignee.FullName} · due {x.DueDate:dd MMM}", "/Main/TaskMgm", x.CreatedAtUtc)));
+                "Expense", $"Expense claim from {x.Employee.FullName}", $"{x.Title} Â· â‚¹{x.Amount:N2}", "/Expense/Index", x.SubmittedAtUtc)));
+            notifications.AddRange(tasks.Where(x => !x.Status.Equals("Completed", StringComparison.OrdinalIgnoreCase) && x.DueDate < DateOnly.FromDateTime(FieldAttendanceClock.Now)).Select(x => new DashboardNotification(
+                "Task", $"Overdue task: {x.Title}", $"Assigned to {x.Assignee.FullName} Â· due {x.DueDate:dd MMM}", "/Main/TaskMgm", x.CreatedAtUtc)));
 
+            var viewerId = await GetLoggedInEmployeeIdAsync();
+            var viewer = viewerId.HasValue ? await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == viewerId.Value) : null;
+            var ownTasks = viewerId.HasValue ? await _dbContext.WorkTasks.AsNoTracking().Include(x => x.Assignee).Include(x => x.Manager)
+                .Where(x => x.AssigneeId == viewerId.Value).OrderBy(x => x.DueDate).ToListAsync() : new List<WorkTask>();
             return View(new ManagerDashboardViewModel
             {
+                Viewer = viewer, IsManagerScope = managerLogin, OwnTasks = ownTasks,
                 Managers = managers,
                 Projects = projects,
                 ProjectAssignments = projectAssignments,
@@ -1632,7 +1628,7 @@ namespace VertexERP.Controllers
         }
 
         [HttpGet, Authorize(Roles = "Admin,HR,Manager")]
-        public async Task<IActionResult> ManagerNotificationCount(DateTime sinceUtc)
+        public async Task<IActionResult> ManagerNotificationUpdates(DateTime sinceUtc)
         {
             if (sinceUtc == default) sinceUtc = DateTime.UtcNow;
             if (User.IsInRole("Manager"))
@@ -1646,7 +1642,7 @@ namespace VertexERP.Controllers
             }
             var hrNewLeave = await _dbContext.LeaveRequests.AnyAsync(x => x.Status == "Pending" && x.AppliedAtUtc > sinceUtc);
             var hrNewQuery = await _dbContext.QueryTickets.AnyAsync(x => x.Status != "Resolved" && x.Status != "Closed" && x.CreatedAtUtc > sinceUtc);
-            var hrNewExpense = await _dbContext.ExpenseClaims.AnyAsync(x => x.Status == "Pending" && x.SubmittedAtUtc > sinceUtc);
+            var hrNewExpense = await _dbContext.ExpenseClaims.AnyAsync(x => x.WorkflowStage == ExpenseClaimWorkflow.HR && x.Status == "Pending" && x.SubmittedAtUtc > sinceUtc);
             return Json(new { hasNew = hrNewLeave || hrNewQuery || hrNewExpense });
         }
 
@@ -1665,7 +1661,7 @@ namespace VertexERP.Controllers
             }
             var hrLeaveCount = await _dbContext.LeaveRequests.CountAsync(x => x.Status == "Pending");
             var hrQueryCount = await _dbContext.QueryTickets.CountAsync(x => x.Status != "Resolved" && x.Status != "Closed");
-            var hrExpenseCount = await _dbContext.ExpenseClaims.CountAsync(x => x.Status == "Pending");
+            var hrExpenseCount = await _dbContext.ExpenseClaims.CountAsync(x => x.WorkflowStage == ExpenseClaimWorkflow.HR && x.Status == "Pending");
             var hrOverdueCount = await _dbContext.WorkTasks.CountAsync(x => x.Status != "Completed" && x.DueDate < DateOnly.FromDateTime(DateTime.Today));
             return Json(new { count = hrLeaveCount + hrQueryCount + hrExpenseCount + hrOverdueCount });
         }
@@ -1680,7 +1676,7 @@ namespace VertexERP.Controllers
             var teamIds = team.Select(employee => employee.Id).ToList();
             var today = DateTime.Today;
             var presentIds = await _dbContext.AttendanceLogs.AsNoTracking().Where(log => log.EmployeeId.HasValue && teamIds.Contains(log.EmployeeId.Value) && log.PunchTime >= today && log.PunchTime < today.AddDays(1)).Select(log => log.EmployeeId!.Value).Distinct().ToListAsync();
-            var leaveIds = await _dbContext.LeaveRequests.AsNoTracking().Where(request => teamIds.Contains(request.EmployeeId) && request.Status == "Approved" && request.FromDate <= DateOnly.FromDateTime(today) && request.ToDate >= DateOnly.FromDateTime(today)).Select(request => request.EmployeeId).Distinct().ToListAsync();
+            var leaveIds = await _dbContext.LeaveRequests.AsNoTracking().Where(request => teamIds.Contains(request.EmployeeId) && request.LeaveType != ExtraLeaveFacility.ShortLeave && request.Status == "Approved" && request.FromDate <= DateOnly.FromDateTime(today) && request.ToDate >= DateOnly.FromDateTime(today)).Select(request => request.EmployeeId).Distinct().ToListAsync();
             return new ManagerAttendanceViewModel { TeamMembers = team, PresentIds = presentIds.ToHashSet(), OnLeaveIds = leaveIds.ToHashSet(), IsWeeklyOff = AttendanceRules.IsHoliday(DateOnly.FromDateTime(today)) };
         }
 
@@ -1708,31 +1704,40 @@ namespace VertexERP.Controllers
         [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Manager")]
         public async Task<IActionResult> DecideTeamLeave(int id, string? decision, string? note)
         {
-            var managerId = await GetLoggedInEmployeeIdAsync();
-            if (!managerId.HasValue || !int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return Forbid();
-            var normalizedDecision = string.Equals(decision, "Approved", StringComparison.OrdinalIgnoreCase) ? "Approved"
-                : string.Equals(decision, "Rejected", StringComparison.OrdinalIgnoreCase) ? "Rejected" : null;
-            if (normalizedDecision == null || note?.Trim().Length > 500)
+            return await _dbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
             {
-                TempData["WorkflowMessage"] = "Select Approve or Reject. Decision notes must be 500 characters or fewer.";
+                _dbContext.ChangeTracker.Clear();
+                var managerId = await GetLoggedInEmployeeIdAsync();
+                if (!managerId.HasValue || !int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return Forbid();
+                var normalizedDecision = string.Equals(decision, "Approved", StringComparison.OrdinalIgnoreCase) ? "Approved"
+                    : string.Equals(decision, "Rejected", StringComparison.OrdinalIgnoreCase) ? "Rejected" : null;
+                if (normalizedDecision == null || note?.Trim().Length > 500)
+                {
+                    TempData["WorkflowMessage"] = "Select Approve or Reject. Decision notes must be 500 characters or fewer.";
+                    return RedirectToAction(nameof(ManagerLeaves));
+                }
+                var request = await _dbContext.LeaveRequests.Include(item => item.Employee).FirstOrDefaultAsync(item => item.Id == id && item.AssignedApproverEmployeeId == managerId && item.EmployeeId != managerId);
+                if (request == null)
+                {
+                    TempData["WorkflowMessage"] = "This leave request is no longer assigned to you. The list has been refreshed.";
+                    return RedirectToAction(nameof(ManagerLeaves));
+                }
+                await using var transaction = await ExtraLeaveFacility.LockAsync(_dbContext, request.EmployeeId);
+                await _dbContext.Entry(request).ReloadAsync();
+                if (_dbContext.Entry(request).State == EntityState.Detached) return NotFound();
+                if (request.AssignedApproverEmployeeId != managerId) return Forbid();
+                if (request.Status != "Pending" || request.ApprovalLevel != "Manager")
+                {
+                    TempData["WorkflowMessage"] = $"This request has already been {request.Status.ToLowerInvariant()}.";
+                    return RedirectToAction(nameof(ManagerLeaves));
+                }
+                var managerName = await _dbContext.AppUsers.Where(x => x.Id == userId).Select(x => x.FullName).SingleAsync();
+                LeaveApprovalWorkflow.DecideManager(request, normalizedDecision, userId, managerName, note);
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+                TempData["WorkflowMessage"] = request.IsExtraFacility || request.IsHalfDay ? "Manager decision recorded. Request sent to HR for final approval." : normalizedDecision == "Approved" ? "Manager approval recorded. Request sent to HR/Admin for final approval." : "Leave request rejected. HR/Admin can see the updated status.";
                 return RedirectToAction(nameof(ManagerLeaves));
-            }
-            var request = await _dbContext.LeaveRequests.Include(item => item.Employee).FirstOrDefaultAsync(item => item.Id == id && item.AssignedApproverEmployeeId == managerId && item.EmployeeId != managerId);
-            if (request == null)
-            {
-                TempData["WorkflowMessage"] = "This leave request is no longer assigned to you. The list has been refreshed.";
-                return RedirectToAction(nameof(ManagerLeaves));
-            }
-            if (request.Status != "Pending" || request.ApprovalLevel != "Manager")
-            {
-                TempData["WorkflowMessage"] = $"This request has already been {request.Status.ToLowerInvariant()}.";
-                return RedirectToAction(nameof(ManagerLeaves));
-            }
-            var managerName = await _dbContext.AppUsers.Where(x => x.Id == userId).Select(x => x.FullName).SingleAsync();
-            LeaveApprovalWorkflow.DecideManager(request, normalizedDecision, userId, managerName, note);
-            await _dbContext.SaveChangesAsync();
-            TempData["WorkflowMessage"] = normalizedDecision == "Approved" ? "Manager approval recorded. Request sent to HR/Admin for final approval." : "Leave request rejected. HR/Admin can see the updated status.";
-            return RedirectToAction(nameof(ManagerLeaves));
+            });
         }
 
         [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Manager,HR,Admin")]
@@ -1860,27 +1865,48 @@ namespace VertexERP.Controllers
         [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "HR,Admin")]
         public async Task<IActionResult> CancelApprovedLeave(int id, string? note)
         {
-            if (string.IsNullOrWhiteSpace(note) || note.Trim().Length > 500) return BadRequest("Enter a cancellation reason, up to 500 characters.");
-            var request = await _dbContext.LeaveRequests.SingleOrDefaultAsync(x => x.Id == id && x.Status == "Approved");
-            if (request == null) return NotFound();
-            request.Status = "Cancelled";
-            request.DecisionNote = note.Trim();
-            request.DecidedAtUtc = DateTime.UtcNow;
-            request.DecidedByUserId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId) ? userId : null;
-            await _dbContext.SaveChangesAsync();
-            return RedirectToAction(nameof(LeaveStatus));
+            return await _dbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
+            {
+                _dbContext.ChangeTracker.Clear();
+                if (string.IsNullOrWhiteSpace(note) || note.Trim().Length > 500) return BadRequest("Enter a cancellation reason, up to 500 characters.");
+                var request = await _dbContext.LeaveRequests.SingleOrDefaultAsync(x => x.Id == id && x.Status == "Approved");
+                if (request == null) return NotFound();
+                await using var transaction = await ExtraLeaveFacility.LockAsync(_dbContext, request.EmployeeId);
+                await _dbContext.Entry(request).ReloadAsync();
+                if (_dbContext.Entry(request).State == EntityState.Detached) return NotFound();
+                if (request.Status != "Approved") return Conflict("This request changed. Reload and try again.");
+                if (!LeaveApprovalWorkflow.CanTakeFinalAction(request, User.IsInRole("HR"), User.IsInRole("Admin"))) return Forbid();
+                request.Status = "Cancelled";
+                request.DecisionNote = note.Trim();
+                request.DecidedAtUtc = DateTime.UtcNow;
+                request.DecidedByUserId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId) ? userId : null;
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return RedirectToAction(nameof(LeaveStatus));
+            });
         }
 
         [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "HR,Admin")]
         public async Task<IActionResult> DecideManagerLeave(int id, string? decision, string? note)
         {
-            var request = await _dbContext.LeaveRequests.Include(item => item.Employee).FirstOrDefaultAsync(item => item.Id == id && item.ApprovalLevel == "HR/Admin" && item.Status == "Pending");
-            if (request == null) return NotFound();
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return Forbid();
-            if (!LeaveApprovalWorkflow.DecideFinal(request, decision, userId, note))
-                return BadRequest("Select Approve or Reject and enter a note of at most 500 characters.");
-            await _dbContext.SaveChangesAsync();
-            return RedirectToAction(nameof(WorkflowManagement));
+            return await _dbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
+            {
+                _dbContext.ChangeTracker.Clear();
+                var request = await _dbContext.LeaveRequests.Include(item => item.Employee).FirstOrDefaultAsync(item => item.Id == id && item.ApprovalLevel == "HR/Admin" && item.Status == "Pending");
+                if (request == null) return NotFound();
+                await using var transaction = await ExtraLeaveFacility.LockAsync(_dbContext, request.EmployeeId);
+                await _dbContext.Entry(request).ReloadAsync();
+                if (_dbContext.Entry(request).State == EntityState.Detached) return NotFound();
+                if (request.Status != "Pending") return Conflict("This request changed. Reload and try again.");
+                if (request.ApprovalLevel != "HR/Admin") return Conflict("This request is awaiting manager review.");
+                if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return Forbid();
+                if (!LeaveApprovalWorkflow.CanTakeFinalAction(request, User.IsInRole("HR"), User.IsInRole("Admin"))) return Forbid();
+                if (!LeaveApprovalWorkflow.DecideFinal(request, decision, userId, note))
+                    return BadRequest("Select Approve or Reject and enter a note of at most 500 characters.");
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return RedirectToAction(nameof(WorkflowManagement));
+            });
         }
 
         [Authorize(Roles = "Manager")]
@@ -1890,36 +1916,71 @@ namespace VertexERP.Controllers
             return RedirectToAction("Index", "ProjectWorkspace", new { section = "projects" });
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Employee,User,Manager,HR")]
-        public async Task<IActionResult> ApplyLeave(string leaveType, DateOnly fromDate, DateOnly toDate, string reason, bool isHalfDay = false)
+        [HttpGet, Authorize(Roles = "Employee,User,Manager,HR")]
+        public async Task<IActionResult> ExtraLeaveQuota(DateOnly? date, int? excludingId = null)
         {
-            var userIdText = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var employeeId = int.TryParse(userIdText, out var userId)
-                ? await _dbContext.AppUsers.Where(user => user.Id == userId).Select(user => user.EmployeeId).FirstOrDefaultAsync()
-                : null;
-            if (!employeeId.HasValue)
+            var employeeId = await GetLoggedInEmployeeIdAsync();
+            if (!employeeId.HasValue) return Forbid();
+            var selected = date ?? DateOnly.FromDateTime(FieldAttendanceClock.Now);
+            if (!ModelState.IsValid || selected.Year is < 2000 or > 2100) return BadRequest();
+            var first = new DateOnly(selected.Year, selected.Month, 1);
+            var last = first.AddMonths(1);
+            var requests = await _dbContext.LeaveRequests.AsNoTracking().Where(x => x.EmployeeId == employeeId.Value
+                && x.IsExtraFacility && x.FromDate >= first && x.FromDate < last).ToListAsync();
+            Response.Headers.CacheControl = "no-store";
+            return Json(new { month = selected.ToString("MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture),
+                halfDay = ExtraLeaveFacility.Quota(requests, employeeId.Value, selected, ExtraLeaveFacility.HalfDay, excludingId),
+                shortLeave = ExtraLeaveFacility.Quota(requests, employeeId.Value, selected, ExtraLeaveFacility.ShortLeave, excludingId) });
+        }
+
+        [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Employee,User,Manager,HR")]
+        public async Task<IActionResult> ApplyLeave(string leaveType, DateOnly fromDate, DateOnly toDate, string reason,
+            bool isHalfDay = false, string? halfDaySession = null, TimeOnly? shortLeaveFrom = null, TimeOnly? shortLeaveTo = null)
+        {
+            return await _dbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
             {
-                TempData["LeaveError"] = "Your login is not linked to an employee profile.";
+                _dbContext.ChangeTracker.Clear();
+                var employeeId = await GetLoggedInEmployeeIdAsync();
+                if (!employeeId.HasValue)
+                {
+                    TempData["LeaveError"] = "Your login is not linked to an employee profile.";
+                    return RedirectToAction(nameof(EmployeeLeaves));
+                }
+                // Any new half-day application uses the extra paid facility, including older form entry points.
+                var type = isHalfDay ? ExtraLeaveFacility.HalfDay : leaveType?.Trim();
+                var facility = ExtraLeaveFacility.IsFacilityType(type);
+                var valid = facility ? ExtraLeaveFacility.Valid(type!, fromDate, toDate, reason, halfDaySession, shortLeaveFrom, shortLeaveTo)
+                    : LeaveApprovalWorkflow.ValidApplication(type, fromDate, toDate, reason, false);
+                if (!ModelState.IsValid || !valid || fromDate.Year is < 2000 or > 2100 || toDate.Year is < 2000 or > 2100)
+                {
+                    TempData["LeaveError"] = facility ? "Select a single date, a valid half-day session or short leave of up to 2 hours, and a reason (up to 500 characters)."
+                        : "Please enter a valid leave type, date range and reason.";
+                    return RedirectToAction(nameof(EmployeeLeaves));
+                }
+                var employee = await _dbContext.Employees.AsNoTracking().SingleAsync(x => x.Id == employeeId.Value);
+                var senior = !facility && (User.IsInRole("Manager") || User.IsInRole("HR"));
+                if (!senior && (!employee.ReportingManagerId.HasValue || employee.ReportingManagerId == employee.Id))
+                {
+                    TempData["LeaveError"] = "Please contact HR to assign your reporting manager before applying for leave.";
+                    return RedirectToAction(nameof(EmployeeLeaves));
+                }
+                await using var transaction = await ExtraLeaveFacility.LockAsync(_dbContext, employee.Id);
+                var request = new LeaveRequest { EmployeeId = employee.Id, LeaveType = type!.ToUpperInvariant(),
+                    FromDate = fromDate, ToDate = toDate, Reason = reason.Trim(), ApprovalLevel = senior ? "HR/Admin" : "Manager",
+                    AssignedApproverEmployeeId = senior ? null : employee.ReportingManagerId };
+                if (facility)
+                {
+                    ExtraLeaveFacility.SetDetails(request, type!, halfDaySession, shortLeaveFrom, shortLeaveTo);
+                    var error = await ExtraLeaveFacility.ApplicationError(_dbContext, request);
+                    if (error != null) { TempData["LeaveError"] = error; return RedirectToAction(nameof(EmployeeLeaves)); }
+                }
+                _dbContext.LeaveRequests.Add(request);
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+                TempData["LeaveMessage"] = facility ? "Extra paid facility request sent to your manager, then HR. Your regular leave balance will not be deducted."
+                    : senior ? "Leave request submitted to HR/Admin." : "Leave request submitted to your manager. HR/Admin approval will follow.";
                 return RedirectToAction(nameof(EmployeeLeaves));
-            }
-            if (!ModelState.IsValid || !LeaveApprovalWorkflow.ValidApplication(leaveType, fromDate, toDate, reason, isHalfDay))
-            {
-                TempData["LeaveError"] = "Please enter a valid leave type, date range and reason.";
-                return RedirectToAction(nameof(EmployeeLeaves));
-            }
-            var employee = await _dbContext.Employees.AsNoTracking().FirstAsync(item => item.Id == employeeId.Value);
-            var seniorApplicant = User.IsInRole("Manager") || User.IsInRole("HR");
-            if (!seniorApplicant && !employee.ReportingManagerId.HasValue)
-            {
-                TempData["LeaveError"] = "Please contact HR to assign your reporting manager before applying for leave.";
-                return RedirectToAction(nameof(EmployeeLeaves));
-            }
-            _dbContext.LeaveRequests.Add(new LeaveRequest { EmployeeId = employee.Id, LeaveType = leaveType!.Trim().ToUpperInvariant(), FromDate = fromDate, ToDate = toDate, IsHalfDay = isHalfDay, Reason = reason.Trim(), ApprovalLevel = seniorApplicant ? "HR/Admin" : "Manager", AssignedApproverEmployeeId = seniorApplicant ? null : employee.ReportingManagerId });
-            await _dbContext.SaveChangesAsync();
-            TempData["LeaveMessage"] = seniorApplicant ? "Leave request submitted to HR/Admin." : "Leave request submitted to your manager. HR/Admin approval will follow.";
-            return RedirectToAction(nameof(EmployeeLeaves));
+            });
         }
 
         public IActionResult AccessDenied()

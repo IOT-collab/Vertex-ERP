@@ -1,15 +1,19 @@
 @model VertexERP.Models.LeaveRequest
+@if (Model.IsExtraFacility) { <small>Extra paid facility - no regular leave deduction</small> }
+@if (Model.IsExtraFacility && Model.LeaveType == VertexERP.Services.ExtraLeaveFacility.ShortLeave)
+{ <small>Short leave: @Model.ShortLeaveFrom?.ToString("HH:mm") - @Model.ShortLeaveTo?.ToString("HH:mm") (@((Model.ShortLeaveTo - Model.ShortLeaveFrom)?.TotalMinutes.ToString("0")) minutes)</small> }
+@if (Model.IsHalfDay) { <small>Half day - @(Model.HalfDaySession == "First" ? "1st Half" : Model.HalfDaySession == "Second" ? "2nd Half" : "Session not recorded") - 0.5 day</small> }
 @if (Model.FromDate < DateOnly.FromDateTime(VertexERP.Services.FieldAttendanceClock.IndiaTime(new DateTimeOffset(DateTime.SpecifyKind(Model.AppliedAtUtc, DateTimeKind.Utc)))))
 {
     <small>Back-date leave</small>
 }
 @if (Model.ManagerDecision != null)
 {
-    <small>Manager: @Model.ManagerDecision Â· @Model.ManagerDecidedByName Â· @Model.ManagerDecidedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small>
+    <small>Manager: @Model.ManagerDecision - @Model.ManagerDecidedByName - @Model.ManagerDecidedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small>
     @if (!string.IsNullOrWhiteSpace(Model.ManagerDecisionNote)) { <small>@Model.ManagerDecisionNote</small> }
 }
 @if (Model.DecidedAtUtc.HasValue)
 {
-    <small>@Model.ApprovalLevel: @Model.Status Â· @Model.DecidedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small>
+    <small>@((Model.IsHalfDay || Model.IsExtraFacility) && Model.ApprovalLevel == "HR/Admin" ? "HR" : Model.ApprovalLevel): @Model.Status - @Model.DecidedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small>
     @if (!string.IsNullOrWhiteSpace(Model.DecisionNote)) { <small>@Model.DecisionNote</small> }
 }

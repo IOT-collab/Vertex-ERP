@@ -1,13 +1,13 @@
-﻿/* =========================================================
+/* =========================================================
    PROJECT MANAGEMENT STYLES (projectcreation.css)
    ========================================================= */
 
 .project-page {
     padding: 20px;
-    background-color: #0b1329; /* Dark theme background matching ERP */
+    background-color: var(--erp-surface, #0b1329); /* Dark theme background matching ERP */
     min-height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #e2e8f0;
+    color: var(--erp-text, #e2e8f0);
 }
 
 /* --- Page Header & Left Alignment --- */
@@ -15,10 +15,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #182238;
+    background: var(--erp-surface-soft, #182238);
     padding: 18px 24px;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.08)) 8%, transparent);
     margin-bottom: 20px;
     gap: 16px;
 }
@@ -39,7 +39,7 @@
     width: 16px;
     height: 40px;
     padding: 3px 2px;
-    background-color: #ffffff;
+    background-color: var(--erp-surface, #ffffff);
     border-radius: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     text-decoration: none;
@@ -51,13 +51,13 @@
 .pill-knob {
     width: 10px;
     height: 10px;
-    background-color: #0f172a;
+    background-color: var(--erp-surface, #0f172a);
     border-radius: 50%;
     transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .pill-back-btn:hover {
-    background-color: #f8fafc;
+    background-color: var(--erp-surface, #f8fafc);
     box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
 }
 
@@ -73,14 +73,14 @@
     .header-text h2 {
         font-size: 22px;
         font-weight: 700;
-        color: #ffffff;
+        color: var(--erp-text, #ffffff);
         margin: 0 0 2px 0;
         text-align: left;
     }
 
     .header-text p {
         font-size: 13px;
-        color: #94a3b8;
+        color: var(--erp-text-muted, #94a3b8);
         margin: 0;
         text-align: left;
     }
@@ -94,16 +94,16 @@
     font-size: 15px;
     border-radius: 8px;
     text-decoration: none;
-    background-color: #1e293b;
-    color: #94a3b8;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: var(--erp-surface-soft, #1e293b);
+    color: var(--erp-text-muted, #94a3b8);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.1)) 10%, transparent);
     transition: all 0.2s ease-in-out;
     flex-shrink: 0;
 }
 
     .btn-secondary-action:hover {
-        background-color: #334155;
-        color: #ffffff;
+        background-color: var(--erp-surface-soft, #334155);
+        color: var(--erp-text, #ffffff);
     }
 
 /* --- Summary Metrics Bar --- */
@@ -115,10 +115,10 @@
 }
 
 .summary-card {
-    background: #182238;
+    background: var(--erp-surface-soft, #182238);
     padding: 18px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.08)) 8%, transparent);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     text-align: center;
     transition: transform 0.2s ease;
@@ -138,7 +138,7 @@
     .summary-card p {
         font-size: 11px;
         font-weight: 600;
-        color: #94a3b8;
+        color: var(--erp-text-muted, #94a3b8);
         margin: 0;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -152,9 +152,9 @@
 }
 
 .form-card, .table-card {
-    background: #182238;
+    background: var(--erp-surface-soft, #182238);
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.08)) 8%, transparent);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     padding: 24px;
 }
@@ -165,13 +165,13 @@
     align-items: center;
     padding-bottom: 16px;
     margin-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.08)) 8%, transparent);
 }
 
     .card-header h3 {
         font-size: 18px;
         font-weight: 700;
-        color: #ffffff;
+        color: var(--erp-text, #ffffff);
         margin: 0;
     }
 
@@ -210,7 +210,7 @@
     .form-group label {
         font-size: 13px;
         font-weight: 600;
-        color: #cbd5e1;
+        color: var(--erp-text, #cbd5e1);
     }
 
 .req {
@@ -221,10 +221,10 @@
     width: 100%;
     padding: 10px 12px;
     font-size: 14px;
-    border: 1px solid #334155;
+    border: 1px solid var(--erp-border, #334155);
     border-radius: 6px;
-    background-color: #0f172a;
-    color: #ffffff;
+    background-color: var(--erp-surface, #0f172a);
+    color: var(--erp-text, #ffffff);
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -240,12 +240,12 @@
     gap: 12px;
     margin-top: 12px;
     padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.08)) 8%, transparent);
 }
 
 .btn-submit {
-    background-color: #2563eb;
-    color: #ffffff;
+    background-color: var(--erp-primary, var(--erp-primary, #2563eb));
+    color: var(--theme-accent-text, #ffffff);
     border: none;
     padding: 10px 24px;
     border-radius: 6px;
@@ -260,9 +260,9 @@
     }
 
 .btn-reset {
-    background-color: #1e293b;
-    color: #94a3b8;
-    border: 1px solid #334155;
+    background-color: var(--erp-surface-soft, #1e293b);
+    color: var(--erp-text-muted, #94a3b8);
+    border: 1px solid var(--erp-border, #334155);
     padding: 10px 18px;
     border-radius: 6px;
     font-size: 14px;
@@ -271,8 +271,8 @@
 }
 
     .btn-reset:hover {
-        background-color: #334155;
-        color: #ffffff;
+        background-color: var(--erp-surface-soft, #334155);
+        color: var(--erp-text, #ffffff);
     }
 
 /* --- Table Controls --- */
@@ -288,17 +288,17 @@
 }
 
     .data-table th {
-        background-color: #0f172a;
-        color: #94a3b8;
+        background-color: var(--erp-surface, #0f172a);
+        color: var(--erp-text-muted, #94a3b8);
         font-weight: 600;
         padding: 12px 14px;
-        border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 2px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.08)) 8%, transparent);
     }
 
     .data-table td {
         padding: 12px 14px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        color: #cbd5e1;
+        border-bottom: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.05)) 5%, transparent);
+        color: var(--erp-text, #cbd5e1);
     }
 
 .text-right {
@@ -311,7 +311,7 @@
 
 .empty-state {
     padding: 24px;
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
 }
 
 /* --- Fully Responsive Media Queries --- */

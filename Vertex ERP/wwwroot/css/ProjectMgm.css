@@ -23,10 +23,10 @@
         align-items: center;
         gap: 8px;
         padding: 8px 16px;
-        background: #ffffff;
-        border: 1px solid #cbd5e1;
+        background: var(--erp-surface, #ffffff);
+        border: 1px solid var(--erp-border, #cbd5e1);
         border-radius: 8px;
-        color: #0f172a;
+        color: var(--erp-text, #0f172a);
         font-size: 14px;
         font-weight: 600;
         cursor: pointer;
@@ -35,7 +35,7 @@
     }
 
         .project-page .btn-back:hover {
-            background: #f8fafc;
+            background: var(--erp-surface, #f8fafc);
             border-color: #5b4bdb;
             color: #5b4bdb;
             transform: translateX(-3px);
@@ -62,13 +62,13 @@
     }
 
     .project-page .page-header h2 {
-        color: #2c3e50;
+        color: var(--erp-text, #2c3e50);
         font-size: 28px;
         font-weight: 700;
     }
 
     .project-page .page-header p {
-        color: #64748b;
+        color: var(--erp-text-muted, #64748b);
         margin-top: 4px;
         font-size: 14px;
     }
@@ -76,7 +76,7 @@
     /* Primary CTA Button */
     .project-page .btn-add {
         background: #5b4bdb;
-        color: #ffffff;
+        color: var(--theme-accent-text, #ffffff);
         border: none;
         padding: 12px 22px;
         border-radius: 10px;
@@ -104,12 +104,12 @@
     }
 
     .project-page .summary-card {
-        background: #ffffff;
+        background: var(--erp-surface, #ffffff);
         padding: 22px;
         border-radius: 14px;
         text-align: center;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--erp-border, #e2e8f0);
     }
 
         .project-page .summary-card h2 {
@@ -120,7 +120,7 @@
         }
 
         .project-page .summary-card p {
-            color: #64748b;
+            color: var(--erp-text-muted, #64748b);
             font-size: 13.5px;
             font-weight: 600;
         }
@@ -133,12 +133,12 @@
     }
 
     .project-page .module-card {
-        background: #ffffff;
+        background: var(--erp-surface, #ffffff);
         border-radius: 16px;
         padding: 26px 20px;
         text-align: center;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--erp-border, #e2e8f0);
         border-top: 5px solid #5b4bdb;
         display: flex;
         flex-direction: column;
@@ -155,7 +155,7 @@
         width: 70px;
         height: 70px;
         border-radius: 50%;
-        background: #ede9fe;
+        background: var(--erp-surface-soft, #ede9fe);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -165,14 +165,14 @@
     }
 
     .project-page .module-card h3 {
-        color: #1e293b;
+        color: var(--erp-text, #1e293b);
         font-size: 17px;
         font-weight: 700;
         margin-bottom: 10px;
     }
 
     .project-page .module-card p {
-        color: #64748b;
+        color: var(--erp-text-muted, #64748b);
         font-size: 13.5px;
         line-height: 1.5;
         min-height: 48px;
@@ -184,7 +184,7 @@
         width: 100%;
         padding: 11px;
         background: #5b4bdb;
-        color: #ffffff;
+        color: var(--theme-accent-text, #ffffff);
         border-radius: 8px;
         text-decoration: none;
         display: inline-block;

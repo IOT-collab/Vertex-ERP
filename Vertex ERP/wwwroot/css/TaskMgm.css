@@ -1,13 +1,13 @@
-﻿/* =====================================================
+/* =====================================================
    TASK MANAGEMENT CORE LAYOUT & RESPONSIVE CONFIG
 ===================================================== */
 
 :root {
-    --bg-dark: #0f172a;
-    --card-bg: #1e293b;
-    --card-border: #334155;
-    --text-white: #f8fafc;
-    --text-muted: #94a3b8;
+    --bg-dark: var(--erp-surface, #0f172a);
+    --card-bg: var(--erp-surface-soft, #1e293b);
+    --card-border: var(--erp-border, #334155);
+    --text-white: var(--erp-text, #f8fafc);
+    --text-muted: var(--erp-text-muted, #94a3b8);
     --text-accent: #38bdf8;
     --accent-blue: #2563eb;
     --accent-purple: #8b5cf6;
@@ -41,9 +41,9 @@
     align-items: center;
     justify-content: center;
     border-radius: 10px;
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #1e293b;
+    background: var(--erp-surface, #ffffff);
+    border: 1px solid var(--erp-border, #cbd5e1);
+    color: var(--erp-text, #1e293b);
     font-size: 15px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -51,7 +51,7 @@
 }
 
     .btn-back:hover {
-        background: #f1f5f9;
+        background: var(--erp-surface, #f1f5f9);
         border-color: #2563eb;
         color: #2563eb;
         transform: translateX(-3px);
@@ -123,12 +123,12 @@
 
     .switch-btn.active {
         background: var(--accent-blue);
-        color: #ffffff;
+        color: var(--theme-accent-text, #ffffff);
     }
 
 .btn-assign {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--erp-primary, var(--erp-primary, #2563eb)) 0%, var(--erp-primary, var(--erp-primary, #1d4ed8)) 100%);
+    color: var(--theme-accent-text, #ffffff);
     border: none;
     padding: 10px 18px;
     border-radius: 8px;
@@ -173,7 +173,7 @@
     align-items: center;
     justify-content: center;
     font-size: 18px;
-    color: #ffffff;
+    color: var(--theme-accent-text, #ffffff);
     flex-shrink: 0;
 }
 
@@ -254,7 +254,7 @@
     .assignment-table th {
         color: var(--text-muted);
         font-weight: 600;
-        background: rgba(15, 23, 42, 0.4);
+        background: color-mix(in srgb, var(--erp-surface, rgba(15, 23, 42, 0.4)) 40%, transparent);
     }
 
 /* Filter Bar Component */
@@ -310,7 +310,7 @@
 }
 
 .kanban-col {
-    background: rgba(30, 41, 59, 0.5);
+    background: color-mix(in srgb, var(--erp-surface-soft, rgba(30, 41, 59, 0.5)) 50%, transparent);
     border: 1px solid var(--card-border);
     border-radius: 12px;
     padding: 16px;
@@ -384,7 +384,7 @@
 
     .btn-gantt-mode.active {
         background: var(--accent-blue);
-        color: #ffffff;
+        color: var(--theme-accent-text, #ffffff);
         border-color: var(--accent-blue);
     }
 
@@ -518,7 +518,7 @@
 .btn-submit {
     background: var(--accent-blue);
     border: none;
-    color: #ffffff;
+    color: var(--theme-accent-text, #ffffff);
     padding: 8px 16px;
     border-radius: 6px;
     font-size: 13px;

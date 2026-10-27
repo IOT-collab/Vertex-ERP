@@ -1,0 +1,11 @@
+const fs=require('node:fs');
+const vm=require('node:vm');
+const assert=require('node:assert/strict');
+const path=require('node:path');
+const context={window:{},document:{getElementById:()=>null},Intl,Date};
+vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../../Vertex ERP/wwwroot/js/manager-dashboard.js'),'utf8'),context);
+const clock=context.window.VertexManagerDashboardClock;
+for(const [utc,want] of [['2026-10-26T00:00:00Z','Good Morning'],['2026-10-26T06:29:59Z','Good Morning'],['2026-10-26T06:30:00Z','Good Afternoon'],['2026-10-26T11:29:59Z','Good Afternoon'],['2026-10-26T11:30:00Z','Good Evening'],['2026-10-26T18:29:59Z','Good Evening'],['2026-10-26T18:30:00Z','Good Morning']])assert.equal(clock.greeting(new Date(utc)),want,utc);
+const nextDay=clock.indiaParts(new Date('2026-10-31T20:00:00Z'));
+assert.equal(nextDay.year,'2026');assert.equal(nextDay.month,'11');assert.equal(nextDay.day,'01');
+console.log('Manager dashboard clock checks passed: India morning/afternoon/evening, midnight and month rollover.');

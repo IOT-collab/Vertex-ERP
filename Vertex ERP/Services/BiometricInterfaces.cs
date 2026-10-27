@@ -22,6 +22,14 @@ public interface IAttendanceSyncService
 public interface IAttendanceProcessingService
 {
     Task<AttendancePageViewModel> GetDailyAttendanceAsync(DateOnly date, string? search, string? department, string? status, CancellationToken cancellationToken = default);
+    async Task<IReadOnlyList<DailyAttendanceViewModel>> GetAttendanceRangeAsync(DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
+    {
+        var records = new List<DailyAttendanceViewModel>();
+        for (var day = from; day <= to; day = day.AddDays(1))
+            records.AddRange((await GetDailyAttendanceAsync(day, null, null, null, cancellationToken)).Records);
+        return records;
+    }
+
 }
 
 public sealed record AttendanceSyncResult(bool Accepted, int Received, int Saved, int Unmapped, string Message);
@@ -30,6 +38,6 @@ public sealed record NormalizedBiometricPunch(string DeviceUserId, DateTime Punc
 public sealed class AttendanceOptions
 {
     public const string SectionName = "AttendanceProcessing";
-    public string WorkDayStart { get; set; } = "09:30";
+    public string WorkDayStart { get; set; } = "09:45";
     public int OnlineThresholdMinutes { get; set; } = 10;
 }

@@ -20,11 +20,13 @@
 <label><input asp-for="ConfirmReplaceManual"/> I reviewed the existing balances and entered all working days and additional usage to replace the manual totals.</label>}
 <div class="manual-category-grid">
 <fieldset><legend>EL carry forward</legend><label>Opening EL<input asp-for="OpeningEL" type="number" min="0" max="3660" step="0.5" required/></label><p>Previous year available: @(Model.PreviousEL?.ToString("0.##") ?? "Not recorded")</p></fieldset>
+<fieldset><legend>CL carry forward</legend><label>Opening CL<input asp-for="OpeningCL" type="number" min="0" max="3660" step="0.5" required/></label><p>Previous year available: @(Model.PreviousCL?.ToString("0.##") ?? "Not recorded")</p></fieldset>
+<fieldset><legend>ML carry forward</legend><label>Opening ML<input asp-for="OpeningML" type="number" min="0" max="3660" step="0.5" required/></label><p>Previous year available: @(Model.PreviousML?.ToString("0.##") ?? "Not recorded")</p></fieldset>
 <fieldset><legend>EW carry forward</legend><label>Opening EW<input asp-for="OpeningEW" type="number" min="0" max="3660" step="0.5" required/></label><p>Previous year available: @(Model.PreviousEW?.ToString("0.##") ?? "Not recorded")</p></fieldset>
 </div>
-@if(Model.PreviousEL.HasValue || Model.PreviousEW.HasValue){
-<button type="button" id="refresh-opening" data-el="@N(Math.Max(0, Model.PreviousEL ?? Model.OpeningEL))" data-ew="@N(Math.Max(0, Model.PreviousEW ?? Model.OpeningEW))">Use previous year's closing balances</button>
-@if(Model.HasSavedCalculation && ((Model.PreviousEL.HasValue && Model.OpeningEL!=Math.Max(0,Model.PreviousEL.Value)) || (Model.PreviousEW.HasValue && Model.OpeningEW!=Math.Max(0,Model.PreviousEW.Value)))){<p class="manual-notice">Opening balance differs from the previous year's current closing balance. Review and refresh if appropriate.</p>}}
+@if(Model.PreviousEL.HasValue || Model.PreviousEW.HasValue || Model.PreviousCL.HasValue || Model.PreviousML.HasValue){
+<button type="button" id="refresh-opening" data-el="@N(Math.Max(0, Model.PreviousEL ?? Model.OpeningEL))" data-ew="@N(Math.Max(0, Model.PreviousEW ?? Model.OpeningEW))" data-cl="@N(Math.Max(0, Model.PreviousCL ?? Model.OpeningCL))" data-ml="@N(Math.Max(0, Model.PreviousML ?? Model.OpeningML))">Use previous year's closing balances</button>
+@if(Model.HasSavedCalculation && ((Model.PreviousEL.HasValue && Model.OpeningEL!=Math.Max(0,Model.PreviousEL.Value)) || (Model.PreviousEW.HasValue && Model.OpeningEW!=Math.Max(0,Model.PreviousEW.Value)) || (Model.PreviousCL.HasValue && Model.OpeningCL!=Math.Max(0,Model.PreviousCL.Value)) || (Model.PreviousML.HasValue && Model.OpeningML!=Math.Max(0,Model.PreviousML.Value)))){<p class="manual-notice">Opening balance differs from the previous year's current closing balance. Review and refresh if appropriate.</p>}}
 <p class="manual-help">Additional used means leave not already recorded as an approved request. Half-day entries are allowed. Opening balances are saved once, never added again on repeated saves.</p>
 <div class="manual-table"><table><thead><tr><th>Month</th><th>Working days</th><th>Additional EL used</th><th>Additional CL used</th><th>Additional ML used</th><th>EW earned</th><th>Additional EW used</th></tr></thead><tbody>
 @for(var i=0;i<Model.Months.Count;i++){
@@ -46,7 +48,7 @@
 <p class="manual-help">Negative balances remain visible. Approved requests are read from the latest saved decisions; this preview refreshes when you reload.</p>
 <div class="manual-actions"><button type="submit">Save Calculation &amp; Update Leaves</button></div>
 </form></section>
-<style>#calculator{padding:24px}#calculator input[type=number]{width:100%;min-width:80px;padding:9px;border:1px solid #64748b;border-radius:6px;background:transparent;color:inherit}#calculator .manual-table{margin-top:20px}#calculator [data-negative=true]{color:#ef4444;font-weight:bold}</style>
+<style>#calculator{padding:24px}#calculator input[type=number]{width:100%;min-width:80px;padding:9px;border:1px solid var(--erp-border, #64748b);border-radius:6px;background:transparent;color:inherit}#calculator .manual-table{margin-top:20px}#calculator [data-negative=true]{color:#ef4444;font-weight:bold}</style>
 <script>
 (()=>{
 const form=document.getElementById('calculator');
@@ -55,6 +57,6 @@ const opening=c=>Number(form.elements.namedItem('Opening'+c)?.value)||0;
 function update(){const days=sum('WorkingDays');document.getElementById('working-total').textContent=days;
 form.querySelectorAll('[data-category]').forEach(row=>{const c=row.dataset.category,earned=c==='EW'?sum('EarnedEW'):Math.floor(days/(c==='EL'?20:40)),adjusted=sum('Adjusted'+c),used=Number(row.dataset.approved)+adjusted,available=opening(c)+earned-used;
 Object.entries({opening:opening(c),earned,adjusted,used,available}).forEach(([key,value])=>{const cell=row.querySelector(`[data-value="${key}"]`);cell.textContent=value;cell.dataset.negative=String(value<0);});});}
-form.addEventListener('input',update);document.getElementById('refresh-opening')?.addEventListener('click',e=>{form.elements.OpeningEL.value=e.currentTarget.dataset.el;form.elements.OpeningEW.value=e.currentTarget.dataset.ew;update();});update();
+form.addEventListener('input',update);document.getElementById('refresh-opening')?.addEventListener('click',e=>{['EL','CL','ML','EW'].forEach(c=>{form.elements.namedItem('Opening'+c).value=e.currentTarget.dataset[c.toLowerCase()];});update();});update();
 })();
 </script>

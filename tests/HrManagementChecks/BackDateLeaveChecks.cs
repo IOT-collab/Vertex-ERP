@@ -31,6 +31,18 @@ static class BackDateLeaveChecks
         var hrRejected = new LeaveRequest();
         LeaveApprovalWorkflow.DecideManager(hrRejected, "Approved", 2, "Manager", null);
         Check(LeaveApprovalWorkflow.DecideFinal(hrRejected, "Rejected", 3, "Declined") && hrRejected.ManagerDecision == "Approved" && hrRejected.Status == "Rejected", "HR rejection preserves manager approval");
+        Check(LeaveApprovalWorkflow.ValidHalfDaySession(true, "First") && LeaveApprovalWorkflow.ValidHalfDaySession(true, "Second"), "Both half-day sessions accepted");
+        Check(!LeaveApprovalWorkflow.ValidHalfDaySession(true, null) && !LeaveApprovalWorkflow.ValidHalfDaySession(true, "invalid"), "Half-day session required and validated");
+        foreach (var managerDecision in new[] { "Approved", "Rejected" })
+        foreach (var finalDecision in new[] { "Approved", "Rejected" })
+        {
+            var half = new LeaveRequest { EmployeeId = 1, IsHalfDay = true, HalfDaySession = "Second", LeaveType = "CL", FromDate = past, ToDate = past };
+            Check(!LeaveApprovalWorkflow.DecideFinal(half, finalDecision, 3, null), "Half day cannot bypass manager");
+            Check(LeaveApprovalWorkflow.DecideManager(half, managerDecision, 2, "Manager", "Reviewed") && half.Status == "Pending" && half.ApprovalLevel == "HR/Admin", "Half-day manager " + managerDecision + " forwards to HR");
+            Check(LeaveBalanceCalculator.Days(new[] { half }, 2025, "Approved") == 0, "Manager decision does not deduct half day");
+            Check(LeaveApprovalWorkflow.DecideFinal(half, finalDecision, 3, "Final review") && half.ManagerDecision == managerDecision && half.HalfDaySession == "Second", "HR final decision preserves manager decision and session");
+            Check(LeaveBalanceCalculator.Days(new[] { half }, 2025, "Approved") == (finalDecision == "Approved" ? .5m : 0m), "Only HR approval deducts 0.5 day");
+        }
         Console.WriteLine($"{passed} back-date leave checks passed.");
     }
 }

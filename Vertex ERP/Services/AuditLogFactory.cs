@@ -19,6 +19,9 @@ public static class AuditLogFactory
     {
         if (entry.Entity is AuditLog or PasswordResetToken
             || entry.State is not (EntityState.Added or EntityState.Modified or EntityState.Deleted)) return null;
+        // This manual-entry workflow stores only effective attendance, without an activity log.
+        if (entry.Entity is AttendanceLog { WorkCode: ManualAttendance.CorrectionCode }
+            || entry.Entity is BiometricDevice { SerialNumber: "MANUAL-ENTRY" }) return null;
         var type = entry.Metadata.ClrType.Name;
         var action = entry.State switch { EntityState.Added => "added", EntityState.Deleted => "deleted", _ => "updated" };
         // Never copy arbitrary field values: records can contain credentials, bank details or documents.
@@ -54,7 +57,7 @@ public static class AuditLogFactory
         }
         else if (entry.Entity is LeaveCalculation calculation)
         {
-            detail = $"Employee #{calculation.EmployeeId}, year {calculation.Year}, revision {calculation.Revision}; Opening EL {calculation.OpeningEL}, EW {calculation.OpeningEW}; Monthly entries: {calculation.MonthsJson}";
+            detail = $"Employee #{calculation.EmployeeId}, year {calculation.Year}, revision {calculation.Revision}; Opening EL {calculation.OpeningEL}, EW {calculation.OpeningEW}, CL {calculation.OpeningCL}, ML {calculation.OpeningML}; Monthly entries: {calculation.MonthsJson}";
         }
         else if (entry.Entity is ManualLeaveBalance balance)
         {

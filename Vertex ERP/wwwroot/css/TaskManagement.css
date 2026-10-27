@@ -1,4 +1,4 @@
-﻿/* =====================================================
+/* =====================================================
    TASK MANAGEMENT - RESPONSIVE FIXES
 ===================================================== */
 
@@ -20,17 +20,17 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #f1f5f9;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.08)) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.12)) 12%, transparent);
+    color: var(--erp-text, #f1f5f9);
     font-size: 15px;
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
     .btn-back:hover {
-        background: rgba(255, 255, 255, 0.14);
-        border-color: rgba(255, 255, 255, 0.2);
+        background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.14)) 14%, transparent);
+        border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.2)) 20%, transparent);
         transform: translateX(-2px);
     }
 

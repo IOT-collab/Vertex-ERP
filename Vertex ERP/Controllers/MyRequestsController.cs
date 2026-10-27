@@ -30,43 +30,63 @@ public sealed class MyRequestsController(ApplicationDbContext db) : Controller
     }
 
     [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditLeave(int id, string leaveType, DateOnly fromDate, DateOnly toDate, string reason, bool isHalfDay)
+    public async Task<IActionResult> EditLeave(int id, string leaveType, DateOnly fromDate, DateOnly toDate, string reason,
+        bool isHalfDay = false, string? halfDaySession = null, TimeOnly? shortLeaveFrom = null, TimeOnly? shortLeaveTo = null)
     {
-        var employee = await CurrentEmployee();
-        if (employee is null) return Forbid();
-        var request = await db.LeaveRequests.SingleOrDefaultAsync(x => x.Id == id && x.EmployeeId == employee.Id);
-        if (request is null) return NotFound();
-        if (!EmployeeRequestChanges.CanChangeLeave(request, employee.Id)) return LeaveError();
-        if (!ModelState.IsValid || !LeaveApprovalWorkflow.ValidApplication(leaveType, fromDate, toDate, reason, isHalfDay))
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
         {
-            TempData["LeaveError"] = "Please enter a valid leave type, date range and reason.";
-            return RedirectToAction(nameof(EditLeave), new { id });
-        }
-        var senior = User.IsInRole("Manager") || User.IsInRole("HR");
-        if (!senior && !employee.ReportingManagerId.HasValue)
-        {
-            TempData["LeaveError"] = "Please contact HR to assign your reporting manager before applying for leave.";
+            db.ChangeTracker.Clear();
+            var employee = await CurrentEmployee();
+            if (employee is null) return Forbid();
+            await using var transaction = await ExtraLeaveFacility.LockAsync(db, employee.Id);
+            var request = await db.LeaveRequests.SingleOrDefaultAsync(x => x.Id == id && x.EmployeeId == employee.Id);
+            if (request is null) return NotFound();
+            if (!EmployeeRequestChanges.CanChangeLeave(request, employee.Id)) return LeaveError();
+            if (!ModelState.IsValid || fromDate.Year is < 2000 or > 2100 || toDate.Year is < 2000 or > 2100)
+            {
+                TempData["LeaveError"] = "Please enter a valid date, duration and reason.";
+                return RedirectToAction(nameof(EditLeave), new { id });
+            }
+            try
+            {
+                EmployeeRequestChanges.UpdateLeave(request, employee, User.IsInRole("Manager") || User.IsInRole("HR"),
+                    leaveType, fromDate, toDate, reason, isHalfDay, halfDaySession, shortLeaveFrom, shortLeaveTo);
+            }
+            catch (InvalidOperationException)
+            {
+                TempData["LeaveError"] = "Check your reporting manager, dates, reason and half-day session / short leave times (maximum 2 hours).";
+                return RedirectToAction(nameof(EditLeave), new { id });
+            }
+            if (request.IsExtraFacility)
+            {
+                var error = await ExtraLeaveFacility.ApplicationError(db, request);
+                if (error != null) { TempData["LeaveError"] = error; return RedirectToAction(nameof(EditLeave), new { id }); }
+            }
+            await db.SaveChangesAsync();
+            await transaction.CommitAsync();
+            TempData["LeaveMessage"] = "Leave updated and sent for approval again.";
             return RedirectToAction("EmployeeLeaves", "Main");
-        }
-        // A prior manager decision must never approve newly edited dates/reasons.
-        EmployeeRequestChanges.UpdateLeave(request, employee, senior, leaveType, fromDate, toDate, reason, isHalfDay);
-        await db.SaveChangesAsync();
-        TempData["LeaveMessage"] = "Leave updated and sent for approval again.";
-        return RedirectToAction("EmployeeLeaves", "Main");
+        });
     }
 
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteLeave(int id)
     {
-        var employee = await CurrentEmployee();
-        if (employee is null) return Forbid();
-        var request = await db.LeaveRequests.SingleOrDefaultAsync(x => x.Id == id && x.EmployeeId == employee.Id);
-        if (request is null) return NotFound();
-        if (!EmployeeRequestChanges.CanChangeLeave(request, employee.Id)) return LeaveError();
-        db.LeaveRequests.Remove(request);
-        await db.SaveChangesAsync();
-        TempData["LeaveMessage"] = "Leave request deleted successfully.";
-        return RedirectToAction("EmployeeLeaves", "Main");
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
+        {
+            db.ChangeTracker.Clear();
+            var employee = await CurrentEmployee();
+            if (employee is null) return Forbid();
+            await using var transaction = await ExtraLeaveFacility.LockAsync(db, employee.Id);
+            var request = await db.LeaveRequests.SingleOrDefaultAsync(x => x.Id == id && x.EmployeeId == employee.Id);
+            if (request is null) return NotFound();
+            if (!EmployeeRequestChanges.CanChangeLeave(request, employee.Id)) return LeaveError();
+            db.LeaveRequests.Remove(request);
+            await db.SaveChangesAsync();
+            await transaction.CommitAsync();
+            TempData["LeaveMessage"] = "Leave request deleted successfully.";
+            return RedirectToAction("EmployeeLeaves", "Main");
+        });
     }
 
     [HttpGet]

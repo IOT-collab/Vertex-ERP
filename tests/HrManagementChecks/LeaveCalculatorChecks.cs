@@ -48,12 +48,27 @@ static class LeaveCalculatorChecks
         Check(unfilled.Single().Revision==0 && unfilled.Single().PendingDays==2, "Requests remain visible before HR enters entitlement");
         LeaveBalanceCalculator.IncludeUnfilled(unfilled, new[]{pending}, 2026);
         Check(unfilled.Count==1, "Unfilled category creation is idempotent");
+        var carried = new LeaveCalculation { OpeningEL = 4, OpeningCL = 2.5m, OpeningML = 3, OpeningEW = 1 };
+        Check(LeaveBalanceCalculator.Opening(null, "CL") == 0 && LeaveBalanceCalculator.Opening(new LeaveCalculation(), "ML") == 0, "Existing calculations default CL/ML opening to zero");
+        foreach (var category in new[] { "CL", "ML" })
+        {
+            var opening = LeaveBalanceCalculator.Opening(carried, category);
+            var earned = LeaveBalanceCalculator.Calculate(entries, category).Earned;
+            var carriedBalance = new ManualLeaveBalance { EmployeeId = 1, Year = 2026, Category = category, TotalDays = opening + earned, UsedDays = .5m };
+            var categoryRequest = new LeaveRequest { EmployeeId = 1, LeaveType = category, FromDate = new(2026, 2, 3), ToDate = new(2026, 2, 3), Status = "Approved", IsHalfDay = true };
+            LeaveBalanceCalculator.ApplyRequests(new[] { carriedBalance }, new[] { categoryRequest });
+            Check(carriedBalance.AvailableDays == opening, category + " includes carry forward and earned less approved and additional usage");
+            carriedBalance.TotalDays = LeaveBalanceCalculator.Opening(carried, category) + earned;
+            LeaveBalanceCalculator.ApplyRequests(new[] { carriedBalance }, new[] { categoryRequest });
+            Check(carriedBalance.AvailableDays == opening, category + " repeated save does not duplicate carry forward");
+        }
         var roles=typeof(LeaveBalancesController).GetCustomAttributes(typeof(AuthorizeAttribute),true).Cast<AuthorizeAttribute>().Single().Roles;
         Check(roles=="Admin,HR", "Calculator limited to HR and Admin");
         Check(typeof(LeaveBalancesController).GetMethods().Where(x=>x.Name=="Calculate" && x.IsDefined(typeof(HttpPostAttribute),true)).Single().IsDefined(typeof(ValidateAntiForgeryTokenAttribute),true), "Calculator POST requires antiforgery");
         using var db=new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>().UseNpgsql("Host=localhost;Database=unused").Options);
         var entity=db.Model.FindEntityType(typeof(LeaveCalculation))!;
         Check(entity.GetIndexes().Any(x=>x.IsUnique && x.Properties.Select(p=>p.Name).SequenceEqual(new[]{"EmployeeId","Year"})), "One calculator per employee/year");
+        Check(entity.FindProperty("OpeningCL")!.GetPrecision() == 10 && entity.FindProperty("OpeningML")!.GetScale() == 2, "CL/ML opening balances preserve half-day precision");
         Check(entity.FindProperty("Revision")!.IsConcurrencyToken, "Calculator rejects concurrent stale updates");
         Check(db.Model.FindEntityType(typeof(ManualLeaveBalance))!.FindProperty("ApprovedDays")==null, "Approved usage is derived, never stale persisted state");
         Console.WriteLine($"{count} leave calculator checks passed.");

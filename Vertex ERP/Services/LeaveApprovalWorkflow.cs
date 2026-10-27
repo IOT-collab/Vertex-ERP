@@ -9,6 +9,8 @@ public static class LeaveApprovalWorkflow
         && from != default && to >= from && (!halfDay || from == to)
         && !string.IsNullOrWhiteSpace(reason) && reason.Trim().Length <= 500;
 
+    public static bool ValidHalfDaySession(bool halfDay, string? session) => !halfDay || session is "First" or "Second";
+
     public static bool DecideManager(LeaveRequest request, string? decision, int userId, string name, string? note)
     {
         if (request.Status != "Pending" || request.ApprovalLevel != "Manager" || !ValidDecision(decision, note)) return false;
@@ -17,10 +19,13 @@ public static class LeaveApprovalWorkflow
         request.ManagerDecidedByName = name;
         request.ManagerDecidedAtUtc = DateTime.UtcNow;
         request.ManagerDecisionNote = note?.Trim();
-        if (request.ManagerDecision == "Approved") request.ApprovalLevel = "HR/Admin";
+        if (request.IsExtraFacility || request.IsHalfDay || request.ManagerDecision == "Approved") request.ApprovalLevel = "HR/Admin";
         else SetFinal(request, "Rejected", userId, note);
         return true;
     }
+
+    public static bool CanTakeFinalAction(LeaveRequest request, bool isHr, bool isAdmin) =>
+        isHr || isAdmin && !request.IsExtraFacility && !request.IsHalfDay;
 
     public static bool DecideFinal(LeaveRequest request, string? decision, int userId, string? note)
     {

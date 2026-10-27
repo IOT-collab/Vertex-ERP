@@ -1,4 +1,4 @@
-﻿namespace VertexERP.Models;
+namespace VertexERP.Models;
 
 using System.ComponentModel.DataAnnotations;
 
@@ -38,6 +38,7 @@ public sealed class EmployeeTasksViewModel
 
 public sealed record EmployeeAttendanceDay(DateOnly Date, DateTime? CheckIn, DateTime? CheckOut, string Status, string Source)
 {
+    public string UiSiteDetails { get; init; } = string.Empty;
     public int PunchCount { get; init; }
     public TimeSpan WorkingHours { get; init; }
     public TimeSpan Overtime { get; init; }

@@ -13,6 +13,8 @@ public sealed class LeaveCalculation
     public string MonthsJson { get; set; } = "[]";
     public decimal OpeningEL { get; set; }
     public decimal OpeningEW { get; set; }
+    public decimal OpeningCL { get; set; }
+    public decimal OpeningML { get; set; }
     [ConcurrencyCheck] public int Revision { get; set; }
     public DateTime UpdatedAtUtc { get; set; }
 }
@@ -36,12 +38,16 @@ public sealed class LeaveCalculationEdit
     public List<int> BalanceRevisions { get; set; } = [];
     [Range(typeof(decimal), "0", "3660")] public decimal OpeningEL { get; set; }
     [Range(typeof(decimal), "0", "3660")] public decimal OpeningEW { get; set; }
+    [Range(typeof(decimal), "0", "3660")] public decimal OpeningCL { get; set; }
+    [Range(typeof(decimal), "0", "3660")] public decimal OpeningML { get; set; }
     public List<LeaveMonth> Months { get; set; } = [];
     public string EmployeeName { get; set; } = "";
     public string EmployeeCode { get; set; } = "";
     public List<ManualLeaveBalance> Balances { get; set; } = [];
     public decimal? PreviousEL { get; set; }
     public decimal? PreviousEW { get; set; }
+    public decimal? PreviousCL { get; set; }
+    public decimal? PreviousML { get; set; }
     public bool HasSavedCalculation { get; set; }
     public bool ConfirmReplaceManual { get; set; }
 }

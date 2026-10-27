@@ -5,6 +5,7 @@ namespace VertexERP.Models;
 
 public class EmployeeDirectoryViewModel
 {
+    public IReadOnlyDictionary<int, string> WdmsNames { get; init; } = new Dictionary<int, string>();
     public IReadOnlyDictionary<int, string> EnrollCodes { get; init; } = new Dictionary<int, string>();
     public string? CompanyCode { get; init; }
     public IReadOnlyList<Employee> Employees { get; init; } = Array.Empty<Employee>();
@@ -95,7 +96,7 @@ public class EmployeeFormViewModel : IValidatableObject
     [Display(Name = "Overtime")]
     public bool OvertimeEnabled { get; set; }
     [Required, Display(Name = "Shift Start Time"), DataType(DataType.Time)]
-    public TimeOnly? ShiftStartTime { get; set; } = new TimeOnly(9, 30);
+    public TimeOnly? ShiftStartTime { get; set; } = new TimeOnly(9, 45);
     [Required, Display(Name = "Shift End Time"), DataType(DataType.Time)]
     public TimeOnly? ShiftEndTime { get; set; } = new TimeOnly(18, 30);
 
@@ -201,6 +202,10 @@ public class EmployeeFormViewModel : IValidatableObject
 
     [Required, Display(Name = "Employment Type")]
     public string EmploymentType { get; set; } = "Full Time";
+
+    [StringLength(20), Display(Name = "Employee Category")]
+    [RegularExpression(EmployeeCategories.ValidationPattern, ErrorMessage = "Please select Blue Collar or White Collar.")]
+    public string? EmployeeCategory { get; set; }
 
     [Required, Display(Name = "Employee Status")]
     public string EmployeeStatus { get; set; } = "Active";
@@ -354,7 +359,7 @@ public class HrAddEmployeeViewModel : IValidatableObject
     [Display(Name = "Overtime")]
     public bool OvertimeEnabled { get; set; }
     [Required, Display(Name = "Shift Start Time"), DataType(DataType.Time)]
-    public TimeOnly? ShiftStartTime { get; set; } = new TimeOnly(9, 30);
+    public TimeOnly? ShiftStartTime { get; set; } = new TimeOnly(9, 45);
     [Required, Display(Name = "Shift End Time"), DataType(DataType.Time)]
     public TimeOnly? ShiftEndTime { get; set; } = new TimeOnly(18, 30);
 
@@ -420,6 +425,10 @@ public class HrAddEmployeeViewModel : IValidatableObject
 
     [StringLength(30), Display(Name = "Employment Type")]
     public string? EmploymentType { get; set; }
+
+    [StringLength(20), Display(Name = "Employee Category")]
+    [RegularExpression(EmployeeCategories.ValidationPattern, ErrorMessage = "Please select Blue Collar or White Collar.")]
+    public string? EmployeeCategory { get; set; }
 
     [Display(Name = "Reporting Manager")]
     public int? ReportingManagerId { get; set; }

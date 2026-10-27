@@ -1,10 +1,10 @@
 :root {
     --erp-button-height: 44px;
     --erp-button-radius: 10px;
-    --erp-button-primary: #2563eb;
-    --erp-button-primary-hover: #1d4ed8;
-    --erp-button-secondary: #1e293b;
-    --erp-button-secondary-hover: #29364c;
+    --erp-button-primary: var(--erp-primary, #2563eb);
+    --erp-button-primary-hover: var(--erp-primary-hover, #1d4ed8);
+    --erp-button-secondary: var(--erp-surface-soft, #1e293b);
+    --erp-button-secondary-hover: var(--erp-surface, #29364c);
     --erp-button-danger: #dc2626;
     --erp-button-danger-hover: #b91c1c;
 }
@@ -77,7 +77,7 @@ body :is(
     .hc-btn-primary,
     .btn-primary-glow
 ) {
-    color: #fff !important;
+    color: var(--theme-accent-text, #fff) !important;
     background: var(--erp-button-primary) !important;
     border-color: #3b82f6 !important;
 }
@@ -97,7 +97,7 @@ body :is(
     .hc-btn-primary,
     .btn-primary-glow
 ):hover {
-    color: #fff !important;
+    color: var(--theme-accent-text, #fff) !important;
     background: var(--erp-button-primary-hover) !important;
     border-color: #60a5fa !important;
     transform: translateY(-1px) !important;
@@ -115,9 +115,9 @@ body :is(
     .exp-btn-secondary,
     .btn-secondary-glow
 ) {
-    color: #e2e8f0 !important;
+    color: var(--erp-text, #e2e8f0) !important;
     background: var(--erp-button-secondary) !important;
-    border-color: #475569 !important;
+    border-color: var(--erp-border, #475569) !important;
 }
 
 body :is(
@@ -132,9 +132,9 @@ body :is(
     .exp-btn-secondary,
     .btn-secondary-glow
 ):hover {
-    color: #fff !important;
+    color: var(--erp-text, #fff) !important;
     background: var(--erp-button-secondary-hover) !important;
-    border-color: #64748b !important;
+    border-color: var(--erp-border, #64748b) !important;
     transform: translateY(-1px) !important;
 }
 
@@ -145,7 +145,7 @@ body :is(.erp-btn-danger, .btn-danger, .department-delete-confirm, .bank-danger)
 }
 
 body :is(.erp-btn-danger, .btn-danger, .department-delete-confirm, .bank-danger):hover {
-    color: #fff !important;
+    color: var(--theme-accent-text, #fff) !important;
     background: var(--erp-button-danger-hover) !important;
     border-color: #f87171 !important;
     transform: translateY(-1px) !important;

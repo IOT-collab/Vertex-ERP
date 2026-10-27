@@ -1,0 +1,140 @@
+info: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[63]
+      User profile is available. Using 'C:\Users\V5 IT SOLUTION\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+info: Microsoft.AspNetCore.DataProtection.EphemeralDataProtectionProvider[45]
+      Using ephemeral data protection provider. Payloads will be undecipherable upon application shutdown.
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://127.0.0.1:5188
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: D:\vertex ERP\Vertex-ERP\Vertex ERP
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/preview - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'HTTP: GET /preview'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'HTTP: GET /preview'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/preview - 200 - text/html;+charset=utf-8 766.7481ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/preview - - -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'HTTP: GET /preview'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'HTTP: GET /preview'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/preview - 200 - text/html;+charset=utf-8 44.6156ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/js/theme.js?v=JsFUoRbzJn9KqZYtXXlz_zgyMbiK4eH1axphmpmIkAA - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/css/erp-buttons.css?v=P4mvgzWZcgKRXGPpSOrorRhbVxqH2fwXxKOXbn9XWKs - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/css/Style.css?v=fbAK5ytKllCMCjrxL-dKhIFSSm8iPfd0fjHF9eJZZKQ - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/css/site.css?v=cd4LhcqAp-f0eafJnZ4NLs0KRiYzbHdrvXt1qOdS2ig - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/css/common-ui.css?v=S53GsNTcL6z5g1Hidd_Yx3pgZEZdG-8UrcYFOoy8fdo - - -
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/css/site.css'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\css\site.css'
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/js/theme.js'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\js\theme.js'
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/css/Style.css'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\css\Style.css'
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/css/erp-buttons.css'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\css\erp-buttons.css'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/css/Style.css?v=fbAK5ytKllCMCjrxL-dKhIFSSm8iPfd0fjHF9eJZZKQ - 200 10749 text/css 21.2094ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/css/erp-buttons.css?v=P4mvgzWZcgKRXGPpSOrorRhbVxqH2fwXxKOXbn9XWKs - 200 5731 text/css 21.7585ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/js/theme.js?v=JsFUoRbzJn9KqZYtXXlz_zgyMbiK4eH1axphmpmIkAA - 200 6102 text/javascript 24.4792ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/css/site.css?v=cd4LhcqAp-f0eafJnZ4NLs0KRiYzbHdrvXt1qOdS2ig - 200 20210 text/css 18.7771ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/css/common-back-button.css?v=I_No4B9LuDEG5OsYVsR0wvx8iI69ak0A1w93Q1jqQFs - - -
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/css/common-ui.css'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\css\common-ui.css'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/css/common-ui.css?v=S53GsNTcL6z5g1Hidd_Yx3pgZEZdG-8UrcYFOoy8fdo - 200 19661 text/css 9.9191ms
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/css/common-back-button.css'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\css\common-back-button.css'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/css/common-back-button.css?v=I_No4B9LuDEG5OsYVsR0wvx8iI69ak0A1w93Q1jqQFs - 200 3596 text/css 0.6520ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/css/ResponsiveEnhancements.css?v=2RztQXGMRnIdoNkyjs46gz9km8jkvuDQEqmubWQAzD4 - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/css/hr-modules.css?v=eBF2BBH9XWbB6bStvHdxoVTBuAMjc5II2Tme8JMCKO8 - - -
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/css/ResponsiveEnhancements.css'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\css\ResponsiveEnhancements.css'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/css/ResponsiveEnhancements.css?v=2RztQXGMRnIdoNkyjs46gz9km8jkvuDQEqmubWQAzD4 - 200 2326 text/css 2.5324ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/css/theme.css?v=UqGZcSDh8Y1acQoWx9eApJDHTxV76rVFCFgSHBN6NFM - - -
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/css/hr-modules.css'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\css\hr-modules.css'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/css/ResponsiveGuard.css?v=WcKT9WrzRXJcg1vDmRbqUUYc2gVwzs87uTYkyZxPsKE - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/css/hr-modules.css?v=eBF2BBH9XWbB6bStvHdxoVTBuAMjc5II2Tme8JMCKO8 - 200 5432 text/css 3.9287ms
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/css/theme.css'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\css\theme.css'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/css/theme.css?v=UqGZcSDh8Y1acQoWx9eApJDHTxV76rVFCFgSHBN6NFM - 200 23347 text/css 2.6005ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/css/vertex-ai-assistant.css?v=9lZ1HAUsNRRsVterPPmptbXyxUn2SfvtpoV2pisqnGw - - -
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/css/ResponsiveGuard.css'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\css\ResponsiveGuard.css'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/css/ResponsiveGuard.css?v=WcKT9WrzRXJcg1vDmRbqUUYc2gVwzs87uTYkyZxPsKE - 200 8278 text/css 2.5614ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/css/ManagerWorkspace.css?v=n0JEbKDclAq9Ux-IKMxCZHAhIjpCemU7CjVlI_pe4qU - - -
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/css/vertex-ai-assistant.css'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\css\vertex-ai-assistant.css'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/css/vertex-ai-assistant.css?v=9lZ1HAUsNRRsVterPPmptbXyxUn2SfvtpoV2pisqnGw - 200 5759 text/css 0.7864ms
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/css/ManagerWorkspace.css'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\css\ManagerWorkspace.css'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/js/locales/hi.js?v=hFJ_RNJGdkgnPk9ITiRnUgQBJlMSXuqSUt6KXt93j_Q - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/css/ManagerWorkspace.css?v=n0JEbKDclAq9Ux-IKMxCZHAhIjpCemU7CjVlI_pe4qU - 200 21926 text/css 1.6911ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/js/language.js?v=Isl05HfqnXp40mGSnzRLGCvTWAXm4zkcRwiT43ZML-8 - - -
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/js/language.js'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\js\language.js'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/js/language.js?v=Isl05HfqnXp40mGSnzRLGCvTWAXm4zkcRwiT43ZML-8 - 200 5105 text/javascript 0.8749ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/js/vertex-ai-assistant.js?v=gnoE8mZivygoni00kh_L8TrVsifrlzf4aFsppRrhG7Q - - -
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/js/vertex-ai-assistant.js'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\js\vertex-ai-assistant.js'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/js/vertex-ai-assistant.js?v=gnoE8mZivygoni00kh_L8TrVsifrlzf4aFsppRrhG7Q - 200 12978 text/javascript 0.5865ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/images/manager/welcome-illustration.png?v=BMJ9vfzhq873lKksQGTnTrRtZruxbv-LgATpP1s7BOQ - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/js/input-rules.js?v=JQN9Kjzy5AWiVxFC2yCCbkym3en2Fig1DQEPJ0ejERw - - -
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/js/input-rules.js'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\js\input-rules.js'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/js/input-rules.js?v=JQN9Kjzy5AWiVxFC2yCCbkym3en2Fig1DQEPJ0ejERw - 200 884 text/javascript 0.6310ms
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/js/locales/hi.js'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\js\locales\hi.js'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/js/locales/hi.js?v=hFJ_RNJGdkgnPk9ITiRnUgQBJlMSXuqSUt6KXt93j_Q - 200 226231 text/javascript 15.8186ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/js/manager-dashboard.js?v=G8si_rqaZR0uAWeGbZjwE04FSITliYGVo0M_maRPNkQ - - -
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/js/manager-dashboard.js'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\js\manager-dashboard.js'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/js/manager-dashboard.js?v=G8si_rqaZR0uAWeGbZjwE04FSITliYGVo0M_maRPNkQ - 200 8593 text/javascript 0.6754ms
+info: Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware[2]
+      Sending file. Request path: '/images/manager/welcome-illustration.png'. Physical path: 'D:\vertex ERP\Vertex-ERP\Vertex ERP\wwwroot\images\manager\welcome-illustration.png'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/images/manager/welcome-illustration.png?v=BMJ9vfzhq873lKksQGTnTrRtZruxbv-LgATpP1s7BOQ - 200 1258158 image/png 26.8095ms
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/1.1 GET http://127.0.0.1:5188/favicon.ico - - -
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/1.1 GET http://127.0.0.1:5188/favicon.ico - 404 0 - 0.2040ms

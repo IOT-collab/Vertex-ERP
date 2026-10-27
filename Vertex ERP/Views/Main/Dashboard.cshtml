@@ -127,6 +127,7 @@
 
             </div>
 
+            <partial name="_DashboardCategoryCounts" model='Model.AttendanceCategories.GetValueOrDefault("Present") ?? new VertexERP.Models.DashboardCategoryCount(0, 0, 0)' />
             <partial name="_DashboardSparkline" model='("Present", Model.WeeklyAttendance.Select(day => day.Count).ToArray())' />
             <div class="card-footer-info">Attendance recorded today</div>
 
@@ -155,6 +156,7 @@
 
             </div>
 
+            <partial name="_DashboardCategoryCounts" model='Model.AttendanceCategories.GetValueOrDefault("Absent") ?? new VertexERP.Models.DashboardCategoryCount(0, 0, 0)' />
             <partial name="_DashboardSparkline" model='("Absent", Model.WeeklyAttendance.Select(day => day.Absent).ToArray())' />
             <div class="card-footer-info">Excludes approved leave, Sundays and company holidays</div>
 
@@ -183,6 +185,7 @@
 
             </div>
 
+            <partial name="_DashboardCategoryCounts" model='Model.AttendanceCategories.GetValueOrDefault("Late") ?? new VertexERP.Models.DashboardCategoryCount(0, 0, 0)' />
             <partial name="_DashboardSparkline" model='("Late", Model.WeeklyAttendance.Select(day => day.Late).ToArray())' />
             <div class="card-footer-info">Late arrivals today</div>
 
@@ -211,6 +214,7 @@
 
             </div>
 
+            <partial name="_DashboardCategoryCounts" model='Model.AttendanceCategories.GetValueOrDefault("Leave") ?? new VertexERP.Models.DashboardCategoryCount(0, 0, 0)' />
             <partial name="_DashboardSparkline" model='("Leave", Model.WeeklyAttendance.Select(day => day.Leave).ToArray())' />
             <div class="card-footer-info">Employees on approved leave</div>
 

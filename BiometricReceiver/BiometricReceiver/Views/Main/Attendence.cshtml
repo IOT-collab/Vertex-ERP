@@ -1,4 +1,5 @@
-﻿@model VertexERP.Models.AttendancePageViewModel
+@inject VertexERP.Services.ManualAttendanceAccess ManualAttendancePermissions
+@model VertexERP.Models.AttendancePageViewModel
 @{
     ViewData["Title"] = "Attendance";
     Layout = "~/Views/Shared/_LayoutMaster.cshtml";
@@ -10,7 +11,10 @@
         <div class="header-left"><div class="header-text"><h2>Attendance Management</h2></div></div>
         <div class="header-actions">
             <button type="button" class="btn-add btn-export" onclick="openAttendanceExport()"><i class="fa-solid fa-file-excel"></i> Download Excel</button>
-            <a asp-controller="Main" asp-action="AddAttendance" class="btn-add">+ Mark Attendance</a>
+            @if (await ManualAttendancePermissions.CanMarkAsync(User))
+            {
+                <a asp-controller="Main" asp-action="AddAttendance" class="btn-add">+ Mark Attendance</a>
+            }
         </div>
     </div>
     @if (VertexERP.Services.AttendanceRules.HolidayName(Model.FilterDate) is string holidayName)
@@ -31,7 +35,6 @@
             <div class="filter-field action-field"><button type="submit" class="btn-search">Apply Filter</button></div>
         </div>
     </form>
-    <p>Only employees in the last synced WDMS directory are shown, using their WDMS name and original enrollment number. Manage ERP links in <a asp-controller="BiometricEnrollments" asp-action="Index">WDMS Enroll Codes / Review</a>.</p>
     <div class="table-box" tabindex="0" role="region" aria-label="Employee attendance; scroll horizontally to view all columns">
         <table>
             <thead><tr><th>Emp ID</th><th>Employee Name</th><th>Department</th><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Action</th></tr></thead>
@@ -45,7 +48,7 @@
             }
             else
             {
-                <tr><td colspan="8" style="text-align:center;color:#64748b;padding:24px;">No attendance records found.</td></tr>
+                <tr><td colspan="8" style="text-align:center;color:var(--erp-text-muted, #64748b);padding:24px;">No attendance records found.</td></tr>
             }
             </tbody>
         </table>
@@ -53,12 +56,13 @@
 </div>
 <div class="attendance-export-modal" id="attendanceExportModal" role="dialog" aria-modal="true" aria-labelledby="attendanceExportTitle">
  <div class="attendance-export-card"><header><div><h3 id="attendanceExportTitle">Download Attendance</h3><p>Choose a particular day or complete month.</p></div><button type="button" onclick="closeAttendanceExport()" aria-label="Close">&times;</button></header>
- <form asp-controller="Main" asp-action="ExportAttendance" method="get">
+ <form id="attendanceExportForm" asp-controller="Main" asp-action="ExportAttendance" method="get">
   <input type="hidden" name="searchQuery" value="@Model.SearchQuery"/><input type="hidden" name="department" value="@Model.Department"/><input type="hidden" name="status" value="@Model.Status"/>
   <div class="export-period-options"><label><input type="radio" name="exportPeriod" value="day" checked onchange="setExportPeriod('day')"/><span><i class="fa-regular fa-calendar-day"></i><b>Particular Day</b><small>One selected date</small></span></label><label><input type="radio" name="exportPeriod" value="month" onchange="setExportPeriod('month')"/><span><i class="fa-regular fa-calendar-days"></i><b>Complete Month</b><small>Day-wise monthly report</small></span></label></div>
-  <label class="export-date-field" id="exportDayField"><span>Select date</span><input type="date" name="filterDate" value="@filterDateValue" max="@DateTime.Today.ToString("yyyy-MM-dd")"/></label>
-  <label class="export-date-field hidden" id="exportMonthField"><span>Select month</span><input type="month" name="exportMonth" value="@Model.FilterDate.ToString("yyyy-MM")" max="@DateTime.Today.ToString("yyyy-MM")" disabled/></label>
-  <div class="export-note"><i class="fa-solid fa-circle-info"></i><span>Includes site check-in/out times, site names, GPS locations and overtime beyond 8 hours 30 minutes per day. Complete Month includes an employee summary and Daily Details sheet. Day export follows the current filters.</span></div>
+  <label class="export-date-field" id="exportDayField"><span>Select date</span><input type="date" name="filterDate" value="@filterDateValue" max="@DateOnly.FromDateTime(VertexERP.Services.FieldAttendanceClock.Now).ToString("yyyy-MM-dd")"/></label>
+  <label class="export-date-field hidden" id="exportMonthField"><span>Select month</span><input type="month" name="exportMonth" value="@Model.FilterDate.ToString("yyyy-MM")" max="@DateOnly.FromDateTime(VertexERP.Services.FieldAttendanceClock.Now).ToString("yyyy-MM")" disabled/></label>
+  <div class="export-note"><i class="fa-solid fa-circle-info"></i><span>Includes site check-in/out times, site names, GPS locations and enabled overtime beyond each employee's assigned shift duration. Complete Month includes an employee summary and Daily Details sheet. Day export follows the current filters.</span></div>
+  <p id="attendanceExportMessage" role="status" aria-live="polite" hidden></p>
   <footer><button type="button" class="export-cancel" onclick="closeAttendanceExport()">Cancel</button><button type="submit" class="export-download"><i class="fa-solid fa-download"></i> Download</button></footer>
  </form></div>
 </div>
@@ -97,3 +101,5 @@
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')scheduleAttendanceRefresh();});
  scheduleAttendanceRefresh();
 </script>
+
+<script src="~/js/attendance-export.js" asp-append-version="true"></script>

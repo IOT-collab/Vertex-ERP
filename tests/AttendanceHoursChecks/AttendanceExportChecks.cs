@@ -18,11 +18,11 @@ static class AttendanceExportChecks
             if (!value) throw new Exception("FAIL: " + name);
             Console.WriteLine("PASS: " + name);
         }
-        foreach (var (minutes, expected) in new[] { (0, 0), (539, 0), (540, 0), (541, 1), (600, 60) })
+        foreach (var (minutes, expected) in new[] { (0, 0), (524, 0), (525, 0), (526, 1), (600, 75) })
             Check(AttendanceRules.CalculateOvertime(TimeSpan.FromMinutes(minutes)).TotalMinutes == expected, $"Overtime boundary {minutes} minutes");
 
         var day = new DateOnly(2026, 9, 1);
-        var employee = new Employee { Id = 1, OvertimeEnabled = true, EmployeeCode = "E001", FullName = "Test Employee", Department = "Service" };
+        var employee = new Employee { Id = 1, IsBiometricProfilePending = true, OvertimeEnabled = true, EmployeeCode = "E001", FullName = "Test Employee", Department = "Service" };
         AttendanceLog Punch(int hour, int minute, string action, string site) => new()
         {
             EmployeeId = 1, Employee = employee, PunchTime = day.ToDateTime(new TimeOnly(hour, minute)),
@@ -46,18 +46,48 @@ static class AttendanceExportChecks
         Check((await service.GetDailyAttendanceAsync(day, null, null, null)).Records.Single().EmployeeName == "WDMS exact Name", "Imported sheet name cannot override WDMS name");
         stub.Enrollments[0].IsSheetReference = false;
         employee.FullName = "Updated Employee";
-        Check((await service.GetDailyAttendanceAsync(day, "WDMS exact Name", null, null)).Records.Single().EmployeeName == "WDMS exact Name", "ERP rename does not override WDMS name or search");
+        employee.IsBiometricProfilePending = false;
+        employee.Department = "Updated Department";
+        var updatedProfile = (await service.GetDailyAttendanceAsync(day, "Updated Employee", "Updated Department", null)).Records.Single();
+        Check(updatedProfile.EmployeeName == "Updated Employee" && updatedProfile.Department == "Updated Department", "HR profile changes update attendance name, department, search and filters");
+        Check(EmployeeProfileDisplay.Name(employee, "WDMS exact Name") == "Updated Employee", "HR name takes precedence over old WDMS name");
+        var profileController = new MainController(null!, service, null!, null!, null!, null!);
+        var profileCsv = Encoding.UTF8.GetString(((FileContentResult)await profileController.ExportAttendance(null, null, day, null)).FileContents);
+        Check(profileCsv.Contains("Updated Employee") && profileCsv.Contains("Updated Department") && !profileCsv.Contains("WDMS exact Name"), "Daily export reads latest HR profile");
+        var profileMonthly = (FileContentResult)await profileController.ExportAttendance(null, null, null, null, exportPeriod: "month", exportMonth: "2026-09");
+        var profileXml = XDocument.Parse(Encoding.UTF8.GetString(profileMonthly.FileContents));
+        Check(profileXml.Root!.Value.Contains("Updated Employee") && profileXml.Root.Value.Contains("Updated Department"), "Monthly export reads latest HR profile");
+        employee.IsBiometricProfilePending = true;
+        employee.Department = "Service";
         employee.FullName = "Test Employee";
         Check((await service.GetDailyAttendanceAsync(day, "00108", null, null)).Records.Count == 1, "Search accepts WDMS enroll code");
         Check(record.SiteCheckIns.Contains("Site A & Works") && record.SiteCheckIns.Contains("09:00 AM") && record.SiteCheckIns.Contains("28.6139,77.2090"), "Site check-in retains time, site and GPS");
         Check(record.SiteCheckOuts.Contains("Site B") && record.SiteCheckOuts.Contains("07:00 PM"), "Site checkout retains its own location and time");
-        Check(record.OvertimeDisplay == "1h 00m", "Completed site day overtime");
+        Check(record.OvertimeDisplay == "1h 15m", "Completed site day overtime");
         var controller = new MainController(null!, service, null!, null!, null!, null!);
         var csv = (FileContentResult)await controller.ExportAttendance(null, null, day, null);
         var csvText = Encoding.UTF8.GetString(csv.FileContents);
         Check(csvText.Contains("\"00108\",\"WDMS exact Name\"") && !csvText.Contains("E001"), "Daily export uses WDMS identity instead of internal ERP code");
-        Check(csvText.Contains("Overtime,Site Check In") && csvText.Contains("1h 00m") && csvText.Contains("Site A & Works") && csvText.Contains("Site B"), "Daily export includes overtime and both site locations");
+        Check(csvText.Contains("Overtime,Site Check In") && csvText.Contains("1h 15m") && csvText.Contains("Site A & Works") && csvText.Contains("Site B"), "Daily export includes overtime and both site locations");
+        var originalLogs = stub.Logs;
+        var updatedIn = Punch(9, 40, "Check In", "");
+        updatedIn.VerificationMode = ManualAttendance.VerificationMode; updatedIn.WorkCode = ManualAttendance.CorrectionCode;
+        updatedIn.RawPayload = "HR correction | Previous: 09:55 | Updated: 09:40 | Reason: Corrected punch";
+        var updatedOut = Punch(18, 0, "Check Out", "");
+        updatedOut.VerificationMode = ManualAttendance.VerificationMode; updatedOut.WorkCode = ManualAttendance.CorrectionCode;
+        stub.Logs = new[] { updatedIn, updatedOut };
+        var updatedRecord = (await service.GetDailyAttendanceAsync(day, null, null, null)).Records.Single();
+        Check(updatedRecord.CheckIn == new TimeOnly(9,40) && updatedRecord.CheckOut == new TimeOnly(18,0)
+            && updatedRecord.WorkingHours == TimeSpan.FromMinutes(500), "Attendance screen uses corrected endpoints and duration");
+        var updatedCsv = Encoding.UTF8.GetString(((FileContentResult)await controller.ExportAttendance(null, null, day, null)).FileContents);
+        Check(updatedCsv.Contains("09:40") && updatedCsv.Contains("06:00") && updatedCsv.Contains("8h 20m"), "Daily Excel export uses updated times and duration");
+        var updatedMonthly = (FileContentResult)await controller.ExportAttendance(null, null, null, null, exportPeriod: "month", exportMonth: "2026-09");
+        var updatedXml = XDocument.Parse(Encoding.UTF8.GetString(updatedMonthly.FileContents));
+        Check(updatedXml.Root!.Value.Contains("09:40") && updatedXml.Root!.Value.Contains("06:00") && updatedXml.Root!.Value.Contains("8h 20m"), "Monthly Excel export uses updated times and duration");
+        stub.Logs = originalLogs;
+        stub.LogReads = 0; stub.RosterReads = 0;
         var monthly = (FileContentResult)await controller.ExportAttendance(null, null, null, null, exportPeriod: "month", exportMonth: "2026-09");
+        Check(stub.LogReads == 1 && stub.RosterReads == 1, "Monthly export loads punches and roster once for the entire month");
         var xml = XDocument.Parse(Encoding.UTF8.GetString(monthly.FileContents));
         XNamespace ns = "urn:schemas-microsoft-com:office:spreadsheet";
         var sheets = xml.Root!.Elements(ns + "Worksheet").ToList();
@@ -65,8 +95,20 @@ static class AttendanceExportChecks
         var pivotRows = sheets[0].Descendants(ns + "Row").ToList();
         Check(pivotRows[2].Elements(ns + "Cell").First().Value == "00108" && sheets[1].Value.Contains("WDMS exact Name"), "Monthly summary and details use WDMS identity");
         Check(pivotRows[1].Elements(ns + "Cell").Count() == 38 && pivotRows[2].Elements(ns + "Cell").Count() == 38, "Monthly headers and data columns align");
-        Check(pivotRows[2].Elements(ns + "Cell").ElementAt(7).Value == "1h 00m", "Monthly overtime sums daily excess without subtracting absent days");
+        Check(pivotRows[2].Elements(ns + "Cell").ElementAt(7).Value == "1h 15m", "Monthly overtime sums daily excess without subtracting absent days");
         Check(sheets[1].Value.Contains("Site A & Works") && sheets[1].Value.Contains("Site B"), "Monthly details preserve site text and XML escaping");
+
+        var originalEnrollments = stub.Enrollments;
+        stub.Enrollments = originalEnrollments.Concat(new[] {
+            new BiometricEnrollment { EnrollCode = "SECOND-108", EmployeeId = 1, Employee = employee, Status = "Linked", WdmsName = "Second WDMS code", LastSeenUtc = DateTime.UtcNow },
+            new BiometricEnrollment { EnrollCode = "UNLINKED-9", Status = "Needs review", WdmsName = "Unlinked WDMS person", LastSeenUtc = DateTime.UtcNow }
+        }).ToArray();
+        var multipleCodes = (FileContentResult)await controller.ExportAttendance(null, null, null, null, exportPeriod: "month", exportMonth: "2026-09");
+        var multipleXml = XDocument.Parse(Encoding.UTF8.GetString(multipleCodes.FileContents));
+        Check(multipleXml.Root!.Value.Contains("SECOND-108") && multipleXml.Root.Value.Contains("UNLINKED-9"), "Monthly export supports multiple codes per employee and unlinked WDMS records without duplicate date crashes");
+        var allCodesDay = Encoding.UTF8.GetString(((FileContentResult)await controller.ExportAttendance(null, null, day, null)).FileContents);
+        Check(allCodesDay.Contains("SECOND-108") && allCodesDay.Contains("UNLINKED-9"), "Day export includes the same full roster as attendance screen");
+        stub.Enrollments = originalEnrollments;
 
         Check(!new Employee().OvertimeEnabled && !new HrAddEmployeeViewModel().OvertimeEnabled && !new EmployeeFormViewModel().OvertimeEnabled, "New and existing employee forms require explicit overtime activation");
         var savedEmployee = stub.Enrollments[0].Employee;
@@ -77,7 +119,7 @@ static class AttendanceExportChecks
         var noOt = (await service.GetDailyAttendanceAsync(day, null, null, null)).Records.Single();
         Check(noOt.Overtime == TimeSpan.Zero && noOt.WorkingHours.TotalHours == 10, "Inactive overtime keeps actual worked hours but reports zero OT");
         var noOtCsv = Encoding.UTF8.GetString(((FileContentResult)await controller.ExportAttendance(null, null, day, null)).FileContents);
-        Check(noOtCsv.Contains("0h 00m") && !noOtCsv.Contains("1h 00m"), "Export respects inactive overtime");
+        Check(noOtCsv.Contains("0h 00m") && !noOtCsv.Contains("1h 15m"), "Export respects inactive overtime");
         employee.OvertimeEnabled = true;
         employee.ShiftStartTime = new TimeOnly(10, 0); employee.ShiftEndTime = new TimeOnly(19, 0);
         var assigned = (await service.GetDailyAttendanceAsync(day, null, null, null)).Records.Single();
@@ -154,12 +196,18 @@ static class AttendanceExportChecks
 
 public class ExportRepository : DispatchProxy
 {
+    public int LogReads;
+    public int RosterReads;
     public IReadOnlySet<int> ApprovedLeaveIds = new HashSet<int>();
     public IReadOnlyList<Employee> Employees = Array.Empty<Employee>();
     public IReadOnlyList<AttendanceLog> Logs = Array.Empty<AttendanceLog>();
     public IReadOnlyList<BiometricEnrollment> Enrollments = Array.Empty<BiometricEnrollment>();
     public IReadOnlyList<EmployeeDeviceMapping> Mappings = Array.Empty<EmployeeDeviceMapping>();
-    protected override object? Invoke(MethodInfo? method, object?[]? args) => method!.Name switch
+    protected override object? Invoke(MethodInfo? method, object?[]? args)
+    {
+        if (method!.Name == "GetAttendanceLogsAsync") LogReads++;
+        if (method.Name == "GetEnrollmentsAsync") RosterReads++;
+        return method.Name switch
     {
         "GetApprovedLeaveEmployeeIdsAsync" => Task.FromResult(ApprovedLeaveIds),
         "GetActiveEmployeesAsync" => Task.FromResult(Employees),
@@ -168,4 +216,5 @@ public class ExportRepository : DispatchProxy
         "GetAttendanceLogsAsync" => Task.FromResult<IReadOnlyList<AttendanceLog>>(Logs.Where(log => log.PunchTime >= (DateTime)args![0]! && log.PunchTime < (DateTime)args[1]!).ToList()),
         _ => throw new NotSupportedException(method.Name)
     };
+    }
 }

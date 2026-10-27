@@ -21,12 +21,39 @@ public sealed class AttendanceProcessingService : IAttendanceProcessingService
         var logs = await _repository.GetAttendanceLogsAsync(from, to, cancellationToken);
         var approvedLeaveIds = await _repository.GetApprovedLeaveEmployeeIdsAsync(date, cancellationToken);
         var enrollments = await _repository.GetEnrollmentsAsync(cancellationToken);
+        return BuildDay(date, search, department, status, logs, approvedLeaveIds, enrollments);
+    }
+
+    public async Task<IReadOnlyList<DailyAttendanceViewModel>> GetAttendanceRangeAsync(DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
+    {
+        // One database snapshot for punches and roster instead of reloading the month for each day.
+        var logs = await _repository.GetAttendanceLogsAsync(from.ToDateTime(TimeOnly.MinValue), to.AddDays(2).ToDateTime(TimeOnly.MinValue), cancellationToken);
+        var enrollments = await _repository.GetEnrollmentsAsync(cancellationToken);
+        var leaves = _repository is BiometricRepository databaseRepository
+            ? await databaseRepository.GetApprovedLeavesForRangeAsync(from, to, cancellationToken) : null;
+        var records = new List<DailyAttendanceViewModel>();
+        for (var day = from; day <= to; day = day.AddDays(1))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            IReadOnlySet<int> leaveIds = leaves != null
+                ? leaves.Where(request => request.FromDate <= day && request.ToDate >= day).Select(request => request.EmployeeId).ToHashSet()
+                : await _repository.GetApprovedLeaveEmployeeIdsAsync(day, cancellationToken);
+            var dayFrom = day.ToDateTime(TimeOnly.MinValue);
+            var dayLogs = logs.Where(log => log.PunchTime >= dayFrom && log.PunchTime < dayFrom.AddDays(2)).ToList();
+            records.AddRange(BuildDay(day, null, null, null, dayLogs, leaveIds, enrollments).Records);
+        }
+        return records;
+    }
+
+    private AttendancePageViewModel BuildDay(DateOnly date, string? search, string? department, string? status,
+        IReadOnlyList<AttendanceLog> logs, IReadOnlySet<int> approvedLeaveIds, IReadOnlyList<BiometricEnrollment> enrollments)
+    {
         // Source membership and names come only from the last complete WDMS directory sync.
         var roster = enrollments.Where(x => x.LastSeenUtc.HasValue).ToList();
         var uniqueLinks = roster.Where(x => x.Status == "Linked" && x.EmployeeId.HasValue)
             .GroupBy(x => x.EmployeeId!.Value).Where(g => g.Count() == 1)
             .ToDictionary(g => g.Key, g => g.Single().EnrollCode);
-        var startTime = TimeOnly.TryParse(_options.WorkDayStart, out var parsedStart) ? parsedStart : new TimeOnly(9, 30);
+        var startTime = TimeOnly.TryParse(_options.WorkDayStart, out var parsedStart) ? parsedStart : new TimeOnly(9, 45);
         var records = roster.Select(source =>
         {
             var employee = source.Status == "Linked" ? source.Employee : null;
@@ -42,13 +69,13 @@ public sealed class AttendanceProcessingService : IAttendanceProcessingService
                 || ((log.VerificationMode == "Manual Approved" || log.VerificationMode == AttendanceRules.FieldVerificationMode)
                     && log.EmployeeId.HasValue && uniqueLinks.TryGetValue(log.EmployeeId.Value, out var code)
                     && code == source.EnrollCode))).ToList();
-            var paired = AttendanceRules.PairPunches(punches.Select(log => (log.PunchTime, log.PunchState)));
+            var paired = ManualAttendance.EffectivePunches(punches);
             var evaluation = AttendanceRules.EvaluateDay(paired.CheckIn, paired.CheckOut, date, DateOnly.FromDateTime(DateTime.Today), shiftStart);
             var onLeave = employee != null && approvedLeaveIds.Contains(employee.Id);
             return new DailyAttendanceViewModel
             {
                 EmployeeId = employee?.Id ?? 0, EmpId = source.EnrollCode,
-                EmployeeName = string.IsNullOrWhiteSpace(source.WdmsName) ? "Name unavailable in WDMS" : source.WdmsName,
+                EmployeeName = EmployeeProfileDisplay.Name(employee, source.WdmsName),
                 Department = FormatDisplayText(employee?.Department), Date = date,
                 CheckIn = paired.CheckIn.HasValue ? TimeOnly.FromDateTime(paired.CheckIn.Value) : null,
                 CheckOut = paired.CheckOut.HasValue ? TimeOnly.FromDateTime(paired.CheckOut.Value) : null,
@@ -56,10 +83,30 @@ public sealed class AttendanceProcessingService : IAttendanceProcessingService
                 OvertimeEnabled = employee?.OvertimeEnabled ?? false, ShiftStartTime = shiftStart, ShiftEndTime = shiftEnd,
                 Status = punches.Count == 0 ? AttendanceRules.NoPunchStatus(date, onLeave) : evaluation.Status,
                 IsLate = evaluation.IsLate,
-                Remark = punches.Count == 0 ? AttendanceRules.HolidayName(date) ?? (onLeave ? "Approved leave" : "No punches recorded") : evaluation.Remark,
+                Remark = punches.Count == 0 ? AttendanceRules.HolidayName(date) ?? (onLeave ? "Approved leave" : "No punches recorded") : evaluation.Remark + LateDetails(paired.CheckIn, date, shiftStart) + EarlyExit(paired.CheckOut, date, shiftStart, shiftEnd),
                 SiteCheckIns = FormatSitePunches(punches, "Check In"), SiteCheckOuts = FormatSitePunches(punches, "Check Out")
             };
         }).ToList();
+        // Explicit HR/Admin manual marks must appear even without a WDMS enrollment.
+        // Do not synthesize unrelated ERP employees into the biometric roster.
+        foreach (var group in logs.Where(x => x.VerificationMode == ManualAttendance.VerificationMode && x.EmployeeId.HasValue && x.Employee != null)
+                     .GroupBy(x => x.EmployeeId!.Value).Where(g => records.All(x => x.EmployeeId != g.Key)))
+        {
+            var employee = group.First().Employee!;
+            var window = AttendanceRules.PunchWindow(date, employee.ShiftStartTime, employee.ShiftEndTime);
+            var punches = logs.Where(x => x.EmployeeId == employee.Id && x.PunchTime >= window.From && x.PunchTime < window.To).ToList();
+            if (!punches.Any(x => x.VerificationMode == ManualAttendance.VerificationMode)) continue;
+            var pair = ManualAttendance.EffectivePunches(punches);
+            var day = AttendanceRules.EvaluateDay(pair.CheckIn, pair.CheckOut, date, DateOnly.FromDateTime(FieldAttendanceClock.Now), employee.ShiftStartTime);
+            records.Add(new DailyAttendanceViewModel { EmployeeId = employee.Id, EmpId = employee.EmployeeCode, EmployeeName = employee.FullName,
+                Department = FormatDisplayText(employee.Department), Date = date,
+                CheckIn = pair.CheckIn.HasValue ? TimeOnly.FromDateTime(pair.CheckIn.Value) : null,
+                CheckOut = pair.CheckOut.HasValue ? TimeOnly.FromDateTime(pair.CheckOut.Value) : null,
+                WorkingHours = day.Hours, PunchCount = punches.Count, Status = day.Status, IsLate = day.IsLate,
+                ShiftStartTime = employee.ShiftStartTime, ShiftEndTime = employee.ShiftEndTime, OvertimeEnabled = employee.OvertimeEnabled,
+                Remark = day.Remark + LateDetails(pair.CheckIn, date, employee.ShiftStartTime) + EarlyExit(pair.CheckOut, date, employee.ShiftStartTime, employee.ShiftEndTime),
+                SiteCheckIns = FormatSitePunches(punches, "Check In"), SiteCheckOuts = FormatSitePunches(punches, "Check Out") });
+        }
         var presentCount = records.Count(record => record.CheckIn.HasValue);
         var lateCount = records.Count(record => record.IsLate);
         var absentCount = records.Count(record => record.Status == "Absent");
@@ -72,6 +119,13 @@ public sealed class AttendanceProcessingService : IAttendanceProcessingService
         _logger.LogDebug("Built attendance for {Date}: {Punches} punches, {Employees} employees", date, logs.Count, records.Count);
         return new AttendancePageViewModel { Records = filtered.OrderBy(record => record.EmployeeName).ToList(), Departments = records.Select(record => record.Department).Where(value => !string.IsNullOrWhiteSpace(value)).Distinct(StringComparer.OrdinalIgnoreCase).Order().ToList(), PresentCount = presentCount, AbsentCount = absentCount, LeaveCount = leaveCount, LateCount = lateCount, IncompleteCount = incompleteCount, SearchQuery = search, Department = department, FilterDate = date, Status = status };
     }
+
+    private static string LateDetails(DateTime? checkIn, DateOnly date, TimeOnly start) =>
+        checkIn.HasValue && !AttendanceRules.IsWeeklyOff(date) && AttendanceRules.IsLateArrival(checkIn.Value, date, start)
+            ? " | Late by " + AttendanceRules.FormatHours(AttendanceRules.LateDuration(checkIn.Value, date, start)) : "";
+
+    private static string EarlyExit(DateTime? checkOut, DateOnly date, TimeOnly start, TimeOnly end) =>
+        checkOut.HasValue && checkOut.Value < date.ToDateTime(end).AddDays(end < start ? 1 : 0) ? " | Early exit" : "";
 
     private static string FormatSitePunches(IEnumerable<AttendanceLog> logs, string action) =>
         string.Join("\n", logs.Where(log =>

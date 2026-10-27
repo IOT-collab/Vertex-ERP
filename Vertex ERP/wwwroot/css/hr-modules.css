@@ -50,11 +50,11 @@
 
 /* Restore a readable document surface inside the dark application. */
 :is(.page-content, body > .container) .letter-sheet {
-    color: #172033 !important;
-    background: #fff !important;
+    color: var(--erp-text, #172033) !important;
+    background: var(--erp-surface, #fff) !important;
 }
 :is(.page-content, body > .container) .letter-sheet :is(h1, h2, h3, p, span, strong, div, header, footer) {
-    color: #172033 !important;
+    color: var(--erp-text, #172033) !important;
 }
 :is(.page-content, body > .container) .letter-sheet p {
     font-size: 15px !important;
@@ -115,7 +115,7 @@
     :is(.page-content, body > .container) .letter-sheet {
         max-width: none !important;
         width: 100% !important;
-        color: #000 !important;
+        color: var(--erp-text, #000) !important;
         box-shadow: none !important;
     }
 }

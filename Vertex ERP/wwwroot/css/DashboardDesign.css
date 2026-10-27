@@ -6,7 +6,7 @@
     --studio-soft: var(--erp-surface-soft);
 }
 html[data-theme="dark"] .dashboard-studio-shell {
-    --studio-surface: #05172f;
+    --studio-surface: var(--erp-surface, #05172f);
     --studio-page: #020b1c;
     --studio-border: #164a79;
     --studio-soft: #092449;
@@ -114,9 +114,9 @@ html[data-theme] .dashboard.dashboard-studio :is(.attendance-item, .alert-item) 
 html[data-theme] .dashboard.dashboard-studio .alerts-box { border-color: color-mix(in srgb, #ef4444 30%, var(--studio-border)) !important; }
 html[data-theme] .dashboard.dashboard-studio .label-group { color: var(--erp-text-muted) !important; }
 html[data-theme] .dashboard.dashboard-studio .metric-val { color: var(--erp-text) !important; }
-html[data-theme="light"] .dashboard.dashboard-studio .status-active { color: #166534 !important; }
+html[data-theme="light"] .dashboard.dashboard-studio .status-active { color: var(--erp-text-muted, #166534) !important; }
 html[data-theme="light"] .dashboard.dashboard-studio .status-absent { color: #b91c1c !important; }
-html[data-theme="dark"] .dashboard-studio-shell :is(.topbar, .sidebar, .logo) { background: linear-gradient(125deg, #061a38, #061228) !important; border-color: var(--studio-border) !important; }
+html[data-theme="dark"] .dashboard-studio-shell :is(.topbar, .sidebar, .logo) { background: linear-gradient(125deg, var(--erp-surface-soft, #061a38), var(--erp-surface, #061228)) !important; border-color: var(--studio-border) !important; }
 html[data-theme] .dashboard-studio-shell .sidebar-menu a[href="/Main/Dashboard"] { background: var(--erp-primary); color: var(--theme-accent-text) !important; box-shadow: 0 4px 14px color-mix(in srgb, var(--erp-primary) 24%, transparent); }
 html[data-theme] .dashboard.dashboard-studio :is(a, button, [role="link"]):focus-visible { outline: 3px solid var(--erp-primary) !important; outline-offset: 3px !important; }
 /* Use the shared hamburger drawer on desktop as well as mobile. */
@@ -189,7 +189,7 @@ html[data-theme] .dashboard.dashboard-studio .dashboard-card::after {
 html[data-theme] .dashboard.dashboard-studio .card-icon {
     width: 42px !important; height: 42px !important; font-size: 19px !important;
     background: linear-gradient(140deg, color-mix(in srgb, var(--card-accent) 65%, white), var(--card-accent)) !important;
-    border: 1px solid #ffffff40 !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, #ffffff40) 25.1%, transparent) !important;
     box-shadow: 0 0 22px color-mix(in srgb, var(--card-accent) 40%, transparent), inset 0 1px 0 #ffffff45 !important;
 }
 html[data-theme] .dashboard.dashboard-studio .card-body-metrics { margin-left: 54px !important; margin-bottom: 8px !important; }
@@ -298,7 +298,7 @@ html[data-theme] .dashboard.dashboard-studio .workforce-simple-caption { display
 .dashboard-studio .workforce-simple-bar { --bar-color: rgb(53, 150, 255); height: var(--bar-height); width: 72%; max-width: 56px; position: relative; }
 .dashboard-studio .workforce-simple-day:nth-child(3n+2) .workforce-simple-bar { --bar-color: rgb(44, 199, 136); }
 .dashboard-studio .workforce-simple-day:nth-child(3n) .workforce-simple-bar { --bar-color: rgb(242, 91, 111); }
-.dashboard-studio .workforce-simple-bar > span { display: block; width: 100%; height: 100%; border-radius: 8px 8px 0 0; background: linear-gradient(to top, color-mix(in srgb, var(--bar-color) 80%, black), var(--bar-color)); }
+.dashboard-studio .workforce-simple-bar > span { display: block; width: 100%; height: 100%; border-radius: 8px 8px 0 0; background: linear-gradient(to top, color-mix(in srgb, var(--bar-color) 80%, var(--erp-text, black)), var(--bar-color)); }
 .dashboard-studio .workforce-simple-bar > strong { position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 12px; line-height: 1; color: var(--erp-text); font-variant-numeric: tabular-nums; }
 .dashboard-studio .workforce-simple-bar.is-zero { height: 0; }
 .dashboard-studio .workforce-simple-bar.is-zero > span { width: 5px; height: 5px; border-radius: 50%; position: absolute; bottom: -2px; left: calc(50% - 2px); }
@@ -312,3 +312,15 @@ html[data-theme] .dashboard.dashboard-studio .workforce-simple-caption { display
 html[data-theme] .dashboard.dashboard-studio .attendance-count-note { grid-column: 1 / -1; grid-row: 3; margin: 6px 0 0; color: var(--erp-text-muted); font-size: 11px; line-height: 1.5; }
 html[data-theme] .dashboard.dashboard-studio .attendance-box > .attendance-list { grid-column: 2; grid-row: 2; }
 html[data-theme] .dashboard.dashboard-studio .attendance-box > .attendance-donut { grid-column: 1; grid-row: 2; }
+
+/* Category counts share the attendance card's current theme. */
+.dashboard.dashboard-studio .attendance-category-counts {
+    display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 8px 0 10px;
+    color: var(--text-primary); font-size: 12px;
+}
+.dashboard.dashboard-studio .attendance-category-counts > span {
+    display: inline-flex; align-items: center; gap: 8px; padding: 5px 0;
+    border: 0; border-radius: 0;
+    background: transparent;
+}
+.dashboard.dashboard-studio .attendance-category-counts strong { font-variant-numeric: tabular-nums; }

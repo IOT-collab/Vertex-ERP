@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
 using VertexERP.Models;
+using VertexERP.Services;
 
 namespace Vertex_ERP.Controllers;
 
@@ -17,38 +18,42 @@ public sealed class ExpenseController(ApplicationDbContext db, IWebHostEnvironme
     [HttpGet]
     public async Task<IActionResult> Index(string? view)
     {
-        var role = User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
-        var query = db.ExpenseClaims.AsNoTracking().Include(x => x.Employee).Include(x => x.ReportingManager).Include(x => x.DecidedByUser).AsQueryable();
+        var currentEmployeeId = await LoggedInEmployeeIdAsync();
+        var viewer = currentEmployeeId.HasValue ? await db.Employees.AsNoTracking().Include(x => x.ReportingManager)
+            .FirstOrDefaultAsync(x => x.Id == currentEmployeeId && x.IsActive) : null;
+        var canReceive = viewer?.CanReceiveExpenseClaims == true;
+        if (string.Equals(view, "inbox", StringComparison.OrdinalIgnoreCase) && !canReceive) return Forbid();
+        var query = db.ExpenseClaims.AsNoTracking().Include(x => x.Employee).Include(x => x.ReportingManager)
+            .Include(x => x.DecidedByUser).Include(x => x.ForwardedToEmployee).AsQueryable();
         string mode;
-        if (User.IsInRole("Manager"))
+        if (string.Equals(view, "inbox", StringComparison.OrdinalIgnoreCase) && canReceive)
         {
-            var managerId = await LoggedInEmployeeIdAsync();
-            if (!managerId.HasValue) return Forbid();
-            if (string.Equals(view, "self", StringComparison.OrdinalIgnoreCase))
-            {
-                query = query.Where(x => x.EmployeeId == managerId.Value);
-                mode = "Self";
-            }
-            else
-            {
-                query = query.Where(x => !x.RequiresHrApproval && x.ReportingManagerId == managerId.Value && x.EmployeeId != managerId.Value);
-                mode = "Manager";
-            }
+            query = query.Where(x => (x.WorkflowStage == ExpenseClaimWorkflow.Forwarded || x.WorkflowStage == ExpenseClaimWorkflow.Completed) && x.ForwardedToEmployeeId == currentEmployeeId);
+            mode = "Recipient";
         }
-        else if (User.IsInRole("HR") || User.IsInRole("Admin")) mode = "HR";
+        else if (string.Equals(view, "self", StringComparison.OrdinalIgnoreCase) || (!User.IsInRole("Manager") && !User.IsInRole("HR") && !User.IsInRole("Admin")))
+        {
+            if (viewer == null) return Forbid();
+            query = query.Where(x => x.EmployeeId == viewer.Id);
+            mode = "Self";
+        }
+        else if (User.IsInRole("Manager"))
+        {
+            if (viewer == null) return Forbid();
+            query = query.Where(x => x.ReportingManagerId == viewer.Id && x.EmployeeId != viewer.Id);
+            mode = "Manager";
+        }
         else
         {
-            var employeeId = await LoggedInEmployeeIdAsync();
-            if (!employeeId.HasValue) return Forbid();
-            query = query.Where(x => x.EmployeeId == employeeId.Value);
-            mode = "Employee";
+            query = query.Where(x => x.WorkflowStage != ExpenseClaimWorkflow.Manager);
+            mode = "HR";
         }
-        var currentEmployeeId = await LoggedInEmployeeIdAsync();
         var advances = db.ExpenseAdvances.AsNoTracking().Include(x => x.Employee).AsQueryable();
         if (mode != "HR") advances = advances.Where(x => x.EmployeeId == currentEmployeeId);
         return View("~/Views/Hr/ExpenseClaim.cshtml", new ExpenseClaimPageViewModel
         {
-            Mode = mode, CurrentEmployeeId = currentEmployeeId,
+            Mode = mode, CurrentEmployeeId = currentEmployeeId, CanReceiveForwardedClaims = canReceive,
+            HasReportingManager = viewer?.ReportingManagerId.HasValue == true, ReportingManagerName = viewer?.ReportingManager?.FullName,
             Claims = await query.OrderByDescending(x => x.SubmittedAtUtc).ToListAsync(),
             Advances = await advances.OrderByDescending(x => x.PaidAtUtc).ToListAsync(),
             AdvanceEmployees = mode == "HR" ? await db.Employees.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.FullName).ToListAsync() : new List<Employee>()
@@ -163,55 +168,170 @@ public sealed class ExpenseController(ApplicationDbContext db, IWebHostEnvironme
     }
 
     [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Employee,User,Manager")]
+    [RequestSizeLimit(11 * 1024 * 1024)]
     public async Task<IActionResult> Submit(SubmitExpenseClaimViewModel model)
     {
         var employeeId = await LoggedInEmployeeIdAsync();
-        var employee = employeeId.HasValue ? await db.Employees.FirstOrDefaultAsync(x => x.Id == employeeId.Value && x.IsActive) : null;
+        var employee = employeeId.HasValue ? await db.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == employeeId && x.IsActive) : null;
         if (employee == null) return Forbid();
-        var isManagerClaim = User.IsInRole("Manager");
-        if (!isManagerClaim && !employee.ReportingManagerId.HasValue)
-            ModelState.AddModelError(string.Empty, "A reporting manager must be assigned before you can submit an expense claim. Please contact HR.");
+        if (!employee.ReportingManagerId.HasValue || employee.ReportingManagerId == employee.Id
+            || !await db.Employees.AnyAsync(x => x.Id == employee.ReportingManagerId && x.IsActive
+                && db.AppUsers.Any(account => account.EmployeeId == x.Id && account.IsActive)))
+            ModelState.AddModelError("", "Ask HR to assign an active reporting manager before submitting an expense.");
         ValidateReceipt(model.ReceiptFile);
-        if (model.ExpenseDate > DateOnly.FromDateTime(DateTime.Today)) ModelState.AddModelError(nameof(model.ExpenseDate), "Expense date cannot be in the future.");
+        if (model.ExpenseDate == null || model.ExpenseDate > DateOnly.FromDateTime(FieldAttendanceClock.Now))
+            ModelState.AddModelError(nameof(model.ExpenseDate), "Select a valid expense date, not in the future.");
+        if (model.Amount != decimal.Round(model.Amount, 2)) ModelState.AddModelError(nameof(model.Amount), "Use at most two decimal places.");
+        if (model.ReceiptFile != null && Path.GetFileName(model.ReceiptFile.FileName).Length > 260)
+            ModelState.AddModelError(nameof(model.ReceiptFile), "Receipt filename is too long.");
+        if (ModelState.IsValid && !await HasReceiptSignatureAsync(model.ReceiptFile!))
+            ModelState.AddModelError(nameof(model.ReceiptFile), "The bill content must match its PDF, JPG or PNG file type.");
         if (!ModelState.IsValid)
         {
             TempData["ExpenseError"] = string.Join(" ", ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage));
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { view = "self" });
         }
-        var extension = Path.GetExtension(model.ReceiptFile!.FileName).ToLowerInvariant();
+        var file = model.ReceiptFile!;
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         var storedName = $"{Guid.NewGuid():N}{extension}";
         var folder = Path.Combine(environment.ContentRootPath, "App_Data", "ExpenseReceipts");
         Directory.CreateDirectory(folder);
-        await using (var target = new FileStream(Path.Combine(folder, storedName), FileMode.CreateNew)) await model.ReceiptFile.CopyToAsync(target);
-        db.ExpenseClaims.Add(new ExpenseClaim
+        var path = Path.Combine(folder, storedName);
+        try
         {
-            EmployeeId = employee.Id, ReportingManagerId = isManagerClaim ? null : employee.ReportingManagerId,
-            RequiresHrApproval = isManagerClaim,
-            Category = model.Category.Trim(), Title = model.Title.Trim(), ExpenseDate = model.ExpenseDate!.Value,
-            Amount = model.Amount, Remarks = model.Remarks?.Trim(), StoredFileName = storedName,
-            OriginalFileName = Path.GetFileName(model.ReceiptFile.FileName), ContentType = AllowedFiles[extension], FileSize = model.ReceiptFile.Length
-        });
-        await db.SaveChangesAsync();
-        TempData["ExpenseMessage"] = isManagerClaim ? "Expense claim submitted to HR." : "Expense claim submitted to your manager.";
-        return RedirectToAction(nameof(Index), isManagerClaim ? new { view = "self" } : null);
+            await using (var target = new FileStream(path, FileMode.CreateNew)) await file.CopyToAsync(target);
+            db.ExpenseClaims.Add(new ExpenseClaim {
+                EmployeeId = employee.Id, ReportingManagerId = employee.ReportingManagerId,
+                WorkflowStage = ExpenseClaimWorkflow.Manager, RequiresHrApproval = false,
+                Category = model.Category.Trim(), Title = model.Title.Trim(), ExpenseDate = model.ExpenseDate!.Value,
+                Amount = model.Amount, Remarks = model.Remarks?.Trim(), StoredFileName = storedName,
+                OriginalFileName = Path.GetFileName(file.FileName), ContentType = AllowedFiles[extension], FileSize = file.Length
+            });
+            await db.SaveChangesAsync();
+        }
+        catch { if (System.IO.File.Exists(path)) System.IO.File.Delete(path); throw; }
+        TempData["ExpenseMessage"] = "Expense submitted to your reporting manager. You can track each review below.";
+        return RedirectToAction(nameof(Index), new { view = "self" });
     }
 
     [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Manager,HR,Admin")]
     public async Task<IActionResult> Decide(int id, string decision, string? note)
     {
-        if (!decision.Equals("Approved", StringComparison.OrdinalIgnoreCase) && !decision.Equals("Rejected", StringComparison.OrdinalIgnoreCase))
-            return BadRequest();
-        var isHrReviewer = User.IsInRole("HR") || User.IsInRole("Admin");
-        var managerId = isHrReviewer ? null : await LoggedInEmployeeIdAsync();
-        var claim = await db.ExpenseClaims.FirstOrDefaultAsync(x => x.Id == id && x.Status == "Pending" && (isHrReviewer || (!x.RequiresHrApproval && x.ReportingManagerId == managerId)));
+        if (!ExpenseClaimWorkflow.ValidDecision(decision) || note?.Length > 500) return BadRequest();
+        if (decision == "Rejected" && string.IsNullOrWhiteSpace(note)) {
+            TempData["ExpenseError"] = "Please enter a reason for rejection."; return RedirectToAction(nameof(Index));
+        }
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var actorId)) return Forbid();
+        var viewerId = await LoggedInEmployeeIdAsync();
+        var claim = await db.ExpenseClaims.SingleOrDefaultAsync(x => x.Id == id);
         if (claim == null) return NotFound();
-        claim.Status = decision.Equals("Approved", StringComparison.OrdinalIgnoreCase) ? "Approved" : "Rejected";
-        claim.DecisionNote = string.IsNullOrWhiteSpace(note) ? null : note.Trim()[..Math.Min(note.Trim().Length, 500)];
-        claim.DecidedAtUtc = DateTime.UtcNow;
-        claim.DecidedByUserId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId) ? userId : null;
-        await db.SaveChangesAsync();
-        TempData["ExpenseMessage"] = $"Expense claim {claim.Status.ToLowerInvariant()}. The employee can now see this decision.";
+        if (User.IsInRole("HR") || User.IsInRole("Admin"))
+        {
+            if (!ExpenseClaimWorkflow.CanHrReview(claim, viewerId)) return Forbid();
+            ExpenseClaimWorkflow.HrReview(claim, decision, note?.Trim(), actorId);
+        }
+        else
+        {
+            if (!ExpenseClaimWorkflow.CanManagerReview(claim, viewerId)) return Forbid();
+            ExpenseClaimWorkflow.ManagerReview(claim, decision, note?.Trim(), actorId);
+        }
+        try { await db.SaveChangesAsync(); }
+        catch (DbUpdateConcurrencyException) { TempData["ExpenseError"] = "This claim was already updated. Refresh to see its current stage."; return RedirectToAction(nameof(Index)); }
+        TempData["ExpenseMessage"] = claim.WorkflowStage == ExpenseClaimWorkflow.HR
+            ? "Manager decision recorded and claim sent to HR." : "HR decision recorded. You can now forward this claim to Yuvraj.";
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "HR,Admin")]
+    public async Task<IActionResult> Forward(int id)
+    {
+        var claim = await db.ExpenseClaims.SingleOrDefaultAsync(x => x.Id == id);
+        if (claim == null) return NotFound();
+        if (!ExpenseClaimWorkflow.CanForward(claim, await LoggedInEmployeeIdAsync())) return Forbid();
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var actorId)) return Forbid();
+        var recipients = await db.Employees.AsNoTracking().Where(x => x.CanReceiveExpenseClaims && x.IsActive
+            && db.AppUsers.Any(account => account.EmployeeId == x.Id && account.IsActive)).Take(2).ToListAsync();
+        if (recipients.Count != 1) {
+            TempData["ExpenseError"] = "Yuvraj's active linked expense inbox is not configured. Check his employee login.";
+            return RedirectToAction(nameof(Index));
+        }
+        claim.ForwardedToEmployeeId = recipients[0].Id; claim.ForwardedByUserId = actorId;
+        claim.ForwardedAtUtc = DateTime.UtcNow; claim.WorkflowStage = ExpenseClaimWorkflow.Forwarded;
+        try { await db.SaveChangesAsync(); }
+        catch (DbUpdateConcurrencyException) { TempData["ExpenseError"] = "Claim already updated. Refresh to check its forwarding status."; return RedirectToAction(nameof(Index)); }
+        TempData["ExpenseMessage"] = "Claim and bill forwarded to Yuvraj's expense inbox.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost, ValidateAntiForgeryToken, RequestSizeLimit(11 * 1024 * 1024)]
+    public async Task<IActionResult> Respond(RespondToExpenseClaimViewModel model)
+    {
+        var viewerId = await LoggedInEmployeeIdAsync();
+        var hasInbox = viewerId.HasValue && await db.Employees.AnyAsync(x => x.Id == viewerId && x.IsActive && x.CanReceiveExpenseClaims);
+        var claim = await db.ExpenseClaims.SingleOrDefaultAsync(x => x.Id == model.Id);
+        if (claim == null) return NotFound();
+        if (!ExpenseClaimWorkflow.CanRecipientRespond(claim, viewerId, hasInbox)) return Forbid();
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var actorId)) return Forbid();
+        if (!ExpenseClaimWorkflow.ValidDecision(model.Decision)) ModelState.AddModelError(nameof(model.Decision), "Choose Approve or Reject.");
+        if (string.IsNullOrWhiteSpace(model.Reason) || model.Reason.Length > 1000)
+            ModelState.AddModelError(nameof(model.Reason), "Enter a reason of up to 1000 characters.");
+        ValidateReceipt(model.ResponseFile, nameof(model.ResponseFile));
+        if (model.ResponseFile != null && Path.GetFileName(model.ResponseFile.FileName).Length > 260)
+            ModelState.AddModelError(nameof(model.ResponseFile), "Response filename is too long.");
+        if (ModelState.IsValid && !await HasReceiptSignatureAsync(model.ResponseFile!))
+            ModelState.AddModelError(nameof(model.ResponseFile), "Response file content must match its PDF, JPG or PNG type.");
+        if (!ModelState.IsValid)
+        {
+            TempData["ExpenseError"] = string.Join(" ", ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage));
+            return RedirectToAction(nameof(Index), new { view = "inbox" });
+        }
+        var file = model.ResponseFile!;
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var storedName = $"{Guid.NewGuid():N}{extension}";
+        var folder = Path.Combine(environment.ContentRootPath, "App_Data", "ExpenseResponses");
+        var path = Path.Combine(folder, storedName);
+        try
+        {
+            Directory.CreateDirectory(folder);
+            await using (var target = new FileStream(path, FileMode.CreateNew)) await file.CopyToAsync(target);
+            claim.ResponseStoredFileName = storedName; claim.ResponseOriginalFileName = Path.GetFileName(file.FileName);
+            claim.ResponseContentType = AllowedFiles[extension]; claim.ResponseFileSize = file.Length;
+            ExpenseClaimWorkflow.RecipientRespond(claim, model.Decision, model.Reason.Trim(), actorId);
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+            TempData["ExpenseError"] = "This claim already has a response or was updated. Refresh to check its final status.";
+            return RedirectToAction(nameof(Index), new { view = "inbox" });
+        }
+        catch { if (System.IO.File.Exists(path)) System.IO.File.Delete(path); throw; }
+        TempData["ExpenseMessage"] = "Final response sent. The employee can view your decision, reason and attachment in My Claims.";
+        return RedirectToAction(nameof(Index), new { view = "inbox" });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ResponseAttachment(int id, bool download = false)
+    {
+        var claim = await db.ExpenseClaims.AsNoTracking().SingleOrDefaultAsync(x => x.Id == id);
+        if (claim == null || claim.WorkflowStage != ExpenseClaimWorkflow.Completed || claim.ResponseStoredFileName == null) return NotFound();
+        if (!await CanReadClaimAsync(claim)) return Forbid();
+        if (Path.GetFileName(claim.ResponseStoredFileName) != claim.ResponseStoredFileName) return NotFound();
+        var path = Path.Combine(environment.ContentRootPath, "App_Data", "ExpenseResponses", claim.ResponseStoredFileName);
+        Response.Headers["X-Content-Type-Options"] = "nosniff";
+        if (!System.IO.File.Exists(path)) return NotFound();
+        return download ? PhysicalFile(path, claim.ResponseContentType ?? "application/octet-stream", claim.ResponseOriginalFileName)
+            : PhysicalFile(path, claim.ResponseContentType ?? "application/octet-stream", enableRangeProcessing: true);
+    }
+
+    private async Task<bool> CanReadClaimAsync(ExpenseClaim claim)
+    {
+        var privileged = User.IsInRole("HR") || User.IsInRole("Admin");
+        if (privileged) return true;
+        var employeeId = await LoggedInEmployeeIdAsync();
+        var hasInbox = employeeId.HasValue && claim.ForwardedToEmployeeId == employeeId
+            && await db.Employees.AnyAsync(x => x.Id == employeeId && x.IsActive && x.CanReceiveExpenseClaims);
+        return ExpenseClaimWorkflow.CanReadClaim(claim, employeeId, false, hasInbox);
     }
 
     [HttpGet]
@@ -219,11 +339,9 @@ public sealed class ExpenseController(ApplicationDbContext db, IWebHostEnvironme
     {
         var claim = await db.ExpenseClaims.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         if (claim == null) return NotFound();
-        if (!User.IsInRole("HR") && !User.IsInRole("Admin"))
-        {
-            var employeeId = await LoggedInEmployeeIdAsync();
-            if (employeeId != claim.EmployeeId && employeeId != claim.ReportingManagerId) return Forbid();
-        }
+        if (!await CanReadClaimAsync(claim)) return Forbid();
+        if (Path.GetFileName(claim.StoredFileName) != claim.StoredFileName) return NotFound();
+        Response.Headers["X-Content-Type-Options"] = "nosniff";
         var path = Path.Combine(environment.ContentRootPath, "App_Data", "ExpenseReceipts", claim.StoredFileName);
         return System.IO.File.Exists(path) ? PhysicalFile(path, claim.ContentType, enableRangeProcessing: true) : NotFound();
     }
@@ -234,12 +352,12 @@ public sealed class ExpenseController(ApplicationDbContext db, IWebHostEnvironme
         return await db.AppUsers.AsNoTracking().Where(x => x.Id == userId && x.IsActive).Select(x => x.EmployeeId).FirstOrDefaultAsync();
     }
 
-    private void ValidateReceipt(IFormFile? file)
+    private void ValidateReceipt(IFormFile? file, string fieldName = nameof(SubmitExpenseClaimViewModel.ReceiptFile))
     {
-        if (file == null || file.Length == 0) { ModelState.AddModelError(nameof(SubmitExpenseClaimViewModel.ReceiptFile), "Upload a bill or receipt."); return; }
-        if (file.Length > MaximumReceiptSize) ModelState.AddModelError(nameof(SubmitExpenseClaimViewModel.ReceiptFile), "Receipt must be 10 MB or smaller.");
+        if (file == null || file.Length == 0) { ModelState.AddModelError(fieldName, "Upload a bill or receipt."); return; }
+        if (file.Length > MaximumReceiptSize) ModelState.AddModelError(fieldName, "Receipt must be 10 MB or smaller.");
         var extension = Path.GetExtension(file.FileName);
         if (!AllowedFiles.TryGetValue(extension, out var contentType) || !string.Equals(file.ContentType, contentType, StringComparison.OrdinalIgnoreCase))
-            ModelState.AddModelError(nameof(SubmitExpenseClaimViewModel.ReceiptFile), "Only PDF, JPG and PNG receipts are allowed.");
+            ModelState.AddModelError(fieldName, "Only PDF, JPG and PNG receipts are allowed.");
     }
 }

@@ -1,0 +1,10 @@
+@{
+    var today = DateOnly.FromDateTime(VertexERP.Services.FieldAttendanceClock.Now);
+}
+<link href="~/css/ExtraLeaveFacility.css" rel="stylesheet" asp-append-version="true" />
+<section class="facility-summary" data-facility-quota data-date="@today.ToString("yyyy-MM-dd")" data-quota-url="@Url.Action("ExtraLeaveQuota", "Main")" aria-live="polite">
+    <strong>This month's extra paid facility</strong>
+    <div data-quota-content>Loading monthly quota...</div>
+</section>
+<p class="facility-help">Extra paid facility. No deduction from EL, CL, ML or EW. Unused quota does not carry forward.</p>
+<script src="~/js/extra-leave-facility.js" asp-append-version="true" defer></script>

@@ -37,12 +37,12 @@
                     <div class="form-group">
                         @if (!string.IsNullOrWhiteSpace(Model.PhotoPath))
                         {
-                            <img id="editPhotoPreview" src="@Model.PhotoPath" alt="Employee photo" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #334155;" />
+                            <img id="editPhotoPreview" src="@Model.PhotoPath" alt="Employee photo" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid var(--erp-border, #334155);" />
                         }
                         else
                         {
-                            <div id="editPhotoPlaceholder" style="width:110px;height:110px;border-radius:50%;background:#e5e7eb;border:3px solid #334155;"></div>
-                            <img id="editPhotoPreview" src="" alt="Employee photo preview" style="display:none;width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #334155;" />
+                            <div id="editPhotoPlaceholder" style="width:110px;height:110px;border-radius:50%;background:var(--erp-surface-soft, #e5e7eb);border:3px solid var(--erp-border, #334155);"></div>
+                            <img id="editPhotoPreview" src="" alt="Employee photo preview" style="display:none;width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid var(--erp-border, #334155);" />
                         }
                     </div>
                     <div class="form-group"><label asp-for="EmployeePhoto"></label><input asp-for="EmployeePhoto" type="file" accept="image/jpeg,image/png" /><span asp-validation-for="EmployeePhoto" class="field-validation"></span><small>JPG or PNG, maximum 5 MB.</small></div>
@@ -128,6 +128,14 @@
                         <div class="form-group"><label asp-for="Designation"></label><input asp-for="Designation" /><span asp-validation-for="Designation" class="field-validation"></span></div>
                         <div class="form-group"><label asp-for="ReportingManagerId"></label><select asp-for="ReportingManagerId"><option value="">No reporting manager</option>@foreach (var manager in Model.Managers){<option value="@manager.Id">@manager.FullName (@manager.EmployeeCode)</option>}</select><span asp-validation-for="ReportingManagerId" class="field-validation"></span></div>
                         <div class="form-group"><label asp-for="WorkLocation"></label><input asp-for="WorkLocation" /></div>
+<div class="form-group">
+    <label asp-for="EmployeeCategory"></label>
+    <select asp-for="EmployeeCategory">
+        <option value="">Select employee category</option>
+        @foreach(var category in VertexERP.Models.EmployeeCategories.All){<option value="@category">@category</option>}
+    </select>
+    <span asp-validation-for="EmployeeCategory" class="field-validation"></span>
+</div>
                         <div class="form-group"><label asp-for="EmploymentType"></label><select asp-for="EmploymentType"><option>Full Time</option><option>Part Time</option><option>Contract</option><option>Intern</option></select></div>
                         <div class="form-group"><label asp-for="EmployeeStatus"></label><select asp-for="EmployeeStatus"><option>Active</option><option>Probation</option><option>Notice Period</option><option>Inactive</option></select></div>
                     </div>

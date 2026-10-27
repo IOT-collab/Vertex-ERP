@@ -16,22 +16,22 @@
         margin: 28px auto;
         padding: 30px;
         box-sizing: border-box;
-        background: #111c31;
-        border: 1px solid #2b3d5d;
+        background: var(--erp-surface, #111c31);
+        border: 1px solid var(--erp-border, #2b3d5d);
         border-radius: 18px;
-        color: #edf4ff;
+        color: var(--erp-text, #edf4ff);
     }
 
         .field-attendance h1 {
             margin: 0;
             font-size: clamp(25px, 4vw, 34px);
             line-height: 1.2;
-            color: #ffffff;
+            color: var(--erp-text, #ffffff);
         }
 
         .field-attendance > p {
             margin: 8px 0 0;
-            color: #aabbd5;
+            color: var(--erp-text-muted, #aabbd5);
             font-size: 14px;
             line-height: 1.5;
         }
@@ -60,8 +60,8 @@
         margin: 0 !important;
         align-self: flex-start !important;
         border-radius: 14px;
-        background: #172641;
-        border: 1px solid #263b5e;
+        background: var(--erp-surface-soft, #172641);
+        border: 1px solid var(--erp-border, #263b5e);
         box-sizing: border-box;
         display: flex !important;
         flex-direction: column !important;
@@ -81,7 +81,7 @@
         border: 0;
         border-radius: 10px;
         padding: 14px 18px;
-        color: #ffffff;
+        color: var(--theme-accent-text, #ffffff);
         font: 700 16px inherit;
         cursor: pointer;
         transition: background .2s ease, opacity .2s ease, transform .15s ease;
@@ -121,8 +121,8 @@
         flex: 0 0 auto !important;
         margin: 8px 0 0 !important;
         padding: 8px 10px !important;
-        background: #111c31;
-        border: 1px solid #263b5e;
+        background: var(--erp-surface, #111c31);
+        border: 1px solid var(--erp-border, #263b5e);
         border-radius: 9px;
         min-height: 0 !important;
         height: auto !important;
@@ -131,14 +131,14 @@
 
         .attendance-status small {
             display: block;
-            color: #9db0cf;
+            color: var(--erp-text-muted, #9db0cf);
             font-size: 11px;
             margin-bottom: 4px;
         }
 
         .attendance-status strong {
             display: block;
-            color: #ffffff;
+            color: var(--erp-text, #ffffff);
             font-size: 16px;
             line-height: 1.2;
         }
@@ -153,7 +153,7 @@
         padding: 14px 16px;
         border: 1px dashed #4b6b99;
         border-radius: 14px;
-        background: rgba(17, 28, 49, .55);
+        background: color-mix(in srgb, var(--erp-surface, rgba(17, 28, 49, .55)) 55%, transparent);
     }
 
     .selfie-row {
@@ -177,7 +177,7 @@
         }
 
     .selfie-help {
-        color: #aabbd5;
+        color: var(--erp-text-muted, #aabbd5);
         font-size: 13px;
     }
 
@@ -198,7 +198,7 @@
     .field-message {
         min-height: 20px;
         margin: 14px 0 0;
-        color: #c1d4f3;
+        color: var(--erp-text, #c1d4f3);
         font-size: 13px;
         line-height: 1.4;
     }
@@ -215,12 +215,12 @@
     .field-action.checkin:disabled {
         background: #315181 !important;
         opacity: 1 !important;
-        color: #b9c8df !important;
+        color: var(--erp-text, #b9c8df) !important;
         cursor: not-allowed;
     }
 
     .field-action.checkout:disabled {
-        background: #285f52;
+        background: var(--erp-surface-soft, #285f52);
         opacity: .55;
     }
 

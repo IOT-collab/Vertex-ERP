@@ -1,16 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --app-bg-1: #07111f;
-    --app-bg-2: #0b1424;
-    --app-bg-3: #111827;
-    --app-glass: rgba(255, 255, 255, .06);
-    --app-glass-strong: rgba(255, 255, 255, .09);
-    --app-border: rgba(255, 255, 255, .12);
-    --app-border-strong: rgba(255, 255, 255, .18);
-    --app-text: #ffffff;
-    --app-text-soft: #d7def2;
-    --app-muted: #a8b3cf;
+    --app-bg-1: var(--erp-bg, #07111f);
+    --app-bg-2: var(--erp-surface, #0b1424);
+    --app-bg-3: var(--erp-surface, #111827);
+    --app-glass: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .06)) 6%, transparent);
+    --app-glass-strong: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .09)) 9%, transparent);
+    --app-border: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .12)) 12%, transparent);
+    --app-border-strong: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .18)) 18%, transparent);
+    --app-text: var(--erp-text, #ffffff);
+    --app-text-soft: var(--erp-text, #d7def2);
+    --app-muted: var(--erp-text-muted, #a8b3cf);
     --app-blue: #3b82f6;
     --app-green: #22c55e;
     --app-orange: #f59e0b;
@@ -99,7 +99,7 @@ section,
 .list-group-item {
     border: 1px solid var(--app-border) !important;
     border-radius: var(--app-radius-xl) !important;
-    background: linear-gradient(145deg, rgba(255, 255, 255, .088), rgba(255, 255, 255, .044)) !important;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .088)) 8.8%, transparent), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .044)) 4.4%, transparent)) !important;
     box-shadow: var(--app-shadow) !important;
     backdrop-filter: blur(22px) saturate(145%) !important;
     -webkit-backdrop-filter: blur(22px) saturate(145%) !important;
@@ -233,7 +233,7 @@ td,
 .filter-field,
 .doc-action-hub {
     background: transparent !important;
-    border-color: rgba(255, 255, 255, .1) !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
 }
 
 table,
@@ -250,9 +250,9 @@ table,
 .responsive-table-wrapper,
 .table-responsive-container {
     overflow: auto !important;
-    border: 1px solid rgba(255, 255, 255, .1) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
     border-radius: var(--app-radius-lg) !important;
-    background: rgba(255, 255, 255, .035) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .035)) 3.5%, transparent) !important;
 }
 
 table th,
@@ -262,8 +262,8 @@ table th,
     top: 0 !important;
     z-index: 2 !important;
     color: var(--app-muted) !important;
-    background: rgba(11, 20, 36, .9) !important;
-    border-color: rgba(255, 255, 255, .12) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(11, 20, 36, .9)) 90%, transparent) !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .12)) 12%, transparent) !important;
     font-size: 11px !important;
     font-weight: 800 !important;
     text-transform: uppercase;
@@ -274,7 +274,7 @@ table td,
 .vault-doc-table td {
     color: var(--app-text-soft) !important;
     background: transparent !important;
-    border-color: rgba(255, 255, 255, .075) !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .075)) 7.5%, transparent) !important;
 }
 
 tbody tr,
@@ -285,8 +285,8 @@ tbody tr,
 tbody tr:hover td,
 .modern-table tr:hover td,
 .vault-doc-table tr:hover td {
-    background: rgba(255, 255, 255, .075) !important;
-    color: #ffffff !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .075)) 7.5%, transparent) !important;
+    color: var(--erp-text, #ffffff) !important;
 }
 
 input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="submit"], [type="button"], [type="reset"], [type="color"]),
@@ -300,9 +300,9 @@ textarea,
 .filter-box select,
 .table-header input {
     min-height: 38px;
-    border: 1px solid rgba(255, 255, 255, .13) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .13)) 13%, transparent) !important;
     border-radius: 14px !important;
-    background: rgba(255, 255, 255, .07) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent) !important;
     color: var(--app-text) !important;
     outline: none !important;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08) !important;
@@ -310,7 +310,7 @@ textarea,
 
 input::placeholder,
 textarea::placeholder {
-    color: rgba(168, 179, 207, .76) !important;
+    color: color-mix(in srgb, var(--erp-text-muted, rgba(168, 179, 207, .76)) 76%, transparent) !important;
 }
 
 input:focus,
@@ -327,8 +327,8 @@ textarea:focus,
 }
 
 select option {
-    color: #ffffff !important;
-    background: #111827 !important;
+    color: var(--erp-text, #ffffff) !important;
+    background: var(--erp-surface, #111827) !important;
 }
 
 /* Native date/time picker glyphs otherwise render dark on the ERP's dark inputs. */
@@ -336,7 +336,7 @@ input[type="date"],
 input[type="datetime-local"],
 input[type="month"],
 input[type="time"] {
-    color-scheme: dark;
+    color-scheme:inherit;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator,
@@ -344,7 +344,7 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator,
 input[type="month"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
-    /* color-scheme: dark already provides a light native icon. */
+    /* color-scheme:inherit already provides a light native icon. */
     filter: none;
     opacity: .95;
 }
@@ -385,7 +385,7 @@ button,
 .btn-upload {
     border: 1px solid rgba(59, 130, 246, .5) !important;
     background: linear-gradient(135deg, rgba(59, 130, 246, .95), rgba(37, 99, 235, .78)) !important;
-    color: #ffffff !important;
+    color: var(--theme-accent-text, #ffffff) !important;
     box-shadow: 0 14px 28px rgba(59, 130, 246, .18) !important;
 }
 
@@ -394,8 +394,8 @@ button,
 .btn-download-slip,
 .edit,
 .delete {
-    border: 1px solid rgba(255, 255, 255, .13) !important;
-    background: rgba(255, 255, 255, .07) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .13)) 13%, transparent) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent) !important;
     color: var(--app-text-soft) !important;
 }
 
@@ -419,7 +419,7 @@ button:hover,
     transform: translateY(-2px) !important;
     border-color: rgba(59, 130, 246, .45) !important;
     background: rgba(59, 130, 246, .2) !important;
-    color: #ffffff !important;
+    color: var(--erp-text, #ffffff) !important;
     box-shadow: 0 16px 34px rgba(59, 130, 246, .2) !important;
 }
 
@@ -434,10 +434,10 @@ button:hover,
 .leave-status {
     display: inline-flex !important;
     align-items: center !important;
-    border: 1px solid rgba(255, 255, 255, .12) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .12)) 12%, transparent) !important;
     border-radius: 999px !important;
     padding: 5px 10px !important;
-    background: rgba(255, 255, 255, .07) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent) !important;
     font-size: 11px !important;
     font-weight: 800 !important;
 }
@@ -445,14 +445,14 @@ button:hover,
 .badge-active,
 .completed,
 .present-status {
-    color: #86efac !important;
+    color: var(--erp-success, #86efac) !important;
     background: rgba(34, 197, 94, .13) !important;
 }
 
 .pending,
 .late-status,
 .leave-status {
-    color: #fde68a !important;
+    color: var(--erp-warning, #fde68a) !important;
     background: rgba(245, 158, 11, .14) !important;
 }
 
@@ -461,26 +461,26 @@ button:hover,
 .danger,
 .delete,
 .btn-delete {
-    color: #fecaca !important;
+    color: var(--erp-danger, #fecaca) !important;
 }
 
 .modal,
 .modal-backdrop,
 .popup-overlay {
-    background: rgba(7, 17, 31, .68) !important;
+    background: color-mix(in srgb, var(--erp-bg, rgba(7, 17, 31, .68)) 68%, transparent) !important;
     backdrop-filter: blur(10px) !important;
 }
 
 .modal-header,
 .modal-footer {
-    border-color: rgba(255, 255, 255, .1) !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
 }
 
 .navbar,
 .bg-white,
 .footer {
-    background: rgba(7, 17, 31, .82) !important;
-    border-color: rgba(255, 255, 255, .1) !important;
+    background: color-mix(in srgb, var(--erp-bg, rgba(7, 17, 31, .82)) 82%, transparent) !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
     color: var(--app-text-soft) !important;
 }
 
@@ -492,13 +492,13 @@ button:hover,
 }
 
 a {
-    color: #93c5fd;
+    color: var(--erp-primary, #93c5fd);
 }
 
 hr,
 .border-top,
 .border-bottom {
-    border-color: rgba(255, 255, 255, .1) !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
 }
 
 ::-webkit-scrollbar {
@@ -507,13 +507,13 @@ hr,
 }
 
 ::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, .04);
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .04)) 4%, transparent);
 }
 
 ::-webkit-scrollbar-thumb {
-    border: 2px solid rgba(7, 17, 31, .88);
+    border: 2px solid color-mix(in srgb, var(--erp-border, rgba(7, 17, 31, .88)) 88%, transparent);
     border-radius: 999px;
-    background: rgba(168, 179, 207, .38);
+    background: color-mix(in srgb, var(--erp-surface-soft, rgba(168, 179, 207, .38)) 38%, transparent);
 }
 
 @media (max-width: 768px) {
@@ -559,7 +559,7 @@ hr,
 .bio-form,
 .bio-map-form {
     border: 1px solid var(--app-border) !important;
-    background: linear-gradient(145deg, rgba(255, 255, 255, .088), rgba(255, 255, 255, .044)) !important;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .088)) 8.8%, transparent), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .044)) 4.4%, transparent)) !important;
     color: var(--app-text-soft) !important;
     box-shadow: var(--app-shadow) !important;
 }
@@ -567,7 +567,7 @@ hr,
 .employee-hero {
     background:
         radial-gradient(circle at 12% 25%, rgba(59, 130, 246, .14), transparent 28%),
-        linear-gradient(145deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .045)) !important;
+        linear-gradient(145deg, color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .09)) 9%, transparent), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .045)) 4.5%, transparent)) !important;
 }
 
 .attendance-times > div,
@@ -577,8 +577,8 @@ hr,
 .bio-secondary,
 .bio-actions a,
 .bio-actions button {
-    border-color: rgba(255, 255, 255, .1) !important;
-    background: rgba(255, 255, 255, .055) !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .055)) 5.5%, transparent) !important;
     color: var(--app-text-soft) !important;
 }
 
@@ -614,7 +614,7 @@ hr,
 .leave-dialog form,
 .notification-panel {
     border: 1px solid var(--app-border) !important;
-    background: #111b2d !important;
+    background: var(--erp-surface, #111b2d) !important;
     color: var(--app-text-soft) !important;
 }
 
@@ -634,7 +634,7 @@ hr,
 .action-card,
 .employee-photo-card {
     border-color: var(--app-border) !important;
-    background: linear-gradient(145deg, rgba(255, 255, 255, .088), rgba(255, 255, 255, .044)) !important;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .088)) 8.8%, transparent), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .044)) 4.4%, transparent)) !important;
     color: var(--app-text-soft) !important;
     box-shadow: var(--app-shadow) !important;
 }
@@ -670,9 +670,9 @@ input[type="number"]::-webkit-outer-spin-button {
     overflow: hidden;
     border: 1px solid rgba(112, 156, 255, .36);
     border-radius: 26px;
-    color: #f8fbff;
+    color: var(--erp-text, #f8fbff);
     text-align: center;
-    background: radial-gradient(ellipse at 50% 0%, rgba(59, 115, 235, .25), transparent 58%), linear-gradient(145deg, #17243d, #0e1729 72%);
+    background: radial-gradient(ellipse at 50% 0%, rgba(59, 115, 235, .25), transparent 58%), linear-gradient(145deg, var(--erp-surface-soft, #17243d), var(--erp-surface, #0e1729) 72%);
     box-shadow: 0 28px 90px rgba(0, 0, 0, .55), 0 0 55px rgba(53, 111, 232, .18);
 }
 .vertex-welcome-close {
@@ -681,10 +681,10 @@ input[type="number"]::-webkit-outer-spin-button {
     right: 15px;
     width: 36px;
     height: 36px;
-    border: 1px solid rgba(255,255,255,.16);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255,255,255,.16)) 16%, transparent);
     border-radius: 50%;
-    color: #dce7ff;
-    background: rgba(255,255,255,.07);
+    color: var(--erp-text, #dce7ff);
+    background: color-mix(in srgb, var(--erp-surface, rgba(255,255,255,.07)) 7%, transparent);
     font-size: 25px;
     line-height: 1;
     cursor: pointer;
@@ -697,16 +697,16 @@ input[type="number"]::-webkit-outer-spin-button {
     margin: 0 auto 20px;
     border: 1px solid rgba(128, 176, 255, .42);
     border-radius: 20px;
-    color: #fff;
+    color: var(--theme-accent-text, #fff);
     background: linear-gradient(140deg, #4387f5, #5149d9);
     box-shadow: 0 12px 35px rgba(48, 102, 223, .36);
     font-size: 25px;
 }
 .vertex-welcome-eyebrow { margin: 0 0 10px; color: #8ebcff; font-size: 11px; font-weight: 800; letter-spacing: .16em; }
 .vertex-welcome-card h1 { margin: 0; font-size: clamp(25px, 5vw, 32px); font-weight: 800; letter-spacing: -.03em; }
-.vertex-welcome-name { margin: 12px 0 0; color: #c7d8ff; font-size: 22px; font-weight: 700; }
-.vertex-welcome-copy { margin: 9px 0 25px; color: #aab8d2; font-size: 14px; }
-.vertex-welcome-continue { min-width: 150px; padding: 11px 24px; border: 0; border-radius: 999px; color: #fff; background: linear-gradient(100deg, #347dec, #2851cb); box-shadow: 0 8px 24px rgba(40, 91, 214, .3); font-weight: 750; cursor: pointer; }
+.vertex-welcome-name { margin: 12px 0 0; color: var(--erp-text, #c7d8ff); font-size: 22px; font-weight: 700; }
+.vertex-welcome-copy { margin: 9px 0 25px; color: var(--erp-text-muted, #aab8d2); font-size: 14px; }
+.vertex-welcome-continue { min-width: 150px; padding: 11px 24px; border: 0; border-radius: 999px; color: var(--theme-accent-text, #fff); background: linear-gradient(100deg, #347dec, #2851cb); box-shadow: 0 8px 24px rgba(40, 91, 214, .3); font-weight: 750; cursor: pointer; }
 .vertex-welcome-continue:hover { filter: brightness(1.1); }
 .vertex-welcome-overlay.is-closing { opacity: 0; transition: opacity .18s ease; }
 @keyframes vertexWelcomeFade { from { opacity: 0; } to { opacity: 1; } }

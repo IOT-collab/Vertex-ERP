@@ -11,6 +11,10 @@ public class LeaveRequest
     public DateOnly FromDate { get; set; }
     public DateOnly ToDate { get; set; }
     public bool IsHalfDay { get; set; }
+    public bool IsExtraFacility { get; set; }
+    public TimeOnly? ShortLeaveFrom { get; set; }
+    public TimeOnly? ShortLeaveTo { get; set; }
+    [MaxLength(10)] public string? HalfDaySession { get; set; }
     [Required, MaxLength(500)] public string Reason { get; set; } = string.Empty;
     [Required, MaxLength(20)] public string Status { get; set; } = "Pending";
     [Required, MaxLength(30)] public string ApprovalLevel { get; set; } = "Manager";
@@ -26,6 +30,6 @@ public class LeaveRequest
     public DateTime? ManagerDecidedAtUtc { get; set; }
     [MaxLength(500)] public string? ManagerDecisionNote { get; set; }
     [System.ComponentModel.DataAnnotations.Schema.NotMapped]
-    public string DisplayStatus => Status == "Pending" ? $"Pending {ApprovalLevel}" : Status;
+    public string DisplayStatus => Status == "Pending" ? $"Pending {((IsHalfDay || IsExtraFacility) && ApprovalLevel == "HR/Admin" ? "HR" : ApprovalLevel)}" : Status;
     public DateTime AppliedAtUtc { get; set; } = DateTime.UtcNow;
 }

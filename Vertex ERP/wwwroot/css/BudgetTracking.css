@@ -3,14 +3,14 @@
    ========================================================================== */
 
 :root {
-    --bg-main: #0B0F19;
-    --bg-card: rgba(17, 24, 39, 0.85);
-    --bg-input: #1F2937;
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-highlight: rgba(255, 255, 255, 0.15);
-    --text-primary: #F9FAFB;
-    --text-secondary: #9CA3AF;
-    --text-muted: #6B7280;
+    --bg-main: var(--erp-bg, #0B0F19);
+    --bg-card: color-mix(in srgb, var(--erp-surface, rgba(17, 24, 39, 0.85)) 85%, transparent);
+    --bg-input: var(--erp-surface-soft, #1F2937);
+    --border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.08)) 8%, transparent);
+    --border-highlight: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.15)) 15%, transparent);
+    --text-primary: var(--erp-text, #F9FAFB);
+    --text-secondary: var(--erp-text-muted, #9CA3AF);
+    --text-muted: var(--erp-text-muted, #6B7280);
     --blue: #3B82F6;
     --blue-glow: rgba(59, 130, 246, 0.3);
     --emerald: #10B981;
@@ -92,7 +92,7 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 1.3rem;
-    color: #FFF;
+    color: var(--theme-accent-text, #FFF);
     box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
     flex-shrink: 0;
 }
@@ -159,8 +159,8 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #2563EB, #1D4ED8);
-    color: #FFF;
+    background: linear-gradient(135deg, var(--erp-primary, var(--erp-primary, #2563EB)), var(--erp-primary, var(--erp-primary, #1D4ED8)));
+    color: var(--theme-accent-text, #FFF);
     box-shadow: 0 4px 14px var(--blue-glow);
 }
 
@@ -312,7 +312,7 @@ body {
 }
 
 .project-budget-item {
-    background: rgba(255, 255, 255, 0.02);
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.02)) 2%, transparent);
     border: 1px solid var(--border-color);
     padding: 1.2rem;
     border-radius: var(--radius-md);

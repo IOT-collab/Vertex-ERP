@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
 using VertexERP.Models;
 
@@ -55,9 +55,14 @@ public sealed class BiometricRepository : IBiometricRepository
         await _db.EmployeeDeviceMappings.AsNoTracking().Where(x => x.IsActive
             && !_db.BiometricEmployeeExclusions.Any(e => e.DeviceUserCode == x.DeviceUserId.Trim().ToUpper()))
             .ToListAsync(cancellationToken);
+    public async Task<IReadOnlyList<LeaveRequest>> GetApprovedLeavesForRangeAsync(DateOnly from, DateOnly to, CancellationToken cancellationToken = default) =>
+        await _db.LeaveRequests.AsNoTracking().Where(request => request.Status == "Approved"
+            && request.LeaveType != VertexERP.Services.ExtraLeaveFacility.ShortLeave && request.FromDate <= to && request.ToDate >= from)
+            .Select(request => new LeaveRequest { EmployeeId = request.EmployeeId, FromDate = request.FromDate, ToDate = request.ToDate })
+            .ToListAsync(cancellationToken);
     public async Task<IReadOnlySet<int>> GetApprovedLeaveEmployeeIdsAsync(DateOnly date, CancellationToken cancellationToken = default) =>
         (await _db.LeaveRequests.AsNoTracking()
-            .Where(request => request.Status == "Approved" && request.FromDate <= date && request.ToDate >= date)
+            .Where(request => request.LeaveType != VertexERP.Services.ExtraLeaveFacility.ShortLeave && request.Status == "Approved" && request.FromDate <= date && request.ToDate >= date)
             .Select(request => request.EmployeeId)
             .Distinct()
             .ToListAsync(cancellationToken)).ToHashSet();

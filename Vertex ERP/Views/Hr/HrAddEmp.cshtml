@@ -460,6 +460,14 @@
                     <small>An end time earlier than the start means the shift ends the next day.</small>
                 </div>
 
+<div class="form-group">
+    <label asp-for="EmployeeCategory"></label>
+    <select asp-for="EmployeeCategory">
+        <option value="">Select employee category</option>
+        @foreach(var category in VertexERP.Models.EmployeeCategories.All){<option value="@category">@category</option>}
+    </select>
+    <span asp-validation-for="EmployeeCategory" class="field-validation"></span>
+</div>
                 <!-- Employment Type -->
                 <div class="form-group">
 

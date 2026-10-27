@@ -1,11 +1,11 @@
-﻿/* Layout & Container */
+/* Layout & Container */
 .dashboard-card-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 2rem 1rem;
     min-height: 100vh;
-    background-color: #0b0f19;
+    background-color: var(--erp-bg, #0b0f19);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     box-sizing: border-box;
 }
@@ -19,8 +19,8 @@
     position: relative;
     width: 100%;
     max-width: 380px;
-    background: #111827;
-    border: 1px solid #1f293d;
+    background: var(--erp-surface, #111827);
+    border: 1px solid var(--erp-border, #1f293d);
     border-radius: 24px;
     box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), 0 0 15px rgba(59, 130, 246, 0.05);
     overflow: hidden;
@@ -85,11 +85,11 @@
 
 .shift-tag {
     font-size: 0.72rem;
-    color: #94a3b8;
-    background: #1e293b;
+    color: var(--erp-text-muted, #94a3b8);
+    background: var(--erp-surface-soft, #1e293b);
     padding: 4px 10px;
     border-radius: 12px;
-    border: 1px solid #334155;
+    border: 1px solid var(--erp-border, #334155);
 }
 
 /* Card Body */
@@ -120,7 +120,7 @@
 
 .ring-bg {
     fill: none;
-    stroke: #1e293b;
+    stroke: var(--erp-border, #1e293b);
     stroke-width: 8;
 }
 
@@ -143,13 +143,13 @@
 .live-timer {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
     letter-spacing: 0.5px;
 }
 
 .timer-label {
     font-size: 0.68rem;
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -162,13 +162,13 @@
 .card-title {
     font-size: 1.35rem;
     font-weight: 700;
-    color: #f8fafc;
+    color: var(--erp-text, #f8fafc);
     margin: 0 0 0.25rem 0;
 }
 
 .card-subtitle {
     font-size: 0.825rem;
-    color: #94a3b8;
+    color: var(--erp-text-muted, #94a3b8);
     margin: 0;
 }
 
@@ -182,8 +182,8 @@
 }
 
 .stat-pill {
-    background: #0f172a;
-    border: 1px solid #1e293b;
+    background: var(--erp-surface, #0f172a);
+    border: 1px solid var(--erp-border, #1e293b);
     border-radius: 12px;
     padding: 0.6rem 0.4rem;
     display: flex;
@@ -193,7 +193,7 @@
 
 .pill-label {
     font-size: 0.65rem;
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
     text-transform: uppercase;
     font-weight: 600;
 }
@@ -201,7 +201,7 @@
 .pill-val {
     font-size: 0.78rem;
     font-weight: 600;
-    color: #cbd5e1;
+    color: var(--erp-text, #cbd5e1);
     margin-top: 3px;
 }
 
@@ -215,7 +215,7 @@
     width: 100%;
     padding: 0.85rem 1rem;
     background: linear-gradient(135deg, #e11d48, #be123c);
-    color: #ffffff;
+    color: var(--theme-accent-text, #ffffff);
     font-size: 0.95rem;
     font-weight: 600;
     border: none;
@@ -253,15 +253,15 @@
 }
 
 .quick-tile {
-    background: #0f172a;
-    border: 1px solid #1e293b;
+    background: var(--erp-surface, #0f172a);
+    border: 1px solid var(--erp-border, #1e293b);
     border-radius: 12px;
     padding: 0.65rem 0.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    color: #94a3b8;
+    color: var(--erp-text-muted, #94a3b8);
     text-decoration: none;
     font-size: 0.75rem;
     font-weight: 500;
@@ -271,13 +271,13 @@
     .quick-tile svg {
         width: 16px;
         height: 16px;
-        color: #60a5fa;
+        color: var(--erp-primary, #60a5fa);
     }
 
     .quick-tile:hover {
-        background: #1e293b;
-        color: #ffffff;
-        border-color: #334155;
+        background: var(--erp-surface-soft, #1e293b);
+        color: var(--erp-text, #ffffff);
+        border-color: var(--erp-border, #334155);
     }
 
 /* Helper Utilities */
@@ -286,7 +286,7 @@
 }
 
 .text-amber {
-    color: #fbbf24 !important;
+    color: var(--erp-warning, #fbbf24) !important;
 }
 
 /* Responsive Adjustments */

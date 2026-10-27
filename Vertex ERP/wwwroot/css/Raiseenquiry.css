@@ -1,4 +1,4 @@
-﻿* {
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -19,19 +19,19 @@ body {
 }
 
     .page-header h2 {
-        color: #ffffff;
+        color: var(--erp-text, #ffffff);
         font-size: 30px;
         font-weight: 700;
     }
 
     .page-header p {
-        color: #b8c2d4;
+        color: var(--erp-text-muted, #b8c2d4);
         margin-top: 5px;
     }
 
 .enquiry-card {
-    background: rgba(20, 30, 55, .95);
-    border: 1px solid rgba(255,255,255,.08);
+    background: color-mix(in srgb, var(--erp-surface-soft, rgba(20, 30, 55, .95)) 95%, transparent);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255,255,255,.08)) 8%, transparent);
     border-radius: 16px;
     padding: 30px;
     box-shadow: 0 10px 25px rgba(0,0,0,.25);
@@ -49,7 +49,7 @@ body {
 }
 
     .form-group label {
-        color: #fff;
+        color: var(--erp-text, #fff);
         margin-bottom: 8px;
         font-size: 14px;
         font-weight: 600;
@@ -62,15 +62,15 @@ body {
     min-height: 48px !important;
     padding: 12px 15px !important;
     border-radius: 8px !important;
-    border: 1px solid #3d4f73 !important;
-    background: #233455 !important;
-    color: #fff !important;
+    border: 1px solid var(--erp-border, #3d4f73) !important;
+    background: var(--erp-surface-soft, #233455) !important;
+    color: var(--erp-text, #fff) !important;
     font-size: 15px;
     box-shadow: none !important;
 }
 
     .enquiry-card .form-control::placeholder {
-        color: #9aa8bf;
+        color: var(--erp-text-muted, #9aa8bf);
     }
 
     .enquiry-card .form-control:focus {
@@ -97,7 +97,7 @@ body {
 
 .btn-submit {
     background: #5b4bdb;
-    color: #fff;
+    color: var(--theme-accent-text, #fff);
     border: none;
     padding: 13px 35px;
     border-radius: 8px;

@@ -45,8 +45,8 @@
     inset: 0 !important;
     z-index: -1 !important;
     background-image:
-        linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px) !important;
+        linear-gradient(color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .035)) 3.5%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .035)) 3.5%, transparent) 1px, transparent 1px) !important;
     background-size: 54px 54px !important;
     mask-image: linear-gradient(to bottom, rgba(0, 0, 0, .82), transparent 78%) !important;
 }
@@ -64,7 +64,7 @@
 .dashboard .activity-box,
 .dashboard .quick-box,
 .dashboard .analytics-card {
-    background: linear-gradient(145deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .045)) !important;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .09)) 9%, transparent), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .045)) 4.5%, transparent)) !important;
     border: 1px solid var(--erp-glass-border) !important;
     box-shadow: var(--erp-shadow-soft), inset 0 1px 0 rgba(255, 255, 255, .12) !important;
     backdrop-filter: blur(22px) saturate(145%) !important;
@@ -93,7 +93,7 @@
     border: 1px solid rgba(59, 130, 246, .28) !important;
     border-radius: 999px !important;
     background: rgba(59, 130, 246, .13) !important;
-    color: #bfdbfe !important;
+    color: var(--erp-text, #bfdbfe) !important;
     font-size: 11px !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
@@ -133,9 +133,9 @@
     width: min(340px, 36vw) !important;
     min-height: 46px !important;
     padding: 10px 13px !important;
-    border: 1px solid rgba(255, 255, 255, .13) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .13)) 13%, transparent) !important;
     border-radius: 999px !important;
-    background: rgba(255, 255, 255, .075) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .075)) 7.5%, transparent) !important;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08) !important;
     transition: border-color var(--erp-transition), box-shadow var(--erp-transition), background var(--erp-transition) !important;
 }
@@ -143,7 +143,7 @@
 .dashboard .search-bar:hover,
 .dashboard .search-bar:focus-within {
     border-color: rgba(59, 130, 246, .45) !important;
-    background: rgba(255, 255, 255, .1) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .1)) 10%, transparent) !important;
     box-shadow: 0 0 0 4px rgba(59, 130, 246, .1), inset 0 1px 0 rgba(255, 255, 255, .14) !important;
 }
 
@@ -170,15 +170,15 @@
 }
 
 .dashboard .search-bar input::placeholder {
-    color: rgba(168, 179, 207, .78) !important;
+    color: color-mix(in srgb, var(--erp-text-muted, rgba(168, 179, 207, .78)) 78%, transparent) !important;
 }
 
 .dashboard .search-shortcut {
     min-width: 25px !important;
     padding: 3px 7px !important;
-    border: 1px solid rgba(255, 255, 255, .12) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .12)) 12%, transparent) !important;
     border-radius: 8px !important;
-    background: rgba(255, 255, 255, .08) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .08)) 8%, transparent) !important;
     color: var(--erp-text-muted) !important;
     font-size: 10px !important;
     font-weight: 700 !important;
@@ -191,8 +191,8 @@
 .dashboard .user-avatar {
     display: inline-flex !important;
     align-items: center !important;
-    border: 1px solid rgba(255, 255, 255, .13) !important;
-    background: rgba(255, 255, 255, .075) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .13)) 13%, transparent) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .075)) 7.5%, transparent) !important;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .09) !important;
 }
 
@@ -238,7 +238,7 @@
 .dashboard .btn-ai-mic.listening,
 .dashboard .user-avatar:hover {
     transform: translateY(-2px) !important;
-    background: rgba(255, 255, 255, .12) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .12)) 12%, transparent) !important;
     box-shadow: 0 12px 28px rgba(59, 130, 246, .16), inset 0 1px 0 rgba(255, 255, 255, .16) !important;
 }
 
@@ -253,7 +253,7 @@
     bottom: 9px !important;
     width: 8px !important;
     height: 8px !important;
-    border: 2px solid #0b1424 !important;
+    border: 2px solid var(--erp-border, #0b1424) !important;
     border-radius: 50% !important;
     background: var(--erp-green) !important;
 }
@@ -264,7 +264,7 @@
     right: 10px !important;
     width: 8px !important;
     height: 8px !important;
-    border: 2px solid #0b1424 !important;
+    border: 2px solid var(--erp-border, #0b1424) !important;
     border-radius: 50% !important;
     background: var(--erp-red) !important;
 }
@@ -276,8 +276,8 @@
     border-radius: 50% !important;
     background:
         linear-gradient(135deg, rgba(59, 130, 246, .9), rgba(139, 92, 246, .82)),
-        rgba(255, 255, 255, .08) !important;
-    color: #ffffff !important;
+        color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .08)) 8%, transparent) !important;
+    color: var(--erp-text, #ffffff) !important;
     font-size: 12px !important;
     font-weight: 800 !important;
     transition: transform var(--erp-transition), box-shadow var(--erp-transition) !important;
@@ -326,7 +326,7 @@
 
 .dashboard .dashboard-card:hover {
     transform: scale(1.02) translateY(-2px) !important;
-    border-color: rgba(255, 255, 255, .22) !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .22)) 22%, transparent) !important;
     box-shadow: var(--erp-shadow), 0 0 34px var(--card-glow, rgba(59, 130, 246, .2)) !important;
 }
 
@@ -377,9 +377,9 @@
     justify-content: center !important;
     width: 42px !important;
     height: 42px !important;
-    border: 1px solid rgba(255, 255, 255, .16) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .16)) 16%, transparent) !important;
     border-radius: 16px !important;
-    color: #ffffff !important;
+    color: var(--theme-accent-text, #ffffff) !important;
     font-size: 17px !important;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 12px 24px rgba(0, 0, 0, .18) !important;
 }
@@ -387,7 +387,7 @@
 .dashboard .section-icon {
     width: 20px !important;
     margin-right: 7px !important;
-    color: #60a5fa !important;
+    color: var(--erp-primary, #60a5fa) !important;
     text-align: center !important;
 }
 
@@ -449,9 +449,9 @@
     display: inline-flex !important;
     align-items: center !important;
     width: max-content !important;
-    border: 1px solid rgba(255, 255, 255, .12) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .12)) 12%, transparent) !important;
     border-radius: 999px !important;
-    background: rgba(255, 255, 255, .07) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent) !important;
     font-weight: 700 !important;
     white-space: nowrap !important;
 }
@@ -463,25 +463,25 @@
 
 .dashboard .trend.up,
 .dashboard .status-active {
-    color: #86efac !important;
+    color: var(--erp-success, #86efac) !important;
     background: rgba(34, 197, 94, .13) !important;
 }
 
 .dashboard .trend.neutral,
 .dashboard .status-field {
-    color: #bfdbfe !important;
+    color: var(--erp-text, #bfdbfe) !important;
     background: rgba(59, 130, 246, .13) !important;
 }
 
 .dashboard .trend.warning,
 .dashboard .status-leave {
-    color: #fde68a !important;
+    color: var(--erp-warning, #fde68a) !important;
     background: rgba(245, 158, 11, .14) !important;
 }
 
 .dashboard .trend.down,
 .dashboard .status-absent {
-    color: #fecaca !important;
+    color: var(--erp-danger, #fecaca) !important;
     background: rgba(239, 68, 68, .14) !important;
 }
 
@@ -490,7 +490,7 @@
     z-index: 1 !important;
     margin-top: 2px !important;
     padding-top: 12px !important;
-    border-top: 1px solid rgba(255, 255, 255, .1) !important;
+    border-top: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
     color: var(--erp-text-muted) !important;
     font-size: 12px !important;
 }
@@ -545,7 +545,7 @@
     justify-content: center;
     gap: 8px;
     margin-top: 13px;
-    color: #60a5fa;
+    color: var(--erp-primary, #60a5fa);
     font-size: 11px;
     font-weight: 700;
 }
@@ -576,7 +576,7 @@
     box-shadow: 0 10px 24px rgba(59, 130, 246, .25) !important;
 }
 
-.dashboard .dashboard-week-item strong { color: #fff !important; font-size: 12px !important; }
+.dashboard .dashboard-week-item strong { color: var(--theme-accent-text, #fff) !important; font-size: 12px !important; }
 .dashboard .dashboard-week-item small { font-size: 11px !important; font-weight: 800 !important; }
 .dashboard .alert-item { padding: 12px 13px !important; margin-bottom: 9px !important; }
 .dashboard .avatar-placeholder[src] { object-fit: cover !important; padding: 0 !important; }
@@ -590,7 +590,7 @@
 }
 
 .dashboard .chart-grid line {
-    stroke: rgba(255, 255, 255, .09) !important;
+    stroke: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .09)) 9%, transparent) !important;
     stroke-width: 1 !important;
 }
 
@@ -612,7 +612,7 @@
 }
 
 .dashboard .line-points circle {
-    fill: #ffffff !important;
+    fill: var(--erp-text, #ffffff) !important;
     stroke: #3b82f6 !important;
     stroke-width: 4 !important;
     cursor: pointer !important;
@@ -673,7 +673,7 @@
     width: 100% !important;
     height: var(--bar-height) !important;
     min-height: 34px !important;
-    border: 1px solid rgba(255, 255, 255, .16) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .16)) 16%, transparent) !important;
     border-radius: 14px 14px 8px 8px !important;
     background: linear-gradient(180deg, color-mix(in srgb, var(--bar-color) 92%, #ffffff 8%), color-mix(in srgb, var(--bar-color) 58%, transparent)) !important;
     box-shadow: 0 16px 30px color-mix(in srgb, var(--bar-color) 28%, transparent), inset 0 1px 0 rgba(255, 255, 255, .25) !important;
@@ -710,14 +710,14 @@
     height: var(--ring-size) !important;
     border-radius: 50% !important;
     background:
-        radial-gradient(circle at center, rgba(11, 20, 36, .92) 58%, transparent 60%),
+        radial-gradient(circle at center, var(--erp-surface, rgba(11, 20, 36, .92)) 58%, transparent 60%),
         conic-gradient(from 180deg, #22c55e calc(var(--progress) * 1%), rgba(255, 255, 255, .1) 0) !important;
     box-shadow: 0 0 34px rgba(34, 197, 94, .2), inset 0 1px 0 rgba(255, 255, 255, .13) !important;
     animation: chartFade .75s ease both !important;
 }
 
 .dashboard .radial-ring span {
-    color: #ffffff !important;
+    color: var(--theme-accent-text, #ffffff) !important;
     font-size: 28px !important;
     font-weight: 800 !important;
 }
@@ -731,9 +731,9 @@
 
 .dashboard .radial-details div {
     padding: 10px 8px !important;
-    border: 1px solid rgba(255, 255, 255, .1) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
     border-radius: 14px !important;
-    background: rgba(255, 255, 255, .05) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .05)) 5%, transparent) !important;
     text-align: center !important;
 }
 
@@ -838,24 +838,24 @@
 .dashboard .select-filter {
     min-height: 36px !important;
     padding: 7px 12px !important;
-    border: 1px solid rgba(255, 255, 255, .14) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .14)) 14%, transparent) !important;
     border-radius: 999px !important;
     outline: none !important;
-    background: rgba(255, 255, 255, .08) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .08)) 8%, transparent) !important;
     color: var(--erp-text-soft) !important;
     font-size: 12px !important;
     font-weight: 600 !important;
 }
 
 .dashboard .select-filter option {
-    background: #111827 !important;
-    color: #ffffff !important;
+    background: var(--erp-surface, #111827) !important;
+    color: var(--erp-text, #ffffff) !important;
 }
 
 .dashboard .badge-count {
     min-height: 34px !important;
     padding: 7px 11px !important;
-    color: #bfdbfe !important;
+    color: var(--erp-text, #bfdbfe) !important;
     font-size: 11px !important;
 }
 
@@ -863,9 +863,9 @@
     width: 100% !important;
     max-height: 430px !important;
     overflow: auto !important;
-    border: 1px solid rgba(255, 255, 255, .1) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
     border-radius: var(--erp-radius-lg) !important;
-    background: rgba(255, 255, 255, .035) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .035)) 3.5%, transparent) !important;
 }
 
 .dashboard .modern-table {
@@ -881,8 +881,8 @@
     top: 0 !important;
     z-index: 2 !important;
     padding: 14px 16px !important;
-    border-bottom: 1px solid rgba(255, 255, 255, .12) !important;
-    background: rgba(11, 20, 36, .88) !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .12)) 12%, transparent) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(11, 20, 36, .88)) 88%, transparent) !important;
     backdrop-filter: blur(18px) !important;
     color: var(--erp-text-muted) !important;
     font-size: 11px !important;
@@ -892,7 +892,7 @@
 
 .dashboard .modern-table td {
     padding: 15px 16px !important;
-    border-bottom: 1px solid rgba(255, 255, 255, .075) !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .075)) 7.5%, transparent) !important;
     color: var(--erp-text-soft) !important;
     font-size: 13px !important;
     white-space: nowrap !important;
@@ -901,8 +901,8 @@
 }
 
 .dashboard .modern-table tbody tr:hover td {
-    background: rgba(255, 255, 255, .075) !important;
-    color: #ffffff !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .075)) 7.5%, transparent) !important;
+    color: var(--erp-text, #ffffff) !important;
 }
 
 .dashboard .modern-table tbody tr:last-child td {
@@ -941,10 +941,10 @@
     width: 34px !important;
     height: 34px !important;
     flex: 0 0 34px !important;
-    border: 1px solid rgba(255, 255, 255, .16) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .16)) 16%, transparent) !important;
     border-radius: 50% !important;
     background: linear-gradient(135deg, rgba(59, 130, 246, .8), rgba(139, 92, 246, .72)) !important;
-    color: #ffffff !important;
+    color: var(--theme-accent-text, #ffffff) !important;
     font-size: 11px !important;
     font-weight: 800 !important;
 }
@@ -966,7 +966,7 @@
     border: 1px solid rgba(59, 130, 246, .28) !important;
     border-radius: 999px !important;
     background: rgba(59, 130, 246, .11) !important;
-    color: #bfdbfe !important;
+    color: var(--erp-text, #bfdbfe) !important;
     font-size: 12px !important;
     font-weight: 800 !important;
     cursor: pointer !important;
@@ -984,9 +984,9 @@
     height: 12px !important;
     margin: 4px 0 18px 0 !important;
     overflow: hidden !important;
-    border: 1px solid rgba(255, 255, 255, .1) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
     border-radius: 999px !important;
-    background: rgba(255, 255, 255, .07) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent) !important;
 }
 
 .dashboard .progress-bar {
@@ -1023,9 +1023,9 @@
 
 .dashboard .attendance-item,
 .dashboard .alert-item {
-    border: 1px solid rgba(255, 255, 255, .1) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
     border-radius: var(--erp-radius-md) !important;
-    background: rgba(255, 255, 255, .055) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .055)) 5.5%, transparent) !important;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06) !important;
 }
 
@@ -1094,12 +1094,12 @@
 }
 
 .dashboard .alert-item.warning {
-    background: linear-gradient(135deg, rgba(245, 158, 11, .15), rgba(255, 255, 255, .045)) !important;
+    background: linear-gradient(135deg, rgba(245, 158, 11, .15), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .045)) 4.5%, transparent)) !important;
     border-color: rgba(245, 158, 11, .24) !important;
 }
 
 .dashboard .alert-item.info {
-    background: linear-gradient(135deg, rgba(59, 130, 246, .15), rgba(255, 255, 255, .045)) !important;
+    background: linear-gradient(135deg, rgba(59, 130, 246, .15), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .045)) 4.5%, transparent)) !important;
     border-color: rgba(59, 130, 246, .24) !important;
 }
 
@@ -1111,7 +1111,7 @@
     height: 34px !important;
     flex: 0 0 34px !important;
     border-radius: 13px !important;
-    background: rgba(255, 255, 255, .08) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .08)) 8%, transparent) !important;
 }
 
 .dashboard .alert-item strong {
@@ -1135,7 +1135,7 @@
 }
 
 .dashboard .link-more {
-    color: #93c5fd !important;
+    color: var(--erp-primary, #93c5fd) !important;
     font-size: 12px !important;
     font-weight: 800 !important;
     text-decoration: none !important;
@@ -1143,7 +1143,7 @@
 }
 
 .dashboard .link-more:hover {
-    color: #ffffff !important;
+    color: var(--erp-text, #ffffff) !important;
     text-shadow: 0 0 18px rgba(59, 130, 246, .42) !important;
 }
 
@@ -1181,7 +1181,7 @@
     height: 19px !important;
     margin-top: 3px !important;
     flex: 0 0 19px !important;
-    border: 4px solid rgba(11, 20, 36, .95) !important;
+    border: 4px solid color-mix(in srgb, var(--erp-border, rgba(11, 20, 36, .95)) 95%, transparent) !important;
     border-radius: 50% !important;
     box-shadow: 0 0 18px currentColor !important;
 }
@@ -1204,9 +1204,9 @@
 .dashboard .step-content {
     min-width: 0 !important;
     padding: 12px 14px !important;
-    border: 1px solid rgba(255, 255, 255, .09) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .09)) 9%, transparent) !important;
     border-radius: var(--erp-radius-md) !important;
-    background: rgba(255, 255, 255, .045) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .045)) 4.5%, transparent) !important;
 }
 
 .dashboard .step-content strong {
@@ -1224,7 +1224,7 @@
 }
 
 .dashboard .step-content .timestamp {
-    color: #93c5fd !important;
+    color: var(--erp-primary, #93c5fd) !important;
     font-size: 11px !important;
     font-weight: 700 !important;
 }
@@ -1260,13 +1260,13 @@
 .dashboard .btn-neo-primary {
     border: 1px solid rgba(59, 130, 246, .5) !important;
     background: linear-gradient(135deg, rgba(59, 130, 246, .95), rgba(37, 99, 235, .78)) !important;
-    color: #ffffff !important;
+    color: var(--theme-accent-text, #ffffff) !important;
     box-shadow: 0 14px 28px rgba(59, 130, 246, .2) !important;
 }
 
 .dashboard .btn-neo-secondary {
-    border: 1px solid rgba(255, 255, 255, .13) !important;
-    background: rgba(255, 255, 255, .06) !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .13)) 13%, transparent) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .06)) 6%, transparent) !important;
     color: var(--erp-text-soft) !important;
 }
 
@@ -1522,7 +1522,7 @@
 }
 .dashboard .department-load-heading > span { min-width: 0; overflow-wrap: anywhere; }
 .dashboard .department-load-heading > strong { color: var(--erp-text-soft); font-variant-numeric: tabular-nums; }
-.dashboard .department-load-track { height: 9px; overflow: hidden; border-radius: 999px; background: rgba(148, 163, 184, .15); }
+.dashboard .department-load-track { height: 9px; overflow: hidden; border-radius: 999px; background: color-mix(in srgb, var(--erp-surface-soft, rgba(148, 163, 184, .15)) 15%, transparent); }
 .dashboard .department-load-track > span { display: block; height: 100%; max-width: 100%; border-radius: inherit; background: linear-gradient(90deg, #2563eb, #60a5fa); }
 .dashboard .bottom-row > .activity-box { min-width: 0; width: 100%; }
 .dashboard .bottom-row .box-header { flex-wrap: wrap; gap: 12px; }

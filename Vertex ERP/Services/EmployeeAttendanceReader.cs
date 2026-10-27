@@ -21,7 +21,7 @@ public sealed class EmployeeAttendanceReader(ApplicationDbContext db)
         var last = AttendanceRules.PunchWindow(to, employee.ShiftStartTime, employee.ShiftEndTime).To;
         var punches = await OwnPunches(employee.Id).Where(log => log.PunchTime >= first && log.PunchTime < last)
             .Include(log => log.BiometricDevice).OrderBy(log => log.PunchTime).ToListAsync(token);
-        var leaves = await db.LeaveRequests.AsNoTracking().Where(x => x.EmployeeId == employee.Id && x.Status == "Approved" && x.FromDate <= to && x.ToDate >= from).ToListAsync(token);
+        var leaves = await db.LeaveRequests.AsNoTracking().Where(x => x.EmployeeId == employee.Id && x.LeaveType != ExtraLeaveFacility.ShortLeave && x.Status == "Approved" && x.FromDate <= to && x.ToDate >= from).ToListAsync(token);
         return BuildDays(employee, from, to, punches, leaves);
     }
 
@@ -29,23 +29,26 @@ public sealed class EmployeeAttendanceReader(ApplicationDbContext db)
         IEnumerable<AttendanceLog> logs, IEnumerable<LeaveRequest> approvedLeaves)
     {
         var all = logs.OrderBy(x => x.PunchTime).ToList();
-        var leaves = approvedLeaves.Where(x => x.EmployeeId == employee.Id && x.Status == "Approved").ToList();
+        var leaves = approvedLeaves.Where(x => x.EmployeeId == employee.Id && x.LeaveType != ExtraLeaveFacility.ShortLeave && x.Status == "Approved").ToList();
         var days = new List<EmployeeAttendanceDay>();
         for (var date = from; date <= to; date = date.AddDays(1))
         {
             var window = AttendanceRules.PunchWindow(date, employee.ShiftStartTime, employee.ShiftEndTime);
             var punches = all.Where(x => x.PunchTime >= window.From && x.PunchTime < window.To).ToList();
-            var paired = AttendanceRules.PairPunches(punches.Select(x => (x.PunchTime, x.PunchState)));
+            var paired = ManualAttendance.EffectivePunches(punches);
             var hours = paired.CheckOut.HasValue ? paired.CheckOut.Value - paired.CheckIn!.Value : TimeSpan.Zero;
             var sources = punches.Select(x => x.VerificationMode == AttendanceRules.FieldVerificationMode || x.BiometricDevice?.CommunicationMode == AttendanceRules.FieldCommunicationMode
-                ? "Field Attendance" : x.VerificationMode == "Manual Approved" ? "Manual Approved" : "Biometric / Thumb").Distinct();
+                ? "Field Attendance" : "Punch").Distinct();
             days.Add(new EmployeeAttendanceDay(date, paired.CheckIn, paired.CheckOut,
                 AttendanceRules.StatusFor(paired.CheckIn, date, leaves.Any(x => x.FromDate <= date && x.ToDate >= date), employee.ShiftStartTime),
                 punches.Count == 0 ? "--" : string.Join(" + ", sources))
             {
                 PunchCount = punches.Count, WorkingHours = hours,
                 Overtime = paired.CheckOut.HasValue ? AttendanceRules.CalculateOvertime(hours, employee.OvertimeEnabled, employee.ShiftStartTime, employee.ShiftEndTime) : TimeSpan.Zero,
-                SiteDetails = string.Join("; ", punches.Where(x => !string.IsNullOrWhiteSpace(x.FieldSiteName)).Select(x => $"{x.PunchTime:HH:mm} · {x.FieldSiteName}").Distinct())
+                UiSiteDetails = string.Join("; ", punches.Where(x => !string.IsNullOrWhiteSpace(x.FieldSiteName))
+                    .Select(x => $"{x.PunchTime:HH:mm} · {x.FieldSiteName}").Distinct())
+                    + (paired.CheckOut.HasValue && paired.CheckOut.Value < date.ToDateTime(employee.ShiftEndTime).AddDays(employee.ShiftEndTime < employee.ShiftStartTime ? 1 : 0) ? " | Early exit" : ""),
+                SiteDetails = ((paired.CheckIn.HasValue && !AttendanceRules.IsWeeklyOff(date) && AttendanceRules.IsLateArrival(paired.CheckIn.Value, date, employee.ShiftStartTime) ? " | Late by " + AttendanceRules.FormatHours(AttendanceRules.LateDuration(paired.CheckIn.Value, date, employee.ShiftStartTime)) : "") + (paired.CheckOut.HasValue && paired.CheckOut.Value < date.ToDateTime(employee.ShiftEndTime).AddDays(employee.ShiftEndTime < employee.ShiftStartTime ? 1 : 0) ? " | Early exit" : "") + " " + string.Join("; ", punches.Where(x => !string.IsNullOrWhiteSpace(x.FieldSiteName)).Select(x => $"{x.PunchTime:HH:mm} · {x.FieldSiteName}").Distinct())).Trim()
             });
         }
         return days.OrderByDescending(x => x.Date).ToList();

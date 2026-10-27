@@ -1,14 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --bg-1: #07111f;
-    --bg-2: #0b1424;
-    --bg-3: #111827;
-    --glass: rgba(255, 255, 255, .07);
-    --glass-strong: rgba(255, 255, 255, .11);
-    --border: rgba(255, 255, 255, .14);
-    --text: #ffffff;
-    --muted: #a8b3cf;
+    --bg-1: var(--erp-bg, #07111f);
+    --bg-2: var(--erp-surface, #0b1424);
+    --bg-3: var(--erp-surface, #111827);
+    --glass: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent);
+    --glass-strong: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .11)) 11%, transparent);
+    --border: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .14)) 14%, transparent);
+    --text: var(--erp-text, #ffffff);
+    --muted: var(--erp-text-muted, #a8b3cf);
     --soft: #d7def2;
     --blue: #3b82f6;
     --green: #22c55e;
@@ -57,8 +57,8 @@ body {
     inset: 0;
     z-index: -2;
     background:
-        linear-gradient(90deg, rgba(7, 17, 31, .74), rgba(7, 17, 31, .28) 42%, rgba(7, 17, 31, .82)),
-        radial-gradient(circle at 50% 44%, rgba(0, 0, 0, .06), rgba(0, 0, 0, .72) 72%);
+        linear-gradient(90deg, color-mix(in srgb, var(--erp-bg, rgba(7, 17, 31, .74)) 74%, transparent), color-mix(in srgb, var(--erp-bg, rgba(7, 17, 31, .28)) 28%, transparent) 42%, color-mix(in srgb, var(--erp-bg, rgba(7, 17, 31, .82)) 82%, transparent)),
+        radial-gradient(circle at 50% 44%, color-mix(in srgb, var(--erp-bg, rgba(0, 0, 0, .06)) 6%, transparent), color-mix(in srgb, var(--erp-bg, rgba(0, 0, 0, .72)) 72%, transparent) 72%);
 }
 
 .ai-holo-bg {
@@ -69,7 +69,7 @@ body {
     background:
         radial-gradient(circle at 50% 39%, rgba(56, 189, 248, .24), transparent 23%),
         radial-gradient(circle at 50% 42%, rgba(14, 165, 233, .18), transparent 40%),
-        linear-gradient(115deg, rgba(4, 10, 23, .98), rgba(8, 18, 36, .72) 44%, rgba(2, 6, 16, .98));
+        linear-gradient(115deg, color-mix(in srgb, var(--erp-bg, rgba(4, 10, 23, .98)) 98%, transparent), color-mix(in srgb, var(--erp-surface, rgba(8, 18, 36, .72)) 72%, transparent) 44%, color-mix(in srgb, var(--erp-bg, rgba(2, 6, 16, .98)) 98%, transparent));
 }
 
 .ai-holo-bg::before {
@@ -148,8 +148,8 @@ body {
     inset: 31%;
     border-radius: 50%;
     background:
-        radial-gradient(circle, rgba(240, 249, 255, .96) 0 8%, rgba(125, 211, 252, .86) 9% 18%, rgba(14, 165, 233, .26) 19% 42%, transparent 43%),
-        conic-gradient(from 90deg, rgba(125, 211, 252, .12), rgba(255, 255, 255, .75), rgba(59, 130, 246, .1), rgba(125, 211, 252, .12));
+        radial-gradient(circle, color-mix(in srgb, var(--erp-surface, rgba(240, 249, 255, .96)) 96%, transparent) 0 8%, rgba(125, 211, 252, .86) 9% 18%, rgba(14, 165, 233, .26) 19% 42%, transparent 43%),
+        conic-gradient(from 90deg, rgba(125, 211, 252, .12), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .75)) 75%, transparent), rgba(59, 130, 246, .1), rgba(125, 211, 252, .12));
     box-shadow: 0 0 28px rgba(125, 211, 252, .9), inset 0 0 28px rgba(255, 255, 255, .28);
     animation: aiPulse 1.55s ease-in-out infinite;
 }
@@ -160,7 +160,7 @@ body {
     width: 5px;
     height: 36px;
     border-radius: 999px;
-    background: linear-gradient(180deg, rgba(240, 249, 255, .95), rgba(56, 189, 248, .28));
+    background: linear-gradient(180deg, color-mix(in srgb, var(--erp-surface, rgba(240, 249, 255, .95)) 95%, transparent), rgba(56, 189, 248, .28));
     box-shadow: 0 0 16px rgba(56, 189, 248, .86);
     transform: translateX(-50%);
     animation: voiceTalk 1s ease-in-out infinite;
@@ -195,7 +195,7 @@ body {
     width: 9px;
     height: 9px;
     border-radius: 50%;
-    background: #e0f2fe;
+    background: var(--erp-surface-soft, #e0f2fe);
     box-shadow: 0 0 20px rgba(56, 189, 248, .96);
     animation: nodeDrift 3.4s ease-in-out infinite;
 }
@@ -262,7 +262,7 @@ body {
     border: 1px solid rgba(59, 130, 246, .3);
     border-radius: 999px;
     background: rgba(59, 130, 246, .13);
-    color: #bfdbfe;
+    color: var(--erp-text, #bfdbfe);
     font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
@@ -289,7 +289,7 @@ body {
     border: 1px solid rgba(239, 68, 68, .32);
     border-radius: 14px;
     background: rgba(239, 68, 68, .12);
-    color: #fecaca;
+    color: var(--erp-danger, #fecaca);
     font-size: 13px;
     font-weight: 700;
 }
@@ -316,16 +316,16 @@ body {
     gap: 7px;
     min-height: 34px;
     padding: 0 10px;
-    border: 1px solid rgba(255, 255, 255, .18);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .18)) 18%, transparent);
     border-radius: 999px;
-    background: rgba(3, 7, 18, .26);
+    background: color-mix(in srgb, var(--erp-bg, rgba(3, 7, 18, .26)) 26%, transparent);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07);
     transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
 }
 
 .input-shell:focus-within {
     border-color: rgba(125, 211, 252, .68);
-    background: rgba(3, 7, 18, .34);
+    background: color-mix(in srgb, var(--erp-bg, rgba(3, 7, 18, .34)) 34%, transparent);
     box-shadow: 0 0 0 3px rgba(56, 189, 248, .11), 0 0 22px rgba(56, 189, 248, .12);
 }
 
@@ -337,7 +337,7 @@ body {
     justify-content: center;
     border-radius: 10px;
     background: rgba(59, 130, 246, .22);
-    color: #dbeafe;
+    color: var(--erp-text, #dbeafe);
     font-size: 9px;
     font-weight: 800;
 }
@@ -354,7 +354,7 @@ body {
 }
 
 .input-shell input::placeholder {
-    color: rgba(168, 179, 207, .76);
+    color: color-mix(in srgb, var(--erp-text-muted, rgba(168, 179, 207, .76)) 76%, transparent);
 }
 
 .password-visibility {
@@ -364,7 +364,7 @@ body {
     border: 0;
     border-radius: 50%;
     background: transparent;
-    color: #93c5fd;
+    color: var(--erp-primary, #93c5fd);
     cursor: pointer;
 }
 
@@ -378,7 +378,7 @@ body {
 .input-shell input:-webkit-autofill:hover,
 .input-shell input:-webkit-autofill:focus,
 .input-shell input:-webkit-autofill:active {
-    -webkit-text-fill-color: #ffffff !important;
+    -webkit-text-fill-color: var(--erp-text, #ffffff) !important;
     caret-color: #ffffff !important;
     box-shadow: 0 0 0 1000px transparent inset !important;
     -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
@@ -387,7 +387,7 @@ body {
 }
 
 .input-shell input:autofill {
-    color: #ffffff !important;
+    color: var(--erp-text, #ffffff) !important;
     background: transparent !important;
 }
 
@@ -420,9 +420,9 @@ body {
     width: 17px;
     height: 17px;
     display: inline-flex;
-    border: 1px solid rgba(255, 255, 255, .22);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .22)) 22%, transparent);
     border-radius: 5px;
-    background: rgba(255, 255, 255, .07);
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent);
     transition: background .25s ease, border-color .25s ease, box-shadow .25s ease;
 }
 
@@ -433,7 +433,7 @@ body {
 }
 
 .forgot-link {
-    color: #93c5fd;
+    color: var(--erp-primary, #93c5fd);
     text-decoration: none;
     font-size: 11px;
     font-weight: 800;
@@ -441,7 +441,7 @@ body {
 }
 
 .forgot-link:hover {
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
     text-shadow: 0 0 18px rgba(59, 130, 246, .42);
 }
 
@@ -456,7 +456,7 @@ body {
     border: 1px solid rgba(59, 130, 246, .52);
     border-radius: 999px;
     background: linear-gradient(135deg, rgba(59, 130, 246, .96), rgba(37, 99, 235, .78));
-    color: #ffffff;
+    color: var(--theme-accent-text, #ffffff);
     box-shadow: 0 18px 36px rgba(59, 130, 246, .22), inset 0 1px 0 rgba(255, 255, 255, .2);
     font-size: 12px;
     font-weight: 800;

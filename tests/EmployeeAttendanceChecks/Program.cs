@@ -11,12 +11,12 @@ EmployeeAttendanceDay Day(params AttendanceLog[] punches) => EmployeeAttendanceR
 var day = Day(Punch(9, 44, 59), Punch(19, 44, 59));
 Check(day.Status == "Present" && day.CheckIn!.Value.Second == 59 && day.PunchCount == 2, "Seconds and on-time arrival retained");
 Check(day.WorkingHours.TotalHours == 10 && day.Overtime.TotalHours == 1, "Worked hours and assigned-shift overtime");
-Check(Day(Punch(9, 45)).Status == "Late", "Confirmed 09:45 cutoff retained");
+Check(Day(Punch(9, 45)).Status == "Present" && Day(Punch(9, 45, 1)).Status == "Late", "09:30 shift allows exactly 09:45; later punches are late");
 var open = Day(Punch(9, 0));
 Check(open.CheckOut is null && open.WorkingHours == TimeSpan.Zero && open.Overtime == TimeSpan.Zero, "Single punch cannot invent a checkout or completed hours");
 var field = Punch(9, 0, 0, AttendanceRules.FieldVerificationMode); field.FieldSiteName = "Customer <Site>";
 var mixed = Day(field, Punch(18, 0));
-Check(mixed.Source.Contains("Field Attendance") && mixed.Source.Contains("Biometric / Thumb") && mixed.SiteDetails.Contains("Customer <Site>"), "Mixed source and site details retained as data");
+Check(mixed.Source.Contains("Field Attendance") && mixed.Source.Contains("Punch") && mixed.SiteDetails.Contains("Customer <Site>"), "Mixed source and site details retained as data");
 var leave = new LeaveRequest { EmployeeId = 7, FromDate = date, ToDate = date, Status = "Approved" };
 Check(EmployeeAttendanceReader.BuildDays(employee, date, date, [], [leave]).Single().Status == "Leave", "Approved leave is not absence");
 leave.EmployeeId = 8;

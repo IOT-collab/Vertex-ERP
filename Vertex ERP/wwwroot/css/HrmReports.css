@@ -7,8 +7,8 @@
     width: 100%;
     min-height: 100vh;
     padding: clamp(12px, 3vw, 24px);
-    background-color: #0b0f19;
-    color: #f1f5f9;
+    background-color: var(--erp-bg, #0b0f19);
+    color: var(--erp-text, #f1f5f9);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     overflow-x: hidden;
 }
@@ -32,9 +32,9 @@
 }
 
 .rpt-btn-icon {
-    background: #161f30;
-    border: 1px solid #28354f;
-    color: #94a3b8;
+    background: var(--erp-surface, #161f30);
+    border: 1px solid var(--erp-border, #28354f);
+    color: var(--erp-text-muted, #94a3b8);
     width: 38px;
     height: 38px;
     border-radius: 10px;
@@ -47,23 +47,23 @@
 }
 
     .rpt-btn-icon:hover {
-        background: #2563eb;
+        background: var(--erp-primary, var(--erp-primary, #2563eb));
         border-color: #2563eb;
-        color: #ffffff;
+        color: var(--theme-accent-text, #ffffff);
     }
 
 .rpt-title {
     font-size: clamp(20px, 4vw, 24px);
     font-weight: 700;
     margin: 0;
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
     letter-spacing: -0.3px;
     word-break: break-word;
 }
 
 .rpt-subtitle {
     font-size: clamp(12px, 2vw, 13px);
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
     margin: 3px 0 0 0;
     word-break: break-word;
 }
@@ -76,8 +76,8 @@
 }
 
 .rpt-btn-primary {
-    background: #2563eb;
-    color: #ffffff;
+    background: var(--erp-primary, var(--erp-primary, #2563eb));
+    color: var(--theme-accent-text, #ffffff);
     border: none;
     padding: 10px 18px;
     border-radius: 10px;
@@ -98,8 +98,8 @@
 
 .rpt-btn-secondary {
     background: transparent;
-    color: #94a3b8;
-    border: 1px solid #28354f;
+    color: var(--erp-text-muted, #94a3b8);
+    border: 1px solid var(--erp-border, #28354f);
     padding: 10px 18px;
     border-radius: 10px;
     font-weight: 600;
@@ -118,8 +118,8 @@
 }
 
 .rpt-stat-card {
-    background: #111827;
-    border: 1px solid #1e293b;
+    background: var(--erp-surface, #111827);
+    border: 1px solid var(--erp-border, #1e293b);
     border-radius: 14px;
     padding: 18px;
     display: flex;
@@ -139,7 +139,7 @@
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.6px;
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
     font-weight: 600;
     display: block;
 }
@@ -147,14 +147,14 @@
 .rpt-stat-value {
     font-size: clamp(18px, 3vw, 20px);
     font-weight: 700;
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
     margin: 6px 0 0 0;
     word-break: break-word;
 }
 
 .rpt-stat-sub {
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--erp-text-muted, #94a3b8);
     margin-top: 12px;
 }
 
@@ -170,7 +170,7 @@
 
 .icon-blue {
     background: rgba(37, 99, 235, 0.15);
-    color: #60a5fa;
+    color: var(--erp-primary, #60a5fa);
 }
 
 .icon-purple {
@@ -185,7 +185,7 @@
 
 .icon-amber {
     background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
+    color: var(--erp-warning, #fbbf24);
 }
 
 .text-emerald {
@@ -193,7 +193,7 @@
 }
 
 .text-amber {
-    color: #fbbf24;
+    color: var(--erp-warning, #fbbf24);
 }
 
 /* Templates Grid */
@@ -205,8 +205,8 @@
 }
 
 .rpt-tpl-card {
-    background: #111827;
-    border: 1px solid #1e293b;
+    background: var(--erp-surface, #111827);
+    border: 1px solid var(--erp-border, #1e293b);
     border-radius: 14px;
     padding: 16px;
     display: flex;
@@ -219,7 +219,7 @@
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    background: #161f30;
+    background: var(--erp-surface, #161f30);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -234,7 +234,7 @@
     .rpt-tpl-info h4 {
         margin: 0 0 4px 0;
         font-size: 14px;
-        color: #ffffff;
+        color: var(--erp-text, #ffffff);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -243,7 +243,7 @@
     .rpt-tpl-info p {
         margin: 0;
         font-size: 11px;
-        color: #64748b;
+        color: var(--erp-text-muted, #64748b);
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -251,9 +251,9 @@
     }
 
 .rpt-btn-download {
-    background: #161f30;
-    border: 1px solid #28354f;
-    color: #60a5fa;
+    background: var(--erp-surface, #161f30);
+    border: 1px solid var(--erp-border, #28354f);
+    color: var(--erp-primary, #60a5fa);
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 12px;
@@ -265,15 +265,15 @@
 }
 
     .rpt-btn-download:hover {
-        background: #2563eb;
+        background: var(--erp-primary, var(--erp-primary, #2563eb));
         border-color: #2563eb;
-        color: #ffffff;
+        color: var(--theme-accent-text, #ffffff);
     }
 
 /* Main Panel & Controls */
 .rpt-main-panel {
-    background: #111827;
-    border: 1px solid #1e293b;
+    background: var(--erp-surface, #111827);
+    border: 1px solid var(--erp-border, #1e293b);
     border-radius: 14px;
     padding: clamp(12px, 3vw, 20px);
 }
@@ -283,7 +283,7 @@
     justify-content: space-between;
     align-items: center;
     padding-bottom: 16px;
-    border-bottom: 1px solid #1e293b;
+    border-bottom: 1px solid var(--erp-border, #1e293b);
     margin-bottom: 20px;
     gap: 16px;
     flex-wrap: wrap;
@@ -300,16 +300,16 @@
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
 }
 
 .rpt-search-box input {
     width: 100%;
-    background: #0b0f19;
-    border: 1px solid #28354f;
+    background: var(--erp-bg, #0b0f19);
+    border: 1px solid var(--erp-border, #28354f);
     border-radius: 10px;
     padding: 8px 12px 8px 36px;
-    color: #f1f5f9;
+    color: var(--erp-text, #f1f5f9);
     font-size: 13px;
     outline: none;
 }
@@ -322,9 +322,9 @@
 }
 
 .rpt-select {
-    background: #111827;
-    border: 1px solid #28354f;
-    color: #e2e8f0;
+    background: var(--erp-surface, #111827);
+    border: 1px solid var(--erp-border, #28354f);
+    color: var(--erp-text, #e2e8f0);
     padding: 8px 14px;
     border-radius: 10px;
     font-size: 13px;
@@ -350,13 +350,13 @@
         padding: 12px 16px;
         font-size: 11px;
         text-transform: uppercase;
-        color: #64748b;
-        border-bottom: 1px solid #1e293b;
+        color: var(--erp-text-muted, #64748b);
+        border-bottom: 1px solid var(--erp-border, #1e293b);
     }
 
     .rpt-table td {
         padding: 16px;
-        border-bottom: 1px solid #1e293b;
+        border-bottom: 1px solid var(--erp-border, #1e293b);
         font-size: 13px;
     }
 
@@ -367,12 +367,12 @@
 
 .user-name {
     font-weight: 600;
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
 }
 
 .user-id {
     font-size: 11px;
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
     margin-top: 2px;
 }
 
@@ -390,12 +390,12 @@
 
 .badge-employee {
     background: rgba(96, 165, 250, 0.15);
-    color: #60a5fa;
+    color: var(--erp-primary, #60a5fa);
 }
 
 .rpt-amount {
     font-weight: 600;
-    color: #f1f5f9;
+    color: var(--erp-text, #f1f5f9);
 }
 
 .score-pill {
@@ -412,13 +412,13 @@
 
 .score-mid {
     background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
+    color: var(--erp-warning, #fbbf24);
 }
 
 .rpt-btn-action {
-    background: #161f30;
-    border: 1px solid #28354f;
-    color: #94a3b8;
+    background: var(--erp-surface, #161f30);
+    border: 1px solid var(--erp-border, #28354f);
+    color: var(--erp-text-muted, #94a3b8);
     width: 32px;
     height: 32px;
     border-radius: 8px;
@@ -430,9 +430,9 @@
 }
 
     .rpt-btn-action:hover {
-        background: #2563eb;
+        background: var(--erp-primary, var(--erp-primary, #2563eb));
         border-color: #2563eb;
-        color: #ffffff;
+        color: var(--theme-accent-text, #ffffff);
     }
 
 /* Modal Popup */
@@ -452,8 +452,8 @@
 }
 
 .rpt-modal {
-    background: #111827;
-    border: 1px solid #1e293b;
+    background: var(--erp-surface, #111827);
+    border: 1px solid var(--erp-border, #1e293b);
     border-radius: 16px;
     width: 100%;
     max-width: 480px;
@@ -473,13 +473,13 @@
     .rpt-modal-header h2 {
         font-size: 18px;
         margin: 0;
-        color: #ffffff;
+        color: var(--erp-text, #ffffff);
     }
 
 .rpt-modal-close {
     background: none;
     border: none;
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
     font-size: 24px;
     cursor: pointer;
 }
@@ -491,18 +491,18 @@
     .rpt-form-group label {
         display: block;
         font-size: 12px;
-        color: #94a3b8;
+        color: var(--erp-text-muted, #94a3b8);
         margin-bottom: 6px;
         font-weight: 600;
     }
 
 .rpt-input {
     width: 100%;
-    background: #0b0f19;
-    border: 1px solid #28354f;
+    background: var(--erp-bg, #0b0f19);
+    border: 1px solid var(--erp-border, #28354f);
     border-radius: 10px;
     padding: 10px 14px;
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
     font-size: 13px;
     outline: none;
 }
@@ -521,15 +521,15 @@
 
 .format-chip {
     flex: 1 1 100px;
-    background: #0b0f19;
-    border: 1px solid #28354f;
+    background: var(--erp-bg, #0b0f19);
+    border: 1px solid var(--erp-border, #28354f);
     border-radius: 8px;
     padding: 8px;
     display: flex;
     align-items: center;
     gap: 6px;
     font-size: 12px;
-    color: #94a3b8;
+    color: var(--erp-text-muted, #94a3b8);
     cursor: pointer;
 }
 

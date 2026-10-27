@@ -1,13 +1,13 @@
 /* Styling variables Setup */
 :root {
-    --bg-surface: linear-gradient(145deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .03));
-    --border-glass: rgba(255, 255, 255, 0.12);
+    --bg-surface: linear-gradient(145deg, color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .08)) 8%, transparent), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .03)) 3%, transparent));
+    --border-glass: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.12)) 12%, transparent);
     --shadow-main: 0 18px 48px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .1);
     --primary-blue: #3b82f6;
     --primary-hover: #2563eb;
-    --text-bright: #ffffff;
-    --text-muted: #a8b3cf;
-    --text-main: #d7def2;
+    --text-bright: var(--erp-text, #ffffff);
+    --text-muted: var(--erp-text-muted, #a8b3cf);
+    --text-main: var(--erp-text, #d7def2);
 }
 
 .user-settings-page {
@@ -53,7 +53,7 @@
     gap: 6px;
     background: rgba(59, 130, 246, 0.15);
     border: 1px solid rgba(59, 130, 246, 0.3);
-    color: #93c5fd;
+    color: var(--erp-primary, #93c5fd);
     font-size: 11px;
     font-weight: 700;
     padding: 4px 10px;
@@ -104,7 +104,7 @@
 
     .user-summary span {
         display: block;
-        color: #bfdbfe;
+        color: var(--erp-text, #bfdbfe);
         font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
@@ -125,13 +125,13 @@
     .user-alert.success {
         border: 1px solid rgba(34, 197, 94, .3);
         background: rgba(34, 197, 94, .12);
-        color: #86efac;
+        color: var(--erp-success, #86efac);
     }
 
     .user-alert.error {
         border: 1px solid rgba(239, 68, 68, .3);
         background: rgba(239, 68, 68, .12);
-        color: #fecaca;
+        color: var(--erp-danger, #fecaca);
     }
 
 /* Form Layout Grid */
@@ -174,7 +174,7 @@
         border: 1px solid var(--border-glass);
         border-radius: 12px;
         outline: none;
-        background: rgba(255, 255, 255, .06);
+        background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .06)) 6%, transparent);
         color: var(--text-bright);
         font-size: 13px;
         transition: all 0.2s ease;
@@ -185,12 +185,12 @@
         .table-input:focus,
         .table-select:focus {
             border-color: rgba(59, 130, 246, .6);
-            background: rgba(255, 255, 255, .1);
+            background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .1)) 10%, transparent);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, .18);
         }
 
         .form-group select option {
-            background-color: #0f172a;
+            background-color: var(--erp-surface, #0f172a);
             color: var(--text-bright);
         }
 
@@ -230,9 +230,9 @@
     align-items: center;
     justify-content: space-between;
     padding: 12px 14px;
-    border: 1px solid rgba(255, 255, 255, .08);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .08)) 8%, transparent);
     border-radius: 12px;
-    background: rgba(255, 255, 255, .04);
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .04)) 4%, transparent);
 }
 
     .policy-item span {
@@ -263,7 +263,7 @@
     border-radius: 20px;
     padding: 6px 12px;
     background: rgba(34, 197, 94, 0.12);
-    color: #86efac;
+    color: var(--erp-success, #86efac);
     font-size: 12px;
     font-weight: 700;
     white-space: nowrap;
@@ -278,7 +278,7 @@
     overflow-x: auto;
     border: 1px solid var(--border-glass);
     border-radius: 14px;
-    background: rgba(0, 0, 0, .15);
+    background: color-mix(in srgb, var(--erp-bg, rgba(0, 0, 0, .15)) 15%, transparent);
 }
 
 .users-table {
@@ -290,13 +290,13 @@
     .users-table th,
     .users-table td {
         padding: 12px 16px;
-        border-bottom: 1px solid rgba(255, 255, 255, .06);
+        border-bottom: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .06)) 6%, transparent);
         text-align: left;
         vertical-align: middle;
     }
 
     .users-table th {
-        background: rgba(15, 23, 42, 0.8);
+        background: color-mix(in srgb, var(--erp-surface, rgba(15, 23, 42, 0.8)) 80%, transparent);
         color: var(--text-muted);
         font-size: 11px;
         font-weight: 700;
@@ -305,11 +305,11 @@
     }
 
     .users-table tr:hover td {
-        background: rgba(255, 255, 255, .03);
+        background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .03)) 3%, transparent);
     }
 
 .user-id-code {
-    color: #bfdbfe;
+    color: var(--erp-text, #bfdbfe);
     font-family: monospace;
     font-size: 14px;
 }
@@ -320,9 +320,9 @@
     width: 100%;
     height: 36px;
     padding: 6px 10px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.12)) 12%, transparent);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.05);
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.05)) 5%, transparent);
     color: var(--text-bright);
     font-size: 13px;
     outline: none;
@@ -330,17 +330,17 @@
 }
 
     .table-select option {
-        background: #0f172a;
+        background: var(--erp-surface, #0f172a);
         color: var(--text-bright);
     }
 
 .status-select.is-active {
-    color: #86efac;
+    color: var(--erp-success, #86efac);
     border-color: rgba(34, 197, 94, 0.4);
 }
 
 .status-select.is-inactive {
-    color: #fecaca;
+    color: var(--erp-danger, #fecaca);
     border-color: rgba(239, 68, 68, 0.4);
 }
 
@@ -359,7 +359,7 @@
     border-radius: 8px;
     border: 1px solid rgba(34, 197, 94, .4);
     background: rgba(34, 197, 94, .18);
-    color: #bbf7d0;
+    color: var(--erp-success, #bbf7d0);
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
@@ -371,7 +371,7 @@
 
     .btn-table-save:hover {
         background: rgba(34, 197, 94, .35);
-        color: #ffffff;
+        color: var(--theme-accent-text, #ffffff);
     }
 
 .text-center {

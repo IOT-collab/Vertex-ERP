@@ -1,11 +1,11 @@
 :root {
-    --bg-main: #0b1120;
-    --card-bg: #1e293b;
-    --card-inner: #0f172a;
-    --border-color: #334155;
-    --border-hover: #475569;
-    --text-primary: #f8fafc;
-    --text-muted: #94a3b8;
+    --bg-main: var(--erp-surface, #0b1120);
+    --card-bg: var(--erp-surface-soft, #1e293b);
+    --card-inner: var(--erp-surface, #0f172a);
+    --border-color: var(--erp-border, #334155);
+    --border-hover: var(--erp-border, #475569);
+    --text-primary: var(--erp-text, #f8fafc);
+    --text-muted: var(--erp-text-muted, #94a3b8);
     --accent-blue: #3b82f6;
     --accent-blue-hover: #2563eb;
     --accent-green: #22c55e;
@@ -79,14 +79,14 @@ body {
 .emp-avatar {
     width: 54px;
     height: 54px;
-    background: linear-gradient(135deg, var(--accent-blue), #1d4ed8);
+    background: linear-gradient(135deg, var(--accent-blue), var(--erp-primary, var(--erp-primary, #1d4ed8)));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
     font-size: 18px;
-    color: #fff;
+    color: var(--theme-accent-text, #fff);
     flex-shrink: 0;
 }
 
@@ -151,7 +151,7 @@ body {
 
 .btn-primary {
     background: var(--accent-blue);
-    color: #fff;
+    color: var(--theme-accent-text, #fff);
 }
 
     .btn-primary:hover {
@@ -177,7 +177,7 @@ body {
     border-radius: 8px;
     border-color: rgba(239, 68, 68, .45);
     background: rgba(239, 68, 68, .12);
-    color: #fca5a5 !important;
+    color: var(--erp-danger, #fca5a5) !important;
     font-size: 13px;
     font-weight: 600;
     line-height: 1.2;
@@ -188,7 +188,7 @@ body {
     .emp-actions .employee-dashboard-logout:hover {
         border-color: rgba(239, 68, 68, .75);
         background: rgba(239, 68, 68, .24);
-        color: #fff !important;
+        color: var(--erp-text, #fff) !important;
     }
 
 .btn-sm {
@@ -208,7 +208,7 @@ body {
 .stats-grid-4 { grid-template-columns:repeat(4,minmax(0,1fr)); }
 .attendance-stat { position:relative; overflow:hidden; transition:border-color .2s, background .2s; }
 .attendance-stat::after { content:""; position:absolute; inset:auto -25px -35px auto; width:90px; height:90px; border-radius:50%; background:rgba(239,68,68,.06); }
-.attendance-stat.is-present { border-color:rgba(34,197,94,.45); background:linear-gradient(135deg,#1e293b,rgba(22,101,52,.22)); }
+.attendance-stat.is-present { border-color:rgba(34,197,94,.45); background:linear-gradient(135deg,var(--erp-surface-soft, #1e293b),color-mix(in srgb, var(--erp-surface-soft, rgba(22,101,52,.22)) 22%, transparent)); }
 .attendance-stat.is-present::after { background:rgba(34,197,94,.08); }
 .attendance-value { color:#f87171; }
 .attendance-stat.is-present .attendance-value { color:#4ade80; }
@@ -511,7 +511,7 @@ body {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    background: rgba(0,0,0,0.2);
+    background: color-mix(in srgb, var(--erp-bg, rgba(0,0,0,0.2)) 20%, transparent);
 }
 
 .form-row-2col {

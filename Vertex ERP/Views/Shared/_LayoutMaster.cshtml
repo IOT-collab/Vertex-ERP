@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+@inject VertexERP.Services.ManualAttendanceAccess ManualAttendancePermissions
+<!DOCTYPE html>
 @inject VertexERP.Data.ApplicationDbContext LayoutDb
 <html lang="@System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName" data-theme-user="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value">
 <head>
@@ -19,8 +20,12 @@
     <link href="~/css/theme.css" rel="stylesheet" asp-append-version="true" />
     <link href="~/css/ResponsiveGuard.css" rel="stylesheet" asp-append-version="true" />
 </head>
-<body class="erp-shell @((User.IsInRole("Employee") || User.IsInRole("User")) ? "employee-self-service-only" : "") @(ViewData["DashboardDesign"] is true ? "dashboard-studio-shell" : "")">
+<body class="erp-shell @(ViewData["ManagerWorkspace"] is true ? "manager-workspace-shell" : "") @((User.IsInRole("Employee") || User.IsInRole("User")) ? "employee-self-service-only" : "") @(ViewData["DashboardDesign"] is true ? "dashboard-studio-shell" : "")">
     @{
+        var canMarkManualAttendance = await ManualAttendancePermissions.CanMarkAsync(User);
+        var canReceiveExpenses = int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var expenseViewerId)
+            && LayoutDb.AppUsers.Any(account => account.Id == expenseViewerId && account.IsActive && account.Employee != null
+                && account.Employee.IsActive && account.Employee.CanReceiveExpenseClaims);
         var currentRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "User";
         var currentName = User.Identity?.Name ?? currentRole;
         var isEmployee = User.IsInRole("Employee") || User.IsInRole("User");
@@ -35,14 +40,15 @@
             Context.Session.Remove("welcomeGender");
         }
         var pendingBankRequestCount = isHr ? LayoutDb.BankDetailUpdateRequests.Count(request => request.Status == "Pending") : 0;
-        int? sidebarManagerId = null;
-        if (isManager && int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var sidebarUserId))
+        VertexERP.Models.ManagerDashboardViewModel? workspaceModel = ViewData["ManagerWorkspace"] is true ? Model as VertexERP.Models.ManagerDashboardViewModel : null;
+        int? sidebarManagerId = workspaceModel?.Viewer?.Id;
+        if (isManager && workspaceModel == null && int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var sidebarUserId))
         {
             sidebarManagerId = LayoutDb.AppUsers.Where(user => user.Id == sidebarUserId && user.IsActive).Select(user => user.EmployeeId).FirstOrDefault();
         }
-        var assignedTeamCount = sidebarManagerId.HasValue ? LayoutDb.Employees.Count(employee => employee.IsActive && employee.ReportingManagerId == sidebarManagerId && employee.Id != sidebarManagerId) : 0;
-        var teamLeavePendingCount = sidebarManagerId.HasValue ? LayoutDb.LeaveRequests.Count(request => request.AssignedApproverEmployeeId == sidebarManagerId && request.EmployeeId != sidebarManagerId && request.Status == "Pending" && request.ApprovalLevel == "Manager") : 0;
-        var teamQueryCount = sidebarManagerId.HasValue ? LayoutDb.QueryTickets.Count(ticket => ticket.ReportingManagerId == sidebarManagerId && ticket.EmployeeId != sidebarManagerId && ticket.Status != "Resolved" && ticket.Status != "Closed") : 0;
+        var assignedTeamCount = workspaceModel?.TeamMembers.Count ?? (sidebarManagerId.HasValue ? LayoutDb.Employees.Count(employee => employee.IsActive && employee.ReportingManagerId == sidebarManagerId && employee.Id != sidebarManagerId) : 0);
+        var teamLeavePendingCount = workspaceModel?.LeaveRequests.Count(request => VertexERP.Services.ManagerDashboardPresentation.AwaitingAction(request, true)) ?? (sidebarManagerId.HasValue ? LayoutDb.LeaveRequests.Count(request => request.AssignedApproverEmployeeId == sidebarManagerId && request.EmployeeId != sidebarManagerId && request.Status == "Pending" && request.ApprovalLevel == "Manager") : 0);
+        var teamQueryCount = workspaceModel?.OpenQueryTickets ?? (sidebarManagerId.HasValue ? LayoutDb.QueryTickets.Count(ticket => ticket.ReportingManagerId == sidebarManagerId && ticket.EmployeeId != sidebarManagerId && ticket.Status != "Resolved" && ticket.Status != "Closed") : 0);
         var homeUrl = isEmployee ? "/Main/EmployeeHome" : isManager ? "/Main/Manager" : "/Main/Dashboard";
     }
 
@@ -85,6 +91,14 @@
             </div>
 
             <ul class="sidebar-menu">
+                @if (canReceiveExpenses)
+                {
+                    <li><a asp-controller="Expense" asp-action="Index" asp-route-view="inbox"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Forwarded Expenses</span></a></li>
+                }
+                @if (canMarkManualAttendance)
+                {
+                    <li><a asp-controller="Main" asp-action="AddAttendance"><i class="fa-solid fa-user-check" aria-hidden="true"></i><span>Mark Manual Attendance</span></a></li>
+                }
                 @if (isEmployee)
                 {
                     <li><a href="/Main/Employees"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i><span>Dashboard</span></a></li>
@@ -103,6 +117,13 @@
                 }
                 else if (isManager)
                 {
+                    @if (ViewData["ManagerWorkspace"] is true)
+                    {
+                        <partial name="_ManagerWorkspaceNavigation" />
+                    }
+                    else
+                    {
+
                     <li><a href="/Main/Manager"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Manager Dashboard</span></a></li>
                     <li><a href="/Main/MyTeam"><i class="fa-solid fa-users" aria-hidden="true"></i><span>My Team (@assignedTeamCount)</span></a></li>
                     <li><a href="/Main/ManagerAttendance"><i class="fa-solid fa-users-viewfinder" aria-hidden="true"></i><span>Team Attendance</span></a></li>
@@ -123,6 +144,7 @@
                     <li><a href="/Main/EmployeeAssets"><i class="fa-solid fa-laptop"></i><span>My Assets</span></a></li>
                     <li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns"></i><span>My Bank Details</span></a></li>
                     <li><a href="/Main/OrderTracking"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i><span>Shipment Tracking</span></a></li>
+                    }
                 }
                 else
                 {
@@ -130,13 +152,12 @@
                     <li><a href="/Main/Employees"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Employees</span></a></li>
                     <li><a href="/Main/Attendence"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
                     <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Site Employee Location</span></a></li>
-                    <li><a asp-controller="AttendanceRequests" asp-action="Index"><i class="fa-solid fa-user-check" aria-hidden="true"></i><span>Attendance Approvals</span></a></li>
                     <li><a href="/Main/LeaveManagement"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
                     <li><a asp-controller="Main" asp-action="CompanyHoliday"><i class="fa-regular fa-calendar-days" aria-hidden="true"></i><span>Company Holiday</span></a></li>
                     <li><a href="/Main/WorkflowManagement"><i class="fa-solid fa-code-pull-request" aria-hidden="true"></i><span>Leave Approvals & Employee Queries</span></a></li>
 @*                     <li><a href="/Main/DepartmentManagement"><i class="fa-solid fa-building" aria-hidden="true"></i><span>Department</span></a></li>
  *@                    <li><a href="/Main/Hrms"><i class="fa-solid fa-user-tie" aria-hidden="true"></i><span>HR Management</span></a></li>
-                    <li><a href="/Main/Manager"><i class="fa-solid fa-people-roof" aria-hidden="true"></i><span>Manager</span></a></li>
+
                     <li><a href="/Main/OrderTracking"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i><span>Shipment Tracking</span></a></li>
                     <li><a href="/Main/TaskMgm"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Task Management</span></a></li>
                     <li><a href="/Main/ProjectMgm"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Project Management</span></a></li>
@@ -147,12 +168,15 @@
                     }
                     @if (isHr)
                     {
-                        <li><a href="/Main/BankUpdateRequests"><i class="fa-solid fa-building-circle-check"></i><span>Bank Update Requests</span>@if(pendingBankRequestCount>0){<b style="margin-left:auto;background:#ef4444;color:#fff;border-radius:999px;padding:3px 7px;font-size:11px">@pendingBankRequestCount</b>}</a></li>
+                        <li><a href="/Main/BankUpdateRequests"><i class="fa-solid fa-building-circle-check"></i><span>Bank Update Requests</span>@if(pendingBankRequestCount>0){<b style="margin-left:auto;background:#ef4444;color:var(--theme-accent-text, #fff);border-radius:999px;padding:3px 7px;font-size:11px">@pendingBankRequestCount</b>}</a></li>
                     }
                 }
+                @if (!(ViewData["ManagerWorkspace"] is true))
+                {
                 <li><a asp-controller="Theme" asp-action="Index"><i class="fa-solid fa-palette" aria-hidden="true"></i><span>Theme</span></a></li>
                 <li><a asp-controller="Language" asp-action="Index"><i class="fa-solid fa-language" aria-hidden="true"></i><span>Language</span></a></li>
                 <li><a asp-controller="Feedback" asp-action="Index"><i class="fa-regular fa-comment-dots" aria-hidden="true"></i><span>Feedback</span></a></li>
+                }
                 @if (User.IsInRole("HR") || User.IsInRole("Admin"))
                 {
                     <li><a asp-controller="Feedback" asp-action="Inbox"><i class="fa-solid fa-comments" aria-hidden="true"></i><span>Feedback by Emp</span></a></li>
@@ -177,12 +201,19 @@
                     </a>
                 </div>
 
+                @if (ViewData["ManagerWorkspace"] is true)
+                {
+                    <partial name="_ManagerTopbar" model="Model" />
+                }
+                else
+                {
                 <div class="profile">
                     <span class="profile-text" title="Signed in as @currentName">Welcome @currentName</span>
                     <form asp-controller="Main" asp-action="Logout" method="post" style="display:inline">
                         <button class="logout-btn" type="submit" title="Logout">Logout</button>
                     </form>
                 </div>
+                }
             </header>
 
             <!-- Embedded Nested Page Target Body Canvas Wrapper -->

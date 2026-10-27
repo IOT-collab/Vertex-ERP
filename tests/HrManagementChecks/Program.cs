@@ -7,6 +7,24 @@ using VertexERP.Services;
 using VertexERP.Controllers;
 using Vertex_ERP.Controllers;
 
+if (args.Length == 1 && args[0] == "--expense-workflow")
+{
+    await ExpenseWorkflowChecks.Run();
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--manual-access")
+{
+    await ManualAttendanceAccessChecks.Run();
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--employee-master")
+{
+    EmployeeMasterChecks.Run();
+    return;
+}
+
 if (args.Length == 1 && args[0] == "--query-visibility")
 {
     await QueryVisibilityChecks.Run();
@@ -22,6 +40,30 @@ if (args.Length == 1 && args[0] == "--manager-access")
 if (args.Length == 1 && args[0] == "--back-date-leave")
 {
     BackDateLeaveChecks.Run();
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--dashboard-categories")
+{
+    DashboardCategoryChecks.Run();
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--employee-category")
+{
+    EmployeeCategoryChecks.Run();
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--manager-dashboard")
+{
+    ManagerDashboardChecks.Run();
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--extra-facility")
+{
+    ExtraFacilityChecks.Run();
     return;
 }
 

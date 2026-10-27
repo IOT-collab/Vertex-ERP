@@ -4,6 +4,15 @@ namespace VertexERP.Services;
 
 public static class LeaveBalanceCalculator
 {
+    public static decimal Opening(LeaveCalculation? calculation, string category) => category switch
+    {
+        "EL" => calculation?.OpeningEL ?? 0,
+        "CL" => calculation?.OpeningCL ?? 0,
+        "ML" => calculation?.OpeningML ?? 0,
+        "EW" => calculation?.OpeningEW ?? 0,
+        _ => 0
+    };
+
     public static (decimal Earned, decimal Adjustment) Calculate(IEnumerable<LeaveMonth> months, string category)
     {
         var rows = months.ToList();
@@ -20,7 +29,7 @@ public static class LeaveBalanceCalculator
 
     public static void ApplyRequests(IEnumerable<ManualLeaveBalance> balances, IEnumerable<LeaveRequest> requests)
     {
-        var all = requests.ToList();
+        var all = requests.Where(x => !x.IsExtraFacility).ToList();
         foreach (var balance in balances)
         {
             var matching = all.Where(x => x.EmployeeId == balance.EmployeeId && Category(x.LeaveType) == balance.Category);
@@ -30,7 +39,7 @@ public static class LeaveBalanceCalculator
     }
     public static void IncludeUnfilled(List<ManualLeaveBalance> balances, IEnumerable<LeaveRequest> requests, int year)
     {
-        var all = requests.ToList();
+        var all = requests.Where(x => !x.IsExtraFacility).ToList();
         foreach (var group in all.Where(x => x.FromDate.Year <= year && x.ToDate.Year >= year && (x.Status == "Approved" || x.Status == "Pending"))
                      .GroupBy(x => (x.EmployeeId, Category: Category(x.LeaveType))))
             if (Categories.Contains(group.Key.Category) && !balances.Any(x => x.EmployeeId == group.Key.EmployeeId && x.Year == year && x.Category == group.Key.Category))
@@ -52,7 +61,7 @@ public static class LeaveBalanceCalculator
         var first = new DateOnly(year, 1, 1).DayNumber;
         var last = new DateOnly(year, 12, 31).DayNumber;
         var days = new Dictionary<int, decimal>();
-        foreach (var request in requests.Where(x => x.Status == status))
+        foreach (var request in requests.Where(x => !x.IsExtraFacility && x.Status == status))
             for (var day = Math.Max(first, request.FromDate.DayNumber); day <= Math.Min(last, request.ToDate.DayNumber); day++)
                 days[day] = Math.Max(days.GetValueOrDefault(day), request.IsHalfDay ? .5m : 1m);
         return days.Values.Sum();

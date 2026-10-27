@@ -2,17 +2,17 @@
 .hr-department-message {
     margin-bottom: 18px;
     padding: 12px 16px;
-    color: #bbf7d0;
+    color: var(--erp-success, #bbf7d0);
     background: rgba(22, 163, 74, .15);
     border: 1px solid rgba(34, 197, 94, .35);
     border-radius: 10px;
 }
-.hr-department-error { color: #fecaca; background: rgba(220, 38, 38, .14); border-color: rgba(239, 68, 68, .35); }
-.hr-dept-code { color: #60a5fa; font-size: 12px; font-weight: 600; }
+.hr-department-error { color: var(--erp-danger, #fecaca); background: rgba(220, 38, 38, .14); border-color: rgba(239, 68, 68, .35); }
+.hr-dept-code { color: var(--erp-primary, #60a5fa); font-size: 12px; font-weight: 600; }
 .hr-dept-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; width: 100%; }
 .hr-dept-actions .hr-btn-open, .hr-btn-edit, .hr-btn-delete { display: flex; align-items: center; justify-content: center; min-width: 0; padding: 10px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; }
-.hr-btn-edit { color: #bfdbfe; background: #1e3a5f; border: 1px solid #2563eb; }
-.hr-btn-delete { color: #fecaca; background: rgba(127, 29, 29, .35); border: 1px solid #991b1b; }
+.hr-btn-edit { color: var(--erp-text, #bfdbfe); background: var(--erp-surface-soft, #1e3a5f); border: 1px solid #2563eb; }
+.hr-btn-delete { color: var(--erp-danger, #fecaca); background: rgba(127, 29, 29, .35); border: 1px solid #991b1b; }
 
 .hr-container, .hr-container * {
     box-sizing: border-box !important;
@@ -22,8 +22,8 @@
     width: 100%;
     min-height: 100vh;
     padding: 24px;
-    background-color: #0b0f19;
-    color: #f1f5f9;
+    background-color: var(--erp-bg, #0b0f19);
+    color: var(--erp-text, #f1f5f9);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -44,9 +44,9 @@
 }
 
 .hr-btn-icon {
-    background: #161f30;
-    border: 1px solid #28354f;
-    color: #94a3b8;
+    background: var(--erp-surface, #161f30);
+    border: 1px solid var(--erp-border, #28354f);
+    color: var(--erp-text-muted, #94a3b8);
     width: 38px;
     height: 38px;
     border-radius: 10px;
@@ -58,22 +58,22 @@
 }
 
     .hr-btn-icon:hover {
-        background: #2563eb;
+        background: var(--erp-primary, var(--erp-primary, #2563eb));
         border-color: #2563eb;
-        color: #ffffff;
+        color: var(--theme-accent-text, #ffffff);
     }
 
 .hr-title {
     font-size: 24px;
     font-weight: 700;
     margin: 0;
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
     letter-spacing: -0.3px;
 }
 
 .hr-subtitle {
     font-size: 13px;
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
     margin: 3px 0 0 0;
 }
 
@@ -84,8 +84,8 @@
 }
 
 .hr-btn-primary {
-    background: #2563eb;
-    color: #ffffff;
+    background: var(--erp-primary, var(--erp-primary, #2563eb));
+    color: var(--theme-accent-text, #ffffff);
     border: none;
     padding: 9px 18px;
     border-radius: 10px;
@@ -113,8 +113,8 @@
 }
 
 .hr-stat-card {
-    background: #111827;
-    border: 1px solid #1e293b;
+    background: var(--erp-surface, #111827);
+    border: 1px solid var(--erp-border, #1e293b);
     border-radius: 14px;
     padding: 18px;
     display: flex;
@@ -132,7 +132,7 @@
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.6px;
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
     font-weight: 600;
     display: block;
 }
@@ -140,13 +140,13 @@
 .hr-stat-value {
     font-size: 20px;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
     margin: 6px 0 0 0;
 }
 
 .hr-stat-sub {
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--erp-text-muted, #94a3b8);
     display: flex;
     align-items: center;
     gap: 5px;
@@ -165,7 +165,7 @@
 
 .icon-blue {
     background: rgba(37, 99, 235, 0.15);
-    color: #60a5fa;
+    color: var(--erp-primary, #60a5fa);
 }
 
 .icon-purple {
@@ -180,7 +180,7 @@
 
 .icon-amber {
     background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
+    color: var(--erp-warning, #fbbf24);
 }
 
 .text-emerald {
@@ -188,13 +188,13 @@
 }
 
 .text-amber {
-    color: #fbbf24;
+    color: var(--erp-warning, #fbbf24);
 }
 
 /* Main Panel */
 .hr-main-panel {
-    background: #111827;
-    border: 1px solid #1e293b;
+    background: var(--erp-surface, #111827);
+    border: 1px solid var(--erp-border, #1e293b);
     border-radius: 14px;
     padding: 20px;
 }
@@ -204,7 +204,7 @@
     justify-content: space-between;
     align-items: center;
     padding-bottom: 16px;
-    border-bottom: 1px solid #1e293b;
+    border-bottom: 1px solid var(--erp-border, #1e293b);
     margin-bottom: 20px;
     gap: 16px;
     flex-wrap: wrap;
@@ -222,16 +222,16 @@
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
 }
 
 .hr-search-box input {
     width: 100%;
-    background: #0b0f19;
-    border: 1px solid #28354f;
+    background: var(--erp-bg, #0b0f19);
+    border: 1px solid var(--erp-border, #28354f);
     border-radius: 10px;
     padding: 8px 12px 8px 36px;
-    color: #f1f5f9;
+    color: var(--erp-text, #f1f5f9);
     font-size: 13px;
     outline: none;
 }
@@ -241,9 +241,9 @@
     }
 
 .hr-select {
-    background: #111827;
-    border: 1px solid #28354f;
-    color: #e2e8f0;
+    background: var(--erp-surface, #111827);
+    border: 1px solid var(--erp-border, #28354f);
+    color: var(--erp-text, #e2e8f0);
     padding: 8px 14px;
     border-radius: 10px;
     font-size: 13px;
@@ -259,8 +259,8 @@
 }
 
 .hr-dept-card {
-    background: linear-gradient(180deg, rgba(22, 31, 48, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
-    border: 1px solid rgba(40, 53, 79, 0.8);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--erp-surface, rgba(22, 31, 48, 0.8)) 80%, transparent) 0%, color-mix(in srgb, var(--erp-surface, rgba(15, 23, 42, 0.9)) 90%, transparent) 100%);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(40, 53, 79, 0.8)) 80%, transparent);
     border-radius: 20px;
     padding: 28px 20px 20px 20px;
     display: flex;
@@ -279,7 +279,7 @@
 .hr-dept-icon-bg {
     width: 72px;
     height: 72px;
-    background: #eef2ff;
+    background: var(--erp-surface-soft, #eef2ff);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -291,20 +291,20 @@
 .hr-dept-name {
     font-size: 18px;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
     margin: 0 0 6px 0;
 }
 
 .hr-dept-sub {
     font-size: 12px;
-    color: #94a3b8;
+    color: var(--erp-text-muted, #94a3b8);
     margin: 0 0 16px 0;
 }
 
 .hr-dept-meta {
     width: 100%;
-    background: rgba(11, 15, 25, 0.6);
-    border: 1px solid rgba(40, 53, 79, 0.5);
+    background: color-mix(in srgb, var(--erp-bg, rgba(11, 15, 25, 0.6)) 60%, transparent);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(40, 53, 79, 0.5)) 50%, transparent);
     border-radius: 12px;
     padding: 10px 12px;
     margin-bottom: 20px;
@@ -321,21 +321,21 @@
 .meta-label {
     font-size: 10px;
     text-transform: uppercase;
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
     font-weight: 600;
 }
 
 .meta-val {
     font-size: 12px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--erp-text, #e2e8f0);
     margin-top: 2px;
 }
 
 .hr-btn-open {
     width: 100%;
-    background: #2563eb;
-    color: #ffffff;
+    background: var(--erp-primary, var(--erp-primary, #2563eb));
+    color: var(--theme-accent-text, #ffffff);
     border: none;
     padding: 11px 0;
     border-radius: 25px;

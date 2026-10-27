@@ -6,8 +6,11 @@ public class Employee
 {
     public int Id { get; set; }
 
+    public bool CanManageManualAttendance { get; set; }
+    public bool CanReceiveExpenseClaims { get; set; }
+
     public bool OvertimeEnabled { get; set; }
-    public TimeOnly ShiftStartTime { get; set; } = new(9, 30);
+    public TimeOnly ShiftStartTime { get; set; } = new(9, 45);
     public TimeOnly ShiftEndTime { get; set; } = new(18, 30);
 
     [MaxLength(3)] public string? CompanyCode { get; set; }
@@ -93,6 +96,9 @@ public class Employee
 
     [Required, MaxLength(30)]
     public string EmploymentType { get; set; } = "Full Time";
+
+    [MaxLength(20), RegularExpression(EmployeeCategories.ValidationPattern), Display(Name = "Employee Category")]
+    public string? EmployeeCategory { get; set; }
 
     [Required, MaxLength(30)]
     public string EmployeeStatus { get; set; } = "Active";

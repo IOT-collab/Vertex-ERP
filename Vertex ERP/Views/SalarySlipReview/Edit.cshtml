@@ -1,6 +1,6 @@
 @model VertexERP.Models.SalarySlipReviewViewModel
 @{ ViewData["Title"] = "Preview and Update Salary Slip"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
-<section style="max-width:950px;margin:24px auto;padding:24px;background:#111c31;color:#edf4ff;border-radius:16px">
+<section style="max-width:950px;margin:24px auto;padding:24px;background:var(--erp-surface, #111c31);color:var(--erp-text, #edf4ff);border-radius:16px">
     <h1>Preview and Update Salary Slip</h1>
     <p data-no-localize>@Model.EmployeeName · @Model.Month/@Model.Year</p>
     <p>Check salary days and amounts, then preview the PDF. Changes apply to this month's slip only. The employee can see it after you select Generate reviewed slip.</p>

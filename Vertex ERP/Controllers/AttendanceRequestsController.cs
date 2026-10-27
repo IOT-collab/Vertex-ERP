@@ -4,79 +4,69 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VertexERP.Data;
 using VertexERP.Models;
+using VertexERP.Services;
 
 namespace VertexERP.Controllers;
 
-[Authorize(Roles = "Admin,HR,Manager")]
+[Authorize]
 public sealed class AttendanceRequestsController(ApplicationDbContext db) : Controller
 {
     public async Task<IActionResult> Index()
     {
-        if (!User.IsInRole("Admin") && !User.IsInRole("HR") && !User.IsInRole("Manager")) return Forbid();
+        var canMark = await new ManualAttendanceAccess(db).CanMarkAsync(User);
+        ViewData["CanMarkManualAttendance"] = canMark;
+        if (!canMark && !User.IsInRole("Admin") && !User.IsInRole("Manager")) return Forbid();
         if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return Forbid();
         var query = db.AttendanceRequests.AsNoTracking().Include(r => r.Employee).AsQueryable();
-        if (!User.IsInRole("Admin") && !User.IsInRole("HR"))
+        if (!canMark && !User.IsInRole("Admin"))
         {
             var employeeId = await db.AppUsers.Where(u => u.Id == userId && u.IsActive).Select(u => u.EmployeeId).FirstOrDefaultAsync();
             query = User.IsInRole("Manager")
                 ? query.Where(r => r.RequestedByUserId == userId || r.EmployeeId == employeeId)
                 : query.Where(r => r.EmployeeId == employeeId);
         }
-        return View(await query.OrderByDescending(r => r.RequestedAtUtc).ToListAsync());
+        var requests = await query.OrderByDescending(r => r.RequestedAtUtc).ToListAsync();
+        var actorIds = requests.Select(x => x.RequestedByUserId).ToList();
+        ViewData["AttendanceActors"] = await db.AppUsers.AsNoTracking().Where(x => actorIds.Contains(x.Id)).ToDictionaryAsync(x => x.Id, x => x.FullName);
+        return View(requests);
     }
 
     [HttpPost, ValidateAntiForgeryToken, Authorize(Roles = "Admin")]
     public async Task<IActionResult> Review(int id, string decision, string? reviewReason)
     {
-        if (decision is not ("Approved" or "Rejected")) return BadRequest();
-        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var adminId)) return Forbid();
-        if (reviewReason?.Length > 300 || (decision == "Rejected" && string.IsNullOrWhiteSpace(reviewReason)))
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
         {
-            TempData["AttendanceRequestMessage"] = "Provide a rejection reason (maximum 300 characters).";
-            return RedirectToAction(nameof(Index));
-        }
-        await using var transaction = await db.Database.BeginTransactionAsync();
-        // Serialize manual approvals so double clicks cannot create duplicate punches or devices.
-        await db.Database.ExecuteSqlRawAsync("SELECT pg_advisory_xact_lock(827431902)");
-        var request = await db.AttendanceRequests.Include(r => r.Employee).SingleOrDefaultAsync(r => r.Id == id);
-        if (request == null) return NotFound();
-        if (request.Status != "Pending")
-        {
-            TempData["AttendanceRequestMessage"] = "This request has already been reviewed.";
-            return RedirectToAction(nameof(Index));
-        }
-        if (decision == "Approved")
-        {
-            var start = request.AttendanceDate.ToDateTime(TimeOnly.MinValue);
-            if (!request.Employee.IsActive || await db.AttendanceLogs.AnyAsync(l => l.EmployeeId == request.EmployeeId && l.PunchTime >= start && l.PunchTime < start.AddDays(1)))
+            db.ChangeTracker.Clear();
+            if (decision is not ("Approved" or "Rejected")) return BadRequest();
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var adminId)) return Forbid();
+            if (reviewReason?.Length > 300 || (decision == "Rejected" && string.IsNullOrWhiteSpace(reviewReason)))
             {
-                TempData["AttendanceRequestMessage"] = "Cannot approve: employee is inactive or attendance already exists for this date. Review and reject this request if it is no longer needed.";
+                TempData["AttendanceRequestMessage"] = "Provide a rejection reason (maximum 300 characters).";
                 return RedirectToAction(nameof(Index));
             }
-            var device = await db.BiometricDevices.FirstOrDefaultAsync(d => d.SerialNumber == "MANUAL-ENTRY");
-            if (device == null)
+            await using var transaction = await db.Database.BeginTransactionAsync();
+            await ManualAttendance.LockAsync(db);
+            var request = await db.AttendanceRequests.Include(r => r.Employee).SingleOrDefaultAsync(r => r.Id == id);
+            if (request == null) return NotFound();
+            if (request.Status != "Pending")
             {
-                device = new BiometricDevice { Name = "ERP Manual Attendance", SerialNumber = "MANUAL-ENTRY", Model = "ERP", CommunicationMode = "Manual" };
-                db.BiometricDevices.Add(device);
-                await db.SaveChangesAsync();
+                TempData["AttendanceRequestMessage"] = "This request has already been reviewed.";
+                return RedirectToAction(nameof(Index));
             }
-            AttendanceLog Punch(TimeOnly time, string state) => new()
+            if (decision == "Approved")
             {
-                BiometricDeviceId = device.Id, EmployeeId = request.EmployeeId, DeviceUserId = request.Employee.EmployeeCode,
-                PunchTime = request.AttendanceDate.ToDateTime(time), PunchState = state,
-                VerificationMode = "Manual Approved", UniqueHash = Guid.NewGuid().ToString("N"),
-                RawPayload = $"MANUAL|Request:{request.Id}|RequestedBy:{request.RequestedByUserId}|ApprovedBy:{adminId}|Reason:{request.Reason}"
-            };
-            db.AttendanceLogs.Add(Punch(request.CheckInTime, "Check In"));
-            if (request.CheckOutTime.HasValue) db.AttendanceLogs.Add(Punch(request.CheckOutTime.Value, "Check Out"));
-        }
-        request.Status = decision;
-        request.ReviewedByUserId = adminId;
-        request.ReviewedAtUtc = DateTime.UtcNow;
-        request.ReviewReason = reviewReason?.Trim();
-        await db.SaveChangesAsync();
-        await transaction.CommitAsync();
-        TempData["AttendanceRequestMessage"] = decision == "Approved" ? "Approved. Attendance is now visible in the attendance list and employee attendance." : "Rejected. No attendance was marked.";
-        return RedirectToAction(nameof(Index));
+                var error = await ManualAttendance.MarkAsync(db, request.Employee, request.AttendanceDate,
+                    request.CheckInTime, request.CheckOutTime, request.Reason, adminId, request.Id);
+                if (error != null) { TempData["AttendanceRequestMessage"] = error; return RedirectToAction(nameof(Index)); }
+            }
+            request.Status = decision;
+            request.ReviewedByUserId = adminId;
+            request.ReviewedAtUtc = DateTime.UtcNow;
+            request.ReviewReason = reviewReason?.Trim();
+            await db.SaveChangesAsync();
+            await transaction.CommitAsync();
+            TempData["AttendanceRequestMessage"] = decision == "Approved" ? "Approved. Attendance is now visible in the attendance list and employee attendance." : "Rejected. No attendance was marked.";
+            return RedirectToAction(nameof(Index));
+        });
     }
 }

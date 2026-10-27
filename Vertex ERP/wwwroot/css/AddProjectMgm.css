@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    Container Layout Hierarchy Setup
    ========================================================================== */
 .project-page {
@@ -22,13 +22,13 @@
     }
 
 .page-header h2 {
-    color: #1e3a5f;
+    color: var(--erp-text-muted, #1e3a5f);
     font-size: 26px;
     font-weight: 700;
 }
 
 .page-header p {
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
     margin-top: 6px;
     font-size: 14px;
     line-height: 1.5;
@@ -38,9 +38,9 @@
    Master Card Layout Form Sheet Wrapper
    ========================================================================== */
 .form-container-wrapper {
-    background: #fff;
+    background: var(--erp-surface, #fff);
     border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--erp-border, #e2e8f0);
     box-shadow: 0 4px 12px rgba(0, 0, 0, .03);
     margin-top: 25px;
     padding: 30px;
@@ -62,7 +62,7 @@
 
 /* Form Group Field Boundary Blocks Header Dividers */
 .section-divider {
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--erp-border, #e2e8f0);
     padding-bottom: 6px;
     margin-top: 10px;
 }
@@ -96,7 +96,7 @@
     .form-group label {
         font-size: 13.5px;
         font-weight: 600;
-        color: #334155;
+        color: var(--erp-text, #334155);
     }
 
     .form-group input[type="text"],
@@ -106,12 +106,12 @@
     .form-group textarea {
         width: 100%;
         padding: 11px 14px;
-        border: 1px solid #cbd5e1;
+        border: 1px solid var(--erp-border, #cbd5e1);
         border-radius: 8px;
         font-size: 14px;
         outline: none;
-        background-color: #fff;
-        color: #1e293b;
+        background-color: var(--erp-surface, #fff);
+        color: var(--erp-text, #1e293b);
         transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
@@ -126,8 +126,8 @@
    Side Administrative Configuration Information Cards Panel
    ========================================================================== */
 .config-card {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--erp-surface, #f8fafc);
+    border: 1px solid var(--erp-border, #e2e8f0);
     border-radius: 10px;
     padding: 20px;
     display: flex;
@@ -137,7 +137,7 @@
 
     .config-card h3 {
         font-size: 14px;
-        color: #1e3a5f;
+        color: var(--erp-text-muted, #1e3a5f);
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -158,7 +158,7 @@
     cursor: pointer;
     font-size: 13.5px;
     font-weight: 500;
-    color: #475569;
+    color: var(--erp-text-muted, #475569);
     user-select: none;
 }
 
@@ -176,8 +176,8 @@
     left: 0;
     height: 18px;
     width: 18px;
-    background-color: #fff;
-    border: 1px solid #cbd5e1;
+    background-color: var(--erp-surface, #fff);
+    border: 1px solid var(--erp-border, #cbd5e1);
     border-radius: 4px;
 }
 
@@ -212,7 +212,7 @@
 
 /* Telemetry Validation Information Warnings Alert Box */
 .info-alert-box {
-    background: #eff6ff;
+    background: var(--erp-surface-soft, #eff6ff);
     border-left: 4px solid #2563eb;
     border-radius: 6px;
     padding: 14px;
@@ -240,7 +240,7 @@
     gap: 12px;
     margin-top: 30px;
     padding-top: 20px;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--erp-border, #e2e8f0);
 }
 
 .btn-cancel,
@@ -256,19 +256,19 @@
 }
 
 .btn-cancel {
-    background: #fff;
-    color: #64748b;
-    border: 1px solid #cbd5e1;
+    background: var(--erp-surface, #fff);
+    color: var(--erp-text-muted, #64748b);
+    border: 1px solid var(--erp-border, #cbd5e1);
 }
 
     .btn-cancel:hover {
-        background: #f8fafc;
-        color: #334155;
+        background: var(--erp-surface, #f8fafc);
+        color: var(--erp-text, #334155);
     }
 
 .btn-submit {
-    background: #2563eb;
-    color: #fff;
+    background: var(--erp-primary, var(--erp-primary, #2563eb));
+    color: var(--theme-accent-text, #fff);
     border: none;
 }
 

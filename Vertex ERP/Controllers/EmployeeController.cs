@@ -24,6 +24,13 @@ public class EmployeeController : Controller
     [HttpGet]
     public IActionResult Index(string? search, string? department, string? status, string? companyCode = null)
     {
+        status = status?.Trim().ToLowerInvariant() switch
+        {
+            "all" => "all",
+            "inactive" => "inactive",
+            "pending" => "pending",
+            _ => "active"
+        };
         var query = _dbContext.Employees
             .AsNoTracking()
             .Include(employee => employee.ReportingManager)
@@ -36,6 +43,7 @@ public class EmployeeController : Controller
                 employee.EmployeeCode.ToLower().Contains(term) ||
                 _dbContext.EmployeeDeviceMappings.Any(mapping => mapping.EmployeeId == employee.Id && mapping.DeviceUserId.ToLower().Contains(term)) ||
                 _dbContext.BiometricEnrollments.Any(enrollment => enrollment.EmployeeId == employee.Id && enrollment.EnrollCode.ToLower().Contains(term)) ||
+                _dbContext.BiometricEnrollments.Any(enrollment => enrollment.EmployeeId == employee.Id && enrollment.Status == "Linked" && enrollment.LastSeenUtc != null && enrollment.WdmsName != null && enrollment.WdmsName.ToLower().Contains(term)) ||
                 employee.FirstName.ToLower().Contains(term) ||
                 (employee.LastName != null && employee.LastName.ToLower().Contains(term)) ||
                 employee.Email.ToLower().Contains(term) ||
@@ -56,9 +64,14 @@ public class EmployeeController : Controller
         else if (string.Equals(status, "pending", StringComparison.OrdinalIgnoreCase))
             query = query.Where(employee => employee.IsBiometricProfilePending);
 
+        var linkedEnrollments = _dbContext.BiometricEnrollments.AsNoTracking()
+            .Where(x => x.EmployeeId != null && x.Status == "Linked").ToList();
         var model = new EmployeeDirectoryViewModel
         {
-            EnrollCodes = _dbContext.BiometricEnrollments.AsNoTracking().Where(x => x.EmployeeId != null && x.Status == "Linked").ToList()
+            WdmsNames = linkedEnrollments.Where(x => x.LastSeenUtc.HasValue && !string.IsNullOrWhiteSpace(x.WdmsName))
+                .GroupBy(x => x.EmployeeId!.Value).ToDictionary(x => x.Key,
+                    x => x.OrderByDescending(e => e.LastSeenUtc).ThenBy(e => e.EnrollCode).First().WdmsName!.Trim()),
+            EnrollCodes = linkedEnrollments
                 .GroupBy(x => x.EmployeeId!.Value).ToDictionary(x => x.Key, x => string.Join(", ", x.Select(e => e.EnrollCode))),
             Employees = query.OrderBy(employee => employee.FirstName).ThenBy(employee => employee.LastName).ToList(),
             TotalEmployees = _dbContext.Employees.Count(),
@@ -626,6 +639,7 @@ public class EmployeeController : Controller
         employee.Designation = model.Designation.Trim();
         employee.ReportingManagerId = model.ReportingManagerId;
         employee.EmploymentType = model.EmploymentType;
+        employee.EmployeeCategory = Clean(model.EmployeeCategory);
         employee.IsActive = model.IsActive && model.EmployeeStatus != "Inactive";
         employee.EmployeeStatus = employee.IsActive ? model.EmployeeStatus : "Inactive";
     }
@@ -666,6 +680,7 @@ public class EmployeeController : Controller
         Designation = employee.Designation,
         ReportingManagerId = employee.ReportingManagerId,
         EmploymentType = employee.EmploymentType,
+        EmployeeCategory = employee.EmployeeCategory,
         EmployeeStatus = employee.EmployeeStatus,
         IsActive = employee.IsActive
     };

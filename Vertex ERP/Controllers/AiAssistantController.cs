@@ -154,15 +154,16 @@ public sealed class AiAssistantController(ApplicationDbContext db) : Controller
         {
             var tomorrow = today.AddDays(1);
             var logs = employeeIds.Count == 0
-                ? new List<AssistantPunch>()
+                ? new List<AttendanceLog>()
                 : await db.AttendanceLogs.AsNoTracking()
                     .Where(log => log.EmployeeId.HasValue && employeeIds.Contains(log.EmployeeId.Value) && log.PunchTime >= today && log.PunchTime < tomorrow.AddDays(1))
-                    .Select(log => new AssistantPunch(log.EmployeeId!.Value, log.PunchTime))
                     .ToListAsync(cancellationToken);
             var employeeById = targetEmployees.ToDictionary(e => e.Id);
-            var punchesByEmployee = logs.Where(log => employeeById.TryGetValue(log.EmployeeId, out var e)
-                    && AttendanceRules.ShiftDate(log.PunchTime, e.ShiftStartTime, e.ShiftEndTime) == todayDate).GroupBy(log => log.EmployeeId)
-                .ToDictionary(group => group.Key, group => group.Min(log => log.PunchTime));
+            var punchesByEmployee = logs.Where(log => employeeById.TryGetValue(log.EmployeeId!.Value, out var e)
+                    && AttendanceRules.ShiftDate(log.PunchTime, e.ShiftStartTime, e.ShiftEndTime) == todayDate).GroupBy(log => log.EmployeeId!.Value)
+                .Select(group => new { EmployeeId = group.Key, Times = ManualAttendance.EffectivePunches(group) })
+                .Where(item => item.Times.CheckIn.HasValue)
+                .ToDictionary(item => item.EmployeeId, item => item.Times.CheckIn!.Value);
             var lateIds = punchesByEmployee.Where(pair => !AttendanceRules.IsWeeklyOff(todayDate) && AttendanceRules.IsLateArrival(pair.Value, todayDate, employeeById[pair.Key].ShiftStartTime))
                 .Select(pair => pair.Key).ToHashSet();
             var presentIds = punchesByEmployee.Keys.ToHashSet();

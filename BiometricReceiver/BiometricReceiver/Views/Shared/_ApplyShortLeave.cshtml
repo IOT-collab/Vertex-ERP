@@ -1,0 +1,13 @@
+@{ var today = DateOnly.FromDateTime(VertexERP.Services.FieldAttendanceClock.Now).ToString("yyyy-MM-dd"); }
+<dialog id="shortLeaveForm" class="facility-dialog" aria-labelledby="shortLeaveForm-title">
+<form asp-controller="Main" asp-action="ApplyLeave" method="post" data-facility-form>
+<div class="facility-dialog-title"><h3 id="shortLeaveForm-title">Apply Short Leave</h3><button type="button" onclick="document.getElementById('shortLeaveForm').close()" aria-label="Close">&times;</button></div>
+<input type="hidden" name="leaveType" value="Short Leave"/>
+<label>Date<input type="date" name="fromDate" value="@today" min="2000-01-01" max="2100-12-31" required/></label><input type="hidden" name="toDate" value="@today"/>
+<div class="facility-time-fields"><label>From Time<input type="time" name="shortLeaveFrom" required/></label><label>To Time<input type="time" name="shortLeaveTo" required/></label></div><p>Maximum 2 hours per request, twice per month.</p>
+<div class="facility-summary" data-facility-quota data-quota-url="@Url.Action("ExtraLeaveQuota", "Main")" aria-live="polite"><div data-quota-content>Loading monthly quota...</div></div>
+<label>Reason<textarea name="reason" rows="3" maxlength="500" required></textarea></label>
+<p class="facility-help">Extra paid facility - no regular leave deduction. Your manager reviews first, then HR makes the final decision.</p>
+<p data-facility-error role="alert"></p>
+<button class="submit-leave" type="submit">Submit Short Leave Request</button>
+</form></dialog>

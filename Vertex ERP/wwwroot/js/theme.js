@@ -30,12 +30,16 @@
         const dark = luminance(palette.surface) < .18;
         const muted = mode === 'custom' ? palette.text : dark ? '#a8b3cf' : '#52627a';
         root.dataset.theme = mode;
+        root.dataset.themeTone = dark ? 'dark' : 'light';
         root.style.colorScheme = dark ? 'dark' : 'light';
         const values = {
             'bg': palette.background, 'bg-1': palette.background, 'bg-2': palette.background, 'bg-3': palette.background,
             'surface': palette.surface, 'surface-soft': mode === 'custom' ? palette.surface : dark ? '#162238' : '#f1f5f9',
             'text': palette.text, 'text-soft': palette.text, 'text-muted': muted, 'primary': palette.accent, 'primary-hover': palette.accent,
             'border': dark ? '#29374e' : '#dce4ef',
+            'success': mode === 'custom' ? palette.text : dark ? '#86efac' : '#15803d',
+            'danger': mode === 'custom' ? palette.text : dark ? '#fda4af' : '#b91c1c',
+            'warning': mode === 'custom' ? palette.text : dark ? '#fcd34d' : '#92400e',
             'glass': palette.surface, 'glass-strong': palette.surface, 'glass-border': dark ? '#29374e' : '#dce4ef',
             'shadow': dark ? '0 8px 28px rgba(0,0,0,.18)' : '0 4px 20px rgba(15,23,42,.045)',
             'shadow-soft': dark ? '0 8px 28px rgba(0,0,0,.18)' : '0 4px 20px rgba(15,23,42,.045)'

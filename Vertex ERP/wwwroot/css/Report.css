@@ -4,11 +4,11 @@
     --primary-blue-hover: #1d4ed8;
     --success-green: #16a34a;
     --success-green-hover: #15803d;
-    --bg-main: #f4f7fc;
-    --card-bg: #ffffff;
-    --text-primary: #0f172a;
-    --text-secondary: #64748b;
-    --border-color: #e2e8f0;
+    --bg-main: var(--erp-surface, #f4f7fc);
+    --card-bg: var(--erp-surface, #ffffff);
+    --text-primary: var(--erp-text, #0f172a);
+    --text-secondary: var(--erp-text-muted, #64748b);
+    --border-color: var(--erp-border, #e2e8f0);
     --radius-lg: 12px;
     --radius-md: 8px;
     --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.03);
@@ -48,7 +48,7 @@ body {
     gap: 8px;
     padding: 8px 16px;
     background: var(--card-bg);
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--erp-border, #cbd5e1);
     border-radius: var(--radius-md);
     color: var(--text-primary);
     font-size: 13.5px;
@@ -59,7 +59,7 @@ body {
 }
 
     .btn-back:hover {
-        background: #f1f5f9;
+        background: var(--erp-surface, #f1f5f9);
         border-color: var(--primary-blue);
         color: var(--primary-blue);
         transform: translateX(-3px);
@@ -81,7 +81,7 @@ body {
     }
 
     .report-header h2 {
-        color: #1d3557;
+        color: var(--erp-text, #1d3557);
         font-size: clamp(20px, 2.5vw, 26px);
         font-weight: 700;
         display: flex;
@@ -111,7 +111,7 @@ body {
     padding: 11px 20px;
     border-radius: var(--radius-md);
     cursor: pointer;
-    color: #fff;
+    color: var(--erp-text, #fff);
     font-size: 14px;
     font-weight: 600;
     white-space: nowrap;
@@ -164,7 +164,7 @@ body {
     .report-card h3 {
         font-size: 32px;
         margin-bottom: 6px;
-        color: #1e293b;
+        color: var(--erp-text, #1e293b);
         font-weight: 800;
     }
 
@@ -229,7 +229,7 @@ body {
 .filter-panel button.btn-search {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--erp-border, #cbd5e1);
     border-radius: var(--radius-md);
     font-size: 13.5px;
     height: 42px;
@@ -245,7 +245,7 @@ body {
 
 .filter-panel button.btn-search {
     background: var(--primary-blue);
-    color: #fff;
+    color: var(--theme-accent-text, #fff);
     border: none;
     font-weight: 600;
     cursor: pointer;
@@ -284,14 +284,14 @@ body {
     .category-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 20px rgba(37, 99, 235, 0.08);
-        border-color: #bfdbfe;
+        border-color: var(--erp-border, #bfdbfe);
     }
 
 .cat-icon-box {
     width: 42px;
     height: 42px;
     border-radius: 8px;
-    background-color: #eff6ff;
+    background-color: var(--erp-surface-soft, #eff6ff);
     color: var(--primary-blue);
     display: flex;
     align-items: center;
@@ -331,13 +331,13 @@ body {
 }
 
 thead {
-    background: #f8fafc;
+    background: var(--erp-surface, #f8fafc);
 }
 
 th {
     padding: 16px;
     text-align: left;
-    color: #475569;
+    color: var(--erp-text-muted, #475569);
     font-size: 12px;
     font-weight: 700;
     border-bottom: 2px solid var(--border-color);
@@ -348,14 +348,14 @@ th {
 td {
     padding: 16px;
     text-align: left;
-    border-bottom: 1px solid #f1f5f9;
-    color: #334155;
+    border-bottom: 1px solid var(--erp-border, #f1f5f9);
+    color: var(--erp-text, #334155);
     font-size: 14px;
     white-space: nowrap;
 }
 
 tbody tr:hover {
-    background: #f8fbff;
+    background: var(--erp-surface, #f8fbff);
 }
 
 .no-data-cell {
@@ -366,7 +366,7 @@ tbody tr:hover {
 
 .no-data-icon {
     font-size: 32px;
-    color: #cbd5e1;
+    color: var(--erp-text, #cbd5e1);
     margin-bottom: 8px;
 }
 
@@ -382,17 +382,17 @@ tbody tr:hover {
 }
 
 .completed {
-    background: #e6f9f0;
+    background: var(--erp-surface-soft, #e6f9f0);
     color: #16a34a;
 }
 
 .pending {
-    background: #fff3c4;
+    background: var(--erp-surface-soft, #fff3c4);
     color: #d97706;
 }
 
 .failed {
-    background: #fef2f2;
+    background: var(--erp-surface, #fef2f2);
     color: #dc2626;
 }
 
@@ -405,7 +405,7 @@ tbody tr:hover {
 .view-btn,
 .download-btn {
     border: none;
-    color: #fff;
+    color: var(--theme-accent-text, #fff);
     padding: 6px 12px;
     border-radius: 6px;
     cursor: pointer;

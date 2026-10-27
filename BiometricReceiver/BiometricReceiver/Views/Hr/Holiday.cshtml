@@ -117,7 +117,7 @@
                 </thead>
                 <tbody id="holidayTableBody">
                     <tr class="hc-empty-row">
-                        <td colspan="5" style="text-align: center; color: #64748b; padding: 32px;">No holidays found for the selected configuration.</td>
+                        <td colspan="5" style="text-align: center; color: var(--erp-text-muted, #64748b); padding: 32px;">No holidays found for the selected configuration.</td>
                     </tr>
                 </tbody>
             </table>
@@ -139,7 +139,7 @@
         tbody.innerHTML = "";
 
         if (!data || data.length === 0) {
-            tbody.innerHTML = `<tr class="hc-empty-row"><td colspan="5" style="text-align: center; color: #64748b; padding: 32px;">No records available.</td></tr>`;
+            tbody.innerHTML = `<tr class="hc-empty-row"><td colspan="5" style="text-align: center; color: var(--erp-text-muted, #64748b); padding: 32px;">No records available.</td></tr>`;
             return;
         }
 

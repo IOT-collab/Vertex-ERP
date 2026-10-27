@@ -12,9 +12,9 @@
 }
 <link href="~/css/EmployeeDashboard.css" rel="stylesheet" asp-append-version="true" />
 <style>
-.team-overview details { padding:20px; border:1px solid #334155; border-radius:12px; background:#111827; margin-bottom:16px; }
-.team-overview summary {cursor:pointer;font-size:18px;font-weight:600;color:#e2e8f0;}
-.team-overview .team-meta {color:#94a3b8;margin:10px 0 18px;}
+.team-overview details { padding:20px; border:1px solid var(--erp-border, #334155); border-radius:12px; background:var(--erp-surface, #111827); margin-bottom:16px; }
+.team-overview summary {cursor:pointer;font-size:18px;font-weight:600;color:var(--erp-text, #e2e8f0);}
+.team-overview .team-meta {color:var(--erp-text-muted, #94a3b8);margin:10px 0 18px;}
 .team-overview .team-actions {display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
 .team-overview .team-picker {display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;max-height:240px;overflow:auto;margin:16px 0;}
 .team-overview .team-picker label {display:flex;gap:8px;align-items:center;}

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" data-theme-user="">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense Review - Vertex ERP</title>
+    <script src="/js/theme.js?v=JsFUoRbzJn9KqZYtXXlz_zgyMbiK4eH1axphmpmIkAA"></script>
+    <script src="/js/locales/hi.js?v=hFJ_RNJGdkgnPk9ITiRnUgQBJlMSXuqSUt6KXt93j_Q"></script>
+    <script src="/js/language.js?v=Isl05HfqnXp40mGSnzRLGCvTWAXm4zkcRwiT43ZML-8"></script>
+    <link href="/css/Style.css?v=fbAK5ytKllCMCjrxL-dKhIFSSm8iPfd0fjHF9eJZZKQ" rel="stylesheet" />
+    <link href="/css/site.css?v=cd4LhcqAp-f0eafJnZ4NLs0KRiYzbHdrvXt1qOdS2ig" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="/css/common-ui.css?v=S53GsNTcL6z5g1Hidd_Yx3pgZEZdG-8UrcYFOoy8fdo" rel="stylesheet" />
+    <link href="/css/common-back-button.css?v=I_No4B9LuDEG5OsYVsR0wvx8iI69ak0A1w93Q1jqQFs" rel="stylesheet" />
+    <link href="/css/erp-buttons.css?v=P4mvgzWZcgKRXGPpSOrorRhbVxqH2fwXxKOXbn9XWKs" rel="stylesheet" />
+    <link href="/css/ResponsiveEnhancements.css?v=2RztQXGMRnIdoNkyjs46gz9km8jkvuDQEqmubWQAzD4" rel="stylesheet" />
+    <link href="/css/hr-modules.css?v=eBF2BBH9XWbB6bStvHdxoVTBuAMjc5II2Tme8JMCKO8" rel="stylesheet" />
+    <link href="/css/theme.css?v=UqGZcSDh8Y1acQoWx9eApJDHTxV76rVFCFgSHBN6NFM" rel="stylesheet" />
+    <link href="/css/ResponsiveGuard.css?v=WcKT9WrzRXJcg1vDmRbqUUYc2gVwzs87uTYkyZxPsKE" rel="stylesheet" />
+</head>
+<body class="erp-shell  employee-self-service-only ">
+
+
+
+    <!-- Pure CSS Sidebar Drawer Controller Toggle -->
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-check" />
+
+    <div class="layout">
+
+        <!-- Mobile Drawer Overlay Screen -->
+        <label for="sidebar-toggle" class="sidebar-overlay"></label>
+
+        <!-- Sidebar Navigation Drawer -->
+        <aside class="sidebar">
+            <div class="logo">
+                <a class="erp-logo-link" href="/Main/EmployeeHome" aria-label="Go to Dashboard">
+                    <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                    <span>Vertex ERP</span>
+                </a>
+                    <label for="sidebar-toggle" class="sidebar-close-btn">&times;</label>
+            </div>
+
+            <ul class="sidebar-menu">
+                    <li><a href="/Main/Employees"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i><span>Dashboard</span></a></li>
+                    <li><a href="/Main/EmployeeTasks"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>My Tasks</span></a></li>
+                    <li><a href="/Main/EmployeeAttendance"><i class="fa-regular fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
+                    <li><a href="/Main/FieldAttendance"><i class="fa-solid fa-location-dot" aria-hidden="true"></i><span>Mark Attendance</span></a></li>
+                    <li><a href="/Main/EmployeeLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
+                    <li><a href="/Main/CompanyHoliday"><i class="fa-regular fa-calendar-days" aria-hidden="true"></i><span>Company Holiday</span></a></li>
+                    <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user" aria-hidden="true"></i><span>My Profile</span></a></li>
+                    <li><a href="/Main/EmployeeNotifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Notifications</span></a></li>
+                    <li><a href="/Main/EmployeeQueries"><i class="fa-regular fa-circle-question" aria-hidden="true"></i><span>Raise Query</span></a></li>
+                    <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Salary Slip</span></a></li>
+                    <li><a href="/Main/EmployeeAssets"><i class="fa-solid fa-laptop" aria-hidden="true"></i><span>Assets</span></a></li>
+                    <li><a href="/Expense/Index"><i class="fa-solid fa-receipt" aria-hidden="true"></i><span>Expense Claims</span></a></li>
+                    <li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns" aria-hidden="true"></i><span>My Bank Details</span></a></li>
+                <li><a href="/Theme/Index"><i class="fa-solid fa-palette" aria-hidden="true"></i><span>Theme</span></a></li>
+                <li><a href="/Language/Index"><i class="fa-solid fa-language" aria-hidden="true"></i><span>Language</span></a></li>
+                <li><a href="/Feedback/Index"><i class="fa-regular fa-comment-dots" aria-hidden="true"></i><span>Feedback</span></a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Dashboard Workspace Panel -->
+        <main class="main-content">
+
+            <!-- Global Action Application Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <label for="sidebar-toggle" class="hamburger-menu-btn" title="Open navigation" aria-label="Open navigation">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </label>
+                    <a class="topbar-brand" href="/Main/EmployeeHome" aria-label="Go to Dashboard">
+                        <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                        <span>Vertex ERP</span>
+                    </a>
+                </div>
+
+                <div class="profile">
+                    <span class="profile-text" title="Signed in as Preview Employee">Welcome Preview Employee</span>
+                    <form method="post" style="display:inline" action="/Main/Logout">
+                        <button class="logout-btn" type="submit" title="Logout">Logout</button>
+                    <input name="__RequestVerificationToken" type="hidden" value="CfDJ8AAAAAAAAAAAAAAAAAAAAAAE5s6r0nyHLjln7BgYvIVgtuSKJc38SMh9_FqeLUUniADC8tZ3yqOBEMBlH9o8931iWKCQhYXZf6lQrx5KIVWBkrV_EAp0K9huU-OXQA7-6sOYi8w5BmtR3EF-INDN0KY" /></form>
+                </div>
+            </header>
+
+            <!-- Embedded Nested Page Target Body Canvas Wrapper -->
+            <div class="page-content">
+                
+    <nav class="common-back-nav" aria-label="Page navigation">
+        <a class="common-back-button" title="Go Back" aria-label="Go Back" href="/Main/Employees">
+            <svg class="common-back-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            <span>Back</span>
+        </a>
+    </nav>
+
+                <link href="/css/ExpenseClaim.css?v=-Jx6q8D_VuUQU7I-HlX6H8bJFXHKEqtGSDGbqM3JYWI" rel="stylesheet" />
+<link href="/css/ExpenseWorkspace.css?v=HPKavFo_pqByOqjGa2PXWRM4yXDZ0AAhcWidDzfy38g" rel="stylesheet" />
+<div class="exp-container expense-workspace">
+    <header class="expense-hero">
+        <div><span class="expense-eyebrow">EMPLOYEE REIMBURSEMENTS</span><h1>Expense Review</h1><p>Review manager decisions, record your decision, and forward claims to Yuvraj.</p></div>
+        <span class="expense-hero-icon"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i></span>
+    </header>
+    <nav class="expense-nav" aria-label="Expense views">
+ <a class="" href="/Expense/Index?view=self">My Claims</a>     </nav>
+    <div class="expense-route"><span><i class="fa-solid fa-user"></i> Employee</span><i class="fa-solid fa-arrow-right"></i><span><i class="fa-solid fa-user-tie"></i> Reporting Manager</span><i class="fa-solid fa-arrow-right"></i><span><i class="fa-solid fa-user-check"></i> HR Review</span><i class="fa-solid fa-arrow-right"></i><span><i class="fa-solid fa-inbox"></i> Yuvraj's Final Review</span></div>
+    <div class="exp-grid-stats">
+        <article class="exp-stat-card"><span class="exp-stat-label">Total Claimed</span><h2 class="exp-stat-value">₹750.00</h2><span class="exp-stat-sub">1 claims</span></article>
+        <article class="exp-stat-card"><span class="exp-stat-label">Under Review</span><h2 class="exp-stat-value">₹750.00</h2><span class="exp-stat-sub">Awaiting final response</span></article>
+        <article class="exp-stat-card"><span class="exp-stat-label">Final Approved</span><h2 class="exp-stat-value">₹0.00</h2><span class="exp-stat-sub">Approved by Yuvraj</span></article>
+        <article class="exp-stat-card"><span class="exp-stat-label">Final Rejected</span><h2 class="exp-stat-value">₹0.00</h2><span class="exp-stat-sub">Rejected by Yuvraj</span></article>
+    </div>
+    <div class="expense-columns ">
+        <section class="expense-claims-panel" aria-labelledby="expenseListTitle">
+            <div class="expense-section-heading"><div><h2 id="expenseListTitle">Expense claims</h2><p>View bills, decisions and the current approval stage.</p></div><span class="badge">1 records</span></div>
+            <div class="exp-controls"><input id="expSearchInput" type="search" class="exp-input" placeholder="Search claim, employee or category..." aria-label="Search expenses" /><select id="statusFilter" class="exp-select" aria-label="Filter expenses"><option value="All">All statuses</option><option>Pending</option><option>Approved</option><option>Rejected</option></select></div>
+            <div class="expense-claim-list">
+                <article class="expense-claim" data-expense-status="Pending">
+                    <div class="expense-claim-head"><div><span class="expense-category">Travel · #1</span><h3>Client visit travel</h3><small>Preview Employee &#xB7; PREVIEW-10</small></div><strong class="expense-value">₹750.00</strong></div>
+                    <div class="expense-claim-meta"><span><i class="fa-regular fa-calendar"></i> 20 Oct 2026</span><span class="status-badge status-approved">HR Approved</span><span class="expense-stage">HR reviewed &#xB7; Ready to forward</span></div>
+                    <a target="_blank" rel="noopener" class="expense-bill" href="/Expense/Receipt?id=1"><i class="fa-solid fa-file-pdf"></i><span>bill.pdf</span><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    <div class="expense-decisions">
+                        <div><small>MANAGER</small><strong>Previous review</strong></div>
+                        <div><small>HR</small><strong>Approved</strong></div>
+                        <div><small>FORWARDED TO</small><strong>Not forwarded</strong></div>
+                    </div>
+ <form method="post" class="expense-forward" action="/Expense/Forward"><input type="hidden" name="id" value="1" /><button class="exp-btn-primary" type="submit"><i class="fa-solid fa-share"></i> Forward to Yuvraj</button><input name="__RequestVerificationToken" type="hidden" value="CfDJ8AAAAAAAAAAAAAAAAAAAAAAE5s6r0nyHLjln7BgYvIVgtuSKJc38SMh9_FqeLUUniADC8tZ3yqOBEMBlH9o8931iWKCQhYXZf6lQrx5KIVWBkrV_EAp0K9huU-OXQA7-6sOYi8w5BmtR3EF-INDN0KY" /></form>                 </article>
+            </div><p id="expenseNoMatches" class="exp-empty" hidden>No claims match your filters.</p>
+        </section>
+    </div>
+    <details class="expense-advance-details"><summary>Advance payments &amp; receipts</summary><section class="exp-main-panel exp-advances" aria-labelledby="advanceHeading">
+    <div class="exp-header">
+        <div><h2 id="advanceHeading">Advance Payments</h2><p class="exp-subtitle">Payment receipts and employee confirmation · All times in IST</p></div>
+        <span class="badge">0 awaiting confirmation</span>
+    </div>
+        <details class="exp-advance-entry">
+            <summary class="exp-link">+ Record Advance Payment</summary>
+            <form method="post" enctype="multipart/form-data" class="exp-advance-form" action="/Expense/RecordAdvance">
+                <div class="exp-form-row">
+                    <div class="exp-form-group"><label for="advanceEmployee">Employee</label><select id="advanceEmployee" name="EmployeeId" class="exp-input" required><option value="">Select employee</option></select></div>
+                    <div class="exp-form-group"><label for="advancePurpose">Site / visit / purpose</label><input id="advancePurpose" name="Purpose" class="exp-input" maxlength="150" required placeholder="Example: Mumbai site visit" /></div>
+                </div>
+                <div class="exp-form-row">
+                    <div class="exp-form-group"><label for="advanceAmount">Advance paid (₹)</label><input id="advanceAmount" name="Amount" type="number" class="exp-input" min="0.01" max="10000000" step="0.01" required /></div>
+                    <div class="exp-form-group"><label for="advanceMode">Payment mode</label><select id="advanceMode" name="PaymentMode" class="exp-input" required><option value="">Select mode</option><option>Bank Transfer</option><option>UPI</option><option>Cash</option><option>Cheque</option></select></div>
+                </div>
+                <div class="exp-form-row">
+                    <div class="exp-form-group"><label for="advanceTransaction">Transaction ID / cash voucher reference</label><input id="advanceTransaction" name="TransactionId" class="exp-input" maxlength="100" required /></div>
+                    <div class="exp-form-group"><label for="advanceDate">Payment date &amp; time (IST)</label><input id="advanceDate" name="PaidAtIst" type="datetime-local" class="exp-input" max="2026-10-27T14:26" required /></div>
+                </div>
+                <div class="exp-form-group"><label for="advanceReceipt">Transaction receipt / payment proof</label><input id="advanceReceipt" name="ReceiptFile" type="file" class="exp-input" accept=".pdf,.jpg,.jpeg,.png" required /><small>PDF, JPG or PNG · Maximum 10 MB</small></div>
+                <p class="exp-subtitle">Record each payment separately. The employee must confirm receipt from their own account.</p>
+                <button class="exp-btn-primary" type="submit">Save Advance Payment</button>
+            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8AAAAAAAAAAAAAAAAAAAAAAE5s6r0nyHLjln7BgYvIVgtuSKJc38SMh9_FqeLUUniADC8tZ3yqOBEMBlH9o8931iWKCQhYXZf6lQrx5KIVWBkrV_EAp0K9huU-OXQA7-6sOYi8w5BmtR3EF-INDN0KY" /></form>
+        </details>
+    <div class="exp-table-responsive"><table class="exp-table"><thead><tr><th>Employee / purpose</th><th>Payment</th><th>Transaction ID &amp; date</th><th>Receipt</th><th>Employee confirmation</th></tr></thead><tbody>
+<tr><td colspan="5"><div class="exp-empty"><strong>No advance payments recorded</strong><span>Payments will appear here for employee confirmation.</span></div></td></tr>    </tbody></table></div>
+    <p class="exp-subtitle">Confirmation acknowledges payment receipt. Advance adjustment against expenses is separate.</p>
+</section>
+<script>
+function toggleAdvanceResponse(select) {
+    const form = select.form, amount = form.querySelector('[data-advance-amount]');
+    const mismatch = select.value === 'Amount Mismatch';
+    amount.hidden = !mismatch;
+    amount.querySelector('input').disabled = !mismatch;
+    amount.querySelector('input').required = mismatch;
+    form.querySelector('textarea').required = select.value !== '' && select.value !== 'Received';
+}
+</script>
+</details>
+</div>
+<script src="/js/expense-workspace.js?v=U94uQ_aydAxc6bh_hkLD7h5Imn8fxNLrSJtt2ooUEhw"></script>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    
+    <script src="/js/input-rules.js?v=JQN9Kjzy5AWiVxFC2yCCbkym3en2Fig1DQEPJ0ejERw"></script>
+    <script>
+        (() => {
+            const attendanceSelectors = {
+                '/Main/Attendence': '.attendance-panel-container',
+                '/Main/EmployeeAttendance': '.employee-section',
+                '/Main/EmployeeAssets': '.employee-section',
+                '/Main/Hrms': '.hrms-page'
+            };
+            const selector = attendanceSelectors[window.location.pathname];
+            const target = document.querySelector('[data-attendance-auto-refresh]') || (selector ? document.querySelector(selector) : null);
+            if (!target) return;
+            let refreshing = false;
+            const refreshAttendanceInBackground = async () => {
+                if (refreshing || document.hidden || document.activeElement?.matches('input, select, textarea')) return;
+                refreshing = true;
+                try {
+                    const response = await fetch(window.location.href, { cache: 'no-store', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!response.ok) return;
+                    const nextDocument = new DOMParser().parseFromString(await response.text(), 'text/html');
+                    const nextTarget = nextDocument.querySelector('[data-attendance-auto-refresh]') || (selector ? nextDocument.querySelector(selector) : null);
+                    if (nextTarget) target.innerHTML = nextTarget.innerHTML;
+                } catch {
+                    // A temporary connection problem must not disturb the current screen.
+                } finally {
+                    refreshing = false;
+                }
+            };
+            window.setInterval(refreshAttendanceInBackground, 15000);
+            document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshAttendanceInBackground(); });
+        })();
+    </script>
+</body>

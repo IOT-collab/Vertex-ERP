@@ -1,17 +1,17 @@
 /* Core Dark Theme Variables (Premium Glassmorphism) */
 :root {
-    --bg-dark: #0b0f19;
-    --card-bg: rgba(30, 41, 59, 0.7);
-    --card-bg-solid: #1e293b;
-    --text-primary: #f8fafc;
-    --text-muted: #94a3b8;
-    --border-color: rgba(255, 255, 255, 0.08);
+    --bg-dark: var(--erp-bg, #0b0f19);
+    --card-bg: color-mix(in srgb, var(--erp-surface-soft, rgba(30, 41, 59, 0.7)) 70%, transparent);
+    --card-bg-solid: var(--erp-surface-soft, #1e293b);
+    --text-primary: var(--erp-text, #f8fafc);
+    --text-muted: var(--erp-text-muted, #94a3b8);
+    --border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, 0.08)) 8%, transparent);
     --border-hover: rgba(59, 130, 246, 0.4);
     --primary: #3b82f6;
     --primary-hover: #2563eb;
     --radius-lg: 16px;
     --radius-md: 10px;
-    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --shadow-glass: 0 8px 32px 0 color-mix(in srgb, var(--erp-bg, rgba(0, 0, 0, 0.37)) 37%, transparent);
 }
 
 body {
@@ -55,7 +55,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.05);
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.05)) 5%, transparent);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     width: 42px;
@@ -69,7 +69,7 @@ body {
     .btn-back:hover {
         background-color: var(--primary);
         border-color: var(--primary);
-        color: #ffffff;
+        color: var(--erp-text, #ffffff);
         transform: translateX(-3px);
         box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
     }
@@ -77,8 +77,8 @@ body {
 .icon-avatar {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    color: #fff;
+    background: linear-gradient(135deg, var(--erp-primary, var(--erp-primary, #3b82f6)), var(--erp-primary, var(--erp-primary, #1d4ed8)));
+    color: var(--theme-accent-text, #fff);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -131,7 +131,7 @@ input[type="number"],
 input[type="date"],
 select,
 textarea {
-    background: rgba(15, 23, 42, 0.6) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(15, 23, 42, 0.6)) 60%, transparent) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-primary) !important;
     padding: 0.65rem 1rem;
@@ -153,7 +153,7 @@ textarea {
     select:focus,
     textarea:focus {
         border-color: var(--primary) !important;
-        background: rgba(15, 23, 42, 0.9) !important;
+        background: color-mix(in srgb, var(--erp-surface, rgba(15, 23, 42, 0.9)) 90%, transparent) !important;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
 
@@ -173,8 +173,8 @@ textarea {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: #ffffff;
+    background: linear-gradient(135deg, var(--erp-primary, var(--erp-primary, #3b82f6)), var(--erp-primary, var(--erp-primary, #2563eb)));
+    color: var(--theme-accent-text, #ffffff);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
@@ -185,13 +185,13 @@ textarea {
     }
 
 .btn-outline {
-    background: rgba(255, 255, 255, 0.03);
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.03)) 3%, transparent);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
 }
 
     .btn-outline:hover {
-        background: rgba(255, 255, 255, 0.08);
+        background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.08)) 8%, transparent);
         border-color: var(--border-hover);
     }
 
@@ -249,7 +249,7 @@ textarea {
     }
 
 .text-amber {
-    color: #fbbf24 !important;
+    color: var(--erp-warning, #fbbf24) !important;
 }
 
 .metric-icon {
@@ -264,7 +264,7 @@ textarea {
 
 .icon-blue {
     background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
+    color: var(--erp-primary, #60a5fa);
 }
 
 .icon-purple {
@@ -279,7 +279,7 @@ textarea {
 
 .icon-amber {
     background: rgba(245, 158, 11, 0.15);
-    color: #fbbf24;
+    color: var(--erp-warning, #fbbf24);
 }
 
 /* Main Glass Content Card */
@@ -338,7 +338,7 @@ textarea {
 }
 
     .asset-table th {
-        background-color: rgba(15, 23, 42, 0.5);
+        background-color: color-mix(in srgb, var(--erp-surface, rgba(15, 23, 42, 0.5)) 50%, transparent);
         color: var(--text-muted);
         font-weight: 600;
         padding: 1rem;
@@ -360,14 +360,14 @@ textarea {
     }
 
         .asset-table tbody tr:hover {
-            background-color: rgba(255, 255, 255, 0.02);
+            background-color: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.02)) 2%, transparent);
         }
 
 .empty-state-row {
     text-align: center;
     padding: 3rem !important;
     color: var(--text-muted);
-    background: rgba(15, 23, 42, 0.3);
+    background: color-mix(in srgb, var(--erp-surface, rgba(15, 23, 42, 0.3)) 30%, transparent);
 }
 
     .empty-state-row i {
@@ -406,7 +406,7 @@ textarea {
 }
 
 .category-chip {
-    background: rgba(255, 255, 255, 0.05);
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, 0.05)) 5%, transparent);
     padding: 0.3rem 0.65rem;
     border-radius: 6px;
     font-size: 0.75rem;
@@ -425,7 +425,7 @@ textarea {
     width: 34px;
     height: 34px;
     background: rgba(59, 130, 246, 0.2);
-    color: #60a5fa;
+    color: var(--erp-primary, #60a5fa);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -441,7 +441,7 @@ textarea {
 }
 
 .asset-tag {
-    background: rgba(15, 23, 42, 0.8);
+    background: color-mix(in srgb, var(--erp-surface, rgba(15, 23, 42, 0.8)) 80%, transparent);
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
     font-family: monospace;

@@ -1,4 +1,4 @@
-﻿
+
 /* =========================================================
    HR ADD EMPLOYEE
    FULLY RESPONSIVE CSS
@@ -52,7 +52,7 @@ body {
         font-size: clamp(22px, 2vw, 28px);
         line-height: 1.3;
         font-weight: 700;
-        color: #1f2937;
+        color: var(--erp-text, #1f2937);
         word-break: break-word;
     }
 
@@ -60,7 +60,7 @@ body {
         margin: 6px 0 0;
         font-size: 14px;
         line-height: 1.6;
-        color: #6b7280;
+        color: var(--erp-text-muted, #6b7280);
     }
 
 
@@ -83,8 +83,8 @@ body {
     min-width: 0;
     margin-bottom: 20px;
     padding: 24px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--erp-surface, #ffffff);
+    border: 1px solid var(--erp-border, #e5e7eb);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
@@ -117,9 +117,9 @@ body {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    border: 3px solid #e5e7eb;
+    border: 3px solid var(--erp-border, #e5e7eb);
     border-radius: 50%;
-    background: #f3f4f6;
+    background: var(--erp-surface, #f3f4f6);
 }
 
 
@@ -150,7 +150,7 @@ body {
         font-size: 17px;
         line-height: 1.4;
         font-weight: 600;
-        color: #111827;
+        color: var(--erp-text, #111827);
     }
 
     .employee-photo-content p {
@@ -159,7 +159,7 @@ body {
         margin: 0 0 15px;
         font-size: 13px;
         line-height: 1.6;
-        color: #6b7280;
+        color: var(--erp-text-muted, #6b7280);
     }
 
 
@@ -189,8 +189,8 @@ body {
     padding: 10px 18px;
     border: none;
     border-radius: 7px;
-    background: #2563eb;
-    color: #ffffff;
+    background: var(--erp-primary, var(--erp-primary, #2563eb));
+    color: var(--theme-accent-text, #ffffff);
     font-family: inherit;
     font-size: 13px;
     line-height: 1;
@@ -220,10 +220,10 @@ body {
     justify-content: center;
     min-height: 42px;
     padding: 10px 18px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--erp-border, #d1d5db);
     border-radius: 7px;
-    background: #ffffff;
-    color: #374151;
+    background: var(--erp-surface, #ffffff);
+    color: var(--erp-text, #374151);
     font-family: inherit;
     font-size: 13px;
     line-height: 1;
@@ -233,9 +233,9 @@ body {
 }
 
     .photo-remove-btn:hover {
-        background: #f3f4f6;
-        border-color: #cbd5e1;
-        color: #111827;
+        background: var(--erp-surface, #f3f4f6);
+        border-color: var(--erp-border, #cbd5e1);
+        color: var(--erp-text, #111827);
     }
 
 
@@ -248,7 +248,7 @@ body {
     width: 100%;
     font-size: 12px;
     line-height: 1.5;
-    color: #9ca3af;
+    color: var(--erp-text-muted, #9ca3af);
 }
 
 
@@ -261,8 +261,8 @@ body {
     min-width: 0;
     margin-bottom: 20px;
     padding: 24px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+    background: var(--erp-surface, #ffffff);
+    border: 1px solid var(--erp-border, #e5e7eb);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
@@ -276,7 +276,7 @@ body {
     width: 100%;
     margin-bottom: 22px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--erp-border, #e5e7eb);
 }
 
     .card-header h3 {
@@ -284,14 +284,14 @@ body {
         font-size: 17px;
         line-height: 1.4;
         font-weight: 600;
-        color: #111827;
+        color: var(--erp-text, #111827);
     }
 
     .card-header p {
         margin: 5px 0 0;
         font-size: 13px;
         line-height: 1.5;
-        color: #6b7280;
+        color: var(--erp-text-muted, #6b7280);
     }
 
 
@@ -325,7 +325,7 @@ body {
         font-size: 13px;
         line-height: 1.4;
         font-weight: 600;
-        color: #374151;
+        color: var(--erp-text, #374151);
     }
 
         .form-group label span {
@@ -345,10 +345,10 @@ body {
         max-width: 100%;
         min-width: 0;
         padding: 11px 12px;
-        border: 1px solid #d1d5db;
+        border: 1px solid var(--erp-border, #d1d5db);
         border-radius: 7px;
-        background: #ffffff;
-        color: #1f2937;
+        background: var(--erp-surface, #ffffff);
+        color: var(--erp-text, #1f2937);
         font-family: inherit;
         font-size: 14px;
         line-height: 1.4;
@@ -375,7 +375,7 @@ body {
 
     .form-group input::placeholder,
     .form-group textarea::placeholder {
-        color: #9ca3af;
+        color: var(--erp-text-muted, #9ca3af);
         opacity: 1;
     }
 
@@ -437,10 +437,10 @@ body {
     justify-content: center;
     min-height: 42px;
     padding: 11px 22px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--erp-border, #d1d5db);
     border-radius: 7px;
-    background: #ffffff;
-    color: #374151;
+    background: var(--erp-surface, #ffffff);
+    color: var(--erp-text, #374151);
     font-family: inherit;
     font-size: 14px;
     font-weight: 600;
@@ -449,9 +449,9 @@ body {
 }
 
     .btn-cancel:hover {
-        background: #f3f4f6;
-        border-color: #cbd5e1;
-        color: #111827;
+        background: var(--erp-surface, #f3f4f6);
+        border-color: var(--erp-border, #cbd5e1);
+        color: var(--erp-text, #111827);
     }
 
 
@@ -467,8 +467,8 @@ body {
     padding: 11px 24px;
     border: none;
     border-radius: 7px;
-    background: #2563eb;
-    color: #ffffff;
+    background: var(--erp-primary, var(--erp-primary, #2563eb));
+    color: var(--theme-accent-text, #ffffff);
     font-family: inherit;
     font-size: 14px;
     font-weight: 600;
@@ -1062,15 +1062,15 @@ body {
    ========================================================================== */
 .add-employee-page .employee-photo-card,
 .add-employee-page .form-card {
-    background: linear-gradient(145deg, rgba(255, 255, 255, .088), rgba(255, 255, 255, .044)) !important;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .088)) 8.8%, transparent), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .044)) 4.4%, transparent)) !important;
     border-color: var(--app-border) !important;
     box-shadow: var(--app-shadow) !important;
     color: var(--app-text-soft) !important;
 }
 
 .add-employee-page .employee-photo-preview {
-    border-color: rgba(255, 255, 255, .14) !important;
-    background: rgba(255, 255, 255, .065) !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .14)) 14%, transparent) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .065)) 6.5%, transparent) !important;
 }
 
 .add-employee-page .employee-photo-content h3,
@@ -1086,26 +1086,26 @@ body {
 }
 
 .add-employee-page .card-header {
-    border-color: rgba(255, 255, 255, .1) !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
 }
 
 .add-employee-page .form-group input,
 .add-employee-page .form-group select,
 .add-employee-page .form-group textarea {
-    border-color: rgba(255, 255, 255, .13) !important;
-    background: rgba(255, 255, 255, .07) !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .13)) 13%, transparent) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent) !important;
     color: var(--app-text) !important;
 }
 
 .add-employee-page .form-group input::placeholder,
 .add-employee-page .form-group textarea::placeholder {
-    color: rgba(168, 179, 207, .76) !important;
+    color: color-mix(in srgb, var(--erp-text-muted, rgba(168, 179, 207, .76)) 76%, transparent) !important;
 }
 
 .add-employee-page .photo-remove-btn,
 .add-employee-page .btn-cancel {
-    border-color: rgba(255, 255, 255, .16) !important;
-    background: rgba(255, 255, 255, .07) !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .16)) 16%, transparent) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent) !important;
     color: var(--app-text-soft) !important;
 }
 
@@ -1113,7 +1113,7 @@ body {
 .add-employee-page .btn-cancel:hover {
     border-color: rgba(59, 130, 246, .5) !important;
     background: rgba(59, 130, 246, .16) !important;
-    color: #fff !important;
+    color: var(--erp-text, #fff) !important;
 }
 
 .credential-input-row input {
@@ -1125,7 +1125,7 @@ body {
     border: 1px solid #3b82f6;
     border-radius: 8px;
     background: rgba(59, 130, 246, .14);
-    color: #93c5fd;
+    color: var(--erp-primary, #93c5fd);
     padding: 0 16px;
     font-weight: 700;
     cursor: pointer;
@@ -1139,8 +1139,8 @@ body {
     min-height: 42px;
     width: 100%;
     gap: 8px;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    color: #fff;
+    background: linear-gradient(135deg, var(--erp-primary, var(--erp-primary, #2563eb)), var(--erp-primary, var(--erp-primary, #1d4ed8)));
+    color: var(--theme-accent-text, #fff);
 }
 
 .credential-generate-all-btn:disabled {
@@ -1166,7 +1166,7 @@ body {
 }
 
 .account-option-group small {
-    color: #94a3b8;
+    color: var(--erp-text-muted, #94a3b8);
 }
 
 .field-validation,
@@ -1180,21 +1180,21 @@ body {
 }
 
 .validation-summary {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
+    background: var(--erp-surface, #fef2f2);
+    border: 1px solid var(--erp-border, #fecaca);
     border-radius: 8px;
     margin-bottom: 18px;
     padding: 12px 14px;
 }
 /* Bank and salary are separate popup forms opened from the top action buttons. */
 .employee-extra-modal[hidden] { display: none !important; }
-.employee-extra-modal { position: fixed; inset: 0; z-index: 2500; padding: 32px; background: rgba(2, 10, 24, .78); backdrop-filter: blur(5px); overflow-y: auto; }
-.employee-extra-dialog { width: min(1180px, 100%); margin: 30px auto; padding: 28px; border: 1px solid #30415d; border-radius: 18px; background: #172238; box-shadow: 0 24px 70px rgba(0,0,0,.45); }
-.employee-extra-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding-bottom: 20px; margin-bottom: 24px; border-bottom: 1px solid #30415d; }
-.employee-extra-heading h3 { margin: 0 0 6px; color: #f5f8ff; font-size: 24px; }
-.employee-extra-heading p { margin: 0; color: #aebbd0; }
-.employee-extra-close { border: 0; background: transparent; color: #cdd7e7; font-size: 32px; line-height: 1; cursor: pointer; }
-.employee-extra-footer { display: flex; justify-content: flex-end; padding-top: 24px; margin-top: 22px; border-top: 1px solid #30415d; }
-.employee-extra-footer button { min-width: 120px; padding: 12px 24px; border: 0; border-radius: 10px; background: #2868e8; color: #fff; font-weight: 700; cursor: pointer; }
+.employee-extra-modal { position: fixed; inset: 0; z-index: 2500; padding: 32px; background: color-mix(in srgb, var(--erp-bg, rgba(2, 10, 24, .78)) 78%, transparent); backdrop-filter: blur(5px); overflow-y: auto; }
+.employee-extra-dialog { width: min(1180px, 100%); margin: 30px auto; padding: 28px; border: 1px solid var(--erp-border, #30415d); border-radius: 18px; background: var(--erp-surface-soft, #172238); box-shadow: 0 24px 70px rgba(0,0,0,.45); }
+.employee-extra-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding-bottom: 20px; margin-bottom: 24px; border-bottom: 1px solid var(--erp-border, #30415d); }
+.employee-extra-heading h3 { margin: 0 0 6px; color: var(--erp-text, #f5f8ff); font-size: 24px; }
+.employee-extra-heading p { margin: 0; color: var(--erp-text-muted, #aebbd0); }
+.employee-extra-close { border: 0; background: transparent; color: var(--erp-text, #cdd7e7); font-size: 32px; line-height: 1; cursor: pointer; }
+.employee-extra-footer { display: flex; justify-content: flex-end; padding-top: 24px; margin-top: 22px; border-top: 1px solid var(--erp-border, #30415d); }
+.employee-extra-footer button { min-width: 120px; padding: 12px 24px; border: 0; border-radius: 10px; background: #2868e8; color: var(--theme-accent-text, #fff); font-weight: 700; cursor: pointer; }
 body.employee-extra-open { overflow: hidden; }
 @media (max-width: 700px) { .employee-extra-modal { padding: 12px; } .employee-extra-dialog { margin: 12px auto; padding: 18px; } }

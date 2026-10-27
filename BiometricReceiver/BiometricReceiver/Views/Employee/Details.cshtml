@@ -10,7 +10,7 @@
         <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
             @if (!string.IsNullOrWhiteSpace(Model.PhotoPath))
             {
-                <img src="@Url.Content(Model.PhotoPath)" alt="@Model.FullName profile photo" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid #334155;" />
+                <img src="@Url.Content(Model.PhotoPath)" alt="@Model.FullName profile photo" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid var(--erp-border, #334155);" />
             }
             <div class="header-text"><h2 data-no-localize>@Model.FullName</h2><p data-no-localize>@Model.EmployeeCode · @Model.Designation · @Model.Department</p></div>
         </div>
@@ -36,7 +36,7 @@
                 <div class="form-row"><div class="form-group"><label>Date of Birth</label><strong>@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Not provided")</strong></div><div class="form-group"><label>Gender</label><strong>@(Model.Gender ?? "Not provided")</strong></div></div>
                 <div class="form-group"><label>Address</label><strong>@(string.Join(", ", new[] { Model.Address, Model.City, Model.State }.Where(value => !string.IsNullOrWhiteSpace(value))) is var address && address.Length > 0 ? address : "Not provided")</strong></div>
             </div>
-            <div class="form-side-section"><div class="config-card"><h3>Employment Details</h3><div class="form-group"><label>Joining Date</label><strong>@Model.JoiningDate.ToString("dd MMM yyyy")</strong></div><div class="form-group"><label>Reporting Manager</label><strong>@(Model.ReportingManager?.FullName ?? "Not assigned")</strong></div><div class="form-group"><label>Employment Type</label><strong>@Model.EmploymentType</strong></div><div class="form-group"><label>Status</label><strong>@Model.EmployeeStatus</strong></div><div class="form-group"><label>Active</label><strong>@(Model.IsActive ? "Yes" : "No")</strong></div></div></div>
+            <div class="form-side-section"><div class="config-card"><h3>Employment Details</h3><div class="form-group"><label>Joining Date</label><strong>@Model.JoiningDate.ToString("dd MMM yyyy")</strong></div><div class="form-group"><label>Reporting Manager</label><strong>@(Model.ReportingManager?.FullName ?? "Not assigned")</strong></div><div class="form-group"><label>Employee Category</label><strong>@(Model.EmployeeCategory ?? "Not assigned")</strong></div><div class="form-group"><label>Employment Type</label><strong>@Model.EmploymentType</strong></div><div class="form-group"><label>Status</label><strong>@Model.EmployeeStatus</strong></div><div class="form-group"><label>Active</label><strong>@(Model.IsActive ? "Yes" : "No")</strong></div></div></div>
         </div>
         <div class="form-actions-footer"><a asp-controller="Employee" asp-action="Index" class="btn-cancel">Back</a><a asp-controller="Employee" asp-action="Edit" asp-route-id="@Model.Id" class="btn-submit">Edit Employee</a></div>
     </div>

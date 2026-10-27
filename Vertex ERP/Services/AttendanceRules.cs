@@ -5,12 +5,30 @@ public static class AttendanceRules
     public const string FieldCommunicationMode = "Field";
     public const string FieldVerificationMode = "GPS Field";
 
-    // Office arrivals before 09:45:00 are on time. Other assigned shifts retain their existing cutoff.
+    // Office check-in at 09:45 is on time; later arrivals are late.
     public static bool IsLateArrival(DateTime checkIn) =>
-        IsLateArrival(checkIn, DateOnly.FromDateTime(checkIn), new TimeOnly(9, 30));
+        IsLateArrival(checkIn, DateOnly.FromDateTime(checkIn), new TimeOnly(9, 45));
 
     public static bool IsLateArrival(DateTime checkIn, DateOnly shiftDate, TimeOnly startTime) =>
-        checkIn >= shiftDate.ToDateTime(startTime).AddMinutes(startTime == new TimeOnly(9, 30) ? 15 : 1);
+        LateDuration(checkIn, shiftDate, startTime) > TimeSpan.Zero;
+
+    // The 09:30 office shift allows arrival through 09:45. Other assigned
+    // shifts retain their own start time as the cutoff.
+    public static TimeOnly ArrivalCutoff(TimeOnly startTime) =>
+        startTime == new TimeOnly(9, 30) ? new TimeOnly(9, 45) : startTime;
+
+    public static TimeSpan LateDuration(DateTime checkIn, DateOnly shiftDate, TimeOnly startTime)
+    {
+        var cutoff = shiftDate.ToDateTime(ArrivalCutoff(startTime));
+        return checkIn > cutoff ? checkIn - cutoff : TimeSpan.Zero;
+    }
+
+    public static DateTime CheckInAt(DateOnly date, TimeOnly checkIn, TimeOnly shiftStart, TimeOnly shiftEnd) =>
+        date.ToDateTime(checkIn).AddDays(shiftEnd < shiftStart && date.ToDateTime(checkIn) < PunchWindow(date, shiftStart, shiftEnd).From ? 1 : 0);
+
+    public static DateTime CheckOutAt(DateOnly date, TimeOnly checkIn, TimeOnly checkOut, TimeOnly shiftStart, TimeOnly shiftEnd) =>
+        date.ToDateTime(checkOut).AddDays(shiftEnd < shiftStart
+            && (checkOut < checkIn || CheckInAt(date, checkIn, shiftStart, shiftEnd).Date > date.ToDateTime(TimeOnly.MinValue)) ? 1 : 0);
 
     public static TimeSpan ShiftDuration(TimeOnly start, TimeOnly end) =>
         end > start ? end - start : TimeSpan.FromDays(1) - (start - end);
@@ -45,7 +63,7 @@ public static class AttendanceRules
         IsHoliday(date) ? "Holiday" : approvedLeave ? "Leave" : "Absent";
 
     public static string StatusFor(DateTime? checkIn, DateOnly date, bool approvedLeave = false, TimeOnly? startTime = null) =>
-        checkIn.HasValue ? (!IsWeeklyOff(date) && IsLateArrival(checkIn.Value, date, startTime ?? new TimeOnly(9, 30)) ? "Late" : "Present") : NoPunchStatus(date, approvedLeave);
+        checkIn.HasValue ? (!IsWeeklyOff(date) && IsLateArrival(checkIn.Value, date, startTime ?? new TimeOnly(9, 45)) ? "Late" : "Present") : NoPunchStatus(date, approvedLeave);
 
     public static (string Status, string Remark, bool IsLate, TimeSpan Hours) EvaluateDay(
         DateTime? checkIn, DateTime? checkOut, DateOnly date, DateOnly today, TimeOnly startTime)
@@ -60,7 +78,7 @@ public static class AttendanceRules
     public static string FormatHours(TimeSpan hours) => $"{(int)hours.TotalHours}h {hours.Minutes:D2}m";
 
     public static TimeSpan CalculateOvertime(TimeSpan workingHours) =>
-        CalculateOvertime(workingHours, true, new TimeOnly(9, 30), new TimeOnly(18, 30));
+        CalculateOvertime(workingHours, true, new TimeOnly(9, 45), new TimeOnly(18, 30));
 
     public static TimeSpan CalculateOvertime(TimeSpan workingHours, bool enabled, TimeOnly start, TimeOnly end) =>
         enabled && workingHours > ShiftDuration(start, end) ? workingHours - ShiftDuration(start, end) : TimeSpan.Zero;

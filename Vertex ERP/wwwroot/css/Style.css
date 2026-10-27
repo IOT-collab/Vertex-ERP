@@ -9,7 +9,7 @@
 
 html {
     font-size: 14px;
-    background: #07111f;
+    background: var(--erp-bg, #07111f);
     width: 100%;
     height: 100%;
     min-height: 100%;
@@ -24,8 +24,8 @@ body {
     background:
         radial-gradient(circle at 16% 0%, rgba(59, 130, 246, .22), transparent 30%),
         radial-gradient(circle at 92% 10%, rgba(139, 92, 246, .16), transparent 26%),
-        linear-gradient(135deg, #07111f 0%, #0b1424 52%, #111827 100%);
-    color: #ffffff;
+        linear-gradient(135deg, var(--erp-bg, #07111f) 0%, var(--erp-surface, #0b1424) 52%, var(--erp-surface, #111827) 100%);
+    color: var(--erp-text, #ffffff);
 }
 
 .layout {
@@ -55,9 +55,9 @@ body {
     display: flex;
     flex-direction: column;
     z-index: 100;
-    color: #ffffff;
-    background: linear-gradient(180deg, rgba(15, 23, 42, .9), rgba(7, 17, 31, .88));
-    border-right: 1px solid rgba(255, 255, 255, .1);
+    color: var(--erp-text, #ffffff);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--erp-surface, rgba(15, 23, 42, .9)) 90%, transparent), color-mix(in srgb, var(--erp-bg, rgba(7, 17, 31, .88)) 88%, transparent));
+    border-right: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent);
     box-shadow: 18px 0 44px rgba(0, 0, 0, .22), inset -1px 0 0 rgba(255, 255, 255, .04);
     backdrop-filter: blur(22px) saturate(140%);
     -webkit-backdrop-filter: blur(22px) saturate(140%);
@@ -72,11 +72,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid rgba(255, 255, 255, .09);
+    border-bottom: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .09)) 9%, transparent);
 }
 
 .logo h2 {
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
     font-size: 18px;
     font-weight: 800;
     letter-spacing: 0;
@@ -84,14 +84,14 @@ body {
 
 .sidebar-close-btn {
     display: flex;
-    color: #a8b3cf;
+    color: var(--erp-text-muted, #a8b3cf);
     font-size: 26px;
     line-height: 1;
     cursor: pointer;
 }
 
 .sidebar-close-btn:hover {
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
 }
 
 .sidebar-menu {
@@ -109,7 +109,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    color: #f8fafc;
+    color: var(--erp-text, #f8fafc);
     text-decoration: none;
 }
 
@@ -121,13 +121,13 @@ body {
 .erp-logo-link i,
 .topbar-brand i {
     width: 22px;
-    color: #60a5fa;
+    color: var(--erp-primary, #60a5fa);
     text-align: center;
 }
 
 .erp-logo-link:hover,
 .topbar-brand:hover {
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
 }
 
 .sidebar-menu a {
@@ -139,7 +139,7 @@ body {
 .sidebar-menu a i {
     width: 21px;
     flex: 0 0 21px;
-    color: #93c5fd;
+    color: var(--erp-primary, #93c5fd);
     font-size: 16px;
     text-align: center;
 }
@@ -151,11 +151,11 @@ body {
 .sidebar-menu .manager-self-label {
     margin: 17px 14px 7px;
     padding-top: 13px;
-    border-top: 1px solid rgba(255, 255, 255, .09);
+    border-top: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .09)) 9%, transparent);
 }
 
 .sidebar-menu .manager-self-label span {
-    color: #7182a2;
+    color: var(--erp-text-muted, #7182a2);
     font-size: 9px;
     font-weight: 800;
     letter-spacing: 1.25px;
@@ -168,7 +168,7 @@ body {
     padding: 11px 14px;
     border: 1px solid transparent;
     border-radius: 14px;
-    color: #c9d3e8;
+    color: var(--erp-text, #c9d3e8);
     text-decoration: none;
     font-size: 13.5px;
     font-weight: 700;
@@ -177,7 +177,7 @@ body {
 
 .sidebar-menu li a:hover {
     transform: translateX(2px);
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
     border-color: rgba(59, 130, 246, .24);
     background: rgba(59, 130, 246, .14);
     box-shadow: 0 12px 28px rgba(59, 130, 246, .12);
@@ -202,8 +202,8 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 30px;
-    background: rgba(7, 17, 31, .76);
-    border-bottom: 1px solid rgba(255, 255, 255, .1);
+    background: color-mix(in srgb, var(--erp-bg, rgba(7, 17, 31, .76)) 76%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent);
     box-shadow: 0 12px 36px rgba(0, 0, 0, .18);
     backdrop-filter: blur(18px) saturate(140%);
     -webkit-backdrop-filter: blur(18px) saturate(140%);
@@ -216,7 +216,7 @@ body {
 }
 
 .topbar-brand {
-    color: #ffffff;
+    color: var(--erp-text, #ffffff);
     font-size: 16px;
     font-weight: 800;
 }
@@ -235,7 +235,7 @@ body {
     width: 100%;
     height: 2px;
     border-radius: 2px;
-    background-color: #d7def2;
+    background-color: var(--erp-surface-soft, #d7def2);
     transition: all .2s ease;
 }
 
@@ -250,10 +250,10 @@ body {
     align-items: center;
     min-height: 38px;
     padding: 8px 13px;
-    border: 1px solid rgba(255, 255, 255, .12);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .12)) 12%, transparent);
     border-radius: 999px;
-    background: rgba(255, 255, 255, .06);
-    color: #d7def2;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .06)) 6%, transparent);
+    color: var(--erp-text, #d7def2);
     font-size: 13px;
     font-weight: 700;
 }
@@ -267,7 +267,7 @@ body {
     border: 1px solid rgba(248, 113, 113, .28);
     border-radius: 999px;
     background: rgba(239, 68, 68, .12);
-    color: #fecaca;
+    color: var(--erp-danger, #fecaca);
     font-size: 13px;
     font-weight: 800;
     text-decoration: none;
@@ -277,7 +277,7 @@ body {
 .logout-btn:hover {
     background: rgba(239, 68, 68, .22);
     border-color: rgba(248, 113, 113, .48);
-    color: #ffffff;
+    color: var(--theme-accent-text, #ffffff);
 }
 
 .page-content {
@@ -289,8 +289,8 @@ body {
     min-height: 0;
     -webkit-overflow-scrolling: touch;
     background:
-        linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, .025) 1px, transparent 1px),
+        linear-gradient(color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .025)) 2.5%, transparent) 1px, transparent 1px),
+        linear-gradient(90deg, color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .025)) 2.5%, transparent) 1px, transparent 1px),
         transparent;
     background-size: 54px 54px;
 }

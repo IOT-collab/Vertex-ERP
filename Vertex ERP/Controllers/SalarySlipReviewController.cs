@@ -102,7 +102,7 @@ public sealed class SalarySlipReviewController(ApplicationDbContext db) : Contro
             .SingleOrDefaultAsync(s => s.EmployeeId == employeeId && s.IsActive && s.Employee.IsActive);
         if (salary == null) return null;
         var start = new DateOnly(year, month, 1); var end = start.AddMonths(1).AddDays(-1);
-        var leaves = await db.LeaveRequests.AsNoTracking().Where(l => l.EmployeeId == employeeId && l.Status == "Approved" && l.FromDate <= end && l.ToDate >= start).ToListAsync();
+        var leaves = await db.LeaveRequests.AsNoTracking().Where(l => l.EmployeeId == employeeId && !l.IsExtraFacility && l.Status == "Approved" && l.FromDate <= end && l.ToDate >= start).ToListAsync();
         return new GeneratedSalarySlip { EmployeeId = employeeId, Employee = salary.Employee, Year = year, Month = month,
             BasicSalary = salary.BasicSalary, HouseRentAllowance = salary.HouseRentAllowance,
             ConveyanceAllowance = salary.ConveyanceAllowance, SpecialAllowance = salary.SpecialAllowance,

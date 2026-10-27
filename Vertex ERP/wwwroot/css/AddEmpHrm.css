@@ -22,13 +22,13 @@
     }
 
 .page-header h2 {
-    color: #1e3a5f;
+    color: var(--erp-text-muted, #1e3a5f);
     font-size: 26px;
     font-weight: 700;
 }
 
 .page-header p {
-    color: #64748b;
+    color: var(--erp-text-muted, #64748b);
     margin-top: 6px;
     font-size: 14px;
     line-height: 1.5;
@@ -38,9 +38,9 @@
    Master Form Sheet Card Wrapper
    ========================================================================== */
 .form-container-wrapper {
-    background: #fff;
+    background: var(--erp-surface, #fff);
     border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--erp-border, #e2e8f0);
     box-shadow: 0 4px 12px rgba(0, 0, 0, .03);
     margin-top: 25px;
     padding: 30px;
@@ -62,7 +62,7 @@
 
 /* Structural Field Group Section Dividers */
 .section-divider {
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--erp-border, #e2e8f0);
     padding-bottom: 6px;
     margin-top: 10px;
 }
@@ -96,7 +96,7 @@
     .form-group label {
         font-size: 13.5px;
         font-weight: 600;
-        color: #334155;
+        color: var(--erp-text, #334155);
     }
 
     .form-group input[type="text"],
@@ -108,12 +108,12 @@
     .form-group select {
         width: 100%;
         padding: 11px 14px;
-        border: 1px solid #cbd5e1;
+        border: 1px solid var(--erp-border, #cbd5e1);
         border-radius: 8px;
         font-size: 14px;
         outline: none;
-        background-color: #fff;
-        color: #1e293b;
+        background-color: var(--erp-surface, #fff);
+        color: var(--erp-text, #1e293b);
         transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
@@ -127,8 +127,8 @@
    Right Administration Sidebar Configuration Panel Cards
    ========================================================================== */
 .config-card {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--erp-surface, #f8fafc);
+    border: 1px solid var(--erp-border, #e2e8f0);
     border-radius: 10px;
     padding: 20px;
     display: flex;
@@ -138,7 +138,7 @@
 
     .config-card h3 {
         font-size: 14px;
-        color: #1e3a5f;
+        color: var(--erp-text-muted, #1e3a5f);
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -159,7 +159,7 @@
     cursor: pointer;
     font-size: 13.5px;
     font-weight: 500;
-    color: #475569;
+    color: var(--erp-text-muted, #475569);
     user-select: none;
 }
 
@@ -177,8 +177,8 @@
     left: 0;
     height: 18px;
     width: 18px;
-    background-color: #fff;
-    border: 1px solid #cbd5e1;
+    background-color: var(--erp-surface, #fff);
+    border: 1px solid var(--erp-border, #cbd5e1);
     border-radius: 4px;
 }
 
@@ -213,7 +213,7 @@
 
 /* Alert Notification Matrix Box Elements */
 .info-alert-box {
-    background: #eff6ff;
+    background: var(--erp-surface-soft, #eff6ff);
     border-left: 4px solid #2563eb;
     border-radius: 6px;
     padding: 14px;
@@ -241,7 +241,7 @@
     gap: 12px;
     margin-top: 30px;
     padding-top: 20px;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--erp-border, #e2e8f0);
 }
 
 .btn-cancel,
@@ -267,27 +267,27 @@
 }
 
 .validation-summary {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
+    background: var(--erp-surface, #fef2f2);
+    border: 1px solid var(--erp-border, #fecaca);
     border-radius: 8px;
     margin-bottom: 20px;
     padding: 12px 14px;
 }
 
 .btn-cancel {
-    background: #fff;
-    color: #64748b;
-    border: 1px solid #cbd5e1;
+    background: var(--erp-surface, #fff);
+    color: var(--erp-text-muted, #64748b);
+    border: 1px solid var(--erp-border, #cbd5e1);
 }
 
     .btn-cancel:hover {
-        background: #f8fafc;
-        color: #334155;
+        background: var(--erp-surface, #f8fafc);
+        color: var(--erp-text, #334155);
     }
 
 .btn-submit {
-    background: #2563eb;
-    color: #fff;
+    background: var(--erp-primary, var(--erp-primary, #2563eb));
+    color: var(--theme-accent-text, #fff);
     border: none;
 }
 
@@ -374,18 +374,18 @@
     border-radius: 10px;
     font-weight: 600;
 }
-.employee-biometric-notice.success { color: #bbf7d0; background: rgba(22, 101, 52, .28); border: 1px solid rgba(74, 222, 128, .35); }
-.employee-biometric-notice.error { color: #fecaca; background: rgba(153, 27, 27, .24); border: 1px solid rgba(248, 113, 113, .35); }
+.employee-biometric-notice.success { color: var(--erp-success, #bbf7d0); background: color-mix(in srgb, var(--erp-surface-soft, rgba(22, 101, 52, .28)) 28%, transparent); border: 1px solid rgba(74, 222, 128, .35); }
+.employee-biometric-notice.error { color: var(--erp-danger, #fecaca); background: rgba(153, 27, 27, .24); border: 1px solid rgba(248, 113, 113, .35); }
 .employee-biometric-editor { margin-bottom: 18px; }
-.employee-biometric-editor > p { color: #cbd5e1; line-height: 1.55; }
+.employee-biometric-editor > p { color: var(--erp-text, #cbd5e1); line-height: 1.55; }
 .employee-biometric-batch-form { display: grid; gap: 16px; }
 .employee-biometric-scroll {
     max-height: 370px;
     overflow-y: auto;
     overscroll-behavior: contain;
-    border: 1px solid rgba(148, 163, 184, .23);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(148, 163, 184, .23)) 23%, transparent);
     border-radius: 12px;
-    background: rgba(15, 23, 42, .38);
+    background: color-mix(in srgb, var(--erp-surface, rgba(15, 23, 42, .38)) 38%, transparent);
     scrollbar-color: #64748b rgba(15, 23, 42, .4);
 }
 .employee-biometric-scroll:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
@@ -395,13 +395,13 @@
     gap: 24px;
     align-items: center;
     padding: 15px 18px;
-    border-bottom: 1px solid rgba(148, 163, 184, .16);
+    border-bottom: 1px solid color-mix(in srgb, var(--erp-border, rgba(148, 163, 184, .16)) 16%, transparent);
 }
 .employee-biometric-link-row:last-child { border-bottom: 0; }
 .employee-biometric-link-details { display: flex; gap: 12px; align-items: center; min-width: 0; }
 .employee-biometric-link-details > div { display: grid; gap: 5px; }
-.employee-biometric-link-details strong { color: #f1f5f9; font-size: .96rem; }
-.employee-biometric-link-details span:not(.employee-biometric-device-icon) { color: #aebbd0; font-size: .87rem; }
+.employee-biometric-link-details strong { color: var(--erp-text, #f1f5f9); font-size: .96rem; }
+.employee-biometric-link-details span:not(.employee-biometric-device-icon) { color: var(--erp-text-muted, #aebbd0); font-size: .87rem; }
 .employee-biometric-device-icon {
     display: grid;
     place-items: center;
@@ -409,24 +409,24 @@
     width: 34px;
     height: 34px;
     border-radius: 10px;
-    color: #93c5fd;
+    color: var(--erp-primary, #93c5fd);
     background: rgba(59, 130, 246, .16);
     font-size: 14px;
 }
 .employee-biometric-link-controls { display: grid; gap: 8px; }
-.employee-biometric-link-controls > label:first-child { color: #dbe5f2; font-size: .84rem; font-weight: 600; }
+.employee-biometric-link-controls > label:first-child { color: var(--erp-text, #dbe5f2); font-size: .84rem; font-weight: 600; }
 .employee-biometric-link-controls > select {
     box-sizing: border-box;
     width: 100%;
     min-height: 42px;
     padding: 9px 12px;
-    color: #f1f5f9;
-    background: #111c30;
-    border: 1px solid #34445e;
+    color: var(--erp-text, #f1f5f9);
+    background: var(--erp-surface, #111c30);
+    border: 1px solid var(--erp-border, #34445e);
     border-radius: 8px;
 }
 .employee-biometric-link-controls > select:focus { border-color: #60a5fa; outline: 2px solid rgba(96, 165, 250, .2); }
-.employee-biometric-confirm { display: flex; gap: 8px; align-items: center; color: #aebbd0; font-size: .82rem; }
+.employee-biometric-confirm { display: flex; gap: 8px; align-items: center; color: var(--erp-text-muted, #aebbd0); font-size: .82rem; }
 .employee-biometric-confirm input { accent-color: #3b82f6; }
 .employee-biometric-actions {
     display: flex;
@@ -435,7 +435,7 @@
     gap: 16px;
     padding-top: 2px;
 }
-.employee-biometric-actions > span { color: #aebbd0; font-size: .86rem; }
+.employee-biometric-actions > span { color: var(--erp-text-muted, #aebbd0); font-size: .86rem; }
 .employee-biometric-actions .btn-submit { width: auto; min-width: 205px; }
 @media (max-width: 768px) {
     .employee-biometric-link-row { grid-template-columns: 1fr; gap: 12px; padding: 14px; }

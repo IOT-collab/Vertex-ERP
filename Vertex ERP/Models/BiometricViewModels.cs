@@ -72,13 +72,14 @@ public class DailyAttendanceViewModel
     public TimeOnly? CheckOut { get; init; }
     public TimeSpan WorkingHours { get; init; }
     public bool OvertimeEnabled { get; init; }
-    public TimeOnly ShiftStartTime { get; init; } = new(9, 30);
+    public TimeOnly ShiftStartTime { get; init; } = new(9, 45);
     public TimeOnly ShiftEndTime { get; init; } = new(18, 30);
     public TimeSpan Overtime => VertexERP.Services.AttendanceRules.CalculateOvertime(WorkingHours, OvertimeEnabled, ShiftStartTime, ShiftEndTime);
     public string OvertimeDisplay => CheckIn.HasValue && CheckOut.HasValue
         ? VertexERP.Services.AttendanceRules.FormatHours(Overtime) : "—";
     public string SiteCheckIns { get; init; } = string.Empty;
     public string SiteCheckOuts { get; init; } = string.Empty;
+    public TimeSpan LateBy => IsLate && CheckIn.HasValue ? VertexERP.Services.AttendanceRules.LateDuration(VertexERP.Services.AttendanceRules.CheckInAt(Date, CheckIn.Value, ShiftStartTime, ShiftEndTime), Date, ShiftStartTime) : TimeSpan.Zero;
     public bool IsLate { get; init; }
     public string Remark { get; init; } = string.Empty;
     public string TotalHoursDisplay => CheckIn.HasValue && CheckOut.HasValue
@@ -89,9 +90,10 @@ public class DailyAttendanceViewModel
 
 public sealed class ManualAttendanceViewModel
 {
+    public string ModificationMode { get; set; } = "Both";
     public string? Department { get; set; }
     public int? EmployeeId { get; set; }
-    public DateOnly AttendanceDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    public DateOnly AttendanceDate { get; set; } = DateOnly.FromDateTime(VertexERP.Services.FieldAttendanceClock.Now);
     public TimeOnly? CheckInTime { get; set; }
     public TimeOnly? CheckOutTime { get; set; }
     public string? Remarks { get; set; }

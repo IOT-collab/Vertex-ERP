@@ -9,6 +9,7 @@ public class DashboardViewModel
     public int LateToday { get; init; }
     public int OnLeaveToday { get; init; }
     public int AbsentToday { get; init; }
+    public IReadOnlyDictionary<string, DashboardCategoryCount> AttendanceCategories { get; init; } = new Dictionary<string, DashboardCategoryCount>();
     public int OpenTasks { get; init; }
     public int OverdueTasks { get; init; }
     public int CompletedTasks { get; init; }
@@ -47,3 +48,5 @@ public sealed class HrmsDashboardViewModel
     public int OnLeaveToday { get; init; }
     public int AbsentToday { get; init; }
 }
+
+public sealed record DashboardCategoryCount(int BlueCollar, int WhiteCollar, int Unassigned);

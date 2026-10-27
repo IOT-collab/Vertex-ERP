@@ -49,13 +49,37 @@ namespace VertexERP.Data
             ChangeTracker.DetectChanges();
             var renamedDepartments = ChangeTracker.Entries<Department>()
                 .Where(entry => entry.State == EntityState.Modified && entry.Property(x => x.DepartmentName).IsModified)
-                .Select(entry => entry.Entity).ToList();
-            foreach (var department in renamedDepartments)
+                .Select(entry => new { Department = entry.Entity, PreviousName = entry.Property(x => x.DepartmentName).OriginalValue }).ToList();
+            foreach (var renamed in renamedDepartments)
             {
-                var query = Employees.Where(employee => employee.DepartmentId == department.Id);
+                var department = renamed.Department;
+                var previousName = renamed.PreviousName;
+                var query = Employees.Where(employee => employee.DepartmentId == department.Id
+                    || (employee.DepartmentId == null && employee.Department == previousName));
                 var employees = asyncQueries ? await query.ToListAsync(cancellationToken) : query.ToList();
-                foreach (var employee in employees.Where(employee => employee.DepartmentId == department.Id))
+                foreach (var employee in employees.Where(employee => employee.DepartmentId == department.Id
+                    || (employee.DepartmentId == null && employee.Department == previousName)))
+                {
+                    employee.DepartmentId = department.Id;
                     employee.Department = department.DepartmentName;
+                }
+            }
+            ChangeTracker.DetectChanges();
+            var assignedEmployees = ChangeTracker.Entries<Employee>()
+                .Where(entry => (entry.State == EntityState.Added || entry.State == EntityState.Modified)
+                    && entry.Entity.DepartmentId.HasValue
+                    && (entry.State == EntityState.Added || entry.Property(x => x.DepartmentId).IsModified || entry.Property(x => x.Department).IsModified))
+                .Select(entry => entry.Entity).ToList();
+            var departmentIds = assignedEmployees.Select(employee => employee.DepartmentId!.Value).Distinct().ToList();
+            if (departmentIds.Count > 0)
+            {
+                var departmentQuery = Departments.Where(department => departmentIds.Contains(department.Id));
+                var masters = asyncQueries ? await departmentQuery.ToListAsync(cancellationToken) : departmentQuery.ToList();
+                foreach (var employee in assignedEmployees)
+                {
+                    var master = masters.FirstOrDefault(department => department.Id == employee.DepartmentId);
+                    if (master != null) employee.Department = master.DepartmentName;
+                }
             }
             var renamedEmployees = ChangeTracker.Entries<Employee>()
                 .Where(entry => entry.State == EntityState.Modified && entry.Property(x => x.FullName).IsModified)
@@ -179,6 +203,8 @@ modelBuilder.Entity<EmployeeLeaveBalance>(entity =>
                 entity.HasIndex(x => new { x.EmployeeId, x.Year }).IsUnique();
                 entity.Property(x => x.OpeningEL).HasPrecision(10, 2);
                 entity.Property(x => x.OpeningEW).HasPrecision(10, 2);
+                entity.Property(x => x.OpeningCL).HasPrecision(10, 2);
+                entity.Property(x => x.OpeningML).HasPrecision(10, 2);
                 entity.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade);
             });
             modelBuilder.Entity<EmployeeAsset>(entity =>
@@ -202,7 +228,7 @@ modelBuilder.Entity<EmployeeLeaveBalance>(entity =>
 
             modelBuilder.Entity<Employee>(entity =>
             {
-                entity.ToTable("Employees");
+                entity.ToTable("Employees", table => table.HasCheckConstraint("CK_Employees_EmployeeCategory", "\"EmployeeCategory\" IS NULL OR \"EmployeeCategory\" IN ('Blue Collar', 'White Collar')"));
                 entity.HasIndex(employee => employee.EmployeeCode).IsUnique();
                 entity.HasIndex(employee => employee.Email).IsUnique();
                 entity.HasIndex(employee => employee.PhoneNumber).IsUnique();
@@ -230,6 +256,12 @@ modelBuilder.Entity<EmployeeLeaveBalance>(entity =>
                 entity.ToTable("ExpenseClaims");
                 entity.HasIndex(claim => new { claim.EmployeeId, claim.SubmittedAtUtc });
                 entity.HasIndex(claim => new { claim.ReportingManagerId, claim.Status });
+                entity.HasIndex(claim => new { claim.WorkflowStage, claim.ForwardedToEmployeeId });
+                entity.HasOne(claim => claim.ForwardedToEmployee).WithMany().HasForeignKey(claim => claim.ForwardedToEmployeeId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<AppUser>().WithMany().HasForeignKey(claim => claim.ManagerDecidedByUserId).OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne<AppUser>().WithMany().HasForeignKey(claim => claim.ForwardedByUserId).OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne<AppUser>().WithMany().HasForeignKey(claim => claim.RecipientRespondedByUserId).OnDelete(DeleteBehavior.SetNull);
+
                 entity.Property(claim => claim.Amount).HasPrecision(18, 2);
                 entity.Property(claim => claim.RequiresHrApproval).HasDefaultValue(false);
                 entity.Property(claim => claim.SubmittedAtUtc).HasDefaultValueSql("CURRENT_TIMESTAMP");
