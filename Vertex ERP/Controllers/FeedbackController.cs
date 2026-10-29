@@ -12,12 +12,15 @@ namespace Vertex_ERP.Controllers;
 public sealed class FeedbackController(ApplicationDbContext db) : Controller
 {
     [HttpGet]
-    public IActionResult Index() => View(new FeedbackForm());
+    public IActionResult Index() => RedirectToAction("Index", "FeedbackDocuments");
+
+    [HttpGet]
+    public IActionResult Message() => View(new FeedbackForm());
 
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Index(FeedbackForm form, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid) return View(form);
+        if (!ModelState.IsValid) return View("Message", form);
         if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return Forbid();
         var user = await db.AppUsers.AsNoTracking().Include(x => x.Employee)
             .SingleOrDefaultAsync(x => x.Id == userId && x.IsActive, cancellationToken);
@@ -30,11 +33,14 @@ public sealed class FeedbackController(ApplicationDbContext db) : Controller
         });
         await db.SaveChangesAsync(cancellationToken);
         TempData["FeedbackMessage"] = "Your feedback has been submitted to HR and Admin.";
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(Message));
     }
 
     [HttpGet, Authorize(Roles = "HR,Admin")]
-    public async Task<IActionResult> Inbox(string? search, int page = 1, CancellationToken cancellationToken = default)
+    public IActionResult Inbox() => RedirectToAction("Responses", "FeedbackDocuments");
+
+    [HttpGet, Authorize(Roles = "HR,Admin")]
+    public async Task<IActionResult> MessageInbox(string? search, int page = 1, CancellationToken cancellationToken = default)
     {
         search = search?.Trim();
         if (search?.Length > 150) return BadRequest();

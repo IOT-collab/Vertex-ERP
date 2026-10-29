@@ -76,15 +76,6 @@
 
             </button>
 
-            <!-- Notifications -->
-            <button class="btn-icon-bell"
-                    type="button"
-                    title="Notifications">
-
-                <i class="fa-solid fa-bell" aria-hidden="true"></i>
-                <span class="dot"></span>
-
-            </button>
 
             <!-- User Avatar -->
             <div class="user-avatar"
@@ -103,7 +94,7 @@
          KPI CARDS
     ========================== -->
 
-    <section class="card-row">
+    <section class="card-row" data-attendance-auto-refresh>
 
         <!-- Present Today -->
         <a class="dashboard-card dashboard-card-link status-blue" href="@Url.Action("DashboardAttendance", "Main", new { status = "Present" })" aria-label="Show employees present today">

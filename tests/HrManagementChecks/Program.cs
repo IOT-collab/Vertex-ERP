@@ -7,6 +7,36 @@ using VertexERP.Services;
 using VertexERP.Controllers;
 using Vertex_ERP.Controllers;
 
+if (args.Length == 1 && args[0] == "--site-location-cards")
+{
+    await SiteLocationCardChecks.Run();
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--employee-documents")
+{
+    await EmployeeDocumentActionChecks.Run();
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--hr-leave")
+{
+    await HrLeaveChecks.Run();
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--notifications")
+{
+    await NotificationInboxChecks.Run();
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--feedback-documents")
+{
+    await FeedbackDocumentChecks.Run();
+    return;
+}
+
 if (args.Length == 1 && args[0] == "--expense-workflow")
 {
     await ExpenseWorkflowChecks.Run();

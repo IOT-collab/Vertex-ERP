@@ -225,7 +225,7 @@ namespace Vertex_ERP.Controllers
             if (employeeId.HasValue)
             {
                 model.Employee = await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(employee => employee.Id == employeeId.Value);
-                if (model.Employee == null) return NotFound();
+                if (model.Employee == null) { TempData["DocumentError"]="This employee is no longer available. Select another employee."; return RedirectToAction(nameof(EmpDocuments)); }
                 model.Documents = await _dbContext.EmployeeDocuments.AsNoTracking()
                     .Where(document => document.EmployeeId == employeeId.Value)
                     .OrderByDescending(document => document.UploadedAtUtc).ToListAsync();
@@ -583,106 +583,106 @@ namespace Vertex_ERP.Controllers
             await PopulateUploadEmployeesAsync(model); return View(model);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> UpdateDocument(int id)
+        private IActionResult DocumentUnavailable(int? employeeId,string message)
         {
-            var document = await _dbContext.EmployeeDocuments.AsNoTracking().FirstOrDefaultAsync(item => item.Id == id);
-            if (document == null) return NotFound();
-            var model = new EmployeeDocumentUploadViewModel
-            {
-                DocumentId = document.Id, EmployeeId = document.EmployeeId, DocumentType = document.DocumentType,
-                DocumentName = document.DocumentName, Notes = document.Notes, CurrentFileName = document.OriginalFileName
-            };
-            await PopulateUploadEmployeesAsync(model);
-            return View("UploadDocument", model);
+            TempData["DocumentError"]=message;
+            return RedirectToAction(nameof(EmpDocuments),new{employeeId});
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [RequestSizeLimit(16 * 1024 * 1024)]
+        [HttpGet]
+        public async Task<IActionResult> UpdateDocument(int id,int? employeeId=null)
+        {
+            if(id<=0)return DocumentUnavailable(employeeId,"This document is no longer available. The list has been refreshed.");
+            var document=await _dbContext.EmployeeDocuments.AsNoTracking().FirstOrDefaultAsync(x=>x.Id==id);
+            if(document==null)return DocumentUnavailable(employeeId,"This document was removed or is no longer available.");
+            var model=new EmployeeDocumentUploadViewModel { DocumentId=document.Id,EmployeeId=document.EmployeeId,DocumentType=document.DocumentType,
+                DocumentName=document.DocumentName,Notes=document.Notes,CurrentFileName=document.OriginalFileName,CurrentFileMissing=!new EmployeeDocumentStorage(_environment).Exists(document.StoredFileName) };
+            await PopulateUploadEmployeesAsync(model);return View("UploadDocument",model);
+        }
+
+        [HttpPost,ValidateAntiForgeryToken,RequestSizeLimit(16*1024*1024)]
         public async Task<IActionResult> UploadDocument(EmployeeDocumentUploadViewModel model)
         {
-            var document = model.DocumentId.HasValue
-                ? await _dbContext.EmployeeDocuments.FirstOrDefaultAsync(item => item.Id == model.DocumentId.Value) : null;
-            if (model.DocumentId.HasValue && document == null) return NotFound();
-            if (document != null && document.EmployeeId != model.EmployeeId) return BadRequest();
-            model.CurrentFileName = document?.OriginalFileName;
-            if (!EmployeeDocumentUploadViewModel.DocumentTypes.Contains(model.DocumentType)) ModelState.AddModelError(nameof(model.DocumentType), "Select a valid document type.");
-            var employee = model.EmployeeId.HasValue ? await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(item => item.Id == model.EmployeeId.Value) : null;
-            if (employee == null) ModelState.AddModelError(nameof(model.EmployeeId), "Select a valid employee.");
-            if ((document == null && model.File == null) || model.File?.Length == 0) ModelState.AddModelError(nameof(model.File), "Choose a non-empty file.");
-            var extension = model.File == null ? string.Empty : Path.GetExtension(model.File.FileName).ToLowerInvariant();
-            if (model.File != null && !new[] { ".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx" }.Contains(extension)) ModelState.AddModelError(nameof(model.File), "Allowed formats: PDF, JPG, PNG, DOC and DOCX.");
-            if (!ModelState.IsValid) { await PopulateUploadEmployeesAsync(model); return View(model); }
-
-            var updating = document != null;
-            var oldStoredName = document?.StoredFileName;
-            var directory = Path.Combine(_environment.ContentRootPath, "App_Data", "EmployeeDocuments");
-            string? targetPath = null;
-            document ??= new EmployeeDocument { EmployeeId = employee!.Id };
-            try
-            {
-                if (model.File != null)
-                {
-                    Directory.CreateDirectory(directory);
-                    var storedName = $"{Guid.NewGuid():N}{extension}";
-                    targetPath = Path.Combine(directory, storedName);
-                    await using (var target = new FileStream(targetPath, FileMode.CreateNew)) await model.File.CopyToAsync(target);
-                    document.StoredFileName = storedName;
-                    document.OriginalFileName = Path.GetFileName(model.File.FileName);
-                    document.ContentType = extension switch { ".pdf" => "application/pdf", ".jpg" or ".jpeg" => "image/jpeg", ".png" => "image/png", ".doc" => "application/msword", ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document", _ => "application/octet-stream" };
-                    document.FileSize = model.File.Length;
-                    document.UploadedBy = User.Identity?.Name ?? "HR";
-                    document.UploadedAtUtc = DateTime.UtcNow;
+            var document=model.DocumentId.HasValue?await _dbContext.EmployeeDocuments.FirstOrDefaultAsync(x=>x.Id==model.DocumentId.Value):null;
+            if(model.DocumentId.HasValue && document==null)return DocumentUnavailable(model.EmployeeId,"This document was removed. Refresh the list before uploading again.");
+            if(document!=null && document.EmployeeId!=model.EmployeeId) {
+                TempData["DocumentError"]="The employee cannot be changed while updating an existing document.";
+                return RedirectToAction(nameof(UpdateDocument),new{id=document.Id});
+            }
+            var storage=new EmployeeDocumentStorage(_environment);
+            model.CurrentFileName=document?.OriginalFileName;
+            model.CurrentFileMissing=document!=null && !storage.Exists(document.StoredFileName);
+            if(!EmployeeDocumentUploadViewModel.DocumentTypes.Contains(model.DocumentType))ModelState.AddModelError(nameof(model.DocumentType),"Select a valid document type.");
+            var employee=model.EmployeeId.HasValue?await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x=>x.Id==model.EmployeeId.Value):null;
+            if(employee==null)ModelState.AddModelError(nameof(model.EmployeeId),"Select a valid employee.");
+            if(document==null && model.File==null)ModelState.AddModelError(nameof(model.File),"Choose a file.");
+            if(model.CurrentFileMissing && model.File==null)ModelState.AddModelError(nameof(model.File),"The stored file is missing. Upload a replacement file to restore this document.");
+            if(model.File!=null) {
+                try { var error=await EmployeeDocumentStorage.ValidateAsync(model.File);if(error!=null)ModelState.AddModelError(nameof(model.File),error); }
+                catch(Exception exception) when(exception is IOException or InvalidDataException or UnauthorizedAccessException) { _logger.LogWarning(exception,"Cannot read employee document upload");ModelState.AddModelError(nameof(model.File),"The selected file could not be read. Choose it again."); }
+            }
+            await PopulateUploadEmployeesAsync(model);
+            if(!ModelState.IsValid)return View("UploadDocument",model);
+            var updating=document!=null;
+            var oldStoredName=document?.StoredFileName;
+            string? savedName=null;
+            document??=new EmployeeDocument{EmployeeId=employee!.Id};
+            try {
+                if(model.File!=null) {
+                    savedName=await storage.SaveAsync(model.File,HttpContext.RequestAborted);
+                    document.StoredFileName=savedName;
+                    document.OriginalFileName=EmployeeDocumentStorage.OriginalName(model.File.FileName);
+                    document.ContentType=EmployeeDocumentStorage.ContentType(document.OriginalFileName);
+                    document.FileSize=model.File.Length;
+                    document.UploadedBy=User.Identity?.Name??"HR";
+                    document.UploadedAtUtc=DateTime.UtcNow;
                 }
-                document.DocumentType = model.DocumentType;
-                document.DocumentName = model.DocumentName.Trim();
-                document.Notes = string.IsNullOrWhiteSpace(model.Notes) ? null : model.Notes.Trim();
-                if (!updating) _dbContext.EmployeeDocuments.Add(document);
+                document.DocumentType=model.DocumentType;document.DocumentName=model.DocumentName.Trim();document.Notes=string.IsNullOrWhiteSpace(model.Notes)?null:model.Notes.Trim();
+                if(!updating)_dbContext.EmployeeDocuments.Add(document);
                 await _dbContext.SaveChangesAsync();
             }
-            catch
-            {
-                if (targetPath != null && System.IO.File.Exists(targetPath)) System.IO.File.Delete(targetPath);
-                throw;
+            catch(Exception exception) when(exception is IOException or UnauthorizedAccessException or DbUpdateException) {
+                if(!storage.TryDelete(savedName))_logger.LogWarning("Unable to clean failed upload {StoredName}",savedName);
+                _logger.LogError(exception,"Unable to save employee document {DocumentId}",model.DocumentId);
+                ModelState.AddModelError("","Document could not be saved. Your previous document is unchanged. Reload if the employee or document was changed, then retry.");
+                return View("UploadDocument",model);
             }
-            if (model.File != null && oldStoredName != null)
-            {
-                try { System.IO.File.Delete(Path.Combine(directory, Path.GetFileName(oldStoredName))); }
-                catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
-                { _logger.LogError(exception, "Unable to remove replaced file for document {DocumentId}", document.Id); }
-            }
-            TempData["DocumentMessage"] = $"{model.DocumentName} {(updating ? "updated" : "uploaded")} for {employee!.FullName}.";
-            return RedirectToAction(nameof(EmpDocuments), new { employeeId = employee.Id });
+            catch { storage.TryDelete(savedName);throw; }
+            if(savedName!=null && oldStoredName!=null && !storage.TryDelete(oldStoredName))_logger.LogWarning("Unable to remove replaced file for document {DocumentId}",document.Id);
+            TempData["DocumentMessage"]=$"{model.DocumentName} {(updating?"updated":"uploaded")} for {employee!.FullName}.";
+            return RedirectToAction(nameof(EmpDocuments),new{employeeId=employee.Id});
         }
 
         [HttpGet]
-        public async Task<IActionResult> ViewDocument(int id, bool download = false)
+        public async Task<IActionResult> ViewDocument(int id,bool download=false,int? employeeId=null)
         {
-            var document = await _dbContext.EmployeeDocuments.AsNoTracking().FirstOrDefaultAsync(item => item.Id == id); if (document == null) return NotFound();
-            var path = Path.Combine(_environment.ContentRootPath, "App_Data", "EmployeeDocuments", document.StoredFileName); if (!System.IO.File.Exists(path)) return NotFound();
-            return PhysicalFile(path, document.ContentType, download ? document.OriginalFileName : null, enableRangeProcessing: true);
+            if(id<=0)return DocumentUnavailable(employeeId,"This document is no longer available. The list has been refreshed.");
+            var document=await _dbContext.EmployeeDocuments.AsNoTracking().FirstOrDefaultAsync(x=>x.Id==id);
+            if(document==null)return DocumentUnavailable(employeeId,"This document was removed or is no longer available.");
+            try {
+                var stream=new EmployeeDocumentStorage(_environment).OpenRead(document.StoredFileName);
+                var type=EmployeeDocumentStorage.ContentType(document.OriginalFileName);
+                Response.Headers["X-Content-Type-Options"]="nosniff";
+                return File(stream,type,download || type is "application/msword" or "application/vnd.openxmlformats-officedocument.wordprocessingml.document" or "application/octet-stream"?EmployeeDocumentStorage.OriginalName(document.OriginalFileName):null,enableRangeProcessing:true);
+            }
+            catch(Exception exception) when(exception is IOException or InvalidDataException or UnauthorizedAccessException or ArgumentException) {
+                _logger.LogWarning(exception,"Cannot open employee document {DocumentId}",id);
+                return DocumentUnavailable(document.EmployeeId,"This file is not available on the server. Use Update to upload a replacement. The document record has been kept.");
+            }
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteDocument(int id)
+        [HttpPost,ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteDocument(int id,int? employeeId=null)
         {
-            var document = await _dbContext.EmployeeDocuments.FindAsync(id);
-            if (document == null) return NotFound();
-            var path = Path.Combine(_environment.ContentRootPath, "App_Data", "EmployeeDocuments", Path.GetFileName(document.StoredFileName));
+            if(id<=0)return DocumentUnavailable(employeeId,"This document is already removed or is no longer available.");
+            var document=await _dbContext.EmployeeDocuments.FindAsync(id);
+            if(document==null) { TempData["DocumentMessage"]="This document is already removed. The list has been refreshed.";return RedirectToAction(nameof(EmpDocuments),new{employeeId}); }
             _dbContext.EmployeeDocuments.Remove(document);
-            await _dbContext.SaveChangesAsync();
-            try
-            {
-                System.IO.File.Delete(path);
-            }
-            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
-            {
-                _logger.LogError(exception, "Unable to remove stored file for deleted employee document {DocumentId}", id);
-            }
-            TempData["DocumentMessage"] = "Document deleted successfully.";
-            return RedirectToAction(nameof(EmpDocuments), new { employeeId = document.EmployeeId });
+            try { await _dbContext.SaveChangesAsync(); }
+            catch(DbUpdateConcurrencyException) { TempData["DocumentMessage"]="This document was already removed. The list has been refreshed.";return RedirectToAction(nameof(EmpDocuments),new{employeeId=document.EmployeeId}); }
+            catch(DbUpdateException exception) { _logger.LogError(exception,"Cannot delete employee document {DocumentId}",id);return DocumentUnavailable(document.EmployeeId,"Document could not be deleted. The record has been kept; refresh the page and retry."); }
+            if(!new EmployeeDocumentStorage(_environment).TryDelete(document.StoredFileName))_logger.LogWarning("Unable to remove stored file for deleted document {DocumentId}",id);
+            TempData["DocumentMessage"]="Document deleted successfully.";return RedirectToAction(nameof(EmpDocuments),new{employeeId=document.EmployeeId});
         }
 
         public IActionResult Holiday()

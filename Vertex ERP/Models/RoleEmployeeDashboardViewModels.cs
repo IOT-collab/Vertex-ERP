@@ -194,10 +194,12 @@ public sealed class SiteEmployeeLocationViewModel
     public bool IsManagerView { get; init; }
 }
 
-public sealed class SiteEmployeeLocationItem
+public sealed record SiteEmployeeLocationItem
 {
+    public string? LastSiteName { get; init; }
     public string? CheckInSiteName { get; init; }
     public string? CheckOutSiteName { get; init; }
+    public string? PhotoPath { get; init; }
     public int EmployeeId { get; init; }
     public string EmployeeName { get; init; } = string.Empty;
     public string EmployeeCode { get; init; } = string.Empty;
@@ -216,5 +218,5 @@ public sealed class SiteEmployeeLocationItem
     public decimal? CheckOutLongitude { get; init; }
     public decimal? CheckOutAccuracyMetres { get; init; }
     public string? CheckOutSelfiePath { get; init; }
-    public bool IsCheckedOut => CheckOutTime.HasValue;
+    public bool IsCheckedOut => CheckOutTime.HasValue && (!LastLocationTime.HasValue || LastLocationTime <= CheckOutTime);
 }

@@ -32,5 +32,5 @@ public static class ManagerDashboardPresentation
         return new(rows.Count(IsCompleted), rows.Count(x => !IsCompleted(x) && !IsOverdue(x, today) && x.Status.Equals("In Progress", StringComparison.OrdinalIgnoreCase)),
             rows.Count(x => !IsCompleted(x) && !IsOverdue(x, today) && !x.Status.Equals("In Progress", StringComparison.OrdinalIgnoreCase)), rows.Count(x => IsOverdue(x, today)));
     }
-    public static bool AwaitingAction(LeaveRequest request, bool managerScope) => request.Status == "Pending" && request.ApprovalLevel == (managerScope ? "Manager" : "HR/Admin");
+    public static bool AwaitingAction(LeaveRequest request, bool managerScope) => request.Status == "Pending" && request.ApprovalLevel == (managerScope ? "Manager" : "HR/Admin") && (managerScope || LeaveApprovalWorkflow.HasManagerReview(request));
 }

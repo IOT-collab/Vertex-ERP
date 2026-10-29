@@ -1,0 +1,6 @@
+@model IReadOnlyList<VertexERP.Models.FeedbackDocumentAsset>
+<div class="fd-files">
+@foreach (var file in Model.OrderByDescending(x => x.Revision).ThenBy(x => x.Id)) {
+    <div class="fd-file"><i class="fa-solid @(file.ContentType == "application/pdf" ? "fa-file-pdf" : "fa-file-image")" aria-hidden="true"></i><span><strong data-no-localize>@file.OriginalFileName</strong><small>@((file.FileSize / 1024d).ToString("N0")) KB @if (file.Revision > 0) { <span>· Version @file.Revision</span> }</small></span><a asp-controller="FeedbackDocuments" asp-action="File" asp-route-id="@file.Id" target="_blank" rel="noopener">Open</a><a asp-controller="FeedbackDocuments" asp-action="File" asp-route-id="@file.Id" asp-route-download="true" aria-label="Download @file.OriginalFileName"><i class="fa-solid fa-download" aria-hidden="true"></i><span class="fd-download-text">Download</span></a></div>
+}
+</div>

@@ -22,11 +22,13 @@ public interface IAttendanceSyncService
 public interface IAttendanceProcessingService
 {
     Task<AttendancePageViewModel> GetDailyAttendanceAsync(DateOnly date, string? search, string? department, string? status, CancellationToken cancellationToken = default);
+    Task<AttendancePageViewModel> GetAttendanceReportAsync(DateOnly date, string? search, string? department, string? status, CancellationToken cancellationToken = default)
+        => GetDailyAttendanceAsync(date, search, department, status, cancellationToken);
     async Task<IReadOnlyList<DailyAttendanceViewModel>> GetAttendanceRangeAsync(DateOnly from, DateOnly to, CancellationToken cancellationToken = default)
     {
         var records = new List<DailyAttendanceViewModel>();
         for (var day = from; day <= to; day = day.AddDays(1))
-            records.AddRange((await GetDailyAttendanceAsync(day, null, null, null, cancellationToken)).Records);
+            records.AddRange((await GetAttendanceReportAsync(day, null, null, null, cancellationToken)).Records);
         return records;
     }
 

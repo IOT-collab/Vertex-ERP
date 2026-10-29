@@ -1,3 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
+using VertexERP.Data;
 using VertexERP.Models;
 using VertexERP.Services;
 
@@ -26,8 +31,21 @@ static class BackDateLeaveChecks
         Check(LeaveBalanceCalculator.Days(new[] { leave }, 2025, "Approved") == 1 && LeaveBalanceCalculator.Days(new[] { leave }, 2026, "Approved") == 1, "Back-date deductions use correct year");
         Check(!LeaveApprovalWorkflow.DecideFinal(leave, "Rejected", 3, null), "Final decision cannot be repeated");
         var rejected = new LeaveRequest();
-        Check(LeaveApprovalWorkflow.DecideManager(rejected, "Rejected", 2, "Manager", "Declined") && rejected.Status == "Rejected", "Manager rejection is final");
-        Check(!LeaveApprovalWorkflow.DecideFinal(rejected, "Approved", 3, null), "HR cannot approve manager-rejected request");
+        Check(LeaveApprovalWorkflow.DecideManager(rejected, "Rejected", 2, "Manager", "Declined") && rejected.Status == "Pending" && rejected.ApprovalLevel == "HR/Admin", "Manager rejection forwards to HR without finalizing");
+        Check(LeaveApprovalWorkflow.DecideFinal(rejected, "Rejected", 3, "Final rejection") && rejected.ManagerDecision == "Rejected", "HR finalizes rejection while preserving manager review");
+        var bypass = new LeaveRequest { ApprovalLevel="HR/Admin" };
+        Check(!LeaveApprovalWorkflow.DecideFinal(bypass,"Approved",3,null),"Legacy direct HR stage cannot bypass a missing manager decision");
+        Check(!LeaveApprovalWorkflow.CanTakeFinalAction(new LeaveRequest(),false,true),"Admin is view only for regular leave");
+        var applicant=new Employee{Id=1,ReportingManagerId=2};
+        foreach(var type in new[]{"EL","CL","ML","EW"}) {
+            var routed=new LeaveRequest{EmployeeId=1,LeaveType=type,FromDate=past,ToDate=past};
+            LeaveApprovalWorkflow.RouteToManager(routed,applicant);
+            Check(routed.ApprovalLevel=="Manager"&&routed.AssignedApproverEmployeeId==2,type+" always routes to reporting manager");
+            EmployeeRequestChanges.UpdateLeave(routed,applicant,true,type,past,past,"Updated by senior employee",false);
+            Check(routed.ApprovalLevel=="Manager"&&routed.AssignedApproverEmployeeId==2,"Senior edit cannot bypass manager for "+type);
+        }
+        Check(!LeaveApprovalWorkflow.CanRouteToManager(new Employee{Id=1}),"Missing reporting manager blocks applications");
+        Check(!LeaveApprovalWorkflow.CanRouteToManager(new Employee{Id=1,ReportingManagerId=1}),"Employee cannot be own approver");
         var hrRejected = new LeaveRequest();
         LeaveApprovalWorkflow.DecideManager(hrRejected, "Approved", 2, "Manager", null);
         Check(LeaveApprovalWorkflow.DecideFinal(hrRejected, "Rejected", 3, "Declined") && hrRejected.ManagerDecision == "Approved" && hrRejected.Status == "Rejected", "HR rejection preserves manager approval");
@@ -43,6 +61,11 @@ static class BackDateLeaveChecks
             Check(LeaveApprovalWorkflow.DecideFinal(half, finalDecision, 3, "Final review") && half.ManagerDecision == managerDecision && half.HalfDaySession == "Second", "HR final decision preserves manager decision and session");
             Check(LeaveBalanceCalculator.Days(new[] { half }, 2025, "Approved") == (finalDecision == "Approved" ? .5m : 0m), "Only HR approval deducts 0.5 day");
         }
+        foreach(var action in new[]{"DecideManagerLeave","CancelApprovedLeave"})
+            Check(typeof(VertexERP.Controllers.MainController).GetMethod(action)!.GetCustomAttributes(typeof(AuthorizeAttribute),true).Cast<AuthorizeAttribute>().Single().Roles=="HR",action+" is restricted to HR at the HTTP boundary");
+        using var db=new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>().UseNpgsql("Host=127.0.0.1;Port=1;Database=unused;Username=unused;Timeout=1").Options);
+        var sql=db.GetService<IMigrator>().GenerateScript();
+        Check(sql.Contains("UPDATE \"LeaveRequests\" AS r") && sql.Contains("r.\"Status\" = 'Pending'") && sql.Contains("r.\"ManagerDecision\" IS NULL"),"Pending unreviewed legacy requests are rerouted without reopening completed decisions");
         Console.WriteLine($"{passed} back-date leave checks passed.");
     }
 }

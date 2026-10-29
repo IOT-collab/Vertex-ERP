@@ -8,7 +8,7 @@
 <label>From Date<input type="date" name="fromDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" required /></label>
 <label>To Date<input type="date" name="toDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" required /></label>
 <label>Status<select name="status"><option value="">All Statuses</option>@foreach(var value in new[]{"Present","Late","Absent","Leave","Holiday"}){<option value="@value" selected="@(Model.StatusFilter==value)">@value</option>}</select></label>
-<label>Source<select name="source"><option value="">All Sources</option>@foreach(var value in new[]{"Biometric / Thumb","Field Attendance","Manual Approved"}){<option value="@value" selected="@(Model.SourceFilter==value)">@value</option>}</select></label>
+<label>Source<select name="source"><option value="">All Sources</option>@foreach(var value in new[]{"Punch","Field Attendance"}){<option value="@value" selected="@(Model.SourceFilter==value)">@value</option>}</select></label>
 <button class="btn btn-primary" type="submit">Apply Filters</button><a class="btn btn-secondary" asp-action="EmployeeAttendance">Reset</a>
 </form>
 <p id="attendance-refresh-status" role="status">Live · refreshes every 15 seconds</p>

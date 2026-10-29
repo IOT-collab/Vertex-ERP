@@ -1,0 +1,11 @@
+# Manager-first leave workflow
+
+All new employee/self-service applications (including Manager/HR applicants), and employee edits, require an active reporting manager with an eligible active login. Applications always start at Manager. Role alone cannot send the request directly to HR. HR on-behalf applications use the same sequence.
+
+A manager records either Approved or Rejected with actor/name/time/note. Both outcomes keep Status Pending and advance to the existing internal HR/Admin stage, displayed as HR. The final approval/rejection requires a recorded manager decision and timestamp. Only HR can finalize or cancel approved leave; Admin is view only. Actual approved leave usage and attendance continue to depend solely on final Status Approved. Pending manager rejections remain pending until HR decides them.
+
+HR's action queue and leave notifications begin after manager review. Admin can see all stages. Managers receive their assigned applications and later status updates; employees receive their own decision updates. Editing a pending employee-authored application clears previous decisions, routes it to the current reporting manager and renews the application time so the resubmission can produce a fresh notification. HR-authored requests remain protected from employee edits.
+
+Migration 20261028113951_RequireManagerFirstLeaveFlow reroutes only unreviewed Pending requests to their current active/eligible reporting manager. It does not reopen approved/rejected/cancelled requests, invent manager decisions or route employees to themselves. Rows without a valid reporting manager are not fabricated into a usable manager stage; manager assignment and resubmission are required. The data routing repair is intentionally not reversed by Down because subsequent decisions may already have been recorded. Startup applies it after deployment; no live data migration was executed during this work.
+
+Validated offline with 56 leave workflow checks, 59 facility checks, 30 HR on-behalf checks and two page renders, 17 manager dashboard checks, and 40 notification checks plus five role renders and actual local HTTP route requests. Live logged-in workflow delivery still requires deployment verification.

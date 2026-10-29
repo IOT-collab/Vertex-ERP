@@ -393,6 +393,7 @@ public class EmployeeController : Controller
 
         if (newPhotoPath != null) DeletePhotoIfPresent(previousPhotoPath);
 
+        TempData["EmployeeStatusChanged"] = true;
         TempData["EmployeeMessage"] = "Employee updated successfully.";
         return RedirectToAction(nameof(Index));
     }

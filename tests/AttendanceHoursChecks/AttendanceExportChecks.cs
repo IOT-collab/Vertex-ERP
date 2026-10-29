@@ -113,7 +113,7 @@ static class AttendanceExportChecks
         Check(!new Employee().OvertimeEnabled && !new HrAddEmployeeViewModel().OvertimeEnabled && !new EmployeeFormViewModel().OvertimeEnabled, "New and existing employee forms require explicit overtime activation");
         var savedEmployee = stub.Enrollments[0].Employee;
         stub.Enrollments[0].Employee = null;
-        Check((await service.GetDailyAttendanceAsync(day, null, null, null)).Records.Single().Overtime == TimeSpan.Zero, "Unlinked enrollment cannot receive overtime without an enabled employee");
+        Check((await service.GetDailyAttendanceAsync(day, null, null, null)).Records.Single().Overtime.TotalMinutes == 75, "Linked employee settings resolve from ERP even when navigation data is missing");
         stub.Enrollments[0].Employee = savedEmployee;
         employee.OvertimeEnabled = false;
         var noOt = (await service.GetDailyAttendanceAsync(day, null, null, null)).Records.Single();
@@ -142,31 +142,76 @@ static class AttendanceExportChecks
         var inactive = new Employee { Id = 2, EmployeeCode = "INACTIVE002", FullName = "Inactive Employee", Department = "Former Department", IsActive = false };
         var absent = new Employee { Id = 3, EmployeeCode = "E003", FullName = "Active Absent", Department = "Service" };
         stub.Employees = new[] { employee, absent };
+        stub.Enrollments[1].Employee = inactive;
+        stub.Enrollments[1].LastSeenUtc = DateTime.UtcNow;
         stub.Enrollments[2].Employee = absent;
         stub.Enrollments[2].LastSeenUtc = DateTime.UtcNow;
         stub.Logs = new[] {
             Punch(9, 0, "Check In", "Site A"),
-            new AttendanceLog { EmployeeId = inactive.Id, Employee = inactive, PunchTime = day.ToDateTime(new TimeOnly(11, 0)), PunchState = "IN" }
+            new AttendanceLog { EmployeeId = inactive.Id, Employee = inactive, DeviceUserId = "109", PunchTime = day.ToDateTime(new TimeOnly(11, 0)), PunchState = "IN" }
         };
-        var roster = await service.GetDailyAttendanceAsync(day, null, null, null);
-        Check(roster.Records.Count == 2 && roster.Records.All(r => r.EmployeeId != inactive.Id), "Inactive employee with punches is excluded from attendance");
-        Check(roster.PresentCount == 1 && roster.AbsentCount == 1 && roster.LateCount == 0, "Attendance totals exclude inactive employee punches");
-        Check(!roster.Departments.Contains("Former Department"), "Inactive department is excluded from attendance filters");
-        Check((await service.GetDailyAttendanceAsync(day, "109", null, null)).Records.Count == 0, "Inactive employee is excluded from search");
-        Check(roster.Records.Single(r => r.EmployeeId == absent.Id).EmpId == "110", "Absent employee also displays WDMS enroll code");
-        var activeCsv = (FileContentResult)await controller.ExportAttendance(null, null, day, null);
-        Check(!Encoding.UTF8.GetString(activeCsv.FileContents).Contains("Inactive WDMS Name"), "Daily export excludes inactive employee punches");
+        var history = await service.GetDailyAttendanceAsync(day, null, null, null);
+        Check(history.Records.Count == 3 && history.Records.Single(x => x.EmployeeId == inactive.Id).PunchCount == 1, "Historical attendance retains inactive employee punches");
+        var historyCsv = Encoding.UTF8.GetString(((FileContentResult)await controller.ExportAttendance(null, null, day, null)).FileContents);
+        Check(historyCsv.Contains("Inactive Employee") && historyCsv.Contains("11:00 am", StringComparison.OrdinalIgnoreCase), "Daily Excel export preserves inactive employee punch time");
+        var reportRange = await service.GetAttendanceRangeAsync(day, day.AddDays(2));
+        Check(reportRange.Count(x => x.EmployeeId == inactive.Id) == 1 && reportRange.Where(x => x.EmployeeId == inactive.Id).All(x => x.PunchCount > 0 && x.Status != "Absent"), "Range report never invents inactive absences after last punch");
+        Check(EmployeeAttendanceReader.BuildDays(inactive, day, day.AddDays(2), stub.Logs.Where(x=>x.EmployeeId==inactive.Id), []).Count == 1, "Individual inactive history contains real punch days only");
+
+        var savedLogs = stub.Logs;
+        var liveDate = DateOnly.FromDateTime(FieldAttendanceClock.Now);
+        foreach(var log in stub.Logs) log.PunchTime = liveDate.ToDateTime(TimeOnly.FromDateTime(log.PunchTime));
+        var roster = await service.GetDailyAttendanceAsync(liveDate, null, null, null);
+        Check(roster.Records.Count == 2 && roster.Records.All(r => r.EmployeeId != inactive.Id), "Inactive employee with current punches is excluded from live attendance");
+        Check(roster.PresentCount == 1 && roster.LateCount == 0 && roster.AbsentCount == (AttendanceRules.IsHoliday(liveDate) ? 0 : 1), "Live totals exclude inactive employees");
+        Check(!roster.Departments.Contains("Former Department"), "Inactive department excluded from current attendance filters");
+        Check((await service.GetDailyAttendanceAsync(liveDate, "109", null, null)).Records.Count == 0, "Inactive employee excluded from current search");
+        Check((await service.GetDailyAttendanceAsync(liveDate, null, null, "Late")).Records.Count == 0, "Current late list excludes inactive punches");
+        var categories = DashboardAttendanceCategories.Build(roster.Records, new Dictionary<int,string?> { [employee.Id] = EmployeeCategories.WhiteCollar, [inactive.Id] = EmployeeCategories.BlueCollar, [absent.Id] = EmployeeCategories.BlueCollar });
+        Check(categories["Present"].BlueCollar == 0 && categories["Present"].WhiteCollar == 1, "Dashboard category totals exclude inactive punches");
+        stub.ApprovedLeaveIds = new HashSet<int> { inactive.Id };
+        Check((await service.GetDailyAttendanceAsync(liveDate, null, null, "Leave")).Records.Count == 0, "Current leave list excludes inactive employees");
+        stub.ApprovedLeaveIds = new HashSet<int>();
+        stub.Logs[1].VerificationMode = ManualAttendance.VerificationMode;
+        Check((await service.GetDailyAttendanceAsync(liveDate, null, null, null)).Records.All(x=>x.EmployeeId!=inactive.Id), "Current corrected attendance cannot re-add inactive employee");
+        stub.Logs[1].VerificationMode = "";
+        var todayReport = await service.GetAttendanceReportAsync(liveDate, null, null, null);
+        Check(todayReport.Records.Any(x=>x.EmployeeId==inactive.Id && x.PunchCount==1), "Today's report preserves punches even after employee is made inactive");
+        var knownEmployees = stub.Employees;
+        var knownCode = inactive.EmployeeCode;
+        inactive.EmployeeCode = "BIO-109";
+        stub.Employees = new[] { employee, absent, inactive };
+        stub.Enrollments[1].EmployeeId = null;
+        stub.Enrollments[1].Employee = null;
+        stub.Enrollments[1].Status = "Needs review";
+        Check((await service.GetDailyAttendanceAsync(liveDate, null, null, null)).Records.All(x => x.EmpId != "109"), "Inactive unlinked imported employee cannot appear as absent or present");
+        inactive.IsActive = true;
+        Check((await service.GetDailyAttendanceAsync(liveDate, null, null, null)).Records.Any(x => x.EmployeeId == inactive.Id), "Unlinked employee activation immediately restores current roster");
+        inactive.IsActive = false;
+        inactive.EmployeeCode = knownCode;
+        stub.Enrollments[1].EmployeeId = inactive.Id;
+        stub.Enrollments[1].Employee = inactive;
+        stub.Enrollments[1].Status = "Linked";
+        var newActive = new Employee { Id = 137, EmployeeCode = "NEW137", FullName = "Newly active employee", IsActive = true };
+        stub.Employees = new[] { employee, absent, inactive, newActive };
+        Check((await service.GetDailyAttendanceAsync(liveDate, null, null, null)).Records.Count(x => x.EmployeeId == 137) == 1, "Activated employee appears before WDMS sync");
+        newActive.IsActive = false;
+        Check((await service.GetDailyAttendanceAsync(liveDate, null, null, null)).Records.All(x => x.EmployeeId != 137), "Deactivated employee without WDMS disappears immediately");
+        stub.Employees = knownEmployees;
+        inactive.IsActive = true;
+        Check((await service.GetDailyAttendanceAsync(liveDate, null, null, null)).Records.Any(x=>x.EmployeeId==inactive.Id), "Reactivated WDMS member returns to current attendance");
+        inactive.IsActive = false;
+        foreach(var log in savedLogs) log.PunchTime = day.ToDateTime(TimeOnly.FromDateTime(log.PunchTime));
         foreach (var exportMonth in new[] { "2026-09", DateTime.Today.ToString("yyyy-MM"), DateTime.Today.AddMonths(-1).ToString("yyyy-MM"), "2024-02" }.Distinct())
         {
             var monthFile = (FileContentResult)await controller.ExportAttendance(null, null, null, null, exportPeriod: "month", exportMonth: exportMonth);
             var monthXml = XDocument.Parse(Encoding.UTF8.GetString(monthFile.FileContents));
             Check(monthFile.FileDownloadName == $"Attendance-Pivot-{exportMonth}.xls" && monthXml.Root!.Elements(ns + "Worksheet").Count() == 2,
                 $"Monthly export downloads valid workbook for {exportMonth}");
-            if (exportMonth == "2026-09")
-            {
-                Check(!monthXml.Root!.Value.Contains("Inactive WDMS Name"), "Monthly export excludes inactive employee punches");
-            }
+            if (exportMonth == "2026-09") Check(monthXml.Root!.Value.Contains("Inactive Employee"), "Monthly Excel retains inactive employee punch history");
         }
+        stub.Enrollments[1].LastSeenUtc = null;
+        Check((await service.GetAttendanceReportAsync(day, null, null, null)).Records.Any(x=>x.EmployeeId==inactive.Id && x.PunchCount==1), "Inactive punch history survives a missing WDMS directory entry");
         // ERP activation and device mappings cannot add a person outside the WDMS roster.
         inactive.IsActive = true;
         stub.Employees = new[] { employee, absent, inactive };
@@ -211,6 +256,7 @@ public class ExportRepository : DispatchProxy
     {
         "GetApprovedLeaveEmployeeIdsAsync" => Task.FromResult(ApprovedLeaveIds),
         "GetActiveEmployeesAsync" => Task.FromResult(Employees),
+        "GetAttendanceEmployeesAsync" => Task.FromResult(Employees),
         "GetEnrollmentsAsync" => Task.FromResult(Enrollments),
         "GetActiveMappingsAsync" => Task.FromResult(Mappings),
         "GetAttendanceLogsAsync" => Task.FromResult<IReadOnlyList<AttendanceLog>>(Logs.Where(log => log.PunchTime >= (DateTime)args![0]! && log.PunchTime < (DateTime)args[1]!).ToList()),

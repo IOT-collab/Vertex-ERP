@@ -24,7 +24,7 @@ static class ManagerDashboardChecks
         Check(ManagerDashboardPresentation.Workload(new[]{tasks[3]},today,"all")==new ManagerWorkload(0,0,0,1),"Overdue in-progress task counted only once");
         var leave=new LeaveRequest{Status="Pending",ApprovalLevel="Manager"};
         Check(ManagerDashboardPresentation.AwaitingAction(leave,true)&&!ManagerDashboardPresentation.AwaitingAction(leave,false),"Manager approvals exclude HR-stage requests");
-        leave.ApprovalLevel="HR/Admin";
+        leave.ApprovalLevel="HR/Admin";leave.ManagerDecision="Approved";leave.ManagerDecidedAtUtc=DateTime.UtcNow;
         Check(!ManagerDashboardPresentation.AwaitingAction(leave,true)&&ManagerDashboardPresentation.AwaitingAction(leave,false),"HR-stage request is not a pending manager action");
         leave.Status="Approved";
         Check(!ManagerDashboardPresentation.AwaitingAction(leave,false),"Completed approval is excluded");

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme-user="">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notifications - Vertex ERP</title>
+    <script src="/js/theme.js?v=JsFUoRbzJn9KqZYtXXlz_zgyMbiK4eH1axphmpmIkAA"></script>
+    <script src="/js/locales/hi.js?v=hFJ_RNJGdkgnPk9ITiRnUgQBJlMSXuqSUt6KXt93j_Q"></script>
+    <script src="/js/language.js?v=Isl05HfqnXp40mGSnzRLGCvTWAXm4zkcRwiT43ZML-8"></script>
+    <link href="/css/Style.css?v=fbAK5ytKllCMCjrxL-dKhIFSSm8iPfd0fjHF9eJZZKQ" rel="stylesheet" />
+    <link href="/css/site.css?v=cd4LhcqAp-f0eafJnZ4NLs0KRiYzbHdrvXt1qOdS2ig" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="/css/common-ui.css?v=S53GsNTcL6z5g1Hidd_Yx3pgZEZdG-8UrcYFOoy8fdo" rel="stylesheet" />
+    <link href="/css/common-back-button.css?v=I_No4B9LuDEG5OsYVsR0wvx8iI69ak0A1w93Q1jqQFs" rel="stylesheet" />
+    <link href="/css/erp-buttons.css?v=P4mvgzWZcgKRXGPpSOrorRhbVxqH2fwXxKOXbn9XWKs" rel="stylesheet" />
+    <link href="/css/ResponsiveEnhancements.css?v=2RztQXGMRnIdoNkyjs46gz9km8jkvuDQEqmubWQAzD4" rel="stylesheet" />
+    <link href="/css/hr-modules.css?v=eBF2BBH9XWbB6bStvHdxoVTBuAMjc5II2Tme8JMCKO8" rel="stylesheet" />
+    <link href="/css/theme.css?v=UqGZcSDh8Y1acQoWx9eApJDHTxV76rVFCFgSHBN6NFM" rel="stylesheet" />
+    <link href="/css/ResponsiveGuard.css?v=WcKT9WrzRXJcg1vDmRbqUUYc2gVwzs87uTYkyZxPsKE" rel="stylesheet" />
+    <link href="/css/notification-inbox.css?v=AuXXfkaAxGiYXPKySVzJsieZf_N5mw0Ofv9Sy4grwzw" rel="stylesheet" />
+</head>
+<body class="erp-shell  employee-self-service-only ">
+
+
+
+    <!-- Pure CSS Sidebar Drawer Controller Toggle -->
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-check" />
+
+    <div class="layout">
+
+        <!-- Mobile Drawer Overlay Screen -->
+        <label for="sidebar-toggle" class="sidebar-overlay"></label>
+
+        <!-- Sidebar Navigation Drawer -->
+        <aside class="sidebar">
+            <div class="logo">
+                <a class="erp-logo-link" href="/Main/EmployeeHome" aria-label="Go to Dashboard">
+                    <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                    <span>Vertex ERP</span>
+                </a>
+                    <label for="sidebar-toggle" class="sidebar-close-btn">&times;</label>
+            </div>
+
+            <ul class="sidebar-menu">
+                    <li><a href="/Main/Employees"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i><span>Dashboard</span></a></li>
+                    <li><a href="/Main/EmployeeTasks"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>My Tasks</span></a></li>
+                    <li><a href="/Main/EmployeeAttendance"><i class="fa-regular fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
+                    <li><a href="/Main/FieldAttendance"><i class="fa-solid fa-location-dot" aria-hidden="true"></i><span>Mark Attendance</span></a></li>
+                    <li><a href="/Main/EmployeeLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
+                    <li><a href="/Main/CompanyHoliday"><i class="fa-regular fa-calendar-days" aria-hidden="true"></i><span>Company Holiday</span></a></li>
+                    <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user" aria-hidden="true"></i><span>My Profile</span></a></li>
+                    <li><a href="/Notifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Notifications</span></a></li>
+                    <li><a href="/Main/EmployeeQueries"><i class="fa-regular fa-circle-question" aria-hidden="true"></i><span>Raise Query</span></a></li>
+                    <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Salary Slip</span></a></li>
+                    <li><a href="/Main/EmployeeAssets"><i class="fa-solid fa-laptop" aria-hidden="true"></i><span>Assets</span></a></li>
+                    <li><a href="/Expense/Index"><i class="fa-solid fa-receipt" aria-hidden="true"></i><span>Expense Claims</span></a></li>
+                    <li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns" aria-hidden="true"></i><span>My Bank Details</span></a></li>
+                <li><a href="/Theme/Index"><i class="fa-solid fa-palette" aria-hidden="true"></i><span>Theme</span></a></li>
+                <li><a href="/Language/Index"><i class="fa-solid fa-language" aria-hidden="true"></i><span>Language</span></a></li>
+                <li><a href="/Feedback/Index"><i class="fa-regular fa-comment-dots" aria-hidden="true"></i><span>Feedback</span></a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Dashboard Workspace Panel -->
+        <main class="main-content">
+
+            <!-- Global Action Application Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <label for="sidebar-toggle" class="hamburger-menu-btn" title="Open navigation" aria-label="Open navigation">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </label>
+                    <a class="topbar-brand" href="/Main/EmployeeHome" aria-label="Go to Dashboard">
+                        <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                        <span>Vertex ERP</span>
+                    </a>
+                </div>
+
+                <div class="profile">
+ <a href="/Notifications" class="ni-bell" title="Notifications" aria-label="Open notifications" data-notification-bell><i class="fa-regular fa-bell" aria-hidden="true"></i><span class="ni-badge" data-notification-count hidden></span></a>
+                     <span class="profile-text" title="Signed in as Preview">Welcome Preview</span>
+                    <form method="post" style="display:inline" action="/Main/Logout">
+                        <button class="logout-btn" type="submit" title="Logout">Logout</button>
+                    <input name="__RequestVerificationToken" type="hidden" value="CfDJ8AAAAAAAAAAAAAAAAAAAAAAD-RuaZACoTD26sP0gXt-cYA2D6shS_NC3nEGKOZZJyP162MI9RoP0UZbrpTWN5jD8Cu2xNXsHd4TnXB93_EQ8_wRnA-J-B-8b2O5Kl0G26NpUBpgnYx0O1CXtBJFa_fM" /></form>
+                </div>
+            </header>
+
+            <!-- Embedded Nested Page Target Body Canvas Wrapper -->
+            <div class="page-content">
+                
+    <nav class="common-back-nav" aria-label="Page navigation">
+        <button type="button"
+                class="common-back-button"
+                onclick="window.history.back()"
+                title="Go Back"
+                aria-label="Go Back">
+            <svg class="common-back-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            <span>Back</span>
+        </button>
+    </nav>
+
+                <section class="ni-workspace">
+    <header class="ni-hero"><div><span class="ni-eyebrow">YOUR NOTIFICATION INBOX</span><h1>Notifications <span class="ni-total">1 unread</span></h1><p>Assignments, responses, approvals and updates for your account.</p></div><form method="post" action="/Notifications/MarkRead"><input type="hidden" name="all" value="true"/><button class="ni-button" type="submit"><i class="fa-solid fa-check-double" aria-hidden="true"></i> Mark all as read</button><input name="__RequestVerificationToken" type="hidden" value="CfDJ8AAAAAAAAAAAAAAAAAAAAAAD-RuaZACoTD26sP0gXt-cYA2D6shS_NC3nEGKOZZJyP162MI9RoP0UZbrpTWN5jD8Cu2xNXsHd4TnXB93_EQ8_wRnA-J-B-8b2O5Kl0G26NpUBpgnYx0O1CXtBJFa_fM" /></form></header>
+    <form method="get" class="ni-filter" action="/Notifications/Index"><label>Category<select name="category"><option value="">All categories</option> <option value="Tasks">Tasks</option>  <option value="Leave">Leave</option>  <option value="Queries">Queries</option>  <option value="Expenses">Expenses</option>  <option value="Reports">Reports</option>  <option value="Feedback">Feedback</option>  <option value="Assets">Assets</option>  <option value="Documents">Documents</option>  <option value="Salary">Salary</option>  <option value="Bank Requests">Bank Requests</option> </select></label><label>Show<select name="unread"><option value="false" selected="selected">All notifications</option><option value="true">Unread only</option></select></label><button class="ni-button" type="submit">Apply</button><a href="/Notifications/Index">Reset</a></form>
+    <div class="ni-list" aria-label="Notifications">
+        <article class="ni-item unread"><span class="ni-icon"><i class="fa-solid fa-file-circle-check" aria-hidden="true"></i></span><div class="ni-content"><span class="ni-category">Feedback · New</span><h2>Employee &lt;script&gt;alert(1)&lt;/script&gt;</h2><p>Form response uploaded &#xB7; Version 2</p><time datetime="2026-10-28T11:53:46.0824260Z">28 Oct 2026 &#xB7; 05:23 PM IST</time></div><div class="ni-actions"><form method="post" action="/Notifications/Open"><input type="hidden" name="key" value="Form:1:123:2"/><button type="submit" class="ni-button">Open <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button><input name="__RequestVerificationToken" type="hidden" value="CfDJ8AAAAAAAAAAAAAAAAAAAAAAD-RuaZACoTD26sP0gXt-cYA2D6shS_NC3nEGKOZZJyP162MI9RoP0UZbrpTWN5jD8Cu2xNXsHd4TnXB93_EQ8_wRnA-J-B-8b2O5Kl0G26NpUBpgnYx0O1CXtBJFa_fM" /></form><form method="post" action="/Notifications/MarkRead"><input type="hidden" name="key" value="Form:1:123:2"/><input type="hidden" name="unread" value="false"/><button type="submit" class="ni-read">Mark read</button><input name="__RequestVerificationToken" type="hidden" value="CfDJ8AAAAAAAAAAAAAAAAAAAAAAD-RuaZACoTD26sP0gXt-cYA2D6shS_NC3nEGKOZZJyP162MI9RoP0UZbrpTWN5jD8Cu2xNXsHd4TnXB93_EQ8_wRnA-J-B-8b2O5Kl0G26NpUBpgnYx0O1CXtBJFa_fM" /></form></div></article>
+        <article class="ni-item read"><span class="ni-icon"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i></span><div class="ni-content"><span class="ni-category">Leave · Read</span><h2>Preview Employee &#xB7; EL</h2><p>Pending &#xB7; Manager</p><time datetime="2026-10-28T11:53:46.0824265Z">28 Oct 2026 &#xB7; 05:23 PM IST</time></div><div class="ni-actions"><form method="post" action="/Notifications/Open"><input type="hidden" name="key" value="Leave:2:456:"/><button type="submit" class="ni-button">Open <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button><input name="__RequestVerificationToken" type="hidden" value="CfDJ8AAAAAAAAAAAAAAAAAAAAAAD-RuaZACoTD26sP0gXt-cYA2D6shS_NC3nEGKOZZJyP162MI9RoP0UZbrpTWN5jD8Cu2xNXsHd4TnXB93_EQ8_wRnA-J-B-8b2O5Kl0G26NpUBpgnYx0O1CXtBJFa_fM" /></form><form method="post" action="/Notifications/MarkRead"><input type="hidden" name="key" value="Leave:2:456:"/><input type="hidden" name="unread" value="true"/><button type="submit" class="ni-read">Mark unread</button><input name="__RequestVerificationToken" type="hidden" value="CfDJ8AAAAAAAAAAAAAAAAAAAAAAD-RuaZACoTD26sP0gXt-cYA2D6shS_NC3nEGKOZZJyP162MI9RoP0UZbrpTWN5jD8Cu2xNXsHd4TnXB93_EQ8_wRnA-J-B-8b2O5Kl0G26NpUBpgnYx0O1CXtBJFa_fM" /></form></div></article>
+    </div>
+</section>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    
+    <script src="/js/input-rules.js?v=JQN9Kjzy5AWiVxFC2yCCbkym3en2Fig1DQEPJ0ejERw"></script>
+    <script>
+        (() => {
+            const attendanceSelectors = {
+                '/Main/Attendence': '.attendance-panel-container',
+                '/Main/Dashboard': '[data-attendance-auto-refresh]',
+                '/Main/DashboardAttendance': '.dashboard-attendance-page',
+                '/Main/EmployeeAttendance': '.employee-section',
+                '/Main/EmployeeAssets': '.employee-section',
+                '/Main/Hrms': '.hrms-page'
+            };
+            const selector = attendanceSelectors[window.location.pathname];
+            const target = document.querySelector('[data-attendance-auto-refresh]') || (selector ? document.querySelector(selector) : null);
+            if (!target) return;
+            let refreshing = false;
+            const refreshAttendanceInBackground = async () => {
+                if (refreshing || document.hidden || document.activeElement?.matches('input, select, textarea')) return;
+                refreshing = true;
+                try {
+                    const response = await fetch(window.location.href, { cache: 'no-store', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!response.ok) return;
+                    const nextDocument = new DOMParser().parseFromString(await response.text(), 'text/html');
+                    const nextTarget = nextDocument.querySelector('[data-attendance-auto-refresh]') || (selector ? nextDocument.querySelector(selector) : null);
+                    if (nextTarget) target.innerHTML = nextTarget.innerHTML;
+                } catch {
+                    // A temporary connection problem must not disturb the current screen.
+                } finally {
+                    refreshing = false;
+                }
+            };
+            window.setInterval(refreshAttendanceInBackground, 15000);
+            document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshAttendanceInBackground(); });
+        })();
+    </script>
+ <script src="/js/notification-inbox.js?v=DHsSX2KpTwqj8eItjcELsxpXdHGlaJA6IYDm-MvCDG4" defer></script> </body>

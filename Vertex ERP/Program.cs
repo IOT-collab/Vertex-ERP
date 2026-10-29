@@ -52,6 +52,18 @@ builder.Services.AddScoped<ModuleAccessService>();
 builder.Services.AddControllersWithViews(options => options.Filters.Add<ModuleAccessFilter>());
 builder.Services.AddHttpContextAccessor();
 
+// Dispatch is off until credentials, approved template verification and sending approval are configured.
+builder.Services.Configure<Msg91WhatsAppOptions>(builder.Configuration.GetSection(Msg91WhatsAppOptions.Section));
+builder.Services.AddHttpClient<IMsg91WhatsAppService, Msg91WhatsAppService>(client => client.Timeout = TimeSpan.FromSeconds(30))
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false })
+    .RedactLoggedHeaders(new[] { "authkey" });
+builder.Services.AddScoped<IWhatsAppTaskQueue, WhatsAppTaskQueue>();
+builder.Services.AddScoped<Msg91DeliveryInbox>();
+builder.Services.AddScoped<IMsg91DeliveryInbox>(sp => sp.GetRequiredService<Msg91DeliveryInbox>());
+builder.Services.AddScoped<WhatsAppTaskDispatcher>();
+builder.Services.AddHostedService<WhatsAppTaskWorker>();
+
+
 // ============================================================
 // ANTIFORGERY
 // ============================================================
@@ -238,6 +250,7 @@ builder.Services
         };
     });
 
+builder.Services.AddScoped<NotificationInboxService>();
 builder.Services.AddScoped<ManualAttendanceAccess>();
 builder.Services.AddScoped<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, ManualAttendanceOperatorHandler>();
 builder.Services.AddAuthorization(options => options.AddPolicy(ManualAttendanceAccess.Policy,
@@ -378,22 +391,7 @@ app.UseAuthorization();
 // MVC ROUTING
 // ============================================================
 
-app.MapControllerRoute(
-    name: "expense",
-    pattern: "Expense/{action=Index}/{id?}",
-    defaults: new { controller = "Expense" }
-);
-
-app.MapControllerRoute(
-    name: "ai-assistant",
-    pattern: "AiAssistant",
-    defaults: new { controller = "AiAssistant", action = "Index" }
-);
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Main}/{action=Start}/{id?}"
-);
+app.MapErpRoutes();
 
 // ============================================================
 // START APPLICATION

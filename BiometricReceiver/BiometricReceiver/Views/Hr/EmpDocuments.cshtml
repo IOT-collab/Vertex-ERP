@@ -7,6 +7,7 @@
 }
 <link rel="stylesheet" href="~/css/EmpDocuments.css" asp-append-version="true" />
 <div class="emp-docs-container">
+    @if (TempData["DocumentError"] is string error) { <p class="document-action-error" role="alert">@error</p> }
     @if (TempData["DocumentMessage"] is string message) { <p role="status">@message</p> }
     <div class="header-section">
         <div class="header-left">
@@ -70,9 +71,9 @@
                             <tr>
                                 <td>@document.DocumentType</td><td>@document.DocumentName</td><td class="document-file-name">@document.OriginalFileName</td><td>@document.UploadedAtUtc.ToLocalTime().ToString("dd MMM yyyy")</td>
                                 <td><div class="action-buttons document-row-actions">
-                                    <a asp-action="ViewDocument" asp-route-id="@document.Id" target="_blank" rel="noopener" class="btn-secondary btn-small"><i class="fa-regular fa-eye"></i> View</a>
-                                    <a asp-action="UpdateDocument" asp-route-id="@document.Id" class="btn-secondary btn-small"><i class="fa-solid fa-pen"></i> Update</a>
-                                    <form asp-action="DeleteDocument" asp-route-id="@document.Id" method="post" onsubmit="return confirm('Delete this document? This cannot be undone.');"><button type="submit" class="btn-secondary btn-small"><i class="fa-solid fa-trash"></i> Delete</button></form>
+                                    <a asp-action="ViewDocument" asp-route-id="@document.Id" asp-route-employeeId="@document.EmployeeId" target="_blank" rel="noopener" class="btn-secondary btn-small"><i class="fa-regular fa-eye"></i> View</a>
+                                    <a asp-action="UpdateDocument" asp-route-id="@document.Id" asp-route-employeeId="@document.EmployeeId" class="btn-secondary btn-small"><i class="fa-solid fa-pen"></i> Update</a>
+                                    <form asp-action="DeleteDocument" asp-route-id="@document.Id" asp-route-employeeId="@document.EmployeeId" method="post" onsubmit="return confirm('Delete this document? This cannot be undone.');"><button type="submit" class="btn-secondary btn-small"><i class="fa-solid fa-trash"></i> Delete</button></form>
                                 </div></td>
                             </tr>
                         }

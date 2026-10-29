@@ -19,6 +19,7 @@
     <link href="~/css/hr-modules.css" rel="stylesheet" asp-append-version="true" />
     <link href="~/css/theme.css" rel="stylesheet" asp-append-version="true" />
     <link href="~/css/ResponsiveGuard.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/notification-inbox.css" rel="stylesheet" asp-append-version="true" />
 </head>
 <body class="erp-shell @(ViewData["ManagerWorkspace"] is true ? "manager-workspace-shell" : "") @((User.IsInRole("Employee") || User.IsInRole("User")) ? "employee-self-service-only" : "") @(ViewData["DashboardDesign"] is true ? "dashboard-studio-shell" : "")">
     @{
@@ -39,7 +40,7 @@
             Context.Session.Remove("showWelcomePopup");
             Context.Session.Remove("welcomeGender");
         }
-        var pendingBankRequestCount = isHr ? LayoutDb.BankDetailUpdateRequests.Count(request => request.Status == "Pending") : 0;
+        var pendingBankRequestCount = isHr && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier) != null ? LayoutDb.BankDetailUpdateRequests.Count(request => request.Status == "Pending") : 0;
         VertexERP.Models.ManagerDashboardViewModel? workspaceModel = ViewData["ManagerWorkspace"] is true ? Model as VertexERP.Models.ManagerDashboardViewModel : null;
         int? sidebarManagerId = workspaceModel?.Viewer?.Id;
         if (isManager && workspaceModel == null && int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var sidebarUserId))
@@ -108,7 +109,7 @@
                     <li><a href="/Main/EmployeeLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
                     <li><a asp-controller="Main" asp-action="CompanyHoliday"><i class="fa-regular fa-calendar-days" aria-hidden="true"></i><span>Company Holiday</span></a></li>
                     <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user" aria-hidden="true"></i><span>My Profile</span></a></li>
-                    <li><a href="/Main/EmployeeNotifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Notifications</span></a></li>
+                    <li><a href="/Notifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Notifications</span></a></li>
                     <li><a href="/Main/EmployeeQueries"><i class="fa-regular fa-circle-question" aria-hidden="true"></i><span>Raise Query</span></a></li>
                     <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Salary Slip</span></a></li>
                     <li><a href="/Main/EmployeeAssets"><i class="fa-solid fa-laptop" aria-hidden="true"></i><span>Assets</span></a></li>
@@ -128,6 +129,7 @@
                     <li><a href="/Main/MyTeam"><i class="fa-solid fa-users" aria-hidden="true"></i><span>My Team (@assignedTeamCount)</span></a></li>
                     <li><a href="/Main/ManagerAttendance"><i class="fa-solid fa-users-viewfinder" aria-hidden="true"></i><span>Team Attendance</span></a></li>
                     <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Site Employee Location</span></a></li>
+                    <li><a href="/Notifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Team Notifications</span></a></li>
                     <li><a href="/Main/ManagerLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Team Leave Requests (@teamLeavePendingCount)</span></a></li>
                     <li><a asp-controller="Expense" asp-action="Index"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Team Expenses</span></a></li>
                     <li><a asp-controller="Expense" asp-action="Index" asp-route-view="self"><i class="fa-solid fa-receipt"></i><span>My Expenses</span></a></li>
@@ -138,7 +140,7 @@
                     <li><a href="/Main/FieldAttendance"><i class="fa-solid fa-location-dot"></i><span>Mark Attendance</span></a></li>
                     <li><a href="/Main/EmployeeLeaves"><i class="fa-solid fa-plane-departure"></i><span>My Leave</span></a></li>
                     <li><a href="/Main/EmployeeQueries"><i class="fa-regular fa-circle-question"></i><span>My Queries</span></a></li>
-                    <li><a href="/Main/EmployeeNotifications"><i class="fa-regular fa-bell"></i><span>My Notifications</span></a></li>
+                    <li><a href="/Notifications"><i class="fa-regular fa-bell"></i><span>My Notifications</span></a></li>
                     <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user"></i><span>My Profile</span></a></li>
                     <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar"></i><span>Salary Slip</span></a></li>
                     <li><a href="/Main/EmployeeAssets"><i class="fa-solid fa-laptop"></i><span>My Assets</span></a></li>
@@ -152,8 +154,9 @@
                     <li><a href="/Main/Employees"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Employees</span></a></li>
                     <li><a href="/Main/Attendence"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
                     <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Site Employee Location</span></a></li>
-                    <li><a href="/Main/LeaveManagement"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
+                    <li><a href="/Main/LeaveManagement"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Manual Mark Attendance</span></a></li>
                     <li><a asp-controller="Main" asp-action="CompanyHoliday"><i class="fa-regular fa-calendar-days" aria-hidden="true"></i><span>Company Holiday</span></a></li>
+                    <li><a href="/Notifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Notifications</span></a></li>
                     <li><a href="/Main/WorkflowManagement"><i class="fa-solid fa-code-pull-request" aria-hidden="true"></i><span>Leave Approvals & Employee Queries</span></a></li>
 @*                     <li><a href="/Main/DepartmentManagement"><i class="fa-solid fa-building" aria-hidden="true"></i><span>Department</span></a></li>
  *@                    <li><a href="/Main/Hrms"><i class="fa-solid fa-user-tie" aria-hidden="true"></i><span>HR Management</span></a></li>
@@ -175,11 +178,14 @@
                 {
                 <li><a asp-controller="Theme" asp-action="Index"><i class="fa-solid fa-palette" aria-hidden="true"></i><span>Theme</span></a></li>
                 <li><a asp-controller="Language" asp-action="Index"><i class="fa-solid fa-language" aria-hidden="true"></i><span>Language</span></a></li>
-                <li><a asp-controller="Feedback" asp-action="Index"><i class="fa-regular fa-comment-dots" aria-hidden="true"></i><span>Feedback</span></a></li>
+                @if (!User.IsInRole("HR") && !User.IsInRole("Admin"))
+                {
+                    <li><a asp-controller="Feedback" asp-action="Index"><i class="fa-regular fa-comment-dots" aria-hidden="true"></i><span>Feedback</span></a></li>
+                }
                 }
                 @if (User.IsInRole("HR") || User.IsInRole("Admin"))
                 {
-                    <li><a asp-controller="Feedback" asp-action="Inbox"><i class="fa-solid fa-comments" aria-hidden="true"></i><span>Feedback by Emp</span></a></li>
+                    <li><a asp-controller="Feedback" asp-action="Inbox"><i class="fa-solid fa-comments" aria-hidden="true"></i><span>Feedback &amp; Response</span></a></li>
                 }
             </ul>
         </aside>
@@ -208,6 +214,7 @@
                 else
                 {
                 <div class="profile">
+                    @if (User.IsInRole("HR") || User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Employee") || User.IsInRole("User")) { <partial name="_NotificationBell" /> }
                     <span class="profile-text" title="Signed in as @currentName">Welcome @currentName</span>
                     <form asp-controller="Main" asp-action="Logout" method="post" style="display:inline">
                         <button class="logout-btn" type="submit" title="Logout">Logout</button>
@@ -245,10 +252,16 @@
         </script>
     }
     <script src="~/js/input-rules.js" asp-append-version="true"></script>
+    @if (TempData["EmployeeStatusChanged"] is true)
+    {
+        <script>try { localStorage.setItem('erp.employee-status-change', String(Date.now())); } catch { }</script>
+    }
     <script>
         (() => {
             const attendanceSelectors = {
                 '/Main/Attendence': '.attendance-panel-container',
+                '/Main/Dashboard': '[data-attendance-auto-refresh]',
+                '/Main/DashboardAttendance': '.dashboard-attendance-page',
                 '/Main/EmployeeAttendance': '.employee-section',
                 '/Main/EmployeeAssets': '.employee-section',
                 '/Main/Hrms': '.hrms-page'
@@ -273,7 +286,10 @@
                 }
             };
             window.setInterval(refreshAttendanceInBackground, 15000);
+            window.addEventListener('storage', event => { if (event.key === 'erp.employee-status-change') refreshAttendanceInBackground(); });
+            window.addEventListener('focus', refreshAttendanceInBackground);
             document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshAttendanceInBackground(); });
         })();
     </script>
+    @if (User.IsInRole("HR") || User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Employee") || User.IsInRole("User")) { <script src="~/js/notification-inbox.js" asp-append-version="true" defer></script> }
 </body>

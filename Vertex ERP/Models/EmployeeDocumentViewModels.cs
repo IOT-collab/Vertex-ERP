@@ -87,6 +87,7 @@ public sealed class EmployeeDocumentUploadViewModel : IValidatableObject
     public static IReadOnlyList<string> DocumentTypes { get; } = Array.AsReadOnly(new[] { "Aadhaar Card", "PAN Card", "10th Certificate", "12th Certificate", "Graduation", "Post Graduation", "Employee Photo", "Previous Company Documents", "UAN Passbook", "Other" });
     public int? DocumentId { get; set; }
     public string? CurrentFileName { get; set; }
+    public bool CurrentFileMissing { get; set; }
     public const long MaximumFileSize = 3 * 1024 * 1024;
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

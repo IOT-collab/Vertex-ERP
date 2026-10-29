@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using VertexERP.Data;
 using VertexERP.Models;
 
 namespace VertexERP.Services;
@@ -19,19 +21,35 @@ public static class LeaveApprovalWorkflow
         request.ManagerDecidedByName = name;
         request.ManagerDecidedAtUtc = DateTime.UtcNow;
         request.ManagerDecisionNote = note?.Trim();
-        if (request.IsExtraFacility || request.IsHalfDay || request.ManagerDecision == "Approved") request.ApprovalLevel = "HR/Admin";
-        else SetFinal(request, "Rejected", userId, note);
+        request.ApprovalLevel = "HR/Admin";
         return true;
     }
 
     public static bool CanTakeFinalAction(LeaveRequest request, bool isHr, bool isAdmin) =>
-        isHr || isAdmin && !request.IsExtraFacility && !request.IsHalfDay;
+        isHr;
 
     public static bool DecideFinal(LeaveRequest request, string? decision, int userId, string? note)
     {
-        if (request.Status != "Pending" || request.ApprovalLevel != "HR/Admin" || !ValidDecision(decision, note)) return false;
+        if (request.Status != "Pending" || request.ApprovalLevel != "HR/Admin" || !HasManagerReview(request) || !ValidDecision(decision, note)) return false;
         SetFinal(request, Normalize(decision!), userId, note);
         return true;
+    }
+
+    public static bool HasManagerReview(LeaveRequest request) => request.ManagerDecision is "Approved" or "Rejected" && request.ManagerDecidedAtUtc.HasValue;
+
+    public static bool CanRouteToManager(Employee employee) => employee.IsActive && employee.ReportingManagerId.HasValue && employee.ReportingManagerId!=employee.Id;
+
+    public static async Task<bool> ReportingManagerReadyAsync(ApplicationDbContext db, Employee employee)
+    {
+        if(!CanRouteToManager(employee)) return false;
+        var roles=await db.AppUsers.AsNoTracking().Where(x=>x.EmployeeId==employee.ReportingManagerId && x.IsActive && x.Employee!=null && x.Employee.IsActive).Select(x=>x.Role).ToListAsync();
+        return roles.Any(role=>AccountRoleService.EffectiveRole(role,true)==AccountRoleService.Manager);
+    }
+
+    public static void RouteToManager(LeaveRequest request,Employee employee)
+    {
+        if(request.Status!="Pending" || request.EmployeeId!=employee.Id || !CanRouteToManager(employee)) throw new InvalidOperationException("An active reporting manager must review this application.");
+        request.ApprovalLevel="Manager";request.AssignedApproverEmployeeId=employee.ReportingManagerId;
     }
 
     private static string Normalize(string decision) => decision.Equals("Approved", StringComparison.OrdinalIgnoreCase) ? "Approved" : "Rejected";

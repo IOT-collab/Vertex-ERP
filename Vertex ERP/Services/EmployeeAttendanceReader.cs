@@ -35,6 +35,7 @@ public sealed class EmployeeAttendanceReader(ApplicationDbContext db)
         {
             var window = AttendanceRules.PunchWindow(date, employee.ShiftStartTime, employee.ShiftEndTime);
             var punches = all.Where(x => x.PunchTime >= window.From && x.PunchTime < window.To).ToList();
+            if (!employee.IsActive && punches.Count == 0) continue;
             var paired = ManualAttendance.EffectivePunches(punches);
             var hours = paired.CheckOut.HasValue ? paired.CheckOut.Value - paired.CheckIn!.Value : TimeSpan.Zero;
             var sources = punches.Select(x => x.VerificationMode == AttendanceRules.FieldVerificationMode || x.BiometricDevice?.CommunicationMode == AttendanceRules.FieldCommunicationMode

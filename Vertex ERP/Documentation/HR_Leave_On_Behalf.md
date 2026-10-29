@@ -1,0 +1,15 @@
+# HR leave applications on behalf of employees
+
+Main/LeaveManagement now redirects HR/Admin to HrLeave/Index. The explicit HrLeave root route also resolves Index. HR can submit; Admin has view-only history. The separate Leave Approvals & Employee Queries workspace remains available.
+
+HR selects an active employee, type, dates, reason, and any applicable half-day session or short-leave times. HR cannot proxy their own request; My Leave remains the self-service entry point. Requests require an active reporting manager with an eligible active account (including employees automatically promoted to manager by an assigned team). The server sets employee/approver/source identities, never accepts an approval stage or HR identity from posted fields, and uses existing per-employee PostgreSQL transaction locks.
+
+Regular EL/CL/ML/EW requests require configured balance for each year, with additional usage, approved days and other pending requests included in availability. Existing calendar-day counting rules apply. Pending/approved overlaps are blocked. Half Day and Short Leave reuse independent monthly limits of two each, with first/second half and a maximum two-hour short-leave interval. Back dates are permitted; a request may span at most 366 calendar days. Regular balance is rechecked before HR final approval. Requests reserve availability while pending; actual usage/attendance changes only with final Approved status. Facility requests never consume regular leave balances.
+
+Both manager approval and rejection send an HR-submitted request to HR final review, preserving the manager's decision/name/time/note. Admin cannot finalize or cancel these requests through either the UI or the existing action guards. All leave types now follow manager-first / HR-final review; Admin is view only for leave decisions. The employee sees the application and source attribution and receives a notification immediately, followed by manager/HR updates. Employees cannot edit/delete an HR-authored application through MyRequests. Standard approval/cancellation accounting remains the shared workflow.
+
+Source is stored in nullable SubmittedByHrUserId/SubmittedByHrName, with a Users foreign key; pre-existing requests retain their existing behavior. Shared decision details show HR attribution in employee, manager, HR and admin views. Source information is not hidden. The new page shows the latest 100 HR submissions and links to complete searchable leave history.
+
+Migration: 20261028102252_HrLeaveOnBehalf. Existing startup migration applies it on deployment/restart. No live database was changed during implementation.
+
+Validation: --hr-leave (30 checks and HR/Admin Razor renders), --back-date-leave (41 checks), --extra-facility (59), --leave-calculator (37), --notifications (ownership/security checks, five role renders and local HTTP routes including HrLeave). Routes use a temporary local test server without a live database; logged-in production delivery is not verified. The notification service resolves effective account roles so managers promoted from Employee/User receive team notifications correctly.

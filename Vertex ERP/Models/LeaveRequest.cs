@@ -1,10 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace VertexERP.Models;
 
 public class LeaveRequest
 {
     public int Id { get; set; }
+    public int? SubmittedByHrUserId { get; set; }
+    public AppUser? SubmittedByHrUser { get; set; }
+    [MaxLength(100)] public string? SubmittedByHrName { get; set; }
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public bool IsHrSubmitted => SubmittedByHrUserId.HasValue;
     public int EmployeeId { get; set; }
     public Employee Employee { get; set; } = null!;
     [Required, MaxLength(30)] public string LeaveType { get; set; } = string.Empty;
@@ -30,6 +35,6 @@ public class LeaveRequest
     public DateTime? ManagerDecidedAtUtc { get; set; }
     [MaxLength(500)] public string? ManagerDecisionNote { get; set; }
     [System.ComponentModel.DataAnnotations.Schema.NotMapped]
-    public string DisplayStatus => Status == "Pending" ? $"Pending {((IsHalfDay || IsExtraFacility) && ApprovalLevel == "HR/Admin" ? "HR" : ApprovalLevel)}" : Status;
+    public string DisplayStatus => Status == "Pending" ? $"Pending {(ApprovalLevel == "HR/Admin" ? "HR" : ApprovalLevel)}" : Status;
     public DateTime AppliedAtUtc { get; set; } = DateTime.UtcNow;
 }

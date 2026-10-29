@@ -81,7 +81,7 @@ internal static class ExpenseViewChecks
             Console.WriteLine("PASS /Expense view and absolute advance partial render: " + mode);
         }
     }
-    private sealed class PreviewRouter : IRouter
+    internal sealed class PreviewRouter : IRouter
     {
         public Task RouteAsync(RouteContext context) => Task.CompletedTask;
         public VirtualPathData? GetVirtualPath(VirtualPathContext context)
@@ -95,8 +95,8 @@ internal static class ExpenseViewChecks
             return new VirtualPathData(this, path + (query.Length > 0 ? "?" + query : ""));
         }
     }
-    private sealed class TestSessionFeature : ISessionFeature { public ISession Session { get; set; } = null!; }
-    private sealed class EmptySession : ISession
+    internal sealed class TestSessionFeature : ISessionFeature { public ISession Session { get; set; } = null!; }
+    internal sealed class EmptySession : ISession
     {
         public bool IsAvailable => true; public string Id => "test"; public IEnumerable<string> Keys => Array.Empty<string>();
         public void Clear() { } public void Remove(string key) { } public void Set(string key, byte[] value) { }

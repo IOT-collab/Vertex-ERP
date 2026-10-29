@@ -16,7 +16,24 @@ namespace VertexERP.Data
         public DbSet<BiometricEnrollment> BiometricEnrollments => Set<BiometricEnrollment>();
         public DbSet<ModuleState> ModuleStates => Set<ModuleState>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+        public DbSet<NotificationReadReceipt> NotificationReadReceipts => Set<NotificationReadReceipt>();
         public DbSet<EmployeeFeedback> EmployeeFeedbacks => Set<EmployeeFeedback>();
+        public DbSet<FeedbackDocument> FeedbackDocuments => Set<FeedbackDocument>();
+        public DbSet<FeedbackDocumentSubmission> FeedbackDocumentSubmissions => Set<FeedbackDocumentSubmission>();
+        public DbSet<FeedbackDocumentAsset> FeedbackDocumentAssets => Set<FeedbackDocumentAsset>();
+
+        public DbSet<WhatsAppDeliveryEvent> WhatsAppDeliveryEvents => Set<WhatsAppDeliveryEvent>();
+        public DbSet<WhatsAppTaskNotification> WhatsAppTaskNotifications => Set<WhatsAppTaskNotification>();
+
+        // Task and outbox row are committed by the same EF transaction, in every assignment path.
+        private void QueueNewTaskNotifications()
+        {
+            ChangeTracker.DetectChanges();
+            var tasks = ChangeTracker.Entries<WorkTask>().Where(e => e.State == EntityState.Added).Select(e => e.Entity).ToList();
+            foreach (var task in tasks)
+                if (!ChangeTracker.Entries<WhatsAppTaskNotification>().Any(e => e.State != EntityState.Detached && ReferenceEquals(e.Entity.Task, task)))
+                    WhatsAppTaskNotifications.Add(new WhatsAppTaskNotification { Task = task, AssigneeId = task.AssigneeId });
+        }
 
         private List<AuditLog> CaptureAuditLogs()
         {
@@ -31,6 +48,7 @@ namespace VertexERP.Data
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
             SynchronizeMasterLabelsAsync(false).GetAwaiter().GetResult();
+            QueueNewTaskNotifications();
             var logs = CaptureAuditLogs();
             try { return base.SaveChanges(acceptAllChangesOnSuccess); }
             catch { foreach (var log in logs) Entry(log).State = EntityState.Detached; throw; }
@@ -39,6 +57,7 @@ namespace VertexERP.Data
         public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
             await SynchronizeMasterLabelsAsync(true, cancellationToken);
+            QueueNewTaskNotifications();
             var logs = CaptureAuditLogs();
             try { return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken); }
             catch { foreach (var log in logs) Entry(log).State = EntityState.Detached; throw; }
@@ -129,6 +148,15 @@ namespace VertexERP.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<WhatsAppDeliveryEvent>(entity => {
+                entity.HasIndex(x => x.EventKey).IsUnique();
+                entity.HasIndex(x => new { x.Applied, x.RequestId });
+            });
+            modelBuilder.Entity<WhatsAppTaskNotification>(entity => {
+                entity.HasIndex(x => x.TaskId).IsUnique();
+                entity.HasIndex(x => new { x.Status, x.NextAttemptAtUtc });
+                entity.HasOne(x => x.Task).WithMany().HasForeignKey(x => x.TaskId).OnDelete(DeleteBehavior.Cascade);
+            });
             modelBuilder.Entity<BiometricEnrollment>().HasOne(x => x.Employee).WithMany()
                 .HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.SetNull);
             modelBuilder.Entity<EmployeeCompany>().HasData(
@@ -281,6 +309,8 @@ modelBuilder.Entity<EmployeeLeaveBalance>(entity =>
             modelBuilder.Entity<LeaveRequest>(entity =>
             {
                 entity.ToTable("LeaveRequests");
+                entity.HasOne(request => request.SubmittedByHrUser).WithMany()
+                    .HasForeignKey(request => request.SubmittedByHrUserId).OnDelete(DeleteBehavior.Restrict);
                 entity.Property(request => request.AppliedAtUtc).HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.HasOne(request => request.Employee).WithMany()
                     .HasForeignKey(request => request.EmployeeId)
@@ -300,6 +330,26 @@ modelBuilder.Entity<EmployeeLeaveBalance>(entity =>
                 entity.HasOne(ticket => ticket.Employee).WithMany().HasForeignKey(ticket => ticket.EmployeeId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(ticket => ticket.ReportingManager).WithMany().HasForeignKey(ticket => ticket.ReportingManagerId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(ticket => ticket.ResolvedByUser).WithMany().HasForeignKey(ticket => ticket.ResolvedByUserId).OnDelete(DeleteBehavior.SetNull);
+            });
+            modelBuilder.Entity<NotificationReadReceipt>(entity => {
+                entity.ToTable("NotificationReadReceipts");
+                entity.HasIndex(x => new { x.UserId, x.EventKey }).IsUnique();
+                entity.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<FeedbackDocument>(entity => {
+                entity.ToTable("FeedbackDocuments"); entity.HasIndex(x => x.PublishedAtUtc);
+                entity.HasOne<AppUser>().WithMany().HasForeignKey(x => x.PublishedByUserId).OnDelete(DeleteBehavior.Restrict);
+            });
+            modelBuilder.Entity<FeedbackDocumentSubmission>(entity => {
+                entity.ToTable("FeedbackDocumentSubmissions"); entity.HasIndex(x => new { x.DocumentId, x.EmployeeId }).IsUnique();
+                entity.HasOne(x => x.Document).WithMany(x => x.Submissions).HasForeignKey(x => x.DocumentId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(x => x.Employee).WithMany().HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<AppUser>().WithMany().HasForeignKey(x => x.SubmittedByUserId).OnDelete(DeleteBehavior.Restrict);
+            });
+            modelBuilder.Entity<FeedbackDocumentAsset>(entity => {
+                entity.ToTable("FeedbackDocumentAssets"); entity.HasIndex(x => x.StoredFileName).IsUnique();
+                entity.HasOne(x => x.Document).WithMany(x => x.Assets).HasForeignKey(x => x.DocumentId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(x => x.Submission).WithMany(x => x.Assets).HasForeignKey(x => x.SubmissionId).OnDelete(DeleteBehavior.Restrict);
             });
             modelBuilder.Entity<EmployeeFeedback>(entity =>
             {

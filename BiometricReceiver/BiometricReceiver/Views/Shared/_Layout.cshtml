@@ -50,13 +50,16 @@
     <link href="~/css/ResponsiveEnhancements.css" rel="stylesheet" asp-append-version="true" />
     <link href="~/css/ResponsiveGuard.css" rel="stylesheet" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="~/css/notification-inbox.css" rel="stylesheet" asp-append-version="true" />
 </head>
 
 <body class="erp-document-shell">
 
     <!-- Header -->
-    <header>
-    </header>
+    @if (User.IsInRole("HR") || User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Employee") || User.IsInRole("User"))
+    {
+        <header class="ni-document-topbar"><a href="@(User.IsInRole("Employee") || User.IsInRole("User") ? "/Main/EmployeeHome" : User.IsInRole("Manager") ? "/Main/Manager" : "/Main/Dashboard")"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Vertex ERP</a><partial name="_NotificationBell" /></header>
+    }
 
     <!-- Main Page Content -->
     <div class="container">
@@ -102,5 +105,6 @@
     <!-- Page Specific Scripts -->
     @await RenderSectionAsync("Scripts", required: false)
 
+    @if (User.IsInRole("HR") || User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Employee") || User.IsInRole("User")) { <script src="~/js/notification-inbox.js" asp-append-version="true" defer></script> }
 </body>
 </html>

@@ -65,7 +65,7 @@ static class ExtraFacilityChecks
         var balance = new ManualLeaveBalance { EmployeeId = 7, Year = 2026, Category = "CL", TotalDays = 10 };
         LeaveBalanceCalculator.ApplyRequests(new[] { balance }, new[] { half, ordinary, shortLeave });
         Check(balance.AvailableDays == 9, "Facility never consumes CL entitlement even with matching category");
-        Check(LeaveApprovalWorkflow.CanTakeFinalAction(ordinary, false, true), "Existing admin action for regular leave unchanged");
+        Check(!LeaveApprovalWorkflow.CanTakeFinalAction(ordinary, false, true), "Admin remains view only for all leave categories");
         var duplicate = Facility(20, "Half Day");
         Check(ExtraLeaveFacility.Overlaps(duplicate, Facility(21, "Half Day")), "Duplicate half-day session blocked");
         var second = Facility(22, "Half Day"); second.HalfDaySession = "Second";

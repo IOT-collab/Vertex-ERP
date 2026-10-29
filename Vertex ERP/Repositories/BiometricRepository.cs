@@ -49,6 +49,8 @@ public sealed class BiometricRepository : IBiometricRepository
         await _db.AttendanceLogs.AsNoTracking().Include(log => log.Employee).Where(log => log.PunchTime >= from && log.PunchTime < to).OrderBy(log => log.PunchTime).ToListAsync(cancellationToken);
     public async Task<IReadOnlyList<Employee>> GetActiveEmployeesAsync(CancellationToken cancellationToken = default) =>
         await _db.Employees.AsNoTracking().Where(employee => employee.IsActive).OrderBy(employee => employee.FullName).ToListAsync(cancellationToken);
+    public async Task<IReadOnlyList<Employee>> GetAttendanceEmployeesAsync(CancellationToken cancellationToken = default) =>
+        await _db.Employees.AsNoTracking().ToListAsync(cancellationToken);
     public async Task<IReadOnlyList<BiometricEnrollment>> GetEnrollmentsAsync(CancellationToken cancellationToken = default) =>
         await _db.BiometricEnrollments.AsNoTracking().Include(x => x.Employee).ToListAsync(cancellationToken);
     public async Task<IReadOnlyList<EmployeeDeviceMapping>> GetActiveMappingsAsync(CancellationToken cancellationToken = default) =>

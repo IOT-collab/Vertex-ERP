@@ -600,3 +600,5 @@ body {
 @media (max-width: 700px) {
     .document-employee-grid, .document-type-grid, .stats-grid.document-summary { grid-template-columns: 1fr; }
 }
+
+.document-action-error{padding:14px 18px;border:1px solid var(--erp-danger);border-radius:10px;color:var(--erp-text);background:var(--erp-surface);line-height:1.6}

@@ -57,6 +57,11 @@ public sealed class MyRequestsController(ApplicationDbContext db) : Controller
                 TempData["LeaveError"] = "Check your reporting manager, dates, reason and half-day session / short leave times (maximum 2 hours).";
                 return RedirectToAction(nameof(EditLeave), new { id });
             }
+            if (!await LeaveApprovalWorkflow.ReportingManagerReadyAsync(db, employee))
+            {
+                TempData["LeaveError"]="Ask HR to assign an active reporting manager with an active login.";
+                return RedirectToAction(nameof(EditLeave),new{id});
+            }
             if (request.IsExtraFacility)
             {
                 var error = await ExtraLeaveFacility.ApplicationError(db, request);
@@ -123,7 +128,7 @@ public sealed class MyRequestsController(ApplicationDbContext db) : Controller
 
     private IActionResult LeaveError()
     {
-        TempData["LeaveError"] = "Only pending leave requests can be edited or deleted. Contact HR for approved leave changes.";
+        TempData["LeaveError"] = "Only your own pending applications can be edited or deleted. Contact HR for HR-submitted or approved leave changes.";
         return RedirectToAction("EmployeeLeaves", "Main");
     }
     private IActionResult QueryError()

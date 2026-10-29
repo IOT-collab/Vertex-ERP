@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" data-theme-user="">
+<head>
+    <meta charset="utf-8" />
+
+    <!-- Responsive / Mobile Support -->
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Update Employee Document - Vertex_ERP</title>
+    <script src="/js/theme.js?v=JsFUoRbzJn9KqZYtXXlz_zgyMbiK4eH1axphmpmIkAA"></script>
+    <script src="/js/locales/hi.js?v=hFJ_RNJGdkgnPk9ITiRnUgQBJlMSXuqSUt6KXt93j_Q"></script>
+    <script src="/js/language.js?v=Isl05HfqnXp40mGSnzRLGCvTWAXm4zkcRwiT43ZML-8"></script>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Site CSS -->
+    <link rel="stylesheet" href="/css/site.css?v=cd4LhcqAp-f0eafJnZ4NLs0KRiYzbHdrvXt1qOdS2ig" />
+
+    <!-- Common Back Button CSS -->
+    <link rel="stylesheet" href="/css/common-back-button.css?v=I_No4B9LuDEG5OsYVsR0wvx8iI69ak0A1w93Q1jqQFs" />
+
+    <!-- Common UI CSS -->
+    <link rel="stylesheet" href="/css/common-ui.css?v=S53GsNTcL6z5g1Hidd_Yx3pgZEZdG-8UrcYFOoy8fdo" />
+
+    <!-- Razor / Scoped CSS -->
+    <link rel="stylesheet" href="/Vertex ERP.styles.css" />
+
+    <!-- ERP Buttons CSS -->
+    <link rel="stylesheet" href="/css/erp-buttons.css?v=P4mvgzWZcgKRXGPpSOrorRhbVxqH2fwXxKOXbn9XWKs" />
+
+    <!-- Main ERP Layout CSS -->
+    <link rel="stylesheet" href="/css/Style.css?v=fbAK5ytKllCMCjrxL-dKhIFSSm8iPfd0fjHF9eJZZKQ" />
+    <link href="/css/hr-modules.css?v=eBF2BBH9XWbB6bStvHdxoVTBuAMjc5II2Tme8JMCKO8" rel="stylesheet" />
+    <link href="/css/theme.css?v=UqGZcSDh8Y1acQoWx9eApJDHTxV76rVFCFgSHBN6NFM" rel="stylesheet" />
+    <link href="/css/ResponsiveEnhancements.css?v=2RztQXGMRnIdoNkyjs46gz9km8jkvuDQEqmubWQAzD4" rel="stylesheet" />
+    <link href="/css/ResponsiveGuard.css?v=WcKT9WrzRXJcg1vDmRbqUUYc2gVwzs87uTYkyZxPsKE" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="/css/notification-inbox.css?v=AuXXfkaAxGiYXPKySVzJsieZf_N5mw0Ofv9Sy4grwzw" rel="stylesheet" />
+</head>
+
+<body class="erp-document-shell">
+
+    <!-- Header -->
+        <header b-wxicrxtll4 class="ni-document-topbar"><a href="/Main/Dashboard"><i b-wxicrxtll4 class="fa-solid fa-layer-group" aria-hidden="true"></i> Vertex ERP</a><a href="/Notifications" class="ni-bell" title="Notifications" aria-label="Open notifications" data-notification-bell><i class="fa-regular fa-bell" aria-hidden="true"></i><span class="ni-badge" data-notification-count hidden></span></a>
+</header>
+
+    <!-- Main Page Content -->
+    <div b-wxicrxtll4 class="container">
+        <main b-wxicrxtll4 role="main" class="pb-3">
+
+            <!-- Common Back Button -->
+            
+    <nav class="common-back-nav" aria-label="Page navigation">
+        <a class="common-back-button" title="Go Back" aria-label="Go Back" href="/Main/Hrms">
+            <svg class="common-back-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            <span>Back</span>
+        </a>
+    </nav>
+
+
+            <!-- Page Content -->
+            <style>
+.upload-page{--blue:#3b82f6;--panel:var(--erp-surface, #111f36);--panel2:var(--erp-surface, #0f1b30);--line:var(--erp-border, #2b3d5d);--text:var(--erp-text, #f1f5f9);--muted:var(--erp-text-muted, #aab8cf);width:min(1080px,100%);margin:22px auto;padding:clamp(18px,3vw,32px);background:var(--erp-surface, #0f1a2e)!important;border:1px solid var(--line);border-radius:20px;color:var(--text)!important}.upload-page *{box-sizing:border-box}.upload-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:22px}.upload-head h1{margin:0 0 6px;color:var(--erp-text, #fff)!important;font-size:clamp(26px,3vw,34px)}.upload-head p{margin:0;color:var(--muted)!important}.upload-back{color:#7db3ff!important;text-decoration:none;font-weight:700}.employee-search{padding:20px;background:var(--panel)!important;border:1px solid var(--line);border-radius:15px}.employee-search h2,.upload-form h2{margin:0 0 15px;color:var(--erp-text, #fff)!important;font-size:18px}.search-box{position:relative}.search-box>i{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--erp-primary, #60a5fa);pointer-events:none}.search-box input{width:100%;padding:13px 14px 13px 44px!important;border:1px solid var(--erp-border, #3a4f70)!important;border-radius:10px;background:var(--panel2)!important;color:var(--erp-text, #fff)!important}.employee-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-height:260px;overflow:auto;margin-top:12px}.employee-option{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);cursor:pointer}.employee-option[hidden]{display:none}.employee-option:hover,.employee-option.selected{border-color:var(--blue);background:var(--erp-surface-soft, #132b50)}.employee-option input{position:absolute;opacity:0}.employee-avatar{width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;background:var(--erp-primary, var(--erp-primary, #1d4ed8));color:var(--theme-accent-text, #fff)}.employee-option strong,.employee-option small{display:block}.employee-option strong{color:var(--erp-text, #fff)}.employee-option small{margin-top:3px;color:var(--muted)}.selected-employee{display:none;margin-top:15px;padding:13px;border-left:4px solid #22c55e;background:var(--erp-surface-soft, #12372f);color:var(--erp-text, #d1fae5)}.selected-employee.show{display:block}.upload-form{margin-top:18px;padding:20px;background:var(--panel)!important;border:1px solid var(--line);border-radius:15px}.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.upload-grid .wide{grid-column:1/-1}.upload-form label{display:flex;flex-direction:column;gap:7px;color:var(--erp-text, #e8f0fb)!important;font-size:13px;font-weight:700}.upload-form input,.upload-form select,.upload-form textarea{width:100%;padding:12px 13px!important;border:1px solid var(--erp-border, #3a4f70)!important;border-radius:10px;background:var(--panel2)!important;color:var(--erp-text, #fff)!important}.upload-form option{background:var(--panel2);color:var(--erp-text, #fff)}.file-drop{padding:25px!important;border:2px dashed #4a6b99!important;text-align:center}.upload-hint{color:var(--muted)!important;font-size:12px}.upload-submit{margin-top:18px;padding:13px 20px;border:0;border-radius:10px;background:var(--blue);color:var(--theme-accent-text, #fff);font-weight:800;cursor:pointer}.field-validation-error{color:var(--erp-danger, #fda4af)}.validation-summary-errors{padding:12px;background:var(--erp-surface-soft, #4c1d2b);color:var(--erp-danger, #fecdd3);border-radius:10px}
+@media(max-width:700px){.upload-page{margin:10px auto}.upload-head{flex-direction:column-reverse}.employee-results,.upload-grid{grid-template-columns:1fr}.upload-grid .wide{grid-column:auto}.upload-submit{width:100%}}
+</style>
+<main class="upload-page"><header class="upload-head"><div><h1>Update Employee Document</h1><p>Update document details or select a replacement file for this employee.</p></div><a class="upload-back" href="/Hr/EmpDocuments?employeeId=117"><i class="fa-solid fa-arrow-left"></i> Documents</a></header>
+ <p role="alert">The stored file is missing. Choose a replacement file to restore this document.</p> <form method="post" enctype="multipart/form-data" action="/Hr/UploadDocument"><input type="hidden" id="DocumentId" name="DocumentId" value="2" />
+ <section class="employee-search"><h2><i class="fa-solid fa-user-check"></i> 1. Select employee</h2><div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input id="employeeSearch" type="search" placeholder="Search by employee name, ID, department or designation" autocomplete="off" /></div><div class="employee-results" id="employeeResults"><label class="employee-option" data-search="doc-117 document employee accounts executive"><input type="radio" value="117" checked="checked" data-val="true" data-val-required="The EmployeeId field is required." id="EmployeeId" name="EmployeeId" /><span class="employee-avatar" data-no-localize>D</span><span><strong data-no-localize>Document Employee</strong><small data-no-localize>DOC-117 · Executive · Accounts</small></span></label></div><span class="field-validation-valid" data-valmsg-for="EmployeeId" data-valmsg-replace="true"></span><div id="selectedEmployee" class="selected-employee"></div></section>
+ <section class="upload-form"><h2><i class="fa-solid fa-cloud-arrow-up"></i> 2. Document details</h2><div class="upload-grid"><label>Document type<select data-val="true" data-val-length="The field DocumentType must be a string with a maximum length of 80." data-val-length-max="80" data-val-required="The DocumentType field is required." id="DocumentType" name="DocumentType"><option value="">Choose type</option><option selected="selected">Aadhaar Card</option><option>PAN Card</option><option>10th Certificate</option><option>12th Certificate</option><option>Graduation</option><option>Post Graduation</option><option>Employee Photo</option><option>Previous Company Documents</option><option>UAN Passbook</option><option>Other</option></select><span class="field-validation-valid" data-valmsg-for="DocumentType" data-valmsg-replace="true"></span></label><label>Document title<input placeholder="e.g. Aadhaar Card - Front and Back" type="text" data-val="true" data-val-length="The field DocumentName must be a string with a maximum length of 160." data-val-length-max="160" data-val-required="The DocumentName field is required." id="DocumentName" maxlength="160" name="DocumentName" value="Updated Aadhaar" /><span class="field-validation-valid" data-valmsg-for="DocumentName" data-valmsg-replace="true"></span></label><label class="wide">Replacement file (required) <span class="upload-hint">Current file: aadhaar.pdf. Upload a replacement to restore access.</span><input class="file-drop" required="required" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" type="file" id="File" name="File" /><span class="upload-hint">PDF, JPG, PNG, DOC or DOCX · Maximum 3 MB</span><span class="field-validation-valid" data-valmsg-for="File" data-valmsg-replace="true"></span></label><label class="wide">Notes (optional)<textarea rows="3" placeholder="Verification notes, document number reference, etc." data-val="true" data-val-length="The field Notes must be a string with a maximum length of 500." data-val-length-max="500" id="Notes" maxlength="500" name="Notes">
+</textarea><span class="field-validation-valid" data-valmsg-for="Notes" data-valmsg-replace="true"></span></label></div><button type="submit" class="upload-submit"><i class="fa-solid fa-shield-halved"></i> Save Document Changes</button></section>
+<input name="__RequestVerificationToken" type="hidden" value="CfDJ8AAAAAAAAAAAAAAAAAAAAABnZYlJvsnKRxbxEkwd0sHyZZbBY__xySbIZJbx-EEa5Nqi2k88q-YBcXAYB3iX68y6xXb7RFqVcppy0EXVLshmu9woj7omUAWRBbMCWyrXml2WqLpYyOfVyk4WSzUXDU4" /></form></main>
+<script>
+(() => {
+    const fileInput = document.getElementById('File');
+    const message = document.querySelector('[data-valmsg-for="File"]');
+    function validateFile() {
+        const oversized = [...fileInput.files].some(file => file.size > 3145728);
+        const error = oversized ? 'The file exceeds the 3 MB limit. Choose a file of 3 MB or less.' : '';
+        fileInput.setCustomValidity(error);
+        message.textContent = error;
+        message.classList.toggle('field-validation-error', oversized);
+        return !oversized;
+    }
+    fileInput.addEventListener('change', validateFile);
+    fileInput.form.addEventListener('submit', event => {
+        if (!validateFile()) { event.preventDefault(); fileInput.reportValidity(); }
+    });
+})();
+(() => { const search=document.getElementById('employeeSearch'), options=[...document.querySelectorAll('.employee-option')], selected=document.getElementById('selectedEmployee'); search.addEventListener('input',()=>{const query=search.value.trim().toLowerCase();options.forEach(option=>option.hidden=!option.dataset.search.includes(query));});options.forEach(option=>option.addEventListener('change',()=>{options.forEach(item=>item.classList.remove('selected'));option.classList.add('selected');selected.textContent='Selected: '+option.querySelector('strong').textContent+' — '+option.querySelector('small').textContent;selected.classList.add('show');})); const checked=document.querySelector('.employee-option input:checked');if(checked)checked.closest('.employee-option').dispatchEvent(new Event('change')); })();
+</script>
+
+
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer b-wxicrxtll4 class="border-top footer text-muted">
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Site JS -->
+    <script src="/js/site.js?v=hRQyftXiu1lLX2P9Ly9xa4gHJgLeR1uGN5qegUobtGo"></script>
+
+    <!-- Input Rules JS -->
+    <script src="/js/input-rules.js?v=JQN9Kjzy5AWiVxFC2yCCbkym3en2Fig1DQEPJ0ejERw"></script>
+
+    <!-- Page Specific Scripts -->
+    
+
+ <script src="/js/notification-inbox.js?v=DHsSX2KpTwqj8eItjcELsxpXdHGlaJA6IYDm-MvCDG4" defer></script> </body>
+</html>

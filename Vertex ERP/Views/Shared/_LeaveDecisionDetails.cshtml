@@ -1,4 +1,5 @@
 @model VertexERP.Models.LeaveRequest
+@if (Model.IsHrSubmitted) { <small>Applied by HR on behalf of employee · @Model.SubmittedByHrName</small> }
 @if (Model.IsExtraFacility) { <small>Extra paid facility - no regular leave deduction</small> }
 @if (Model.IsExtraFacility && Model.LeaveType == VertexERP.Services.ExtraLeaveFacility.ShortLeave)
 { <small>Short leave: @Model.ShortLeaveFrom?.ToString("HH:mm") - @Model.ShortLeaveTo?.ToString("HH:mm") (@((Model.ShortLeaveTo - Model.ShortLeaveFrom)?.TotalMinutes.ToString("0")) minutes)</small> }
@@ -14,6 +15,6 @@
 }
 @if (Model.DecidedAtUtc.HasValue)
 {
-    <small>@((Model.IsHalfDay || Model.IsExtraFacility) && Model.ApprovalLevel == "HR/Admin" ? "HR" : Model.ApprovalLevel): @Model.Status - @Model.DecidedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small>
+    <small>@(Model.ApprovalLevel == "HR/Admin" ? "HR" : Model.ApprovalLevel): @Model.Status - @Model.DecidedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small>
     @if (!string.IsNullOrWhiteSpace(Model.DecisionNote)) { <small>@Model.DecisionNote</small> }
 }

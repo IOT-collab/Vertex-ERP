@@ -1477,6 +1477,128 @@ namespace Vertex_ERP.Migrations
                     b.ToTable("ExpenseClaims", (string)null);
                 });
 
+            modelBuilder.Entity("VertexERP.Models.FeedbackDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Instructions")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<DateTime>("PublishedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("PublishedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PublishedAtUtc");
+
+                    b.HasIndex("PublishedByUserId");
+
+                    b.ToTable("FeedbackDocuments", (string)null);
+                });
+
+            modelBuilder.Entity("VertexERP.Models.FeedbackDocumentAsset", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("character varying(260)");
+
+                    b.Property<int>("Revision")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("character varying(260)");
+
+                    b.Property<int?>("SubmissionId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UploadedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentId");
+
+                    b.HasIndex("StoredFileName")
+                        .IsUnique();
+
+                    b.HasIndex("SubmissionId");
+
+                    b.ToTable("FeedbackDocumentAssets", (string)null);
+                });
+
+            modelBuilder.Entity("VertexERP.Models.FeedbackDocumentSubmission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("SubmittedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("SubmittedByUserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("SubmittedByUserId");
+
+                    b.HasIndex("DocumentId", "EmployeeId")
+                        .IsUnique();
+
+                    b.ToTable("FeedbackDocumentSubmissions", (string)null);
+                });
+
             modelBuilder.Entity("VertexERP.Models.GeneratedSalarySlip", b =>
                 {
                     b.Property<int>("Id")
@@ -1707,6 +1829,13 @@ namespace Vertex_ERP.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<string>("SubmittedByHrName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int?>("SubmittedByHrUserId")
+                        .HasColumnType("integer");
+
                     b.Property<DateOnly>("ToDate")
                         .HasColumnType("date");
 
@@ -1717,6 +1846,8 @@ namespace Vertex_ERP.Migrations
                     b.HasIndex("DecidedByUserId");
 
                     b.HasIndex("EmployeeId");
+
+                    b.HasIndex("SubmittedByHrUserId");
 
                     b.ToTable("LeaveRequests", (string)null);
                 });
@@ -1786,6 +1917,33 @@ namespace Vertex_ERP.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ModuleStates");
+                });
+
+            modelBuilder.Entity("VertexERP.Models.NotificationReadReceipt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("EventKey")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<DateTime>("ReadAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "EventKey")
+                        .IsUnique();
+
+                    b.ToTable("NotificationReadReceipts", (string)null);
                 });
 
             modelBuilder.Entity("VertexERP.Models.PasswordResetToken", b =>
@@ -2111,6 +2269,140 @@ namespace Vertex_ERP.Migrations
                         .IsUnique();
 
                     b.ToTable("RecruitmentHiringRecords", (string)null);
+                });
+
+            modelBuilder.Entity("VertexERP.Models.WhatsAppDeliveryEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("Applied")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ErrorCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("EventKey")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("MetaMessageId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ReceivedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RecipientNumberHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("RequestId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventKey")
+                        .IsUnique();
+
+                    b.HasIndex("Applied", "RequestId");
+
+                    b.ToTable("WhatsAppDeliveryEvents");
+                });
+
+            modelBuilder.Entity("VertexERP.Models.WhatsAppTaskNotification", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("AssigneeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeliveredAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeliveryErrorCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("DeliveryStatus")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<DateTime?>("DeliveryUpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ErrorCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int?>("HttpStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("LastAttemptAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MetaMessageId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("NextAttemptAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ProviderMessageId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("ReadAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RecipientNumberHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<int>("TaskId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskId")
+                        .IsUnique();
+
+                    b.HasIndex("Status", "NextAttemptAtUtc");
+
+                    b.ToTable("WhatsAppTaskNotifications");
                 });
 
             modelBuilder.Entity("VertexERP.Models.WorkTask", b =>
@@ -2442,6 +2734,58 @@ namespace Vertex_ERP.Migrations
                     b.Navigation("ReportingManager");
                 });
 
+            modelBuilder.Entity("VertexERP.Models.FeedbackDocument", b =>
+                {
+                    b.HasOne("VertexERP.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("PublishedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("VertexERP.Models.FeedbackDocumentAsset", b =>
+                {
+                    b.HasOne("VertexERP.Models.FeedbackDocument", "Document")
+                        .WithMany("Assets")
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VertexERP.Models.FeedbackDocumentSubmission", "Submission")
+                        .WithMany("Assets")
+                        .HasForeignKey("SubmissionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Document");
+
+                    b.Navigation("Submission");
+                });
+
+            modelBuilder.Entity("VertexERP.Models.FeedbackDocumentSubmission", b =>
+                {
+                    b.HasOne("VertexERP.Models.FeedbackDocument", "Document")
+                        .WithMany("Submissions")
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VertexERP.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("VertexERP.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("SubmittedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("VertexERP.Models.GeneratedSalarySlip", b =>
                 {
                     b.HasOne("VertexERP.Models.Employee", "Employee")
@@ -2490,11 +2834,18 @@ namespace Vertex_ERP.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("VertexERP.Models.AppUser", "SubmittedByHrUser")
+                        .WithMany()
+                        .HasForeignKey("SubmittedByHrUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("AssignedApproverEmployee");
 
                     b.Navigation("DecidedByUser");
 
                     b.Navigation("Employee");
+
+                    b.Navigation("SubmittedByHrUser");
                 });
 
             modelBuilder.Entity("VertexERP.Models.ManualLeaveBalance", b =>
@@ -2506,6 +2857,17 @@ namespace Vertex_ERP.Migrations
                         .IsRequired();
 
                     b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("VertexERP.Models.NotificationReadReceipt", b =>
+                {
+                    b.HasOne("VertexERP.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("VertexERP.Models.PasswordResetToken", b =>
@@ -2634,6 +2996,17 @@ namespace Vertex_ERP.Migrations
                     b.Navigation("Department");
                 });
 
+            modelBuilder.Entity("VertexERP.Models.WhatsAppTaskNotification", b =>
+                {
+                    b.HasOne("VertexERP.Models.WorkTask", "Task")
+                        .WithMany()
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Task");
+                });
+
             modelBuilder.Entity("VertexERP.Models.WorkTask", b =>
                 {
                     b.HasOne("VertexERP.Models.Employee", "Assignee")
@@ -2675,6 +3048,18 @@ namespace Vertex_ERP.Migrations
             modelBuilder.Entity("VertexERP.Models.Employee", b =>
                 {
                     b.Navigation("DirectReports");
+                });
+
+            modelBuilder.Entity("VertexERP.Models.FeedbackDocument", b =>
+                {
+                    b.Navigation("Assets");
+
+                    b.Navigation("Submissions");
+                });
+
+            modelBuilder.Entity("VertexERP.Models.FeedbackDocumentSubmission", b =>
+                {
+                    b.Navigation("Assets");
                 });
 #pragma warning restore 612, 618
         }

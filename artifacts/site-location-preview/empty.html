@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" data-theme-user="">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Site Employee Location - Vertex ERP</title>
+    <script src="/js/theme.js?v=JsFUoRbzJn9KqZYtXXlz_zgyMbiK4eH1axphmpmIkAA"></script>
+    <script src="/js/locales/hi.js?v=hFJ_RNJGdkgnPk9ITiRnUgQBJlMSXuqSUt6KXt93j_Q"></script>
+    <script src="/js/language.js?v=Isl05HfqnXp40mGSnzRLGCvTWAXm4zkcRwiT43ZML-8"></script>
+    <link href="/css/Style.css?v=fbAK5ytKllCMCjrxL-dKhIFSSm8iPfd0fjHF9eJZZKQ" rel="stylesheet" />
+    <link href="/css/site.css?v=cd4LhcqAp-f0eafJnZ4NLs0KRiYzbHdrvXt1qOdS2ig" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="/css/common-ui.css?v=S53GsNTcL6z5g1Hidd_Yx3pgZEZdG-8UrcYFOoy8fdo" rel="stylesheet" />
+    <link href="/css/common-back-button.css?v=I_No4B9LuDEG5OsYVsR0wvx8iI69ak0A1w93Q1jqQFs" rel="stylesheet" />
+    <link href="/css/erp-buttons.css?v=P4mvgzWZcgKRXGPpSOrorRhbVxqH2fwXxKOXbn9XWKs" rel="stylesheet" />
+    <link href="/css/ResponsiveEnhancements.css?v=2RztQXGMRnIdoNkyjs46gz9km8jkvuDQEqmubWQAzD4" rel="stylesheet" />
+    <link href="/css/hr-modules.css?v=eBF2BBH9XWbB6bStvHdxoVTBuAMjc5II2Tme8JMCKO8" rel="stylesheet" />
+    <link href="/css/theme.css?v=UqGZcSDh8Y1acQoWx9eApJDHTxV76rVFCFgSHBN6NFM" rel="stylesheet" />
+    <link href="/css/ResponsiveGuard.css?v=WcKT9WrzRXJcg1vDmRbqUUYc2gVwzs87uTYkyZxPsKE" rel="stylesheet" />
+    <link href="/css/notification-inbox.css?v=AuXXfkaAxGiYXPKySVzJsieZf_N5mw0Ofv9Sy4grwzw" rel="stylesheet" />
+</head>
+<body class="erp-shell   ">
+
+
+        <link href="/css/vertex-ai-assistant.css?v=9lZ1HAUsNRRsVterPPmptbXyxUn2SfvtpoV2pisqnGw" rel="stylesheet" />
+<section class="ai-assistant" id="vertex-ai-assistant"
+         aria-label="Vertex AI Assistant"
+         data-firebase-config="{}"
+         data-app-check-site-key=""
+         data-development="false"
+         data-admin="false"
+         data-inline-ui="false">
+    <input name="__RequestVerificationToken" type="hidden" value="CfDJ8AAAAAAAAAAAAAAAAAAAAADf27_WAINez2m4Wob-ZHn1zVvQNz2uO-jio6-nu_hbQ1YmmzCaxbL8Ei7_KBb_wlkz7S-CuJEM-Eb5s8eUeneitM__hqO2FxpU1DOk7lhSCgmLyOVCm_9tnjlXaql9qvw" />
+    <button type="button" class="ai-toggle" id="aiToggle" title="Open Vertex AI Assistant" aria-label="Open Vertex AI Assistant">
+        <span class="ai-pulse"></span><strong>AI</strong>
+    </button>
+    <div class="ai-panel" id="aiPanel" aria-label="Vertex AI chat">
+        <div class="ai-panel-header">
+            <div>
+                <span class="system-badge">GEMINI AI</span>
+                <h3>Vertex AI</h3>
+                <p class="sub-text">Ask general questions or ask about your authorized team data.</p>
+            </div>
+            <button type="button" class="ai-close" id="aiClose" title="Close assistant" aria-label="Close assistant">×</button>
+        </div>
+        <div class="ai-messages" id="aiMessages" role="log" aria-live="polite" aria-relevant="additions">
+            <div class="ai-message assistant">Hello! I can answer general questions and help with permitted team attendance, leave, and task information.</div>
+        </div>
+        <div class="ai-status" id="aiStatus" role="status">Ready</div>
+        <div class="ai-attachment" id="aiAttachment" hidden><span id="aiAttachmentName"></span><button type="button" id="aiAttachmentRemove" aria-label="Remove attachment">×</button></div>
+        <div class="ai-controls">
+            <button type="button" class="ai-attach" id="aiAttach" title="Attach an image or PDF" aria-label="Attach an image or PDF"><i class="fa-solid fa-paperclip" aria-hidden="true"></i></button>
+            <input type="file" id="aiFile" accept="image/png,image/jpeg,image/webp,application/pdf" hidden />
+            <input type="text" id="aiInput" maxlength="500" placeholder="Ask Vertex AI..." autocomplete="off" />
+            <button type="button" class="ai-send" id="aiSend">Send</button>
+        </div>
+        <p class="ai-file-note">Selected images or PDFs are sent to Gemini for analysis. Do not upload passwords, payroll, bank, identity, or confidential employee records.</p>
+    </div>
+</section>
+<script type="module" src="/js/vertex-ai-assistant.js?v=gnoE8mZivygoni00kh_L8TrVsifrlzf4aFsppRrhG7Q"></script>
+
+
+    <!-- Pure CSS Sidebar Drawer Controller Toggle -->
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-check" />
+
+    <div class="layout">
+
+        <!-- Mobile Drawer Overlay Screen -->
+        <label for="sidebar-toggle" class="sidebar-overlay"></label>
+
+        <!-- Sidebar Navigation Drawer -->
+        <aside class="sidebar">
+            <div class="logo">
+                <a class="erp-logo-link" href="/Main/Dashboard" aria-label="Go to Dashboard">
+                    <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                    <span>Vertex ERP</span>
+                </a>
+                    <label for="sidebar-toggle" class="sidebar-close-btn">&times;</label>
+            </div>
+
+            <ul class="sidebar-menu">
+                    <li><a href="/Main/Dashboard"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Dashboard</span></a></li>
+                    <li><a href="/Main/Employees"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Employees</span></a></li>
+                    <li><a href="/Main/Attendence"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
+                    <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Site Employee Location</span></a></li>
+                    <li><a href="/Main/LeaveManagement"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Manual Mark Attendance</span></a></li>
+                    <li><a href="/Main/CompanyHoliday"><i class="fa-regular fa-calendar-days" aria-hidden="true"></i><span>Company Holiday</span></a></li>
+                    <li><a href="/Notifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Notifications</span></a></li>
+                    <li><a href="/Main/WorkflowManagement"><i class="fa-solid fa-code-pull-request" aria-hidden="true"></i><span>Leave Approvals & Employee Queries</span></a></li>
+                    <li><a href="/Main/Hrms"><i class="fa-solid fa-user-tie" aria-hidden="true"></i><span>HR Management</span></a></li>
+                    <li><a href="/Main/OrderTracking"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i><span>Shipment Tracking</span></a></li>
+                    <li><a href="/Main/TaskMgm"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Task Management</span></a></li>
+                    <li><a href="/Main/ProjectMgm"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Project Management</span></a></li>
+                        <li><a href="/Main/BankUpdateRequests"><i class="fa-solid fa-building-circle-check"></i><span>Bank Update Requests</span></a></li>
+                <li><a href="/Theme/Index"><i class="fa-solid fa-palette" aria-hidden="true"></i><span>Theme</span></a></li>
+                <li><a href="/Language/Index"><i class="fa-solid fa-language" aria-hidden="true"></i><span>Language</span></a></li>
+                    <li><a href="/Feedback/Inbox"><i class="fa-solid fa-comments" aria-hidden="true"></i><span>Feedback &amp; Response</span></a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Dashboard Workspace Panel -->
+        <main class="main-content">
+
+            <!-- Global Action Application Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <label for="sidebar-toggle" class="hamburger-menu-btn" title="Open navigation" aria-label="Open navigation">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </label>
+                    <a class="topbar-brand" href="/Main/Dashboard" aria-label="Go to Dashboard">
+                        <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                        <span>Vertex ERP</span>
+                    </a>
+                </div>
+
+                <div class="profile">
+ <a href="/Notifications" class="ni-bell" title="Notifications" aria-label="Open notifications" data-notification-bell><i class="fa-regular fa-bell" aria-hidden="true"></i><span class="ni-badge" data-notification-count hidden></span></a>
+                     <span class="profile-text" title="Signed in as Preview">Welcome Preview</span>
+                    <form method="post" style="display:inline" action="/Main/Logout">
+                        <button class="logout-btn" type="submit" title="Logout">Logout</button>
+                    <input name="__RequestVerificationToken" type="hidden" value="CfDJ8AAAAAAAAAAAAAAAAAAAAADf27_WAINez2m4Wob-ZHn1zVvQNz2uO-jio6-nu_hbQ1YmmzCaxbL8Ei7_KBb_wlkz7S-CuJEM-Eb5s8eUeneitM__hqO2FxpU1DOk7lhSCgmLyOVCm_9tnjlXaql9qvw" /></form>
+                </div>
+            </header>
+
+            <!-- Embedded Nested Page Target Body Canvas Wrapper -->
+            <div class="page-content">
+                
+    <nav class="common-back-nav" aria-label="Page navigation">
+        <button type="button"
+                class="common-back-button"
+                onclick="window.history.back()"
+                title="Go Back"
+                aria-label="Go Back">
+            <svg class="common-back-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            <span>Back</span>
+        </button>
+    </nav>
+
+                <link href="/css/site-location-cards.css?v=pEjIGp4tDIHQ3QKClY1JuSO-cpznstrPNK-tXQ7drOQ" rel="stylesheet" />
+<main class="sl-page" data-site-location-page>
+<header class="sl-header"><div><span class="sl-kicker">SITE ATTENDANCE</span><h1>Site Employee Location</h1><p>Employee recorded site check-ins and check-outs. GPS is captured at attendance time, not continuously.</p></div><span class="sl-live"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i> Updates every 15 seconds</span></header>
+<form method="get" class="sl-date" action="/Main/LocationTracking"><label for="sl-date">Attendance date</label><input id="sl-date" name="date" type="date" min="2000-01-01" max="2100-12-31" value="2026-10-29" required/><button type="submit">View</button></form>
+<div class="sl-grid" data-site-location-content>
+<aside class="sl-roster"><div class="sl-section-title"><h2>Site employees <span>0</span></h2><small>29 Oct 2026</small></div>
+<div class="sl-empty"><i class="fa-solid fa-location-dot" aria-hidden="true"></i><strong>No site attendance found</strong><p>No employee has marked site attendance for this date.</p></div></aside>
+<section class="sl-details" aria-label="Selected employee site attendance">
+<div class="sl-panel sl-empty"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><h2>Recorded site locations</h2><p>Employee cards will appear automatically as site attendance is marked.</p></div></section></div><p class="sl-refresh-state" data-site-refresh-status role="status"></p></main>
+<script src="/js/site-location-cards.js?v=LNZwImMsrydoGJKRuRzWAZzUOIpE6GgmofNvJa0JbYo" defer></script>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    
+    <script src="/js/input-rules.js?v=JQN9Kjzy5AWiVxFC2yCCbkym3en2Fig1DQEPJ0ejERw"></script>
+    <script>
+        (() => {
+            const attendanceSelectors = {
+                '/Main/Attendence': '.attendance-panel-container',
+                '/Main/Dashboard': '[data-attendance-auto-refresh]',
+                '/Main/DashboardAttendance': '.dashboard-attendance-page',
+                '/Main/EmployeeAttendance': '.employee-section',
+                '/Main/EmployeeAssets': '.employee-section',
+                '/Main/Hrms': '.hrms-page'
+            };
+            const selector = attendanceSelectors[window.location.pathname];
+            const target = document.querySelector('[data-attendance-auto-refresh]') || (selector ? document.querySelector(selector) : null);
+            if (!target) return;
+            let refreshing = false;
+            const refreshAttendanceInBackground = async () => {
+                if (refreshing || document.hidden || document.activeElement?.matches('input, select, textarea')) return;
+                refreshing = true;
+                try {
+                    const response = await fetch(window.location.href, { cache: 'no-store', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!response.ok) return;
+                    const nextDocument = new DOMParser().parseFromString(await response.text(), 'text/html');
+                    const nextTarget = nextDocument.querySelector('[data-attendance-auto-refresh]') || (selector ? nextDocument.querySelector(selector) : null);
+                    if (nextTarget) target.innerHTML = nextTarget.innerHTML;
+                } catch {
+                    // A temporary connection problem must not disturb the current screen.
+                } finally {
+                    refreshing = false;
+                }
+            };
+            window.setInterval(refreshAttendanceInBackground, 15000);
+            document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshAttendanceInBackground(); });
+        })();
+    </script>
+ <script src="/js/notification-inbox.js?v=DHsSX2KpTwqj8eItjcELsxpXdHGlaJA6IYDm-MvCDG4" defer></script> </body>
