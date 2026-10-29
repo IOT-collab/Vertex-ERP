@@ -1,0 +1,6 @@
+VertexERP Release package
+Target: linux-x64, framework-dependent .NET 8, ASP.NET Core 8 runtime required.
+Main entry: dotnet "Vertex ERP.dll" from /home/azureuser/erp-app.
+All appsettings*.json and remoteattendance.json files are deliberately excluded. Preserve existing server configuration files and App_Data during synchronization; never copy local appsettings from the raw publish directory.
+The BiometricReceiver Linux DLL is included in the bundle. Current ERP startup auto-launch logic only looks for BiometricReceiver.exe, so verify an independent Linux receiver service/listener on port 8082 before deployment. Do not assume it is launched by erp-app.service.
+MSG91 auth is read from Key Vault at startup. No AuthKey or database credential is included. Keep SendingEnabled=false in the systemd environment.

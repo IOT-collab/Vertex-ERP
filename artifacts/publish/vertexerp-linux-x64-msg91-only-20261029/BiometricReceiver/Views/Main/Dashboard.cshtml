@@ -1,0 +1,1234 @@
+@*
+    ASP.NET Core MVC ERP Master Dashboard View
+*@
+
+@model VertexERP.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "ERP Master Dashboard";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var canOpenCalendar = User.IsInRole("HR") || User.IsInRole("Admin");
+    var dashboardToday = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(5.5));
+    ViewData["DashboardDesign"] = true;
+}
+
+<link href="~/css/Dashboard.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/DashboardDesign.css" rel="stylesheet" asp-append-version="true" />
+@if (canOpenCalendar)
+{
+    <partial name="_DashboardCalendar" model="new VertexERP.Models.CompanyHolidayCalendar(DateTimeOffset.UtcNow)" />
+}
+
+<div class="dashboard dashboard-studio">
+
+    <!-- =========================
+         HEADER
+    ========================== -->
+    <header class="page-header">
+
+        <div class="header-text">
+            <span class="system-badge">Enterprise Resource Planning</span>
+
+            <h2>Enterprise Overview</h2>
+
+            <p>
+                Welcome back.
+                Here is your operational summary for today.
+            </p>
+        </div>
+
+        <div class="header-actions">
+
+            <!-- Search -->
+            <div class="search-bar">
+                <span class="search-icon"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+
+                <input type="text" id="dashboardEmployeeSearch"
+                       placeholder="Search employees..." />
+
+                <span class="search-shortcut">⌘</span>
+            </div>
+
+            <!-- Current Date -->
+            <div class="date-box" id="dashboardCalendarTrigger" role="@(canOpenCalendar ? "button" : null)" tabindex="@(canOpenCalendar ? "0" : null)" aria-haspopup="@(canOpenCalendar ? "dialog" : null)" aria-controls="@(canOpenCalendar ? "dashboardCalendar" : null)" aria-label="@(canOpenCalendar ? "Open calendar" : null)">
+
+                <span class="calendar-icon"><i class="fa-solid fa-calendar-days" aria-hidden="true"></i></span>
+
+                <div>
+                    <strong>
+                        @dashboardToday.ToString("dddd")
+                    </strong>
+
+                    <span>
+                        @dashboardToday.ToString("dd MMM yyyy")
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- AI Voice -->
+            <button class="btn-ai-mic"
+                    id="aiHeaderMic"
+                    type="button"
+                    title="Ask Vertex AI by voice">
+
+                <i class="fa-solid fa-microphone" aria-hidden="true"></i>
+                <span class="mic-dot"></span>
+
+            </button>
+
+
+            <!-- User Avatar -->
+            <div class="user-avatar"
+                 title="User">
+
+                <i class="fa-solid fa-user" aria-hidden="true"></i>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================
+         KPI CARDS
+    ========================== -->
+
+    <section class="card-row" data-attendance-auto-refresh>
+
+        <!-- Present Today -->
+        <a class="dashboard-card dashboard-card-link status-blue" href="@Url.Action("DashboardAttendance", "Main", new { status = "Present" })" aria-label="Show employees present today">
+
+            <div class="card-meta">
+
+                <span>Present</span>
+
+                <div class="card-icon blue-icon">
+                    <i class="fa-solid fa-user-check" aria-hidden="true"></i>
+                </div>
+
+            </div>
+
+            <div class="card-body-metrics">
+
+                <!-- Dynamic Value -->
+                <h2>@Model.PresentToday</h2>
+
+                <span class="trend neutral">Today</span>
+
+            </div>
+
+            <partial name="_DashboardCategoryCounts" model='Model.AttendanceCategories.GetValueOrDefault("Present") ?? new VertexERP.Models.DashboardCategoryCount(0, 0, 0)' />
+            <partial name="_DashboardSparkline" model='("Present", Model.WeeklyAttendance.Select(day => day.Count).ToArray())' />
+            <div class="card-footer-info">Attendance recorded today</div>
+
+        </a>
+
+
+        <!-- Absent Today -->
+        <a class="dashboard-card dashboard-card-link status-red" href="@Url.Action("DashboardAttendance", "Main", new { status = "Absent" })" aria-label="Show employees absent today">
+
+            <div class="card-meta">
+
+                <span>Absent</span>
+
+                <div class="card-icon red-icon">
+                    <i class="fa-solid fa-user-xmark" aria-hidden="true"></i>
+                </div>
+
+            </div>
+
+            <div class="card-body-metrics">
+
+                <!-- Dynamic Value -->
+                <h2>@Model.AbsentToday</h2>
+
+                <span class="trend neutral">Today</span>
+
+            </div>
+
+            <partial name="_DashboardCategoryCounts" model='Model.AttendanceCategories.GetValueOrDefault("Absent") ?? new VertexERP.Models.DashboardCategoryCount(0, 0, 0)' />
+            <partial name="_DashboardSparkline" model='("Absent", Model.WeeklyAttendance.Select(day => day.Absent).ToArray())' />
+            <div class="card-footer-info">Excludes approved leave, Sundays and company holidays</div>
+
+        </a>
+
+
+        <!-- Late Arrivals -->
+        <a class="dashboard-card dashboard-card-link status-orange" href="@Url.Action("DashboardAttendance", "Main", new { status = "Late" })" aria-label="Show employees who arrived late today">
+
+            <div class="card-meta">
+
+                <span>Late</span>
+
+                <div class="card-icon orange-icon">
+                    <i class="fa-solid fa-clock" aria-hidden="true"></i>
+                </div>
+
+            </div>
+
+            <div class="card-body-metrics">
+
+                <!-- Dynamic Value -->
+                <h2>@Model.LateToday</h2>
+
+                <span class="trend warning">Today</span>
+
+            </div>
+
+            <partial name="_DashboardCategoryCounts" model='Model.AttendanceCategories.GetValueOrDefault("Late") ?? new VertexERP.Models.DashboardCategoryCount(0, 0, 0)' />
+            <partial name="_DashboardSparkline" model='("Late", Model.WeeklyAttendance.Select(day => day.Late).ToArray())' />
+            <div class="card-footer-info">Late arrivals today</div>
+
+        </a>
+
+
+        <!-- Employees On Leave -->
+        <a class="dashboard-card dashboard-card-link status-purple" href="@Url.Action("DashboardAttendance", "Main", new { status = "Leave" })" aria-label="Show employees on approved leave today">
+
+            <div class="card-meta">
+
+                <span>Leave</span>
+
+                <div class="card-icon purple-icon">
+                    <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
+                </div>
+
+            </div>
+
+            <div class="card-body-metrics">
+
+                <!-- Dynamic Value -->
+                <h2>@Model.OnLeaveToday</h2>
+
+                <span class="trend neutral">Today</span>
+
+            </div>
+
+            <partial name="_DashboardCategoryCounts" model='Model.AttendanceCategories.GetValueOrDefault("Leave") ?? new VertexERP.Models.DashboardCategoryCount(0, 0, 0)' />
+            <partial name="_DashboardSparkline" model='("Leave", Model.WeeklyAttendance.Select(day => day.Leave).ToArray())' />
+            <div class="card-footer-info">Employees on approved leave</div>
+
+        </a>
+
+    </section>
+
+
+    <!-- =========================
+         ANALYTICS
+    ========================== -->
+
+    <section class="analytics-row">
+
+
+        <!-- Workforce Trend -->
+        <div class="analytics-card analytics-wide">
+
+            <div class="box-header">
+
+                <div>
+
+                    <h3><i class="fa-solid fa-chart-line section-icon" aria-hidden="true"></i> Workforce Trend</h3>
+
+                    <p class="sub-text">
+                        Attendance performance across the current week
+                    </p>
+
+                </div>
+
+                <span class="badge-count">
+                    Live Trend
+                </span>
+
+            </div>
+
+
+            <div class="line-chart"
+                 aria-label="Weekly attendance trend graph">
+
+                @{ var chartMaximum = Math.Max(50, (int)Math.Ceiling(Model.WeeklyAttendance.Select(day => day.Count).DefaultIfEmpty(0).Max() / 25d) * 25); }
+                <div class="workforce-simple-caption"><span></span>Present</div>
+                <div class="workforce-simple-chart">
+                    <div class="workforce-axis" aria-hidden="true"><span>@chartMaximum</span><span>@(chartMaximum / 2d)</span><span>0</span></div>
+                    <div class="workforce-simple-grid">
+                    @foreach (var day in Model.WeeklyAttendance)
+                    {
+                        var height = day.Count * 100d / chartMaximum;
+                        <div class="workforce-simple-day">
+                            <div class="workforce-simple-column">
+                                <div class="workforce-simple-bar @(day.Count == 0 ? "is-zero" : "")" style="--bar-height:@(height.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%">
+                                    <strong>@day.Count</strong><span></span>
+                                </div>
+                            </div>
+                            <small>@day.Label</small>
+                        </div>
+                    }
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Department Load -->
+        <div class="analytics-card task-health-link" role="link" tabindex="0" onclick="window.location.href='@Url.Action("TaskMgm", "Main")'" onkeydown="if(event.key==='Enter'||event.key===' '){window.location.href='@Url.Action("TaskMgm", "Main")'}">
+
+            <div class="box-header">
+
+                <div>
+
+                    <h3><i class="fa-solid fa-chart-column section-icon" aria-hidden="true"></i> Department Load</h3>
+
+                    <p class="sub-text">
+                        Open activity by team
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="department-load-list"
+                 aria-label="Department workload bar chart">
+                @{ var maximumDepartmentCount = Math.Max(1, Model.Departments.Select(item => item.Count).DefaultIfEmpty(0).Max()); }
+                @foreach (var department in Model.Departments)
+                {
+                    var width = department.Count * 100 / maximumDepartmentCount;
+                    <div class="department-load-item">
+                        <div class="department-load-heading"><span>@department.Name</span><strong>@department.Count</strong></div>
+                        <div class="department-load-track" aria-hidden="true"><span style="width:@width%"></span></div>
+                    </div>
+                }
+                @if (!Model.Departments.Any())
+                {
+                    <p class="sub-text">No departments available.</p>
+                }
+            </div>
+
+        </div>
+
+
+        <!-- Approval Health -->
+        <div class="analytics-card">
+
+            <div class="box-header">
+
+                <div>
+
+                    <h3><i class="fa-solid fa-chart-pie section-icon" aria-hidden="true"></i> Task Health</h3>
+
+                    <p class="sub-text">
+                        Average progress across all tasks
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="radial-chart">
+
+                @{ var completion = Model.TaskProgressPercentage; }
+                <div class="radial-ring" id="taskHealthRing" data-url="@Url.Action("TaskHealth", "Main")" style="--progress:@completion">
+                    <span id="taskHealthProgress">@completion%</span>
+                </div>
+
+
+                <div class="radial-details">
+
+                    <div>
+
+                        <strong id="taskHealthClosed">@Model.CompletedTasks</strong>
+
+                        <span>
+                            Closed
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong id="taskHealthOpen">@Model.OpenTasks</strong>
+
+                        <span>
+                            Open
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong id="taskHealthOverdue">@Model.OverdueTasks</strong>
+
+                        <span>
+                            Overdue
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <p id="taskHealthLiveStatus" class="sub-text" role="status">Live · refreshes every 5 seconds</p>
+                <a asp-controller="Main" asp-action="TaskMgm" class="task-health-open">Open Task Management <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                <script src="~/js/task-health.js" asp-append-version="true"></script>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <section class="content-row">
+
+
+        <!-- =====================
+             EMPLOYEE DIRECTORY
+        ====================== -->
+
+        <div class="table-card-wrapper">
+
+            <div class="table-box">
+
+
+                <div class="box-header">
+
+                    <div>
+
+                        <h3>
+                            <i class="fa-solid fa-address-book section-icon" aria-hidden="true"></i> Recent Active Directory
+                        </h3>
+
+                        <p class="sub-text">
+                            Real-time status of cross-departmental personnel
+                        </p>
+
+                    </div>
+
+
+                    <div class="table-controls">
+
+                        <select class="select-filter" id="dashboardDepartmentFilter">
+
+                            <option value="">
+                                All Departments
+                            </option>
+                            @foreach (var department in Model.Departments)
+                            {
+                                <option value="@department.Name">@department.Name</option>
+                            }
+
+                        </select>
+
+
+                        <span class="badge-count">@Model.RecentEmployees.Count records</span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-responsive-container">
+
+                    <table class="modern-table">
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Employee ID
+                                </th>
+
+                                <th>
+                                    Employee Details
+                                </th>
+
+                                <th>
+                                    Department
+                                </th>
+
+                                <th>
+                                    Role
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var employee in Model.RecentEmployees)
+                            {
+                                <tr class="dashboard-employee-row" data-search="@employee.EmployeeId.ToLower() @employee.FullName.ToLower() @employee.Email.ToLower()" data-department="@employee.Department">
+                                    <td class="id-col">@employee.EmployeeId</td>
+                                    <td><div class="user-meta"><span class="avatar-placeholder" data-no-localize>@employee.FullName.Substring(0, 1).ToUpper()</span><div><strong data-no-localize>@employee.FullName</strong><small data-no-localize>@employee.Email</small></div></div></td>
+                                    <td><span class="dept-tag">@employee.Department</span></td>
+                                    <td>@employee.Designation</td>
+                                    <td><span class="status @(employee.IsActive ? "status-active" : "status-absent")">@(employee.IsActive ? "Active" : "Inactive")</span></td>
+                                    <td><a asp-controller="Main" asp-action="Employees" asp-route-id="@employee.Id" class="btn-action">View</a></td>
+                                </tr>
+                            }
+
+                        </tbody>
+
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================
+             ATTENDANCE SIDE PANEL
+        ====================== -->
+
+        <div class="side-panel">
+
+
+            <!-- Attendance Split -->
+            <div class="attendance-box">
+
+
+                <div class="box-header">
+
+                    <h3>
+                        <i class="fa-solid fa-clock section-icon" aria-hidden="true"></i> Attendance Split
+                    </h3>
+
+                    <span class="sub-text">
+                        Today
+                    </span>
+
+                </div>
+
+
+                <!-- Attendance Progress -->
+                <partial name="_DashboardAttendanceRing" model="Model" />
+                <p class="attendance-count-note">Late employees are included in Present.</p>
+                <div class="progress-stacked" aria-hidden="true">
+
+                    @if (Model.TotalWorkforce > 0)
+                    {
+                        <span class="progress-bar bg-green" style="width:@(Model.PresentToday * 100 / Model.TotalWorkforce)%"></span>
+                        <span class="progress-bar bg-blue" style="width:@(Model.LateToday * 100 / Model.TotalWorkforce)%"></span>
+                        <span class="progress-bar bg-red" style="width:@(Model.AbsentToday * 100 / Model.TotalWorkforce)%"></span>
+                    }
+
+                </div>
+
+
+                <div class="attendance-list">
+
+
+                    <!-- Present -->
+                    <div class="attendance-item">
+
+                        <span class="label-group">
+
+                            <span class="indicator green"></span>
+
+                            Present
+
+                        </span>
+
+                        <strong class="metric-val">@Model.PresentToday</strong>
+
+                    </div>
+
+
+                    <!-- Late -->
+                    <div class="attendance-item">
+
+                        <span class="label-group">
+
+                            <span class="indicator blue"></span>
+
+                            Late Entry
+
+                        </span>
+
+                        <strong class="metric-val">@Model.LateToday</strong>
+
+                    </div>
+
+
+                    <!-- Leave -->
+                    <div class="attendance-item">
+
+                        <span class="label-group">
+
+                            <span class="indicator orange"></span>
+
+                            On Leave
+
+                        </span>
+
+                        <strong class="metric-val">@Model.OnLeaveToday</strong>
+
+                    </div>
+
+
+                    <!-- Absent -->
+                    <div class="attendance-item">
+
+                        <span class="label-group">
+
+                            <span class="indicator red"></span>
+
+                            Absent
+
+                        </span>
+
+                        <strong class="metric-val">@Model.AbsentToday</strong>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =====================
+                 PRIORITY ALERTS
+            ====================== -->
+
+            <div class="alerts-box">
+
+                <h3>
+                    <i class="fa-solid fa-triangle-exclamation section-icon" aria-hidden="true"></i> Priority Alerts
+                </h3>
+
+
+                <div class="alert-list">
+
+                    @if (Model.OverdueTasks > 0) { <div class="alert-item"><strong>@Model.OverdueTasks overdue task(s)</strong><p class="sub-text">Require manager attention.</p></div> }
+                    @if (Model.AbsentToday > 0) { <div class="alert-item"><strong>@Model.AbsentToday absent employee(s)</strong><p class="sub-text">No attendance recorded today.</p></div> }
+                    @if (Model.OverdueTasks == 0 && Model.AbsentToday == 0) { <div class="alert-item"><strong>No priority alerts</strong><p class="sub-text">Everything looks on track.</p></div> }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         BOTTOM MANAGEMENT
+    ========================== -->
+
+    @if (User.IsInRole("Admin"))
+    {
+    <section class="bottom-row">
+
+
+        <!-- =====================
+             SYSTEM AUDIT LOG
+        ====================== -->
+
+        @if (User.IsInRole("Admin"))
+        {
+        <div class="activity-box">
+
+
+            <div class="box-header">
+
+                <h3>
+                    <i class="fa-solid fa-file-shield section-icon" aria-hidden="true"></i> System Audit & Logs
+                </h3>
+
+                <a asp-controller="Audit" asp-action="Index"
+                   class="link-more">
+
+                    View All Logs →
+
+                </a>
+
+            </div>
+
+
+            <p id="adminAuditStatus" class="sub-text" role="status">Loading live activity…</p>
+            <div class="timeline-container" id="adminAuditTimeline" data-url="@Url.Action("Recent", "Audit")" style="max-height:480px;overflow-y:auto">
+
+                @foreach (var item in Model.RecentActivity)
+                {
+                    <div class="alert-item"><strong data-no-localize>@item.Title</strong><p class="sub-text" data-no-localize>@item.Detail · @item.OccurredAt.ToString("dd MMM, hh:mm tt")</p></div>
+                }
+
+            </div>
+
+        </div>
+        <script src="~/js/admin-audit.js" asp-append-version="true"></script>
+        }
+
+
+
+
+    </section>
+    }
+</div>
+
+
+<!-- =========================
+     VERTEX AI SCRIPT
+========================== -->
+
+<script>
+
+    (() => {
+
+        const aiToggle =
+            document.getElementById("aiToggle");
+
+        const aiPanel =
+            document.getElementById("aiPanel");
+
+        const aiClose =
+            document.getElementById("aiClose");
+
+        const aiInput =
+            document.getElementById("aiInput");
+
+        const aiSend =
+            document.getElementById("aiSend");
+
+        const aiMic =
+            document.getElementById("aiMic");
+
+        const aiHeaderMic =
+            document.getElementById("aiHeaderMic");
+
+        const aiMessages =
+            document.getElementById("aiMessages");
+
+
+        const SpeechRecognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+
+
+        const recognition =
+            SpeechRecognition
+                ? new SpeechRecognition()
+                : null;
+
+
+        if (recognition) {
+
+            recognition.lang = window.VertexLanguage?.locale || "en-IN";
+
+            recognition.interimResults = false;
+
+            recognition.continuous = false;
+
+        }
+
+
+        let isListening = false;
+
+
+        // =====================
+        // STOP AUDIO
+        // =====================
+
+        const stopAssistantAudio = () => {
+
+            if ("speechSynthesis" in window) {
+
+                window.speechSynthesis.cancel();
+
+            }
+
+
+            if (recognition && isListening) {
+
+                try {
+
+                    recognition.abort();
+
+                }
+                catch {
+
+                    recognition.stop();
+
+                }
+
+            }
+
+
+            isListening = false;
+
+
+            if (aiMic)
+                aiMic.classList.remove("listening");
+
+            if (aiHeaderMic)
+                aiHeaderMic.classList.remove("listening");
+
+        };
+
+
+        // =====================
+        // ADD MESSAGE
+        // =====================
+
+            const addMessage = (text, type) => {
+
+            if (!aiMessages)
+                return;
+
+
+            const message =
+                document.createElement("div");
+
+
+            message.className =
+                `ai-message ${type}`;
+
+
+            message.textContent = text;
+
+
+            aiMessages.appendChild(message);
+
+
+            aiMessages.scrollTop =
+                aiMessages.scrollHeight;
+            return message;
+
+        };
+
+
+        // =====================
+        // SPEAK
+        // =====================
+
+        const speak = (text) => {
+
+            if (!aiPanel ||
+                !aiPanel.classList.contains("open") ||
+                !("speechSynthesis" in window)) {
+
+                return;
+
+            }
+
+
+            window.speechSynthesis.cancel();
+
+
+            const utterance =
+                new SpeechSynthesisUtterance(text);
+
+
+            const voices =
+                window.speechSynthesis.getVoices();
+
+
+            utterance.voice =
+
+                voices.find(
+                    voice =>
+                        voice.lang === "en-US"
+                )
+
+                ||
+
+                voices.find(
+                    voice =>
+                        voice.lang === "en-GB"
+                )
+
+                ||
+
+                voices.find(
+                    voice =>
+                        voice.lang?.startsWith("en")
+                );
+
+
+            utterance.lang =
+                utterance.voice?.lang || "en-US";
+
+
+            utterance.rate = 0.95;
+
+            utterance.pitch = 1;
+
+
+            window.speechSynthesis.speak(
+                utterance
+            );
+
+        };
+
+
+        // =====================
+        // ASK ASSISTANT
+        // =====================
+
+        const askAssistant = async () => {
+
+            if (!aiInput || !aiSend || aiSend.disabled)
+                return;
+
+
+            const attachment = window.vertexAiGetAttachment?.() || null;
+            const question =
+                aiInput.value.trim() || (attachment ? "Please analyze the attached file and suggest useful improvements." : "");
+
+
+            if (!question)
+                return;
+
+
+            addMessage(
+                attachment ? `${question}\n📎 ${attachment.name}` : question,
+                "user"
+            );
+
+
+            aiInput.value = "";
+            const assistantStatus = document.getElementById("aiStatus");
+            aiSend.disabled = true;
+            if (assistantStatus) assistantStatus.textContent = "Checking authorized ERP data…";
+
+
+            try {
+                const answerMessage = addMessage("", "assistant");
+                const reply = await window.vertexGeminiAsk(question, chunk => {
+                    if (answerMessage) answerMessage.textContent += chunk;
+                    if (aiMessages) aiMessages.scrollTop = aiMessages.scrollHeight;
+                }, attachment);
+                if (answerMessage) answerMessage.textContent = reply;
+                if (attachment) window.vertexAiClearAttachment?.();
+
+
+                if (
+                    aiPanel &&
+                    aiPanel.classList.contains("open")
+                ) {
+
+                    speak(reply);
+
+                }
+
+            }
+            catch (error) {
+
+                const fallback =
+                    error?.message || "Gemini could not respond. Check Firebase AI Logic setup and your connection.";
+
+
+                addMessage(
+                    fallback,
+                    "assistant"
+                );
+
+
+                if (
+                    aiPanel &&
+                    aiPanel.classList.contains("open")
+                ) {
+
+                    speak(fallback);
+
+                }
+
+            } finally {
+                aiSend.disabled = false;
+                if (assistantStatus) assistantStatus.textContent = "Ready";
+            }
+
+        };
+
+
+        // =====================
+        // OPEN / CLOSE AI
+        // =====================
+
+        if (aiToggle) {
+
+            aiToggle.addEventListener(
+                "click",
+                () => {
+
+                    aiPanel?.classList.toggle("open");
+                    if (aiPanel?.classList.contains("open")) window.vertexLoadAdminBriefing?.();
+
+
+                    if (
+                        aiPanel &&
+                        !aiPanel.classList.contains("open")
+                    ) {
+
+                        stopAssistantAudio();
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        if (aiClose) {
+
+            aiClose.addEventListener(
+                "click",
+                () => {
+
+                    aiPanel?.classList.remove("open");
+
+                    stopAssistantAudio();
+
+                }
+            );
+
+        }
+
+
+        if (aiSend) {
+
+            aiSend.addEventListener(
+                "click",
+                askAssistant
+            );
+
+        }
+
+
+        if (aiInput) {
+
+            aiInput.addEventListener(
+                "keydown",
+                event => {
+
+                    if (event.key === "Enter") {
+
+                        askAssistant();
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        // =====================
+        // VOICE INPUT
+        // =====================
+
+        const startListening = () => {
+
+            aiPanel?.classList.add("open");
+
+
+            if (!recognition) {
+
+                const message =
+                    "Voice input is not supported in this browser. Please type your question.";
+
+
+                addMessage(
+                    message,
+                    "assistant"
+                );
+
+
+                speak(message);
+
+                return;
+
+            }
+
+
+            if (isListening)
+                return;
+
+
+            try {
+
+                isListening = true;
+
+
+                aiMic?.classList.add(
+                    "listening"
+                );
+
+
+                aiHeaderMic?.classList.add(
+                    "listening"
+                );
+
+
+                recognition.start();
+
+            }
+            catch {
+
+                isListening = false;
+
+
+                aiMic?.classList.remove(
+                    "listening"
+                );
+
+
+                aiHeaderMic?.classList.remove(
+                    "listening"
+                );
+
+            }
+
+        };
+
+
+        if (aiMic) {
+
+            aiMic.addEventListener(
+                "click",
+                startListening
+            );
+
+        }
+
+
+        if (aiHeaderMic) {
+
+            aiHeaderMic.addEventListener(
+                "click",
+                startListening
+            );
+
+        }
+
+
+        if (recognition) {
+
+
+            recognition.onresult =
+                event => {
+
+                    const transcript =
+                        event.results[0][0]
+                            .transcript;
+
+
+                    if (aiInput) {
+
+                        aiInput.value =
+                            transcript;
+
+                    }
+
+
+                    isListening = false;
+
+
+                    aiMic?.classList.remove(
+                        "listening"
+                    );
+
+
+                    aiHeaderMic?.classList.remove(
+                        "listening"
+                    );
+
+
+                    askAssistant();
+
+                };
+
+
+            recognition.onerror =
+                () => {
+
+                    isListening = false;
+
+
+                    aiMic?.classList.remove(
+                        "listening"
+                    );
+
+
+                    aiHeaderMic?.classList.remove(
+                        "listening"
+                    );
+
+
+                    const message =
+                        "I could not hear the voice input. Please try again or type your question.";
+
+
+                    addMessage(
+                        message,
+                        "assistant"
+                    );
+
+
+                    speak(message);
+
+                };
+
+
+            recognition.onend =
+                () => {
+
+                    isListening = false;
+
+
+                    aiMic?.classList.remove(
+                        "listening"
+                    );
+
+
+                    aiHeaderMic?.classList.remove(
+                        "listening"
+                    );
+
+                };
+
+        }
+
+    })();
+
+</script>
+<script>
+    (() => {
+        const search = document.getElementById('dashboardEmployeeSearch');
+        const department = document.getElementById('dashboardDepartmentFilter');
+        const rows = [...document.querySelectorAll('.dashboard-employee-row')];
+        const filterRows = () => {
+            const term = (search?.value || '').trim().toLowerCase();
+            const selected = department?.value || '';
+            rows.forEach(row => row.hidden = !((!term || row.dataset.search.includes(term)) && (!selected || row.dataset.department === selected)));
+        };
+        search?.addEventListener('input', filterRows);
+        department?.addEventListener('change', filterRows);
+    })();
+</script>

@@ -1,0 +1,251 @@
+{
+  "SourceFile": "Automation LOI.docx",
+  "CompanyCode": "VAS",
+  "Kind": "LOI",
+  "SourceParagraphCount": 26,
+  "Blocks": [
+    {
+      "Paragraph": {
+        "SourceId": 0,
+        "SourceText": "Letter of Intent (LOI)",
+        "Text": "Letter of Intent (LOI)",
+        "Bold": true,
+        "Title": true
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 2,
+        "SourceText": "Date:------------",
+        "Text": "Date: {{IssueDate}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 4,
+        "SourceText": "Dear,",
+        "Text": "Dear,",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 5,
+        "SourceText": "Mr. --------------",
+        "Text": "Mr. {{EmployeeName}}",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 6,
+        "SourceText": "Greetings from Vertex Group",
+        "Text": "Greetings from Vertex Group",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 7,
+        "SourceText": "Congratulation!!!",
+        "Text": "Congratulation!!!",
+        "Bold": true,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 9,
+        "SourceText": "Please refer to your application and the subsequent interview you had with us, we have pleasure in offering you an appointment for the position of “--------------” for Department- “----------------” at “Vertex Power Controls Pvt Ltd”. Your CTC will be as mutually discussed and agreed.",
+        "Text": "Please refer to your application and the subsequent interview you had with us, we have pleasure in offering you an appointment for the position of “{{Designation}}” for Department- “{{Department}}” at “{{CompanyName}}”. Your CTC will be as mutually discussed and agreed.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 10,
+        "SourceText": "The detailed terms & conditions governing your appointment will be given in the appointment letter, which will be released on your joining the company.",
+        "Text": "The detailed terms & conditions governing your appointment will be given in the appointment letter, which will be released on your joining the company.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 11,
+        "SourceText": "You will endeavor to join your duties from ------------------- at 9:30 am at below mentioned address:",
+        "Text": "You will endeavor to join your duties from {{EffectiveDate}} at 9:30 am at below mentioned address:",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 12,
+        "SourceText": "Vertex Group of Companies",
+        "Text": "Vertex Group of Companies",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 13,
+        "SourceText": "F-16, Site C, Surajpur Industrial Area, Greater Noida, U.P.- 201306",
+        "Text": "F-16, Site C, Surajpur Industrial Area, Greater Noida, U.P.- 201306",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 14,
+        "SourceText": "You are required to submit the following documents at the time of joining.",
+        "Text": "You are required to submit the following documents at the time of joining.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 15,
+        "SourceText": "Proof of age (10th class certificate document)",
+        "Text": "1. Proof of age (10th class certificate document)",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 16,
+        "SourceText": "Academic Certificates",
+        "Text": "2. Academic Certificates",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 17,
+        "SourceText": "2 Photographs (Passport size)",
+        "Text": "3. 2 Photographs (Passport size)",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 18,
+        "SourceText": "Relieving Letter from previous employer (If it is not your first employment).",
+        "Text": "4. Relieving Letter from previous employer (If it is not your first employment).",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 19,
+        "SourceText": "Experience Certificate (If it is not your first employment).",
+        "Text": "5. Experience Certificate (If it is not your first employment).",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 20,
+        "SourceText": "Proof of Salary (Last three months’ salary slip / Certificate of salary last drawn with break-up along with Form-16 to validate the last salary drawn)",
+        "Text": "6. Proof of Salary (Last three months’ salary slip / Certificate of salary last drawn with break-up along with Form-16 to validate the last salary drawn)",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 21,
+        "SourceText": "Aadhar Card",
+        "Text": "7. Aadhar Card",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 22,
+        "SourceText": "PAN Details.",
+        "Text": "8. PAN Details.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 23,
+        "SourceText": "Medical Fitness Certificate",
+        "Text": "9. Medical Fitness Certificate",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 24,
+        "SourceText": "UAN No (if employee is getting PF benefit in last employment)",
+        "Text": "10. UAN No (if employee is getting PF benefit in last employment)",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 25,
+        "SourceText": "Cancelled Cheque",
+        "Text": "11. Cancelled Cheque",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 26,
+        "SourceText": "Permanent address & parents phone no.",
+        "Text": "12. Permanent address & parents phone no.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 27,
+        "SourceText": "",
+        "Text": "13. ",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 28,
+        "SourceText": "Please note that all information submitted by you shall be correct. Any incorrect information furnished by you may lead to cancellation of LOI and the subsequently release of appointment letter.",
+        "Text": "Please note that all information submitted by you shall be correct. Any incorrect information furnished by you may lead to cancellation of LOI and the subsequently release of appointment letter.",
+        "Bold": false,
+        "Title": false
+      }
+    },
+    {
+      "Paragraph": {
+        "SourceId": 29,
+        "SourceText": "Please sign the duplicate copy of this letter as a token of your acceptance of this offer and return to us for records & reference.",
+        "Text": "Please sign the duplicate copy of this letter as a token of your acceptance of this offer and return to us for records & reference.",
+        "Bold": false,
+        "Title": false
+      }
+    }
+  ]
+}

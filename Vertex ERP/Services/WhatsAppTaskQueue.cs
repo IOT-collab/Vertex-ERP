@@ -63,8 +63,8 @@ public sealed class WhatsAppTaskDispatcher(IWhatsAppTaskQueue queue, IMsg91Whats
         if (data != null && Msg91WhatsAppService.NormalizePhone(data.Phone) is string phone) item.RecipientNumberHash = Msg91Delivery.Hash(phone);
         var result = data == null ? new Msg91Result("Skipped", ErrorCode: "task_deleted_reassigned_or_inactive") : await sender.SendTaskAsync(data, token);
         await queue.CompleteAsync(item, result, token);
-        logger.LogInformation("MSG91 task notification {NotificationId}: {Status}; HTTP {HttpStatus}; ProviderId {ProviderId}; Error {ErrorCode}",
-            item.Id, item.Status, item.HttpStatus, item.ProviderMessageId, item.ErrorCode);
+        logger.LogInformation("MSG91 task notification {NotificationId}: {Status}; HTTP {HttpStatus}; SubmittedAtUtc {SubmittedAtUtc}; ProviderId {ProviderId}; ProviderResponse {ProviderResponse}; Error {ErrorCode}",
+            item.Id, item.Status, item.HttpStatus, result.SubmittedAtUtc, item.ProviderMessageId, result.SanitizedResponse, item.ErrorCode);
         return true;
     }
 }
@@ -73,14 +73,24 @@ public sealed class WhatsAppTaskWorker(IServiceScopeFactory scopes, ILogger<What
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        bool? lastReadyState = null;
         while (!stoppingToken.IsCancellationRequested)
         {
             try { using var scope = scopes.CreateScope();
                 var config = scope.ServiceProvider.GetRequiredService<IOptions<Msg91WhatsAppOptions>>().Value;
+                if (lastReadyState != config.Ready)
+                {
+                    if (config.Ready)
+                        logger.LogInformation("MSG91 task notifications are enabled; worker will process the durable queue.");
+                    else
+                        logger.LogWarning("MSG91 task notifications are paused; pending records remain queued. ReadinessIssues={ReadinessIssues}.",
+                            string.Join(',', config.ReadinessIssues));
+                    lastReadyState = config.Ready;
+                }
                 if (config.WebhooksEnabled) await scope.ServiceProvider.GetRequiredService<Msg91DeliveryInbox>().ReconcileAsync(stoppingToken);
                 if (await scope.ServiceProvider.GetRequiredService<WhatsAppTaskDispatcher>().ProcessNextAsync(stoppingToken)) continue; }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
-            catch { logger.LogError("MSG91 queue processing failed. Pending work remains stored; processing will resume."); }
+            catch (Exception exception) { logger.LogError("MSG91 queue processing failed ({ExceptionType}). Pending work remains stored; processing will resume.", exception.GetType().Name); }
             try { await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken); } catch (OperationCanceledException) { break; }
         }
     }

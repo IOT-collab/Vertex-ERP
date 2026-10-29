@@ -1,0 +1,713 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --app-bg-1: var(--erp-bg, #07111f);
+    --app-bg-2: var(--erp-surface, #0b1424);
+    --app-bg-3: var(--erp-surface, #111827);
+    --app-glass: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .06)) 6%, transparent);
+    --app-glass-strong: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .09)) 9%, transparent);
+    --app-border: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .12)) 12%, transparent);
+    --app-border-strong: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .18)) 18%, transparent);
+    --app-text: var(--erp-text, #ffffff);
+    --app-text-soft: var(--erp-text, #d7def2);
+    --app-muted: var(--erp-text-muted, #a8b3cf);
+    --app-blue: #3b82f6;
+    --app-green: #22c55e;
+    --app-orange: #f59e0b;
+    --app-red: #ef4444;
+    --app-purple: #8b5cf6;
+    --app-radius-xl: 22px;
+    --app-radius-lg: 18px;
+    --app-radius-md: 14px;
+    --app-shadow: 0 18px 48px rgba(0, 0, 0, .26), inset 0 1px 0 rgba(255, 255, 255, .09);
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+    font-size: 13px;
+    background: var(--app-bg-1) !important;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 14px;
+    }
+}
+
+body {
+    margin-bottom: 0;
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 14% 4%, rgba(59, 130, 246, .22), transparent 28%),
+        radial-gradient(circle at 88% 7%, rgba(139, 92, 246, .17), transparent 28%),
+        linear-gradient(135deg, var(--app-bg-1) 0%, var(--app-bg-2) 52%, var(--app-bg-3) 100%) !important;
+    color: var(--app-text-soft) !important;
+    font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+body,
+.page-content,
+.main-content,
+.container,
+.container-fluid,
+main,
+section,
+.pb-3 {
+    color: var(--app-text-soft) !important;
+}
+
+.page-content > div:not(.dashboard):not([class*="modal"]):not([role="dialog"]),
+.report-container,
+.project-page,
+.hrms-page,
+.hr-dashboard-container,
+.attendance-panel-container,
+.department-page,
+.document-page,
+.settings-page,
+.admin-control-page,
+.vault-save-container,
+.employee-form-page,
+.add-attendance-page,
+.leave-page {
+    color: var(--app-text-soft) !important;
+    background: transparent !important;
+}
+
+.page-header,
+.report-header,
+.filter-box,
+.filter-panel,
+.table-box,
+.table-card,
+.card,
+.stat-card,
+.summary-card,
+.module-card,
+.setting-card,
+.report-card,
+.category-card,
+.attendance-card,
+.document-card,
+.vault-card,
+.form-card,
+.panel,
+.box,
+.modal-content,
+.dropdown-menu,
+.list-group-item {
+    border: 1px solid var(--app-border) !important;
+    border-radius: var(--app-radius-xl) !important;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .088)) 8.8%, transparent), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .044)) 4.4%, transparent)) !important;
+    box-shadow: var(--app-shadow) !important;
+    backdrop-filter: blur(22px) saturate(145%) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(145%) !important;
+}
+
+.page-header,
+.report-header {
+    padding: 18px 20px !important;
+    margin-bottom: 20px !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.header-text h2,
+.card h3,
+.module-card h3,
+.setting-card h3,
+.setting-card h4,
+.summary-card h2,
+.report-card h3,
+.stat-card h3,
+table strong,
+label {
+    color: var(--app-text) !important;
+    letter-spacing: 0 !important;
+}
+
+h1 {
+    font-size: 28px !important;
+}
+
+h2,
+.header-text h2 {
+    font-size: 24px !important;
+    line-height: 1.18 !important;
+    font-weight: 800 !important;
+}
+
+h3 {
+    font-size: 16px !important;
+    line-height: 1.25 !important;
+}
+
+h4,
+h5,
+h6 {
+    font-size: 14px !important;
+}
+
+p,
+small,
+span,
+li,
+td,
+th,
+label,
+input,
+select,
+textarea,
+button,
+a {
+    font-size: 13px;
+}
+
+.header-text p,
+.sub-text,
+.card p,
+.module-card p,
+.setting-card p,
+.report-card p,
+.category-card p,
+.summary-card p,
+.feature-list li,
+td,
+.text-muted {
+    color: var(--app-muted) !important;
+}
+
+.dashboard-cards,
+.summary,
+.report-cards,
+.settings-grid,
+.admin-modules-grid,
+.module-grid,
+.category-grid,
+.cards-grid,
+.stats-grid {
+    gap: 16px !important;
+}
+
+.card,
+.stat-card,
+.summary-card,
+.module-card,
+.setting-card,
+.report-card,
+.category-card,
+.attendance-card,
+.document-card,
+.vault-card,
+.form-card {
+    overflow: hidden !important;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease, background .25s ease !important;
+}
+
+.card:hover,
+.stat-card:hover,
+.summary-card:hover,
+.module-card:hover,
+.setting-card:hover,
+.report-card:hover,
+.category-card:hover,
+.attendance-card:hover,
+.document-card:hover,
+.vault-card:hover {
+    /* Avoid scaling cards beyond their grid or clipping their actions. */
+    transform: none !important;
+    border-color: var(--app-border-strong) !important;
+    box-shadow: 0 24px 58px rgba(0, 0, 0, .34), 0 0 28px rgba(59, 130, 246, .13) !important;
+}
+
+.card-header,
+.card-body,
+.module-body,
+.module-footer,
+.table-header,
+.filter-field,
+.doc-action-hub {
+    background: transparent !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
+}
+
+table,
+.modern-table,
+.vault-doc-table {
+    width: 100% !important;
+    color: var(--app-text-soft) !important;
+    background: transparent !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+.table-responsive,
+.responsive-table-wrapper,
+.table-responsive-container {
+    overflow: auto !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
+    border-radius: var(--app-radius-lg) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .035)) 3.5%, transparent) !important;
+}
+
+table th,
+.modern-table th,
+.vault-doc-table th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 2 !important;
+    color: var(--app-muted) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(11, 20, 36, .9)) 90%, transparent) !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .12)) 12%, transparent) !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase;
+}
+
+table td,
+.modern-table td,
+.vault-doc-table td {
+    color: var(--app-text-soft) !important;
+    background: transparent !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .075)) 7.5%, transparent) !important;
+}
+
+tbody tr,
+.modern-table tr {
+    transition: background .25s ease !important;
+}
+
+tbody tr:hover td,
+.modern-table tr:hover td,
+.vault-doc-table tr:hover td {
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .075)) 7.5%, transparent) !important;
+    color: var(--erp-text, #ffffff) !important;
+}
+
+input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="submit"], [type="button"], [type="reset"], [type="color"]),
+select,
+textarea,
+.form-control,
+.form-select,
+.filter-panel input,
+.filter-panel select,
+.filter-box input,
+.filter-box select,
+.table-header input {
+    min-height: 38px;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .13)) 13%, transparent) !important;
+    border-radius: 14px !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent) !important;
+    color: var(--app-text) !important;
+    outline: none !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: color-mix(in srgb, var(--erp-text-muted, rgba(168, 179, 207, .76)) 76%, transparent) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.form-control:focus,
+.form-select:focus,
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-check-input:focus {
+    border-color: rgba(59, 130, 246, .55) !important;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, .12), inset 0 1px 0 rgba(255, 255, 255, .12) !important;
+}
+
+select option {
+    color: var(--erp-text, #ffffff) !important;
+    background: var(--erp-surface, #111827) !important;
+}
+
+/* Native date/time picker glyphs otherwise render dark on the ERP's dark inputs. */
+input[type="date"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="time"] {
+    color-scheme:inherit;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    /* color-scheme:inherit already provides a light native icon. */
+    filter: none;
+    opacity: .95;
+}
+
+button,
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-add,
+.save-btn,
+.btn-action,
+.btn-search,
+.btn-view,
+.view-btn,
+.download-btn,
+.edit,
+.delete,
+.btn-upload,
+.btn-delete,
+.btn-download-slip,
+.btn-module-action {
+    min-height: 36px !important;
+    border-radius: 999px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+    transition: transform .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease !important;
+}
+
+.btn-primary,
+.btn-add,
+.save-btn,
+.btn-search,
+.btn-action,
+.btn-module-action,
+.view-btn,
+.download-btn,
+.btn-view,
+.btn-upload {
+    border: 1px solid rgba(59, 130, 246, .5) !important;
+    background: linear-gradient(135deg, rgba(59, 130, 246, .95), rgba(37, 99, 235, .78)) !important;
+    color: var(--theme-accent-text, #ffffff) !important;
+    box-shadow: 0 14px 28px rgba(59, 130, 246, .18) !important;
+}
+
+.btn-secondary,
+.btn-delete,
+.btn-download-slip,
+.edit,
+.delete {
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .13)) 13%, transparent) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent) !important;
+    color: var(--app-text-soft) !important;
+}
+
+button:hover,
+.btn:hover,
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-add:hover,
+.save-btn:hover,
+.btn-action:hover,
+.btn-search:hover,
+.btn-view:hover,
+.view-btn:hover,
+.download-btn:hover,
+.edit:hover,
+.delete:hover,
+.btn-upload:hover,
+.btn-delete:hover,
+.btn-download-slip:hover,
+.btn-module-action:hover {
+    transform: translateY(-2px) !important;
+    border-color: rgba(59, 130, 246, .45) !important;
+    background: rgba(59, 130, 246, .2) !important;
+    color: var(--erp-text, #ffffff) !important;
+    box-shadow: 0 16px 34px rgba(59, 130, 246, .2) !important;
+}
+
+.status,
+.status-badge,
+.badge,
+.badge-active,
+.completed,
+.pending,
+.present-status,
+.late-status,
+.leave-status {
+    display: inline-flex !important;
+    align-items: center !important;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .12)) 12%, transparent) !important;
+    border-radius: 999px !important;
+    padding: 5px 10px !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent) !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+}
+
+.badge-active,
+.completed,
+.present-status {
+    color: var(--erp-success, #86efac) !important;
+    background: rgba(34, 197, 94, .13) !important;
+}
+
+.pending,
+.late-status,
+.leave-status {
+    color: var(--erp-warning, #fde68a) !important;
+    background: rgba(245, 158, 11, .14) !important;
+}
+
+.absent-status,
+.failed,
+.danger,
+.delete,
+.btn-delete {
+    color: var(--erp-danger, #fecaca) !important;
+}
+
+.modal,
+.modal-backdrop,
+.popup-overlay {
+    background: color-mix(in srgb, var(--erp-bg, rgba(7, 17, 31, .68)) 68%, transparent) !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.modal-header,
+.modal-footer {
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
+}
+
+.navbar,
+.bg-white,
+.footer {
+    background: color-mix(in srgb, var(--erp-bg, rgba(7, 17, 31, .82)) 82%, transparent) !important;
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
+    color: var(--app-text-soft) !important;
+}
+
+.navbar a,
+.nav-link,
+.navbar-brand,
+.text-dark {
+    color: var(--app-text-soft) !important;
+}
+
+a {
+    color: var(--erp-primary, #93c5fd);
+}
+
+hr,
+.border-top,
+.border-bottom {
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .04)) 4%, transparent);
+}
+
+::-webkit-scrollbar-thumb {
+    border: 2px solid color-mix(in srgb, var(--erp-border, rgba(7, 17, 31, .88)) 88%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--erp-surface-soft, rgba(168, 179, 207, .38)) 38%, transparent);
+}
+
+@media (max-width: 768px) {
+    h2,
+    .header-text h2 {
+        font-size: 22px !important;
+    }
+
+    .page-header,
+    .report-header,
+    .filter-box,
+    .filter-panel,
+    .table-box,
+    .card,
+    .stat-card,
+    .summary-card,
+    .module-card,
+    .setting-card,
+    .report-card,
+    .category-card,
+    .vault-card {
+        border-radius: 18px !important;
+    }
+}
+/* Keep role dashboards on the same dark surface system as the rest of Vertex ERP. */
+.employee-portal,
+.manager-dashboard,
+.manager-section,
+.bio-page {
+    background: transparent !important;
+    color: var(--app-text-soft) !important;
+}
+
+.portal-card,
+.employee-hero,
+.manager-dashboard .panel,
+.manager-dashboard .today-card,
+.manager-dashboard .summary-card,
+.manager-section .section-card,
+.manager-section .section-stats > div,
+.bio-summary article,
+.bio-table-wrap,
+.bio-form,
+.bio-map-form {
+    border: 1px solid var(--app-border) !important;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .088)) 8.8%, transparent), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .044)) 4.4%, transparent)) !important;
+    color: var(--app-text-soft) !important;
+    box-shadow: var(--app-shadow) !important;
+}
+
+.employee-hero {
+    background:
+        radial-gradient(circle at 12% 25%, rgba(59, 130, 246, .14), transparent 28%),
+        linear-gradient(145deg, color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .09)) 9%, transparent), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .045)) 4.5%, transparent)) !important;
+}
+
+.attendance-times > div,
+.portal-table-wrap th,
+.section-table th,
+.bio-table-wrap th,
+.bio-secondary,
+.bio-actions a,
+.bio-actions button {
+    border-color: color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent) !important;
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .055)) 5.5%, transparent) !important;
+    color: var(--app-text-soft) !important;
+}
+
+.employee-portal h1,
+.employee-portal h2,
+.employee-portal h3,
+.employee-portal strong,
+.manager-dashboard h1,
+.manager-dashboard h2,
+.manager-dashboard h3,
+.manager-dashboard strong,
+.manager-section h1,
+.manager-section h3,
+.manager-section b,
+.bio-page h1,
+.bio-page strong {
+    color: var(--app-text) !important;
+}
+
+.employee-portal small,
+.employee-portal p,
+.portal-empty,
+.manager-dashboard small,
+.manager-dashboard p,
+.manager-section small,
+.manager-section header p,
+.bio-page small,
+.bio-page p {
+    color: var(--app-muted) !important;
+}
+
+.leave-dialog,
+.leave-dialog form,
+.notification-panel {
+    border: 1px solid var(--app-border) !important;
+    background: var(--erp-surface, #111b2d) !important;
+    color: var(--app-text-soft) !important;
+}
+
+/* Compatibility layer for legacy views that still use generic light-panel
+   class names. Specific page styles can retain semantic status colours, but
+   normal content surfaces now always inherit the application dark theme. */
+.content-card,
+.content-panel,
+.form-container,
+.form-container-wrapper,
+.details-card,
+.info-card,
+.data-card,
+.table-container,
+.table-wrapper,
+.list-container,
+.action-card,
+.employee-photo-card {
+    border-color: var(--app-border) !important;
+    background: linear-gradient(145deg, color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .088)) 8.8%, transparent), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .044)) 4.4%, transparent)) !important;
+    color: var(--app-text-soft) !important;
+    box-shadow: var(--app-shadow) !important;
+}
+
+/* Keep numeric fields clean and consistent across the entire ERP UI. */
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+/* One-time post-login welcome card */
+.vertex-welcome-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 120000;
+    display: grid;
+    place-items: center;
+    padding: 22px;
+    background: rgba(3, 9, 22, .78);
+    backdrop-filter: blur(9px);
+    animation: vertexWelcomeFade .22s ease-out;
+}
+.vertex-welcome-card {
+    position: relative;
+    width: min(100%, 470px);
+    padding: 42px 36px 32px;
+    overflow: hidden;
+    border: 1px solid rgba(112, 156, 255, .36);
+    border-radius: 26px;
+    color: var(--erp-text, #f8fbff);
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 0%, rgba(59, 115, 235, .25), transparent 58%), linear-gradient(145deg, var(--erp-surface-soft, #17243d), var(--erp-surface, #0e1729) 72%);
+    box-shadow: 0 28px 90px rgba(0, 0, 0, .55), 0 0 55px rgba(53, 111, 232, .18);
+}
+.vertex-welcome-close {
+    position: absolute;
+    top: 13px;
+    right: 15px;
+    width: 36px;
+    height: 36px;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255,255,255,.16)) 16%, transparent);
+    border-radius: 50%;
+    color: var(--erp-text, #dce7ff);
+    background: color-mix(in srgb, var(--erp-surface, rgba(255,255,255,.07)) 7%, transparent);
+    font-size: 25px;
+    line-height: 1;
+    cursor: pointer;
+}
+.vertex-welcome-mark {
+    display: grid;
+    place-items: center;
+    width: 62px;
+    height: 62px;
+    margin: 0 auto 20px;
+    border: 1px solid rgba(128, 176, 255, .42);
+    border-radius: 20px;
+    color: var(--theme-accent-text, #fff);
+    background: linear-gradient(140deg, #4387f5, #5149d9);
+    box-shadow: 0 12px 35px rgba(48, 102, 223, .36);
+    font-size: 25px;
+}
+.vertex-welcome-eyebrow { margin: 0 0 10px; color: #8ebcff; font-size: 11px; font-weight: 800; letter-spacing: .16em; }
+.vertex-welcome-card h1 { margin: 0; font-size: clamp(25px, 5vw, 32px); font-weight: 800; letter-spacing: -.03em; }
+.vertex-welcome-name { margin: 12px 0 0; color: var(--erp-text, #c7d8ff); font-size: 22px; font-weight: 700; }
+.vertex-welcome-copy { margin: 9px 0 25px; color: var(--erp-text-muted, #aab8d2); font-size: 14px; }
+.vertex-welcome-continue { min-width: 150px; padding: 11px 24px; border: 0; border-radius: 999px; color: var(--theme-accent-text, #fff); background: linear-gradient(100deg, #347dec, #2851cb); box-shadow: 0 8px 24px rgba(40, 91, 214, .3); font-weight: 750; cursor: pointer; }
+.vertex-welcome-continue:hover { filter: brightness(1.1); }
+.vertex-welcome-overlay.is-closing { opacity: 0; transition: opacity .18s ease; }
+@keyframes vertexWelcomeFade { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 480px) { .vertex-welcome-card { padding: 38px 22px 26px; border-radius: 22px; } }

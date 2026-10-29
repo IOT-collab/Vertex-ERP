@@ -11,7 +11,8 @@ static class DeliveryChecks
 {
     public static async Task Run(Action<bool,string> check)
     {
-        var config = new Msg91WhatsAppOptions { SendingEnabled = true, AuthKey = "FAKE-KEY", WebhooksEnabled = true, WebhookToken = new string('a',64) };
+        var config = new Msg91WhatsAppOptions { SendingEnabled = true, AuthKey = "FAKE-KEY", WebhooksEnabled = true, WebhookToken = new string('a',64),
+            ParameterOrder = ["EmployeeName", "TaskTitle", "AssignedBy", "TaskDeadline"] };
         check(config.TemplateMappingVerified && config.Ready && config.ApprovedTemplateText == Msg91WhatsAppOptions.ConfirmedTemplateBody, "Confirmed template is configured; live approval remains a separate switch");
         check(config.ParameterOrder.SequenceEqual(new[] { "EmployeeName", "TaskTitle", "AssignedBy", "TaskDeadline" }), "Confirmed approved template order");
         check(!new Msg91WhatsAppOptions().Ready && !new Msg91WhatsAppOptions().WebhooksEnabled, "Sending and callback processing remain off by default");

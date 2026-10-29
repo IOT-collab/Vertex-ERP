@@ -1,0 +1,414 @@
+/* Core Layout Root Configurations */
+.hr-dashboard-container {
+    padding: 30px;
+    width: 100%;
+    min-height: 100vh;
+    color: var(--erp-text, #d7def2);
+    background: transparent;
+}
+
+/* Back Link Route Navigation Element */
+.back-link {
+    display: inline-block;
+    color: var(--erp-primary, #60a5fa);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .back-link:hover {
+        transform: translateX(-4px);
+    }
+
+.page-header h2 {
+    color: var(--erp-text, #ffffff);
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.page-header p {
+    color: var(--erp-text-muted, #a8b3cf);
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Master Form Sheet Wrapper Component */
+.form-container-wrapper {
+    background: linear-gradient(145deg, color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .09)) 9%, transparent), color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .045)) 4.5%, transparent));
+    border-radius: 22px;
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .12)) 12%, transparent);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, .26), inset 0 1px 0 rgba(255, 255, 255, .1);
+    backdrop-filter: blur(22px) saturate(145%);
+    -webkit-backdrop-filter: blur(22px) saturate(145%);
+    margin-top: 25px;
+    padding: 30px;
+}
+
+/* Flexible Matrix Grid For Form Structure Blocks */
+.form-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+}
+
+.form-main-section,
+.form-side-section {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+/* Side-by-Side Unified Data Rows */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Field Node UI Containers */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+    .form-group label {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--erp-text, #d7def2);
+    }
+
+    .form-group input[type="text"],
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .13)) 13%, transparent);
+        border-radius: 14px;
+        font-size: 14px;
+        outline: none;
+        background-color: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent);
+        color: var(--erp-text, #ffffff);
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: rgba(59, 130, 246, .55);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, .12);
+        }
+
+/* Parameters Checklist Interactive Builder Layout */
+.checklist-builder-section label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--erp-text, #d7def2);
+}
+
+.field-subtext {
+    font-size: 12px;
+    color: var(--erp-text-muted, #a8b3cf);
+    margin-top: 2px;
+    margin-bottom: 8px;
+}
+
+.checklist-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+    .checklist-input-group input {
+        flex: 1;
+        padding: 11px 14px;
+        border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .13)) 13%, transparent);
+        border-radius: 14px;
+        font-size: 14px;
+        outline: none;
+        background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent);
+        color: var(--erp-text, #ffffff);
+    }
+
+.btn-add-item {
+    background: rgba(59, 130, 246, .18);
+    color: var(--erp-text, #bfdbfe);
+    border: 1px solid rgba(59, 130, 246, .34);
+    padding: 0 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13.5px;
+    white-space: nowrap;
+    transition: background-color 0.15s ease;
+}
+
+    .btn-add-item:hover {
+        background: rgba(59, 130, 246, .26);
+    }
+
+/* Checklist Display Preview Node Array */
+.preview-checklist {
+    list-style: none;
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+    .preview-checklist li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .06)) 6%, transparent);
+        border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .11)) 11%, transparent);
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-size: 13.5px;
+        color: var(--erp-text, #d7def2);
+        gap: 10px;
+    }
+
+        .preview-checklist li span {
+            word-break: break-word; /* Prevents overflow errors on ultra small viewports */
+        }
+
+.btn-remove-li {
+    background: transparent;
+    border: none;
+    color: var(--erp-danger, #fca5a5);
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+}
+
+/* Configuration Side Sheet Controls (Right Panel) */
+.config-card {
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .06)) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .11)) 11%, transparent);
+    border-radius: 18px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+    .config-card h3 {
+        font-size: 14px;
+        color: var(--erp-text, #ffffff);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+/* Micro Checkbox Engineering Setup */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 28px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--erp-text, #d7def2);
+    user-select: none;
+}
+
+    .custom-checkbox input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+
+.checkmark {
+    position: absolute;
+    top: 5px;
+    left: 0;
+    height: 18px;
+    width: 18px;
+    background-color: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .07)) 7%, transparent);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .18)) 18%, transparent);
+    border-radius: 4px;
+}
+
+.custom-checkbox:hover input ~ .checkmark {
+    border-color: #60a5fa;
+}
+
+.custom-checkbox input:checked ~ .checkmark {
+    background-color: #2563eb;
+    border-color: #60a5fa;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.custom-checkbox input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.custom-checkbox .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.file-config {
+    margin-top: 4px;
+}
+
+/* System Context Information Notification Alert Box */
+.info-alert-box {
+    background: rgba(59, 130, 246, .12);
+    border-left: 4px solid #3b82f6;
+    border-radius: 12px;
+    padding: 14px;
+}
+
+    .info-alert-box h4 {
+        font-size: 13px;
+        color: var(--erp-text, #bfdbfe);
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .info-alert-box p {
+        font-size: 12.5px;
+        color: var(--erp-text, #d7def2);
+        line-height: 1.5;
+    }
+
+/* Actions Control Footer Alignment Panel */
+.form-actions-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .1)) 10%, transparent);
+}
+
+.btn-cancel,
+.btn-submit {
+    padding: 11px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: background-color 0.15s ease;
+}
+
+.btn-cancel {
+    background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .06)) 6%, transparent);
+    color: var(--erp-text, #d7def2);
+    border: 1px solid color-mix(in srgb, var(--erp-border, rgba(255, 255, 255, .14)) 14%, transparent);
+}
+
+    .btn-cancel:hover {
+        background: color-mix(in srgb, var(--erp-surface, rgba(255, 255, 255, .1)) 10%, transparent);
+        color: var(--erp-text, #ffffff);
+    }
+
+.btn-submit {
+    background: linear-gradient(135deg, rgba(59, 130, 246, .96), rgba(37, 99, 235, .78));
+    color: var(--theme-accent-text, #fff);
+    border: none;
+}
+
+    .btn-submit:hover {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    }
+
+.form-group input::placeholder,
+.form-group textarea::placeholder,
+.checklist-input-group input::placeholder {
+    color: var(--erp-text, #b7c2da);
+}
+
+.form-group select option,
+.edit-select option {
+    background: var(--erp-surface, #111b31);
+    color: var(--erp-text, #ffffff);
+}
+
+/* ==========================================================================
+   DYNAMIC RESPONSIVE MEDIA QUERIES MATRIX (BREAKPOINTS OVERHAUL)
+   ========================================================================== */
+
+@media (max-width: 992px) {
+    .form-grid {
+        grid-template-columns: 1fr; /* Flexibly drops into a unified single column flow layout */
+        gap: 25px;
+    }
+
+    .form-side-section {
+        flex-direction: column-reverse; /* Repositions the system note box logic underneath settings */
+    }
+}
+
+@media (max-width: 768px) {
+    .hr-dashboard-container {
+        padding: 16px;
+    }
+
+    .form-container-wrapper {
+        padding: 20px;
+        margin-top: 15px;
+    }
+
+    .page-header h2 {
+        font-size: 22px;
+    }
+
+    .page-header p {
+        font-size: 13px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr; /* Grid rows break down into dynamic singular arrays */
+        gap: 20px;
+    }
+
+    .form-actions-footer {
+        flex-direction: column-reverse; /* Stack operations natively for easy thumb click targets */
+        gap: 10px;
+    }
+
+    .btn-cancel,
+    .btn-submit {
+        width: 100%;
+        padding: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .checklist-input-group {
+        flex-direction: column; /* Inputs and actions cleanly drop into linear columns */
+    }
+
+    .btn-add-item {
+        width: 100%;
+        padding: 12px;
+    }
+}

@@ -1,0 +1,77 @@
+@model VertexERP.Models.SalarySlipAdminViewModel
+@{ ViewData["Title"] = "Salary Slip Management"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
+<link href="~/css/HrSalarySlips.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/HrSalarySlipsTheme.css" rel="stylesheet" asp-append-version="true" />
+<section class="hr-salary-page">
+    <div class="hr-salary-header"><div><span>HR MANAGEMENT</span><h1>Salary Slip</h1><p>Select an employee or department to generate salary slips. Employees can view only generated salary slips.</p></div></div>
+    @if (TempData["SalaryMessage"] != null) { <div class="salary-alert success">@TempData["SalaryMessage"]</div> }
+    @if (TempData["SalaryError"] != null) { <div class="salary-alert error">@TempData["SalaryError"]</div> }
+    <form method="get" class="salary-filters">
+        <label>Month<input type="month" id="salaryMonth" value="@($"{Model.Year}-{Model.Month:00}")" /></label>
+        <input type="hidden" name="year" id="year" value="@Model.Year" /><input type="hidden" name="month" id="month" value="@Model.Month" />
+        <label>Department<select name="department"><option value="">All departments</option>@foreach(var d in Model.Departments){<option value="@d" selected="@(d == Model.Department)">@d</option>}</select></label>
+        <label>Employee<select name="employeeId"><option value="">All employees</option>@foreach(var e in Model.EmployeeOptions){<option value="@e.EmployeeId" selected="@(e.EmployeeId == Model.EmployeeId)">@e.EmployeeCode - @e.EmployeeName</option>}</select></label>
+        <button type="submit">Apply Filter</button>
+    </form>
+    <form asp-action="GenerateSalarySlips" method="post">
+        <input type="hidden" name="year" value="@Model.Year" /><input type="hidden" name="month" value="@Model.Month" /><input type="hidden" name="department" value="@Model.Department" />
+        <p>Generate once for the previous month only. Enter salary days for each selected employee; earnings = full-month earnings × salary days ÷ calendar days in the selected month. Regular deductions and amount deduction are separate. Use Generate this employee for one slip, or select several employees for bulk generation. Use Preview to check the PDF and Update to correct amounts before generation or revise an existing slip.</p>
+        <input type="hidden" name="employeeId" value="@Model.EmployeeId" />
+        <div class="salary-toolbar"><div><input type="checkbox" id="selectAll" disabled="@(!Model.CanGenerate)" /> <label for="selectAll">Select all shown employees</label></div>@if(Model.CanGenerate && Model.Employees.Any(x => !x.IsGenerated)){<button type="submit" class="generate-action">Generate Selected Slips</button>}</div>
+        <div class="salary-table-wrap"><table><thead><tr><th></th><th>Employee</th><th>Department</th><th>Gross Salary</th><th>Approved Leave</th><th>Salary Days</th><th>Amount Deduction</th><th>Deduction Reason</th><th>Status</th></tr></thead><tbody>
+        @if(Model.Employees.Count == 0){<tr><td colspan="9" class="empty">No active employee with salary details found.</td></tr>}
+        @foreach(var row in Model.Employees){<tr><td><input class="employee-check" type="checkbox" name="employeeIds" value="@row.EmployeeId" disabled="@(row.IsGenerated || !Model.CanGenerate)" /></td><td><strong>@row.EmployeeName</strong><small>@row.EmployeeCode</small></td><td>@row.Department</td><td>₹@row.GrossSalary.ToString("N2")<small>Regular deductions: ₹@row.StandardDeductions.ToString("N2")</small></td><td>@row.ApprovedLeaveDays.ToString("0.##") day(s)</td><td>@if(row.IsGenerated){<input type="number" form="days-@row.SlipId" name="salaryDays" value="@(row.SalaryDays?.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))" aria-label="Salary days for @row.EmployeeName" min="0" max="@DateTime.DaysInMonth(Model.Year, Model.Month)" step="0.01" required placeholder="Enter days" /><button type="submit" form="days-@row.SlipId">Save Days</button>}else{<input type="number" aria-label="Salary days for @row.EmployeeName" min="0" max="@DateTime.DaysInMonth(Model.Year, Model.Month)" step="0.01" name="salaryDays_@row.EmployeeId" value="" placeholder="Enter days" disabled="@(!Model.CanGenerate)" />}</td><td><input disabled="@(row.IsGenerated || !Model.CanGenerate)" type="number" min="0" max="@row.GrossSalary" step="0.01" name="leaveDeduction_@row.EmployeeId" value="@row.LeaveDeduction.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" /></td><td><input disabled="@(row.IsGenerated || !Model.CanGenerate)" type="text" maxlength="300" name="deductionNote_@row.EmployeeId" value="@row.DeductionNote" placeholder="Optional reason" /></td><td>@if(row.IsGenerated){<span class="generated">Generated</span><div class="slip-actions"><a asp-controller="SalarySlipReview" asp-action="Preview" asp-route-id="@row.SlipId" target="_blank" rel="noopener">Preview</a><a asp-controller="SalarySlipRevision" asp-action="Edit" asp-route-id="@row.SlipId">Update</a></div><small>@row.GeneratedAtUtc?.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt")</small>}else{<span class="pending">Not generated</span>@if(Model.CanGenerate){<button type="submit" class="generate-action" formnovalidate name="singleEmployeeId" value="@row.EmployeeId">Generate this employee</button>}@if(Model.CanGenerate){<div class="slip-actions"><a class="draft-slip-link" data-employee="@row.EmployeeId" data-preview="true" asp-controller="SalarySlipReview" asp-action="PreviewDraft" asp-route-employeeId="@row.EmployeeId" asp-route-year="@Model.Year" asp-route-month="@Model.Month" target="_blank" rel="noopener">Preview</a><a class="draft-slip-link" data-employee="@row.EmployeeId" asp-controller="SalarySlipReview" asp-action="Edit" asp-route-employeeId="@row.EmployeeId" asp-route-year="@Model.Year" asp-route-month="@Model.Month">Update</a></div>}}</td></tr>}
+        </tbody></table></div>
+    </form>
+@foreach(var row in Model.Employees.Where(x => x.IsGenerated))
+{
+    <form id="days-@row.SlipId" asp-controller="SalarySlipRevision" asp-action="UpdateDays" method="post">
+        <input type="hidden" name="id" value="@row.SlipId" /><input type="hidden" name="version" value="@row.Version" />
+    </form>
+}
+</section>
+<script>document.getElementById('salaryMonth').addEventListener('change',function(){const p=this.value.split('-');document.getElementById('year').value=p[0];document.getElementById('month').value=p[1];document.querySelectorAll('.generate-action').forEach(x=>x.hidden=true);if(this.value)this.form.requestSubmit();});document.getElementById('selectAll').addEventListener('change',function(){document.querySelectorAll('.employee-check:not(:disabled)').forEach(x=>x.checked=this.checked);});document.querySelector('select[name="department"]').addEventListener('change',function(){document.querySelector('select[name="employeeId"]').value='';});
+const generationForm = document.querySelector('form[action*="GenerateSalarySlips"]');
+generationForm.addEventListener('submit', function(event) {
+    if (event.submitter?.form !== this) return;
+    const singleId = event.submitter?.name === 'singleEmployeeId' ? event.submitter.value : null;
+    const selected = singleId ? [...this.querySelectorAll('.employee-check:not(:disabled)')].filter(x => x.value === singleId) : [...this.querySelectorAll('.employee-check:checked:not(:disabled)')];
+    if (!selected.length) { event.preventDefault(); alert('Select at least one employee.'); return; }
+    for (const box of selected) {
+        const days = this.querySelector('[name="salaryDays_' + box.value + '"]');
+        if (!days.value || !days.checkValidity()) { event.preventDefault(); days.focus(); alert('Enter valid salary days for each selected employee.'); return; }
+    }
+});</script>
+
+<style>.slip-actions{display:flex;gap:12px;margin:10px 0}.slip-actions a{display:inline-block;padding:7px 12px;border:1px solid #5074a4;border-radius:8px;color:#b9d8ff;text-decoration:none}</style>
+<script>
+document.querySelectorAll('.draft-slip-link').forEach(link => link.addEventListener('click', function(event) {
+    const row = this.closest('tr');
+    const days = row.querySelector('[name="salaryDays_' + this.dataset.employee + '"]');
+    const deduction = row.querySelector('[name="leaveDeduction_' + this.dataset.employee + '"]');
+    if ((this.dataset.preview && !days.value) || (days.value && !days.checkValidity()) || !deduction.checkValidity()) {
+        event.preventDefault(); alert('Enter valid salary days and deduction before previewing.'); days.focus(); return;
+    }
+    const url = new URL(this.href);
+    if (days.value) url.searchParams.set('salaryDays', days.value); else url.searchParams.delete('salaryDays');
+    url.searchParams.set('leaveDeduction', deduction.value || '0');
+    url.searchParams.set('deductionNote', row.querySelector('[name="deductionNote_' + this.dataset.employee + '"]').value);
+    this.href = url.toString();
+}));
+</script>
+
+<script>
+(() => {
+    const expires = @(new DateTimeOffset(new DateTime(VertexERP.Services.FieldAttendanceClock.Now.Year, VertexERP.Services.FieldAttendanceClock.Now.Month, 1).AddMonths(1), TimeSpan.FromHours(5.5)).ToUnixTimeMilliseconds());
+    function expireGeneration() {
+        if (Date.now() < expires) return false;
+        document.querySelectorAll('.generate-action, .draft-slip-link').forEach(x => x.hidden = true);
+        return true;
+    }
+    setInterval(expireGeneration, 30000);
+    document.addEventListener('visibilitychange', expireGeneration);
+    generationForm.addEventListener('submit', event => {
+        if (expireGeneration()) { event.preventDefault(); alert('The month has changed. Refresh this page before generating salary slips.'); }
+    });
+})();
+</script>

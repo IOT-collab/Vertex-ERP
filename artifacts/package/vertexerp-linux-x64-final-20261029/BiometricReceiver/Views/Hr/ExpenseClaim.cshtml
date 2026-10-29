@@ -1,0 +1,102 @@
+@model VertexERP.Models.ExpenseClaimPageViewModel
+@using VertexERP.Services
+@{
+    var self = Model.Mode is "Employee" or "Self";
+    var manager = Model.Mode == "Manager";
+    var hr = Model.Mode == "HR";
+    ViewData["Title"] = self ? "My Expenses" : manager ? "Team Expense Review" : hr ? "Expense Review" : "Forwarded Expenses";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    string Ist(DateTime value) => DateTime.SpecifyKind(value, DateTimeKind.Utc).AddMinutes(330).ToString("dd MMM yyyy · hh:mm tt");
+}
+<link href="~/css/ExpenseClaim.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/ExpenseWorkspace.css" rel="stylesheet" asp-append-version="true" />
+<div class="exp-container expense-workspace">
+    <header class="expense-hero">
+        <div><span class="expense-eyebrow">EMPLOYEE REIMBURSEMENTS</span><h1>@ViewData["Title"]</h1><p>@(self ? "Submit a bill, follow each review, and keep your expenses in one place." : manager ? "Review bills from your reporting team and send your decision to HR." : hr ? "Review manager decisions, record your decision, and forward claims to Yuvraj." : "Claims and bills forwarded to you after HR review.")</p></div>
+        <span class="expense-hero-icon"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i></span>
+    </header>
+    <nav class="expense-nav" aria-label="Expense views">
+        @if (!User.IsInRole("Admin") && !User.IsInRole("HR")) { <a asp-controller="Expense" asp-action="Index" asp-route-view="self" class="@(self ? "selected" : "")">My Claims</a> }
+        @if (User.IsInRole("Manager")) { <a asp-controller="Expense" asp-action="Index" class="@(manager ? "selected" : "")">Team Review</a> }
+        @if (User.IsInRole("HR") || User.IsInRole("Admin")) { <a asp-controller="Expense" asp-action="Index" class="@(hr ? "selected" : "")">HR Review</a> }
+        @if (Model.CanReceiveForwardedClaims) { <a asp-controller="Expense" asp-action="Index" asp-route-view="inbox" class="@(Model.Mode == "Recipient" ? "selected" : "")">Forwarded to Me</a> }
+    </nav>
+    @if (TempData["ExpenseMessage"] is string message) { <div class="exp-alert exp-alert-success" role="status">@message</div> }
+    @if (TempData["ExpenseError"] is string error) { <div class="exp-alert exp-alert-error" role="alert">@error</div> }
+    @if (self && Model.Claims.Any(claim => claim.RecipientDecision != null)) { <div class="exp-alert exp-alert-success" role="status">Yuvraj's responses are available below. Open your claim to see the final decision, reason and PDF/image.</div> }
+    <div class="expense-route"><span><i class="fa-solid fa-user"></i> Employee</span><i class="fa-solid fa-arrow-right"></i><span><i class="fa-solid fa-user-tie"></i> Reporting Manager</span><i class="fa-solid fa-arrow-right"></i><span><i class="fa-solid fa-user-check"></i> HR Review</span><i class="fa-solid fa-arrow-right"></i><span><i class="fa-solid fa-inbox"></i> Yuvraj's Final Review</span></div>
+    <div class="exp-grid-stats">
+        <article class="exp-stat-card"><span class="exp-stat-label">Total Claimed</span><h2 class="exp-stat-value">₹@Model.TotalAmount.ToString("N2")</h2><span class="exp-stat-sub">@Model.Claims.Count claims</span></article>
+        <article class="exp-stat-card"><span class="exp-stat-label">Under Review</span><h2 class="exp-stat-value">₹@Model.PendingAmount.ToString("N2")</h2><span class="exp-stat-sub">Awaiting final response</span></article>
+        <article class="exp-stat-card"><span class="exp-stat-label">Final Approved</span><h2 class="exp-stat-value">₹@Model.ApprovedAmount.ToString("N2")</h2><span class="exp-stat-sub">Approved by Yuvraj</span></article>
+        <article class="exp-stat-card"><span class="exp-stat-label">Final Rejected</span><h2 class="exp-stat-value">₹@Model.RejectedAmount.ToString("N2")</h2><span class="exp-stat-sub">Rejected by Yuvraj</span></article>
+    </div>
+    <div class="expense-columns @(self ? "with-form" : "")">
+        @if (self) {
+            <section class="expense-compose" aria-labelledby="newExpenseTitle">
+                <div class="expense-section-heading"><span class="expense-step">+</span><div><h2 id="newExpenseTitle">New expense claim</h2><p>Attach your bill and send it for review.</p></div></div>
+                @if (!Model.HasReportingManager) { <div class="exp-alert exp-alert-error">A reporting manager is not assigned. Ask HR to assign one before submitting.</div> }
+                else { <div class="expense-reviewer"><i class="fa-solid fa-user-tie"></i> First reviewer: <strong>@Model.ReportingManagerName</strong></div> }
+                <form asp-controller="Expense" asp-action="Submit" method="post" enctype="multipart/form-data" id="expenseClaimForm">
+                    <div class="exp-form-group"><label for="expenseCategory">Category</label><select id="expenseCategory" class="exp-input" name="Category" required><option value="">Select expense category</option><option>Travel</option><option>Hotel</option><option>Cab</option><option>Food</option><option>Flight / Train</option><option>Office Supplies</option><option>Other</option></select></div>
+                    <div class="exp-form-group"><label for="expenseTitle">Title / purpose</label><input id="expenseTitle" name="Title" class="exp-input" maxlength="150" required placeholder="e.g. Travel to client site" /></div>
+                    <div class="exp-form-row"><div class="exp-form-group"><label for="expenseDate">Expense date</label><input id="expenseDate" name="ExpenseDate" type="date" class="exp-input" max="@DateOnly.FromDateTime(FieldAttendanceClock.Now).ToString("yyyy-MM-dd")" required /></div><div class="exp-form-group"><label for="expenseAmount">Amount (₹)</label><input id="expenseAmount" name="Amount" type="number" class="exp-input" min="0.01" max="10000000" step="0.01" placeholder="0.00" required /></div></div>
+                    <div class="exp-form-group"><label for="billFile">Bill / receipt</label><label class="expense-dropzone" for="billFile"><i class="fa-solid fa-cloud-arrow-up"></i><strong>Choose a PDF or bill image</strong><span>PDF, JPG, PNG · Up to 10 MB</span><input id="billFile" name="ReceiptFile" type="file" accept=".pdf,.jpg,.jpeg,.png" required /><span id="expenseFileName">No file selected</span></label><img id="expenseImagePreview" class="expense-image-preview" alt="Selected bill preview" hidden /><a id="expensePdfPreview" target="_blank" rel="noopener" hidden>Preview selected PDF</a><p id="expenseFileError" class="expense-file-error" role="alert" hidden></p></div>
+                    <div class="exp-form-group"><label for="expenseRemarks">Notes</label><textarea id="expenseRemarks" name="Remarks" class="exp-input" rows="3" maxlength="1000" placeholder="Additional details for your reviewer"></textarea></div>
+                    <button class="exp-btn-primary expense-submit" type="submit" disabled="@(!Model.HasReportingManager)"><i class="fa-solid fa-paper-plane"></i> Submit to Manager</button>
+                </form>
+            </section>
+        }
+        <section class="expense-claims-panel" aria-labelledby="expenseListTitle">
+            <div class="expense-section-heading"><div><h2 id="expenseListTitle">@(self ? "My claim history" : "Expense claims")</h2><p>View bills, decisions and the current approval stage.</p></div><span class="badge">@Model.Claims.Count records</span></div>
+            <div class="exp-controls"><input id="expSearchInput" type="search" class="exp-input" placeholder="Search claim, employee or category..." aria-label="Search expenses" /><select id="statusFilter" class="exp-select" aria-label="Filter expenses"><option value="All">All statuses</option><option>Pending</option><option>Approved</option><option>Rejected</option></select></div>
+            <div class="expense-claim-list">
+            @if (Model.Claims.Count == 0) { <div class="exp-empty"><i class="fa-solid fa-receipt"></i><strong>No claims here yet</strong><span>@(self ? "Your submitted bills and review updates will appear here." : "Claims will appear when they reach your review stage.")</span></div> }
+            @foreach (var claim in Model.Claims) {
+                var canRespond = Model.Mode == "Recipient" && ExpenseClaimWorkflow.CanRecipientRespond(claim, Model.CurrentEmployeeId, Model.CanReceiveForwardedClaims);
+                var displayedStatus = claim.WorkflowStage == ExpenseClaimWorkflow.Completed ? claim.Status : claim.DecidedAtUtc.HasValue ? $"HR {claim.HrDecision ?? claim.Status}" : "Pending";
+                var canDecide = manager ? ExpenseClaimWorkflow.CanManagerReview(claim, Model.CurrentEmployeeId) : hr && ExpenseClaimWorkflow.CanHrReview(claim, Model.CurrentEmployeeId);
+                <article class="expense-claim" data-expense-status="@(claim.WorkflowStage == ExpenseClaimWorkflow.Completed ? claim.Status : "Pending")">
+                    <div class="expense-claim-head"><div><span class="expense-category">@claim.Category · #@claim.Id</span><h3>@claim.Title</h3><small>@(self ? Ist(claim.SubmittedAtUtc) : $"{claim.Employee.FullName} · {claim.Employee.EmployeeCode}")</small></div><strong class="expense-value">₹@claim.Amount.ToString("N2")</strong></div>
+                    <div class="expense-claim-meta"><span><i class="fa-regular fa-calendar"></i> @claim.ExpenseDate.ToString("dd MMM yyyy")</span><span class="status-badge status-@claim.Status.ToLowerInvariant()">@displayedStatus</span><span class="expense-stage">@ExpenseClaimWorkflow.StageLabel(claim)</span></div>
+                    @if (!string.IsNullOrWhiteSpace(claim.Remarks)) { <p class="expense-notes">@claim.Remarks</p> }
+                    <a asp-controller="Expense" asp-action="Receipt" asp-route-id="@claim.Id" target="_blank" rel="noopener" class="expense-bill"><i class="fa-solid @(claim.ContentType == "application/pdf" ? "fa-file-pdf" : "fa-file-image")"></i><span>@claim.OriginalFileName</span><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                    <div class="expense-decisions">
+                        <div><small>MANAGER</small><strong>@(claim.ManagerDecision ?? (claim.WorkflowStage == ExpenseClaimWorkflow.Manager ? "Awaiting review" : "Previous review"))</strong>@if (claim.ManagerNote != null) { <p>@claim.ManagerNote</p> }</div>
+                        <div><small>HR</small><strong>@(claim.DecidedAtUtc.HasValue ? claim.HrDecision ?? claim.Status : "Awaiting review")</strong>@if (claim.DecisionNote != null) { <p>@claim.DecisionNote</p> }</div>
+                        <div><small>FORWARDED TO</small><strong>@(claim.ForwardedToEmployee?.FullName ?? "Not forwarded")</strong>@if (claim.ForwardedAtUtc.HasValue) { <p>@Ist(claim.ForwardedAtUtc.Value)</p> }</div>
+                    </div>
+                    @if (claim.RecipientDecision != null) {
+                        <section class="expense-final-response" aria-label="Yuvraj final response">
+                            <div class="expense-response-heading"><i class="fa-solid fa-comment-dots" aria-hidden="true"></i><strong>Yuvraj's final response</strong><span class="status-badge status-@claim.RecipientDecision.ToLowerInvariant()">@claim.RecipientDecision</span></div>
+                            @if (claim.RecipientRespondedAtUtc.HasValue) { <small>@Ist(claim.RecipientRespondedAtUtc.Value)</small> }
+                            <p>@claim.RecipientReason</p>
+                            @if (claim.ResponseStoredFileName != null) {
+                                <a asp-controller="Expense" asp-action="ResponseAttachment" asp-route-id="@claim.Id" class="expense-bill" target="_blank" rel="noopener"><i class="fa-solid fa-paperclip"></i><span>@claim.ResponseOriginalFileName</span><span>Open</span></a>
+                                <a asp-controller="Expense" asp-action="ResponseAttachment" asp-route-id="@claim.Id" asp-route-download="true" class="exp-link">Download response file</a>
+                            }
+                        </section>
+                    }
+                    @if (canRespond) {
+                        <form asp-controller="Expense" asp-action="Respond" method="post" enctype="multipart/form-data" class="expense-final-response-form">
+                            <input type="hidden" name="Id" value="@claim.Id" />
+                            <h4>Send your final response to the employee</h4>
+                            <label>Reason / response <textarea name="Reason" class="exp-input" maxlength="1000" rows="3" required placeholder="Explain your approval or rejection to the employee"></textarea></label>
+                            <label>Response PDF / image <input type="file" name="ResponseFile" accept=".pdf,.jpg,.jpeg,.png" required data-response-file /></label>
+                            <small data-response-name>PDF, JPG or PNG · Maximum 10 MB · Required for both decisions</small>
+                            <img data-response-image class="expense-image-preview" alt="Response attachment preview" hidden />
+                            <a data-response-pdf class="exp-link" target="_blank" rel="noopener" hidden>Preview response PDF</a>
+                            <p data-response-error class="expense-file-error" role="alert" hidden></p>
+                            <div class="expense-response-actions"><button name="Decision" value="Approved" type="submit" class="exp-approve">Approve &amp; Send Response</button><button name="Decision" value="Rejected" type="submit" class="exp-reject">Reject &amp; Send Response</button></div>
+                        </form>
+                    }
+                    @if (canDecide) { <form asp-controller="Expense" asp-action="Decide" method="post" class="expense-review-form"><input type="hidden" name="id" value="@claim.Id" /><textarea name="note" class="exp-input" maxlength="500" rows="2" placeholder="Review note (required for rejection)" aria-label="Review note"></textarea><div><button name="decision" value="Approved" class="exp-approve" type="submit">Approve</button><button name="decision" value="Rejected" class="exp-reject" type="submit">Reject</button></div></form> }
+                    @if (hr && ExpenseClaimWorkflow.CanForward(claim, Model.CurrentEmployeeId)) { <form asp-controller="Expense" asp-action="Forward" method="post" class="expense-forward"><input type="hidden" name="id" value="@claim.Id" /><button class="exp-btn-primary" type="submit"><i class="fa-solid fa-share"></i> Forward to Yuvraj</button></form> }
+                </article>
+            }
+            </div><p id="expenseNoMatches" class="exp-empty" hidden>No claims match your filters.</p>
+        </section>
+    </div>
+    <details class="expense-advance-details"><summary>Advance payments &amp; receipts</summary><partial name="~/Views/Hr/_ExpenseAdvances.cshtml" model="Model" /></details>
+</div>
+<script src="~/js/expense-workspace.js" asp-append-version="true"></script>

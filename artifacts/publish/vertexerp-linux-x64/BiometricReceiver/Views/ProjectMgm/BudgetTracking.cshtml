@@ -1,0 +1,126 @@
+@{
+    ViewData["Title"] = "Budget Tracking";
+    Layout = "_Layout";
+}
+
+<!-- FontAwesome Icons CDN Link -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="stylesheet" href="~/css/BudgetTracking.css" asp-append-version="true" />
+
+<div class="budget-container">
+    <!-- Header Section -->
+    <header class="page-header">
+        <div class="header-title-group">
+            <div class="icon-avatar">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div>
+                <h1>Budget Tracking</h1>
+                <p>Monitor project expenses, allocate budgets, and track financial health.</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="date-filter">
+                <i class="far fa-calendar-alt"></i>
+                <select class="select-clean">
+                    <option>This Quarter</option>
+                    <option>This Month</option>
+                    <option>Financial Year</option>
+                </select>
+            </div>
+            <button class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> <span>Add Expense</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Top Financial KPI Cards -->
+    <section class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Total Allocated Budget</span>
+                <span class="value">—</span>
+            </div>
+            <div class="metric-icon icon-blue">
+                <i class="fas fa-sack-dollar"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Total Spent</span>
+                <span class="value">—</span>
+            </div>
+            <div class="metric-icon icon-purple">
+                <i class="fas fa-chart-line"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Remaining Balance</span>
+                <span class="value text-emerald">—</span>
+            </div>
+            <div class="metric-icon icon-emerald">
+                <i class="fas fa-piggy-bank"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Over-Budget Projects</span>
+                <span class="value text-danger">—</span>
+            </div>
+            <div class="metric-icon icon-rose">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <main class="main-content-grid">
+
+        <!-- Project Budget Breakdown Progress -->
+        <div class="glass-card budget-breakdown-card">
+            <div class="card-header flex-between">
+                <div>
+                    <h2>Project Budget Breakdown</h2>
+                    <p class="subtitle">Real-time expenditure tracking per active project</p>
+                </div>
+                <button class="btn btn-outline btn-sm">
+                    <i class="fas fa-download"></i> <span>Export Report</span>
+                </button>
+            </div>
+
+            <div class="card-body">
+                <div class="project-budget-list erp-empty-state">No project budget data available.</div>
+            </div>
+        </div>
+
+        <!-- Recent Expenses Log -->
+        <div class="glass-card expenses-card">
+            <div class="card-header">
+                <h2>Recent Expenses</h2>
+                <p class="subtitle">Latest financial transactions logged across projects</p>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="expense-table">
+                        <thead>
+                            <tr>
+                                <th>Category / Desc</th>
+                                <th>Project</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="4" class="erp-empty-state">No expense data available.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>

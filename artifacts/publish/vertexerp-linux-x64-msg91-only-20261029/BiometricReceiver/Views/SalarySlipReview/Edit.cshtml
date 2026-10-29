@@ -1,0 +1,25 @@
+@model VertexERP.Models.SalarySlipReviewViewModel
+@{ ViewData["Title"] = "Preview and Update Salary Slip"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
+<section style="max-width:950px;margin:24px auto;padding:24px;background:var(--erp-surface, #111c31);color:var(--erp-text, #edf4ff);border-radius:16px">
+    <h1>Preview and Update Salary Slip</h1>
+    <p data-no-localize>@Model.EmployeeName · @Model.Month/@Model.Year</p>
+    <p>Check salary days and amounts, then preview the PDF. Changes apply to this month's slip only. The employee can see it after you select Generate reviewed slip.</p>
+    <form asp-action="Edit" method="post">
+        <input asp-for="EmployeeId" type="hidden" /><input asp-for="Year" type="hidden" /><input asp-for="Month" type="hidden" />
+        <div asp-validation-summary="All" style="color:#ffaaa9"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px">
+        @foreach(var field in VertexERP.Models.SalarySlipRevisionViewModel.Fields)
+        {
+            <label>@(field == "ProfessionalTax" ? "ESIC" : System.Text.RegularExpressions.Regex.Replace(field, "([a-z])([A-Z])", "$1 $2"))
+                <input name="Values[@field]" type="number" step="0.01" min="0" max="@(field == "SalaryDays" ? DateTime.DaysInMonth(Model.Year,Model.Month) : 100000000)" required value="@(Model.Values.TryGetValue(field, out var value) ? value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "")" style="display:block;width:100%;padding:10px" />
+            </label>
+        }
+        </div>
+        <partial name="_SalaryCalculationSummary" model="(Model.Year, Model.Month)" />
+        <label style="display:block;margin-top:18px">Deduction note<input asp-for="DeductionNote" maxlength="300" style="display:block;width:100%;padding:10px" /></label>
+        <p>Enter full-month earnings below. Actual earnings = full-month earnings � salary days � calendar days in this month. Deductions remain separate amounts. Preview opens in a new tab and does not save or generate the slip.</p>
+        <button type="submit" name="operation" value="preview" formtarget="_blank" style="margin:12px;padding:12px">Preview PDF</button>
+        <button type="submit" name="operation" value="generate" style="margin:12px;padding:12px">Generate reviewed slip</button>
+        <a asp-controller="Hr" asp-action="SalarySlips" asp-route-year="@Model.Year" asp-route-month="@Model.Month" asp-route-employeeId="@Model.EmployeeId">Cancel</a>
+    </form>
+</section>

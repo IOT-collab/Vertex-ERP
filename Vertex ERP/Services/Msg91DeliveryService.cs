@@ -20,7 +20,7 @@ public static class Msg91Delivery
         if (root.ValueKind != JsonValueKind.Object) return null;
         if (Text("direction") != "1" || Text("integratedNumber") != config.IntegratedNumber || Text("templateName") != config.TemplateName) return null;
         var language = Text("templateLanguage");
-        if (language != config.Language) return null;
+        if (language != config.LanguageCode) return null;
         var status = Text("eventName").ToLowerInvariant() switch { "sent" => "Sent", "delivered" => "Delivered", "read" => "Read", "failed" => "Failed", _ => "" };
         var id = Text("requestId"); var uuid = Text("uuid"); var phone = Msg91WhatsAppService.NormalizePhone(Text("customerNumber"));
         var timestamp = Text("ts");

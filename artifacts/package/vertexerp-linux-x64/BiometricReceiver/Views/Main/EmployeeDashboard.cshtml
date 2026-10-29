@@ -1,0 +1,84 @@
+@model VertexERP.Models.EmployeePortalViewModel
+@{ ViewData["Title"]="Employee Dashboard"; Layout="~/Views/Shared/_LayoutMaster.cshtml"; var employee=Model.Employee; var attendanceDate = employee == null ? DateOnly.FromDateTime(VertexERP.Services.FieldAttendanceClock.Now) : VertexERP.Services.AttendanceRules.ShiftDate(VertexERP.Services.FieldAttendanceClock.Now, employee.ShiftStartTime, employee.ShiftEndTime); var initialAttendanceStatus = VertexERP.Services.AttendanceRules.StatusFor(Model.CheckIn, attendanceDate, Model.LeaveRequests.Any(request => request.LeaveType != "Short Leave" && request.Status == "Approved" && request.FromDate <= attendanceDate && request.ToDate >= attendanceDate), employee?.ShiftStartTime); }
+<link href="~/css/RoleEmployeeDashboard.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/ProfileEnhancements.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/WorkflowEnhancements.css" rel="stylesheet" asp-append-version="true" />
+<link href="~/css/ResponsiveEnhancements.css" rel="stylesheet" asp-append-version="true" />
+<style>.attendance-status .late{color:#d97706!important}</style>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const applyButton = document.querySelector('.leave-card .portal-card-title button');
+    if (applyButton) applyButton.onclick = function () { window.location.href = '@Url.Action("EmployeeLeaves", "Main")'; };
+});
+</script>
+<div class="dashboard-query-shortcut"><a asp-action="EmployeeQueries"><i class="fa-regular fa-circle-question"></i><span><strong>Raise Query</strong><small>Send a ticket to your reporting manager and HR</small></span></a></div>
+@if(employee==null){<div class="employee-portal"><div class="portal-empty">Employee profile is not linked with this login.</div></div>}else{
+<section class="employee-portal">
+ <header class="portal-title"><div><h1>Employee Dashboard</h1><p>Your profile, assigned tasks, attendance and leave requests</p></div><a class="btn btn-secondary" asp-action="EmployeeProfile">View Complete Profile</a></header>
+ <article class="employee-hero portal-card"><div class="portal-avatar">@if(!string.IsNullOrWhiteSpace(employee.PhotoPath)){<img src="@employee.PhotoPath" alt="@employee.FullName"/>}else{<span><i class="fa-solid fa-user"></i></span>}</div><div class="hero-main"><h2 data-no-localize>@employee.FullName</h2><b>@employee.EmployeeCode</b><p><i class="fa-regular fa-user"></i> @employee.Designation</p><p><i class="fa-regular fa-building"></i> @employee.Department</p></div><div class="hero-detail"><i class="fa-solid fa-user-tie"></i><span><small>Reporting Manager</small><strong>@(employee.ReportingManager?.FullName ?? "Not assigned")</strong></span></div><div class="hero-detail"><i class="fa-regular fa-calendar"></i><span><small>Joining Date</small><strong>@employee.JoiningDate.ToString("dd MMM yyyy")</strong></span></div><div class="hero-contact"><p><i class="fa-regular fa-envelope"></i><span><small>Email</small><strong data-no-localize>@employee.Email</strong></span></p><p><i class="fa-solid fa-phone"></i><span><small>Phone</small><strong data-no-localize>@employee.PhoneNumber</strong></span></p></div></article>
+ <div class="portal-stats"><div class="portal-card"><i class="fa-solid fa-clipboard-list purple"></i><span><small>Total Tasks</small><strong>@Model.Tasks.Count</strong><p>All assigned tasks</p></span></div><div class="portal-card"><i class="fa-regular fa-circle blue"></i><span><small>Pending</small><strong>@Model.Pending</strong><p>Tasks remaining</p></span></div><div class="portal-card"><i class="fa-regular fa-hourglass-half orange"></i><span><small>In Progress</small><strong>@Model.InProgress</strong><p>Active tasks</p></span></div><div class="portal-card"><i class="fa-solid fa-check green"></i><span><small>Completed</small><strong>@Model.Completed</strong><p>Tasks completed</p></span></div><div class="portal-card"><i class="fa-regular fa-clock red"></i><span><small>Overdue</small><strong>@Model.Overdue</strong><p>Past due date</p></span></div></div>
+ <div class="portal-grid"><article class="portal-card task-card"><div class="portal-card-title"><h3>My Tasks</h3></div>@if(Model.Tasks.Count==0){<div class="portal-empty">No tasks assigned.</div>}else{<div class="portal-table-wrap"><table><thead><tr><th>Task</th><th>Manager</th><th>Priority</th><th>Due Date</th><th>Status</th></tr></thead><tbody>@foreach(var task in Model.Tasks){<tr><td><b>@task.Title</b><small>@task.Description</small></td><td>@task.Manager.FullName</td><td>@task.Priority</td><td>@task.DueDate.ToString("dd MMM yyyy")</td><td><em>@task.Status</em></td></tr>}</tbody></table></div>}</article>
+ <article class="portal-card attendance-card" data-live-attendance-url="@Url.Action("MyLiveAttendance", "Main")"><div class="portal-card-title"><div><h3>Today's Attendance</h3><small class="biometric-sync-label"><i class="fa-solid fa-fingerprint"></i> Your daily check-in and check-out punches</small></div><span id="liveAttendanceDate">@attendanceDate.ToString("dd MMM yyyy")</span></div><div class="attendance-times"><div><i class="fa-solid fa-right-to-bracket green"></i><span><small>Check In</small><strong id="liveCheckIn">@(Model.CheckIn?.ToString("hh:mm tt") ?? "--")</strong></span></div><div><i class="fa-solid fa-right-from-bracket red"></i><span><small>Check Out</small><strong id="liveCheckOut">@(Model.CheckOut?.ToString("hh:mm tt") ?? "--")</strong></span></div></div><div class="attendance-status"><span>Status</span><strong id="liveAttendanceStatus" class="@(initialAttendanceStatus.ToLowerInvariant())">@initialAttendanceStatus</strong></div><div class="live-attendance-details"><span><span>Source</span>: <strong id="liveAttendanceSource">--</strong></span><span><span>Working Time</span>: <strong id="liveWorkingHours">--</strong></span><span><span>Overtime</span>: <strong id="liveOvertime">--</strong></span><span><span>Punches</span>: <strong id="livePunchCount">--</strong></span></div><small id="liveAttendanceUpdated" role="status">Loading live activity…</small><a class="attendance-history-link" asp-action="EmployeeAttendance"><i class="fa-regular fa-calendar-days"></i> View my attendance history</a></article>
+ <article class="portal-card leave-card"><div class="portal-card-title"><h3>Leave Requests</h3><button type="button" onclick="document.getElementById('leaveForm').showModal()">Apply Leave</button><button type="button" onclick="openExtraLeave('halfDayForm')">Apply Half Day</button><button type="button" onclick="openExtraLeave('shortLeaveForm')">Apply Short Leave</button></div><partial name="_ExtraFacilitySummary" />@if(Model.LeaveRequests.Count==0){<div class="portal-empty small">No leave requests.</div>}else{<div class="portal-table-wrap"><table><thead><tr><th>Type</th><th>Dates</th><th>Status</th></tr></thead><tbody>@foreach(var leave in Model.LeaveRequests.Take(5)){<tr><td>@leave.LeaveType @if(leave.IsHalfDay){<small>@(leave.HalfDaySession == "First" ? "1st Half" : leave.HalfDaySession == "Second" ? "2nd Half" : "Half day")</small>}</td><td>@leave.FromDate.ToString("dd MMM") - @leave.ToDate.ToString("dd MMM")</td><td><em>@leave.DisplayStatus</em><partial name="_LeaveDecisionDetails" model="leave" /></td></tr>}</tbody></table></div>}</article></div>
+</section>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('#leaveForm form');
+    const submit = form?.querySelector('.submit-leave');
+    if (!form || !submit || form.querySelector('.leave-cancel')) return;
+    const actions = document.createElement('div');
+    actions.className = 'dialog-actions';
+    const cancel = document.createElement('button');
+    cancel.type = 'button';
+    cancel.className = 'leave-cancel';
+    cancel.textContent = 'Cancel';
+    cancel.addEventListener('click', () => document.getElementById('leaveForm').close());
+    submit.before(actions);
+    actions.append(cancel, submit);
+});
+</script>
+<script>
+(() => {
+    const card = document.querySelector('[data-live-attendance-url]');
+    if (!card) return;
+    const checkIn = document.getElementById('liveCheckIn');
+    const checkOut = document.getElementById('liveCheckOut');
+    const status = document.getElementById('liveAttendanceStatus');
+    let loading = false;
+
+    const refreshAttendance = async () => {
+        if (loading || document.hidden) return;
+        loading = true;
+        try {
+            const response = await fetch(card.dataset.liveAttendanceUrl, {
+                cache: 'no-store',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (!response.ok) throw new Error("Attendance refresh failed");
+            const attendance = await response.json();
+            checkIn.textContent = attendance.checkIn || '--';
+            checkOut.textContent = attendance.checkOut || '--';
+            status.textContent = attendance.status;
+            for (const [id, key] of Object.entries({liveAttendanceDate:"date", liveAttendanceSource:"source", liveWorkingHours:"workingHours", liveOvertime:"overtime", livePunchCount:"punchCount"})) { const element = document.getElementById(id); if(element) element.textContent = attendance[key] ?? "--"; }
+            document.getElementById("liveAttendanceUpdated").textContent = (window.VertexLanguage?.t("Last updated") || "Last updated") + ": " + attendance.updatedAt;
+            status.classList.toggle('present', attendance.status === 'Present');
+            status.classList.toggle('absent', attendance.status === 'Absent');
+            status.classList.toggle('holiday', attendance.status === 'Holiday');
+            status.classList.toggle('leave', attendance.status === 'Leave');
+            status.classList.toggle('late', attendance.status === 'Late');
+        } catch {
+            document.getElementById("liveAttendanceUpdated").textContent = window.VertexLanguage?.t("Live update unavailable. Retrying…") || "Live update unavailable. Retrying…";
+        } finally {
+            loading = false;
+        }
+    };
+
+    refreshAttendance();
+    window.setInterval(refreshAttendance, 5000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshAttendance(); });
+})();
+</script>
+<dialog id="leaveForm" class="leave-dialog"><form asp-controller="Main" asp-action="ApplyLeave" method="post"><div class="dialog-title"><h3>Apply Leave</h3><button type="button" onclick="leaveForm.close()">×</button></div><label>Leave Type<select name="leaveType" required><option value="">Select</option><option value="EL">EL</option><option value="CL">CL</option><option value="EW">EW</option><option value="ML">ML</option><option>Sick Leave</option><option>Unpaid Leave</option></select></label><div class="date-fields"><label>From<input type="date" name="fromDate" required/></label><label>To<input type="date" name="toDate" required/></label></div><label>Reason<textarea name="reason" rows="3" required></textarea></label><button class="submit-leave" type="submit">Submit Leave Request</button></form></dialog>}
+
+<partial name="_ApplyHalfDay" />
+<partial name="_ApplyShortLeave" />

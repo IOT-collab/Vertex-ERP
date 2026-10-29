@@ -1,0 +1,41 @@
+@model VertexERP.Models.FeedbackDocumentsViewModel
+@{ Layout = "~/Views/Shared/_LayoutMaster.cshtml"; ViewData["Title"] = "Feedback Forms"; }
+<link href="~/css/FeedbackDocuments.css" rel="stylesheet" asp-append-version="true" />
+<section class="fd-workspace">
+    <header class="fd-hero"><div><span class="fd-eyebrow">FORMS &amp; EMPLOYEE RESPONSES</span><h1>Feedback Forms</h1><p>@(Model.IsManagement ? "Publish a document for your team and track every employee response." : "Download company forms, complete them, and send your files back to HR.")</p></div><i class="fa-solid fa-file-circle-check" aria-hidden="true"></i></header>
+    <nav class="fd-tabs" aria-label="Feedback views"><a asp-action="Index" class="selected" aria-current="page"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Published Forms</span></a>@if (Model.IsManagement) { <a asp-action="Responses"><i class="fa-solid fa-file-circle-check" aria-hidden="true"></i><span>Employee Responses</span></a><a asp-controller="Feedback" asp-action="MessageInbox"><i class="fa-solid fa-comments" aria-hidden="true"></i><span>Written Feedback</span></a> }<a asp-controller="Feedback" asp-action="Message"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i><span>Send Feedback</span></a></nav>
+    <partial name="~/Views/FeedbackDocuments/_Notices.cshtml" />
+    @if (Model.IsManagement) {
+        <div class="fd-tracker-heading"><div><h2>Form response tracker</h2><p class="fd-muted">Counts are for the selected form. Available means visible in employee logins, not opened or read.</p></div>
+            @if (Model.Documents.Count > 0) { <form asp-action="Index" method="get"><label for="tracking-form">Select published form</label><select name="documentId" id="tracking-form" onchange="this.form.submit()">@foreach (var item in Model.Documents) { <option value="@item.Document.Id" selected="@(item.Document.Id == Model.SelectedDocument?.Document.Id)">@item.Document.Title</option> }</select><button class="fd-secondary" type="submit">Show counts</button></form> }
+        </div>
+        <div class="fd-stats fd-tracking-stats"><article><span><i class="fa-solid fa-users" aria-hidden="true"></i> Form Available To</span><strong>@(Model.SelectedDocument?.ReachedCount ?? 0)</strong><small>Employees with access</small></article><article><span><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Responses Uploaded</span><strong>@(Model.SelectedDocument?.SubmittedCount ?? 0)</strong><small>Employees who sent their files back</small></article><article><span><i class="fa-solid fa-clock" aria-hidden="true"></i> Pending Responses</span><strong>@(Model.SelectedDocument?.PendingCount ?? 0)</strong><small>Employees yet to upload a response</small></article></div>
+    } else {
+        <div class="fd-stats"><article><span>Published Forms</span><strong>@Model.Documents.Count</strong></article><article><span>Submitted</span><strong>@Model.Documents.Count(x => x.OwnSubmission != null)</strong></article><article><span>Pending</span><strong>@Model.Documents.Count(x => x.OwnSubmission == null)</strong></article></div>
+    }
+
+    <div class="fd-columns @(Model.IsManagement ? "with-publish" : "")">
+        @if (Model.IsManagement) {
+            <section class="fd-panel fd-publish"><h2>Publish a form</h2><p class="fd-muted">Visible to all active employees, including employees who join later.</p>
+                <form asp-action="Publish" method="post" enctype="multipart/form-data" data-feedback-upload>
+                    <label>Form title<input name="Title" maxlength="150" required placeholder="e.g. Employee declaration form" /></label>
+                    <label>Instructions<textarea name="Instructions" maxlength="4000" rows="5" placeholder="Explain what employees need to fill, sign or complete"></textarea></label>
+                    <label class="fd-upload"><i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i><strong>Attach PDF or images</strong><input name="Files" type="file" multiple required accept=".pdf,.jpg,.jpeg,.png" /><small>Up to 5 files · 10 MB each · 25 MB combined</small></label>
+                    <ul class="fd-selected-files" data-file-list></ul><p class="fd-file-error" data-file-error role="alert" hidden></p>
+                    <button class="fd-primary" type="submit"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Publish to Employees</button>
+                </form>
+            </section>
+        }
+        <section class="fd-document-list" aria-label="Published documents">
+            @if (Model.Documents.Count == 0) { <div class="fd-panel fd-empty"><i class="fa-regular fa-folder-open" aria-hidden="true"></i><h2>No forms published yet</h2><p>@(Model.IsManagement ? "Upload the first form using the panel beside this list." : "Forms shared by HR/Admin will appear here.")</p></div> }
+            @foreach (var item in Model.Documents) {
+                <article class="fd-panel fd-document-card"><div class="fd-card-title"><span class="fd-document-icon"><i class="fa-solid fa-file-lines" aria-hidden="true"></i></span><div><h2>@item.Document.Title</h2><small class="fd-muted">Published @item.Document.PublishedAtUtc.AddMinutes(330).ToString("dd MMM yyyy · hh:mm tt") IST</small></div>@if (!Model.IsManagement) { <span class="fd-badge @(item.OwnSubmission != null ? "submitted" : "pending")">@(item.OwnSubmission != null ? "Submitted" : "Pending")</span> }</div>
+                    @if (item.Document.Instructions != null) { <p class="fd-instructions">@item.Document.Instructions</p> }
+                    <partial name="~/Views/FeedbackDocuments/_FileLinks.cshtml" model="item.Document.Assets.Where(x => x.SubmissionId == null).ToList()" />
+                    <footer>@if (Model.IsManagement) { <span class="fd-muted">Available: @item.ReachedCount · Uploaded: @item.SubmittedCount · Pending: @item.PendingCount</span> } else { <span class="fd-muted">Download → Complete / sign → Upload response</span> }<a asp-action="Details" asp-route-id="@item.Document.Id" class="fd-primary">@(Model.IsManagement ? "View Responses" : item.OwnSubmission != null ? "View / Update Response" : "Upload Response") <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a></footer>
+                </article>
+            }
+        </section>
+    </div>
+</section>
+<script src="~/js/feedback-documents.js" asp-append-version="true" defer></script>

@@ -1,0 +1,11 @@
+VertexERP Linux x64 Release deployment package
+Target framework: .NET 8
+Runtime identifier: linux-x64
+Publish mode: framework-dependent (requires .NET 8 ASP.NET Core runtime)
+Main entry assembly: Vertex ERP.dll (start with: dotnet "Vertex ERP.dll")
+Bundled biometric receiver: BiometricReceiver/BiometricReceiver.dll (ERP starts through dotnet when TCP 8082 is unused)
+Production migration/seeding: startup initialization is Development-only
+MSG91: SendingEnabled must remain false during initial deployment; AuthKey is loaded by the app from Azure Key Vault
+Configuration files: all appsettings*.json, remoteattendance.json, .env, key and certificate files excluded; preserve and configure the VM's existing settings/environment
+Database: no production database was accessed or changed during packaging
+Notifications: no live WhatsApp messages sent

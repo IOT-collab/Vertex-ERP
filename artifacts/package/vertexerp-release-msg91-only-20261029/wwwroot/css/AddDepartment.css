@@ -1,0 +1,34 @@
+.add-department-page { min-height: calc(100vh - 80px); padding: 28px; background: var(--erp-bg, #0b0f19); color: var(--erp-text, #f1f5f9); }
+.department-form-card { max-width: 900px; margin: 0 auto; background: var(--erp-surface, #111827); border: 1px solid var(--erp-border, #1e293b); border-radius: 16px; padding: 26px; }
+.department-form-header { padding-bottom: 20px; margin-bottom: 22px; border-bottom: 1px solid var(--erp-border, #1e293b); }
+.department-form-header h1 { margin: 0; font-size: 26px; color: var(--erp-text, #fff); }
+.department-form-header p { margin: 6px 0 0; color: var(--erp-text-muted, #94a3b8); }
+.department-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.department-field-wide { grid-column: 1 / -1; }
+.department-field label { display: inline-block; margin-bottom: 8px; font-weight: 600; }
+.department-field > span:not(.department-validation) { color: #ef4444; }
+.department-field input, .department-field textarea, .department-field select { width: 100%; box-sizing: border-box; padding: 12px 14px; color: var(--erp-text, #f8fafc); background: var(--erp-surface, #0f172a); border: 1px solid var(--erp-border, #334155); border-radius: 9px; font: inherit; }
+.department-field input:focus, .department-field textarea:focus, .department-field select:focus { outline: none; border-color: #3b82f6; }
+.department-validation { display: block; margin-top: 6px; color: #f87171; font-size: 13px; }
+.department-form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 26px; }
+.department-cancel, .department-submit { border-radius: 9px; padding: 11px 20px; font-weight: 600; text-decoration: none; cursor: pointer; }
+.department-cancel { color: var(--erp-text, #cbd5e1); border: 1px solid var(--erp-border, #334155); }
+.department-submit { border: 0; color: var(--theme-accent-text, #fff); background: var(--erp-primary, var(--erp-primary, #2563eb)); }
+.department-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.department-detail-grid div { padding: 16px; background: var(--erp-surface, #0f172a); border: 1px solid var(--erp-border, #334155); border-radius: 9px; }
+.department-employees-link { display: block; padding: 16px; background: var(--erp-surface, #0f172a); border: 1px solid var(--erp-border, #334155); border-radius: 9px; color: inherit; text-decoration: none; }
+.department-employees-link:hover, .department-employees-link:focus-visible { border-color: #60a5fa; outline: 2px solid #60a5fa; outline-offset: 2px; }
+.department-employees-link small { display: block; margin-top: 8px; color: var(--erp-primary, #60a5fa); }
+.department-roster-card { max-width: 1200px; }
+.department-roster-scroll { overflow-x: auto; }
+.department-roster-table { width: 100%; border-collapse: collapse; }
+.department-roster-table th, .department-roster-table td { text-align: left; padding: 14px; border-bottom: 1px solid var(--erp-border, #334155); }
+.department-roster-table th { color: var(--erp-text-muted, #94a3b8); }
+.department-roster-table a { color: var(--erp-primary, #60a5fa); white-space: nowrap; }
+.department-detail-grid span, .department-detail-grid strong { display: block; }
+.department-detail-grid span { margin-bottom: 7px; color: var(--erp-text-muted, #94a3b8); font-size: 12px; }
+.department-confirm-card { max-width: 680px; }
+.department-confirm-card h2 { font-size: 20px; }
+.department-confirm-note { color: var(--erp-text-muted, #94a3b8); }
+.department-delete-confirm { padding: 11px 20px; border: 0; border-radius: 9px; color: var(--theme-accent-text, #fff); background: #dc2626; font-weight: 600; cursor: pointer; }
+@media (max-width: 700px) { .add-department-page { padding: 16px; } .department-form-card { padding: 18px; } .department-form-grid, .department-detail-grid { grid-template-columns: 1fr; } .department-field-wide { grid-column: auto; } .department-form-actions { flex-direction: column-reverse; } .department-cancel, .department-submit, .department-delete-confirm { width: 100%; text-align: center; box-sizing: border-box; } }

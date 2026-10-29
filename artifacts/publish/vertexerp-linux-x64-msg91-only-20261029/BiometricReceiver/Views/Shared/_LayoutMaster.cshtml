@@ -1,0 +1,295 @@
+@inject VertexERP.Services.ManualAttendanceAccess ManualAttendancePermissions
+<!DOCTYPE html>
+@inject VertexERP.Data.ApplicationDbContext LayoutDb
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName" data-theme-user="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - Vertex ERP</title>
+    <script src="~/js/theme.js" asp-append-version="true"></script>
+    <script src="~/js/locales/hi.js" asp-append-version="true"></script>
+    <script src="~/js/language.js" asp-append-version="true"></script>
+    <link href="~/css/Style.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/site.css" rel="stylesheet" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="~/css/common-ui.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/common-back-button.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/erp-buttons.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/ResponsiveEnhancements.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/hr-modules.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/theme.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/ResponsiveGuard.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/notification-inbox.css" rel="stylesheet" asp-append-version="true" />
+</head>
+<body class="erp-shell @(ViewData["ManagerWorkspace"] is true ? "manager-workspace-shell" : "") @((User.IsInRole("Employee") || User.IsInRole("User")) ? "employee-self-service-only" : "") @(ViewData["DashboardDesign"] is true ? "dashboard-studio-shell" : "")">
+    @{
+        var canMarkManualAttendance = await ManualAttendancePermissions.CanMarkAsync(User);
+        var canReceiveExpenses = int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var expenseViewerId)
+            && LayoutDb.AppUsers.Any(account => account.Id == expenseViewerId && account.IsActive && account.Employee != null
+                && account.Employee.IsActive && account.Employee.CanReceiveExpenseClaims);
+        var currentRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "User";
+        var currentName = User.Identity?.Name ?? currentRole;
+        var isEmployee = User.IsInRole("Employee") || User.IsInRole("User");
+        var isManager = User.IsInRole("Manager");
+        var isHr = User.IsInRole("HR");
+        var showWelcomePopup = Context.Session.GetString("showWelcomePopup") == "true";
+        var welcomeGender = Context.Session.GetString("welcomeGender");
+        var welcomeHonorific = string.Equals(welcomeGender, "Male", StringComparison.OrdinalIgnoreCase) ? "Mr." : string.Equals(welcomeGender, "Female", StringComparison.OrdinalIgnoreCase) ? "Mrs." : string.Empty;
+        if (showWelcomePopup)
+        {
+            Context.Session.Remove("showWelcomePopup");
+            Context.Session.Remove("welcomeGender");
+        }
+        var pendingBankRequestCount = isHr && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier) != null ? LayoutDb.BankDetailUpdateRequests.Count(request => request.Status == "Pending") : 0;
+        VertexERP.Models.ManagerDashboardViewModel? workspaceModel = ViewData["ManagerWorkspace"] is true ? Model as VertexERP.Models.ManagerDashboardViewModel : null;
+        int? sidebarManagerId = workspaceModel?.Viewer?.Id;
+        if (isManager && workspaceModel == null && int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var sidebarUserId))
+        {
+            sidebarManagerId = LayoutDb.AppUsers.Where(user => user.Id == sidebarUserId && user.IsActive).Select(user => user.EmployeeId).FirstOrDefault();
+        }
+        var assignedTeamCount = workspaceModel?.TeamMembers.Count ?? (sidebarManagerId.HasValue ? LayoutDb.Employees.Count(employee => employee.IsActive && employee.ReportingManagerId == sidebarManagerId && employee.Id != sidebarManagerId) : 0);
+        var teamLeavePendingCount = workspaceModel?.LeaveRequests.Count(request => VertexERP.Services.ManagerDashboardPresentation.AwaitingAction(request, true)) ?? (sidebarManagerId.HasValue ? LayoutDb.LeaveRequests.Count(request => request.AssignedApproverEmployeeId == sidebarManagerId && request.EmployeeId != sidebarManagerId && request.Status == "Pending" && request.ApprovalLevel == "Manager") : 0);
+        var teamQueryCount = workspaceModel?.OpenQueryTickets ?? (sidebarManagerId.HasValue ? LayoutDb.QueryTickets.Count(ticket => ticket.ReportingManagerId == sidebarManagerId && ticket.EmployeeId != sidebarManagerId && ticket.Status != "Resolved" && ticket.Status != "Closed") : 0);
+        var homeUrl = isEmployee ? "/Main/EmployeeHome" : isManager ? "/Main/Manager" : "/Main/Dashboard";
+    }
+
+    @if (showWelcomePopup)
+    {
+        <div class="vertex-welcome-overlay" id="vertexWelcomePopup" role="dialog" aria-modal="true" aria-labelledby="vertexWelcomeTitle">
+            <section class="vertex-welcome-card">
+                <button class="vertex-welcome-close" type="button" aria-label="Close welcome message">&times;</button>
+                <div class="vertex-welcome-mark"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></div>
+                <p class="vertex-welcome-eyebrow">A NEW DAY AT VERTEX</p>
+                <h1 id="vertexWelcomeTitle">Welcome to Vertex Group</h1>
+                <p class="vertex-welcome-name">@welcomeHonorific @currentName</p>
+                <p class="vertex-welcome-copy">Wishing you a productive day ahead.</p>
+                <button class="vertex-welcome-continue" type="button">Continue</button>
+            </section>
+        </div>
+    }
+
+    @if (User.IsInRole("Admin") || User.IsInRole("HR") || User.IsInRole("Manager"))
+    {
+        <partial name="_VertexAiAssistant" />
+    }
+
+    <!-- Pure CSS Sidebar Drawer Controller Toggle -->
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle-check" />
+
+    <div class="layout">
+
+        <!-- Mobile Drawer Overlay Screen -->
+        <label for="sidebar-toggle" class="sidebar-overlay"></label>
+
+        <!-- Sidebar Navigation Drawer -->
+        <aside class="sidebar">
+            <div class="logo">
+                <a class="erp-logo-link" href="@homeUrl" aria-label="Go to Dashboard">
+                    <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                    <span>Vertex ERP</span>
+                </a>
+                    <label for="sidebar-toggle" class="sidebar-close-btn">&times;</label>
+            </div>
+
+            <ul class="sidebar-menu">
+                @if (canReceiveExpenses)
+                {
+                    <li><a asp-controller="Expense" asp-action="Index" asp-route-view="inbox"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Forwarded Expenses</span></a></li>
+                }
+                @if (canMarkManualAttendance)
+                {
+                    <li><a asp-controller="Main" asp-action="AddAttendance"><i class="fa-solid fa-user-check" aria-hidden="true"></i><span>Mark Manual Attendance</span></a></li>
+                }
+                @if (isEmployee)
+                {
+                    <li><a href="/Main/Employees"><i class="fa-solid fa-table-cells-large" aria-hidden="true"></i><span>Dashboard</span></a></li>
+                    <li><a href="/Main/EmployeeTasks"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>My Tasks</span></a></li>
+                    <li><a href="/Main/EmployeeAttendance"><i class="fa-regular fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
+                    <li><a href="/Main/FieldAttendance"><i class="fa-solid fa-location-dot" aria-hidden="true"></i><span>Mark Attendance</span></a></li>
+                    <li><a href="/Main/EmployeeLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Leave Management</span></a></li>
+                    <li><a asp-controller="Main" asp-action="CompanyHoliday"><i class="fa-regular fa-calendar-days" aria-hidden="true"></i><span>Company Holiday</span></a></li>
+                    <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user" aria-hidden="true"></i><span>My Profile</span></a></li>
+                    <li><a href="/Notifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Notifications</span></a></li>
+                    <li><a href="/Main/EmployeeQueries"><i class="fa-regular fa-circle-question" aria-hidden="true"></i><span>Raise Query</span></a></li>
+                    <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Salary Slip</span></a></li>
+                    <li><a href="/Main/EmployeeAssets"><i class="fa-solid fa-laptop" aria-hidden="true"></i><span>Assets</span></a></li>
+                    <li><a asp-controller="Expense" asp-action="Index"><i class="fa-solid fa-receipt" aria-hidden="true"></i><span>Expense Claims</span></a></li>
+                    <li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns" aria-hidden="true"></i><span>My Bank Details</span></a></li>
+                }
+                else if (isManager)
+                {
+                    @if (ViewData["ManagerWorkspace"] is true)
+                    {
+                        <partial name="_ManagerWorkspaceNavigation" />
+                    }
+                    else
+                    {
+
+                    <li><a href="/Main/Manager"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Manager Dashboard</span></a></li>
+                    <li><a href="/Main/MyTeam"><i class="fa-solid fa-users" aria-hidden="true"></i><span>My Team (@assignedTeamCount)</span></a></li>
+                    <li><a href="/Main/ManagerAttendance"><i class="fa-solid fa-users-viewfinder" aria-hidden="true"></i><span>Team Attendance</span></a></li>
+                    <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Site Employee Location</span></a></li>
+                    <li><a href="/Notifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Team Notifications</span></a></li>
+                    <li><a href="/Main/ManagerLeaves"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Team Leave Requests (@teamLeavePendingCount)</span></a></li>
+                    <li><a asp-controller="Expense" asp-action="Index"><i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i><span>Team Expenses</span></a></li>
+                    <li><a asp-controller="Expense" asp-action="Index" asp-route-view="self"><i class="fa-solid fa-receipt"></i><span>My Expenses</span></a></li>
+                    <li><a href="/Main/ManagerQueries"><i class="fa-regular fa-circle-question" aria-hidden="true"></i><span>Team Queries (@teamQueryCount)</span></a></li>
+                    <li><a href="/Main/TaskMgm"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Task Management</span></a></li>
+                    <li><a href="/Main/ManagerProjects"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Project Management</span></a></li>
+                    <li><a href="/Main/EmployeeAttendance"><i class="fa-regular fa-clock"></i><span>My Attendance</span></a></li>
+                    <li><a href="/Main/FieldAttendance"><i class="fa-solid fa-location-dot"></i><span>Mark Attendance</span></a></li>
+                    <li><a href="/Main/EmployeeLeaves"><i class="fa-solid fa-plane-departure"></i><span>My Leave</span></a></li>
+                    <li><a href="/Main/EmployeeQueries"><i class="fa-regular fa-circle-question"></i><span>My Queries</span></a></li>
+                    <li><a href="/Notifications"><i class="fa-regular fa-bell"></i><span>My Notifications</span></a></li>
+                    <li><a href="/Main/EmployeeProfile"><i class="fa-regular fa-user"></i><span>My Profile</span></a></li>
+                    <li><a href="/Main/SalarySlips"><i class="fa-solid fa-file-invoice-dollar"></i><span>Salary Slip</span></a></li>
+                    <li><a href="/Main/EmployeeAssets"><i class="fa-solid fa-laptop"></i><span>My Assets</span></a></li>
+                    <li><a href="/Main/MyBankDetails"><i class="fa-solid fa-building-columns"></i><span>My Bank Details</span></a></li>
+                    <li><a href="/Main/OrderTracking"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i><span>Shipment Tracking</span></a></li>
+                    }
+                }
+                else
+                {
+                    <li><a href="/Main/Dashboard"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Dashboard</span></a></li>
+                    <li><a href="/Main/Employees"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Employees</span></a></li>
+                    <li><a href="/Main/Attendence"><i class="fa-solid fa-clock" aria-hidden="true"></i><span>Attendance</span></a></li>
+                    <li><a href="/Main/LocationTracking"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i><span>Site Employee Location</span></a></li>
+                    <li><a href="/Main/LeaveManagement"><i class="fa-solid fa-plane-departure" aria-hidden="true"></i><span>Manual Mark Attendance</span></a></li>
+                    <li><a asp-controller="Main" asp-action="CompanyHoliday"><i class="fa-regular fa-calendar-days" aria-hidden="true"></i><span>Company Holiday</span></a></li>
+                    <li><a href="/Notifications"><i class="fa-regular fa-bell" aria-hidden="true"></i><span>Notifications</span></a></li>
+                    <li><a href="/Main/WorkflowManagement"><i class="fa-solid fa-code-pull-request" aria-hidden="true"></i><span>Leave Approvals & Employee Queries</span></a></li>
+@*                     <li><a href="/Main/DepartmentManagement"><i class="fa-solid fa-building" aria-hidden="true"></i><span>Department</span></a></li>
+ *@                    <li><a href="/Main/Hrms"><i class="fa-solid fa-user-tie" aria-hidden="true"></i><span>HR Management</span></a></li>
+
+                    <li><a href="/Main/OrderTracking"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i><span>Shipment Tracking</span></a></li>
+                    <li><a href="/Main/TaskMgm"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span>Task Management</span></a></li>
+                    <li><a href="/Main/ProjectMgm"><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span>Project Management</span></a></li>
+                    @if (User.IsInRole("Admin"))
+                    {
+                    <li><a href="/Main/AdminPanel"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Admin Panel</span></a></li>
+                    <li><a href="/Main/UserSettings"><i class="fa-solid fa-user-gear" aria-hidden="true"></i><span>User Setting</span></a></li>
+                    }
+                    @if (isHr)
+                    {
+                        <li><a href="/Main/BankUpdateRequests"><i class="fa-solid fa-building-circle-check"></i><span>Bank Update Requests</span>@if(pendingBankRequestCount>0){<b style="margin-left:auto;background:#ef4444;color:var(--theme-accent-text, #fff);border-radius:999px;padding:3px 7px;font-size:11px">@pendingBankRequestCount</b>}</a></li>
+                    }
+                }
+                @if (!(ViewData["ManagerWorkspace"] is true))
+                {
+                <li><a asp-controller="Theme" asp-action="Index"><i class="fa-solid fa-palette" aria-hidden="true"></i><span>Theme</span></a></li>
+                <li><a asp-controller="Language" asp-action="Index"><i class="fa-solid fa-language" aria-hidden="true"></i><span>Language</span></a></li>
+                @if (!User.IsInRole("HR") && !User.IsInRole("Admin"))
+                {
+                    <li><a asp-controller="Feedback" asp-action="Index"><i class="fa-regular fa-comment-dots" aria-hidden="true"></i><span>Feedback</span></a></li>
+                }
+                }
+                @if (User.IsInRole("HR") || User.IsInRole("Admin"))
+                {
+                    <li><a asp-controller="Feedback" asp-action="Inbox"><i class="fa-solid fa-comments" aria-hidden="true"></i><span>Feedback &amp; Response</span></a></li>
+                }
+            </ul>
+        </aside>
+
+        <!-- Main Dashboard Workspace Panel -->
+        <main class="main-content">
+
+            <!-- Global Action Application Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <label for="sidebar-toggle" class="hamburger-menu-btn" title="Open navigation" aria-label="Open navigation">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </label>
+                    <a class="topbar-brand" href="@homeUrl" aria-label="Go to Dashboard">
+                        <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                        <span>Vertex ERP</span>
+                    </a>
+                </div>
+
+                @if (ViewData["ManagerWorkspace"] is true)
+                {
+                    <partial name="_ManagerTopbar" model="Model" />
+                }
+                else
+                {
+                <div class="profile">
+                    @if (User.IsInRole("HR") || User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Employee") || User.IsInRole("User")) { <partial name="_NotificationBell" /> }
+                    <span class="profile-text" title="Signed in as @currentName">Welcome @currentName</span>
+                    <form asp-controller="Main" asp-action="Logout" method="post" style="display:inline">
+                        <button class="logout-btn" type="submit" title="Logout">Logout</button>
+                    </form>
+                </div>
+                }
+            </header>
+
+            <!-- Embedded Nested Page Target Body Canvas Wrapper -->
+            <div class="page-content">
+                <partial name="_BackButton" />
+                @RenderBody()
+            </div>
+
+        </main>
+
+    </div>
+
+    @await RenderSectionAsync("Scripts", required: false)
+    @if (showWelcomePopup)
+    {
+        <script>
+            (() => {
+                const popup = document.getElementById('vertexWelcomePopup');
+                if (!popup) return;
+                const close = () => {
+                    popup.classList.add('is-closing');
+                    window.setTimeout(() => popup.remove(), 180);
+                };
+                popup.querySelectorAll('.vertex-welcome-close, .vertex-welcome-continue').forEach(button => button.addEventListener('click', close));
+                popup.addEventListener('click', event => { if (event.target === popup) close(); });
+                document.addEventListener('keydown', event => { if (event.key === 'Escape') close(); }, { once: true });
+                window.setTimeout(close, 7000);
+            })();
+        </script>
+    }
+    <script src="~/js/input-rules.js" asp-append-version="true"></script>
+    @if (TempData["EmployeeStatusChanged"] is true)
+    {
+        <script>try { localStorage.setItem('erp.employee-status-change', String(Date.now())); } catch { }</script>
+    }
+    <script>
+        (() => {
+            const attendanceSelectors = {
+                '/Main/Attendence': '.attendance-panel-container',
+                '/Main/Dashboard': '[data-attendance-auto-refresh]',
+                '/Main/DashboardAttendance': '.dashboard-attendance-page',
+                '/Main/EmployeeAttendance': '.employee-section',
+                '/Main/EmployeeAssets': '.employee-section',
+                '/Main/Hrms': '.hrms-page'
+            };
+            const selector = attendanceSelectors[window.location.pathname];
+            const target = document.querySelector('[data-attendance-auto-refresh]') || (selector ? document.querySelector(selector) : null);
+            if (!target) return;
+            let refreshing = false;
+            const refreshAttendanceInBackground = async () => {
+                if (refreshing || document.hidden || document.activeElement?.matches('input, select, textarea')) return;
+                refreshing = true;
+                try {
+                    const response = await fetch(window.location.href, { cache: 'no-store', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!response.ok) return;
+                    const nextDocument = new DOMParser().parseFromString(await response.text(), 'text/html');
+                    const nextTarget = nextDocument.querySelector('[data-attendance-auto-refresh]') || (selector ? nextDocument.querySelector(selector) : null);
+                    if (nextTarget) target.innerHTML = nextTarget.innerHTML;
+                } catch {
+                    // A temporary connection problem must not disturb the current screen.
+                } finally {
+                    refreshing = false;
+                }
+            };
+            window.setInterval(refreshAttendanceInBackground, 15000);
+            window.addEventListener('storage', event => { if (event.key === 'erp.employee-status-change') refreshAttendanceInBackground(); });
+            window.addEventListener('focus', refreshAttendanceInBackground);
+            document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshAttendanceInBackground(); });
+        })();
+    </script>
+    @if (User.IsInRole("HR") || User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Employee") || User.IsInRole("User")) { <script src="~/js/notification-inbox.js" asp-append-version="true" defer></script> }
+</body>

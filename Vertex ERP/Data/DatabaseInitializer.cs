@@ -1,10 +1,14 @@
 using VertexERP.Models;
 using VertexERP.Services;
+using Microsoft.Extensions.Hosting;
 
 namespace VertexERP.Data
 {
     public static class DatabaseInitializer
     {
+        public static bool ShouldInitializeAtStartup(string? environmentName) =>
+            string.Equals(environmentName, Environments.Development, StringComparison.OrdinalIgnoreCase);
+
         public static void SeedDevelopmentUsers(ApplicationDbContext context, string password)
         {
             UpsertDevelopmentUser(context, "employee", password, "Employee", "Employee");

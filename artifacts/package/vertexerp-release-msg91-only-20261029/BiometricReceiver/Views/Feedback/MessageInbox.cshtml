@@ -1,0 +1,17 @@
+@model VertexERP.Models.FeedbackInboxViewModel
+@{ Layout = "_LayoutMaster"; ViewBag.Title = "Written Feedback"; }
+<section class="feedback-page">
+    <p><a asp-controller="FeedbackDocuments" asp-action="Index">Feedback Forms &amp; Document Responses</a></p>
+    <header class="feedback-heading"><div><h1>Written Feedback</h1><p>Feedback submitted by employees and other team members.</p></div><span class="feedback-total"><span>Total Feedback</span>: @Model.Total</span></header>
+    <form method="get" asp-action="MessageInbox" class="feedback-search"><label for="feedback-search">Search Feedback</label><input id="feedback-search" name="search" value="@Model.Search" maxlength="150" placeholder="Search employee, ID, department or subject"/><button class="feedback-submit" type="submit">Search</button><a asp-action="MessageInbox">Reset</a></form>
+    @if(Model.Items.Count == 0){<div class="feedback-card feedback-empty"><i class="fa-regular fa-comment-dots" aria-hidden="true"></i><h2>No feedback found.</h2><p>Submitted feedback will appear here.</p></div>}
+    else{<div class="feedback-list">@foreach(var item in Model.Items){<article class="feedback-card">
+        <div class="feedback-meta"><div><strong data-no-localize>@item.SenderName</strong><span data-no-localize>@item.EmployeeCode · @item.Department</span><small>@item.SenderRole</small></div><time datetime="@item.SubmittedAtUtc.ToString("O")">@item.SubmittedAtUtc.AddMinutes(330).ToString("dd MMM yyyy, hh:mm tt") <span>IST</span></time></div>
+        <h2 data-no-localize>@item.Subject</h2><p class="feedback-body" data-no-localize>@item.Message</p>
+    </article>}</div>}
+    @if(Model.TotalPages > 1){<nav class="feedback-pagination" aria-label="Feedback pages">
+        @if(Model.Page > 1){<a asp-action="MessageInbox" asp-route-search="@Model.Search" asp-route-page="@(Model.Page-1)">Previous</a>}
+        <span>@Model.Page / @Model.TotalPages</span>
+        @if(Model.Page < Model.TotalPages){<a asp-action="MessageInbox" asp-route-search="@Model.Search" asp-route-page="@(Model.Page+1)">Next</a>}
+    </nav>}
+</section>

@@ -1,0 +1,921 @@
+@{
+    ViewData["Title"] = Model.PendingBiometricEmployeeId.HasValue ? "Complete Employee Profile" : "Add Employee";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+
+@model VertexERP.Models.HrAddEmployeeViewModel
+
+<link href="~/css/HrAddEmp.css" rel="stylesheet" asp-append-version="true" />
+
+
+<div class="add-employee-page">
+
+    <!-- ================================
+         PAGE HEADER
+    ================================= -->
+    <div class="page-header">
+
+        <div class="header-content">
+            <h2>@ViewData["Title"]</h2>
+            <p>@(Model.PendingBiometricEmployeeId.HasValue ? "Complete this biometric employee's details. Existing punches stay linked to this employee." : "Create a new employee profile and add employment details.")</p>
+        </div>
+
+    </div>
+
+
+    <!-- ================================
+         EMPLOYEE FORM
+    ================================= -->
+    <form class="employee-form"
+          asp-controller="Hr"
+          asp-action="HrAddEmp"
+          method="post"
+          enctype="multipart/form-data">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+
+        <!-- ================================
+             EMPLOYEE PHOTO
+        ================================= -->
+        <div class="employee-photo-card">
+
+            <div class="employee-photo-wrapper">
+
+                <!-- Photo Preview -->
+                <div class="employee-photo-preview">
+
+                    <img id="employeeImagePreview"
+                         src="~/images/employee-placeholder.svg" asp-append-version="true"
+                         alt="Employee Profile Photo" />
+
+                </div>
+
+
+                <!-- Photo Information -->
+                <div class="employee-photo-content">
+
+                    <h3>Employee Photo</h3>
+
+                    <p>
+                        Upload a clear profile photo of the employee.
+                        JPG, JPEG or PNG files are supported.
+                    </p>
+
+
+                    <div class="photo-actions">
+
+                        <!-- Upload Button -->
+                        <label for="employeePhoto"
+                               class="photo-upload-btn">
+
+                            Upload Photo
+
+                        </label>
+
+
+                        <!-- Hidden File Input -->
+                        <input asp-for="EmployeePhoto"
+                               type="file"
+                               id="employeePhoto"
+                               accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                               hidden />
+                        <span asp-validation-for="EmployeePhoto" class="field-validation"></span>
+
+
+                        <!-- Remove Photo -->
+                        <button type="button"
+                                id="removeEmployeePhoto"
+                                class="photo-remove-btn">
+
+                            Remove
+
+                        </button>
+
+                    </div>
+
+
+                    <span class="photo-help-text">
+                        Recommended size: 500 × 500 px • Maximum size: 5 MB
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================
+             BASIC INFORMATION
+        ================================= -->
+        <div class="form-card">
+
+            <div class="card-header">
+
+                <h3>Basic Information</h3>
+
+                <p>
+                    Enter the employee's personal information.
+                </p>
+
+            </div>
+
+
+            <div class="form-grid">
+
+
+                <div class="form-group">
+                    <label asp-for="CompanyCode">Company <span>*</span></label>
+                    <select asp-for="CompanyCode" required>
+                        <option value="">Select company</option>
+                        <option value="VAS">Vertex Automation System Pvt. Ltd.</option>
+                        <option value="VPC">Vertex Power Controls Pvt. Ltd.</option>
+                    </select>
+                    <span asp-validation-for="CompanyCode" class="field-validation"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="EmployeeId">Employee ID</label>
+                    <input asp-for="EmployeeId" readonly placeholder="Automatically assigned when saved" />
+                    <span asp-validation-for="EmployeeId" class="field-validation"></span>
+                    <p id="employeeIdPreviewNotice" role="status" aria-live="polite">Select a company to see the next Employee ID.</p>
+                </div>
+                <input asp-for="PendingBiometricEmployeeId" type="hidden" />
+
+                <!-- First Name -->
+                <div class="form-group">
+
+                    <label>
+                        First Name
+                        <span>*</span>
+                    </label>
+
+                    <input asp-for="FirstName"
+                           type="text"
+                           placeholder="Enter first name"
+                           required />
+                    <span asp-validation-for="FirstName" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Last Name -->
+                <div class="form-group">
+
+                    <label>
+                        Last Name (optional)
+                    </label>
+
+                    <input asp-for="LastName"
+                           type="text"
+                           placeholder="Enter last name" />
+                    <span asp-validation-for="LastName" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Aadhaar Number -->
+                <div class="form-group">
+                    <label asp-for="AadhaarNumber">Aadhaar Number <span>*</span></label>
+                    <input asp-for="AadhaarNumber"
+                           type="text"
+                           inputmode="numeric"
+                           maxlength="12"
+                           pattern="[0-9]{12}"
+                           autocomplete="off"
+                           placeholder="Enter 12-digit Aadhaar number"
+                           required />
+                    <span asp-validation-for="AadhaarNumber" class="field-validation"></span>
+                </div>
+
+                <!-- Date Of Birth -->
+                <div class="form-group">
+
+                    <label>
+                        Date of Birth
+                    </label>
+
+                    <input asp-for="DateOfBirth" type="date" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="DateOfBirth" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Gender -->
+                <div class="form-group">
+
+                    <label>
+                        Gender
+                    </label>
+
+                    <select asp-for="Gender">
+
+                        <option value="">
+                            Select gender
+                        </option>
+
+                        <option value="Male">
+                            Male
+                        </option>
+
+                        <option value="Female">
+                            Female
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Marital Status -->
+                <div class="form-group">
+
+                    <label>
+                        Marital Status
+                    </label>
+
+                    <select asp-for="MaritalStatus">
+
+                        <option value="">
+                            Select status
+                        </option>
+
+                        <option value="Single">
+                            Single
+                        </option>
+
+                        <option value="Married">
+                            Married
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================
+             CONTACT INFORMATION
+        ================================= -->
+        <div class="form-card">
+
+            <div class="card-header">
+
+                <h3>Contact Information</h3>
+
+                <p>
+                    Add employee contact details.
+                </p>
+
+            </div>
+
+
+            <div class="form-grid">
+
+
+                <!-- Email -->
+                <div class="form-group">
+
+                    <label>
+                        Email Address
+                        <span>*</span>
+                    </label>
+
+                    <input asp-for="Email"
+                           type="email"
+                           placeholder="employee@company.com"
+                           required />
+                    <span asp-validation-for="Email" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Phone -->
+                <div class="form-group">
+
+                    <label>
+                        Phone Number
+                        <span>*</span>
+                    </label>
+
+                    <input asp-for="Phone"
+                           type="tel"
+                           inputmode="numeric"
+                           maxlength="10"
+                           pattern="[0-9]{10}"
+                           oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                           placeholder="Enter phone number"
+                           required />
+                    <span asp-validation-for="Phone" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Emergency Contact -->
+                <div class="form-group">
+
+                    <label>
+                        Emergency Contact
+                        <span>*</span>
+                    </label>
+
+                    <input asp-for="EmergencyContact"
+                           type="tel"
+                           inputmode="numeric"
+                           maxlength="10"
+                           pattern="[0-9]{10}"
+                           oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+                           placeholder="Emergency contact number"
+                           required />
+                    <span asp-validation-for="EmergencyContact" class="field-validation"></span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================
+             EMPLOYMENT DETAILS
+        ================================= -->
+        <div class="form-card">
+
+            <div class="card-header">
+
+                <h3>Employment Details</h3>
+
+                <p>
+                    Configure employee job and organization details.
+                </p>
+
+            </div>
+
+
+            <div class="form-grid">
+
+
+                <!-- Department -->
+                <div class="form-group">
+
+                    <label>
+                        Department
+                        <span>*</span>
+                    </label>
+
+                    <select asp-for="DepartmentId"
+                            required>
+
+                        <option value="">
+                            Select department
+                        </option>
+
+                        @foreach (var department in Model.Departments)
+                        {
+                            <option value="@department.Id">@department.DepartmentName</option>
+                        }
+
+                    </select>
+                    <span asp-validation-for="DepartmentId" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Designation -->
+                <div class="form-group">
+
+                    <label>
+                        Designation
+                        <span>*</span>
+                    </label>
+
+                    <input asp-for="Designation"
+                           type="text"
+                           placeholder="Enter designation"
+                           required />
+                    <span asp-validation-for="Designation" class="field-validation"></span>
+
+                </div>
+
+
+                <!-- Position -->
+                <div class="form-group">
+                    <label asp-for="Position">
+                        Position
+                        <span>*</span>
+                    </label>
+                    <select asp-for="Position" required>
+                        <option value="Employee">Employee</option>
+                        <option value="Manager">Manager</option>
+                    </select>
+                    <span asp-validation-for="Position" class="field-validation"></span>
+                </div>
+
+
+                <!-- Joining Date -->
+                <div class="form-group">
+
+                    <label>
+                        Joining Date
+                        <span>*</span>
+                    </label>
+
+                    <input asp-for="JoiningDate"
+                           type="date"
+                           required />
+                    <span asp-validation-for="JoiningDate" class="field-validation"></span>
+
+                </div>
+
+
+
+                <div class="form-group">
+                    <label asp-for="OvertimeEnabled"></label>
+                    <select asp-for="OvertimeEnabled"><option value="false">Inactive</option><option value="true">Active</option></select>
+                    <small>Active: count hours worked beyond the assigned shift duration. Inactive: overtime stays zero.</small>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ShiftStartTime"></label><input asp-for="ShiftStartTime" type="time" asp-format="{0:HH:mm}" required />
+                    <span asp-validation-for="ShiftStartTime" class="field-validation"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ShiftEndTime"></label><input asp-for="ShiftEndTime" type="time" asp-format="{0:HH:mm}" required />
+                    <span asp-validation-for="ShiftEndTime" class="field-validation"></span>
+                    <small>An end time earlier than the start means the shift ends the next day.</small>
+                </div>
+
+<div class="form-group">
+    <label asp-for="EmployeeCategory"></label>
+    <select asp-for="EmployeeCategory">
+        <option value="">Select employee category</option>
+        @foreach(var category in VertexERP.Models.EmployeeCategories.All){<option value="@category">@category</option>}
+    </select>
+    <span asp-validation-for="EmployeeCategory" class="field-validation"></span>
+</div>
+                <!-- Employment Type -->
+                <div class="form-group">
+
+                    <label>
+                        Employment Type
+                    </label>
+
+                    <select asp-for="EmploymentType">
+
+                        <option value="">
+                            Select employment type
+                        </option>
+
+                        <option value="Permanent">
+                            Permanent
+                        </option>
+
+                        <option value="Contract">
+                            Contract
+                        </option>
+
+                        <option value="Intern">
+                            Intern
+                        </option>
+
+                        <option value="Part Time">
+                            Part Time
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Reporting Manager -->
+                <div class="form-group">
+
+                    <label>
+                        Reporting Manager
+                    </label>
+
+                    <select asp-for="ReportingManagerId">
+                        <option value="">Select reporting manager</option>
+                        @foreach (var manager in Model.Managers)
+                        {
+                            <option value="@manager.Id">@manager.FullName (@manager.EmployeeCode)</option>
+                        }
+                    </select>
+
+                </div>
+
+
+                <!-- Work Location -->
+                <div class="form-group">
+
+                    <label>
+                        Work Location
+                    </label>
+
+                    <input asp-for="WorkLocation"
+                           type="text"
+                           placeholder="Enter work location" />
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ================================
+             ADDRESS DETAILS
+        ================================= -->
+        <div class="form-card">
+
+            <div class="card-header">
+
+                <h3>Present Address</h3>
+
+                <p>
+                    Enter the employee's current address.
+                </p>
+
+            </div>
+
+
+            <div class="form-grid">
+
+
+                <!-- Address -->
+                <div class="form-group full-width">
+
+                    <label>
+                        Address
+                    </label>
+
+                    <textarea asp-for="Address"
+                              rows="3"
+                              placeholder="Enter complete address"></textarea>
+
+                </div>
+
+
+                <!-- City -->
+                <div class="form-group">
+
+                    <label>
+                        City
+                    </label>
+
+                    <input asp-for="City"
+                           type="text"
+                           placeholder="Enter city" />
+
+                </div>
+
+
+                <!-- State -->
+                <div class="form-group">
+
+                    <label>
+                        State
+                    </label>
+
+                    <input asp-for="State"
+                           type="text"
+                           placeholder="Enter state" />
+
+                </div>
+
+
+                <!-- PIN Code -->
+                <div class="form-group">
+
+                    <label>
+                        PIN Code
+                    </label>
+
+                    <input asp-for="PinCode"
+                           type="text"
+                           placeholder="Enter PIN code"
+                           maxlength="6"
+                           inputmode="numeric" />
+                    <span asp-validation-for="PinCode" class="field-validation"></span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="form-card"><div class="form-grid"><div class="form-group" style="grid-column:1 / -1"><h3>Permanent Address</h3><label style="display:flex;align-items:center;gap:10px;margin:12px 0"><input asp-for="PermanentAddressSameAsPresent" style="width:18px;height:18px" /> Same as Present Address</label></div>
+<div class="form-group" style="grid-column:1 / -1"><label asp-for="PermanentAddress"></label><textarea asp-for="PermanentAddress" rows="3" maxlength="300"></textarea><span asp-validation-for="PermanentAddress" class="field-validation"></span></div>
+<div class="form-group"><label asp-for="PermanentCity"></label><input asp-for="PermanentCity" maxlength="80" /><span asp-validation-for="PermanentCity" class="field-validation"></span></div>
+<div class="form-group"><label asp-for="PermanentState"></label><input asp-for="PermanentState" maxlength="80" /><span asp-validation-for="PermanentState" class="field-validation"></span></div>
+<div class="form-group"><label asp-for="PermanentPinCode"></label><input asp-for="PermanentPinCode" maxlength="6" /><span asp-validation-for="PermanentPinCode" class="field-validation"></span></div>
+</div></div>
+        <div class="form-card login-access-card">
+            <div class="card-header">
+                <h3>Login &amp; Account Access</h3>
+                <p>Create the credentials this employee will use to open the self-service dashboard.</p>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label asp-for="LoginUsername">Login Username <span>*</span></label>
+                    <div class="credential-input-row">
+                        <input asp-for="LoginUsername" type="text" autocomplete="off" placeholder="Generate or enter username" />
+                    </div>
+                    <span asp-validation-for="LoginUsername" class="field-validation"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="TemporaryPassword">Password <span>*</span></label>
+                    <div class="credential-input-row">
+                        <input asp-for="TemporaryPassword" type="password" autocomplete="new-password" placeholder="Generate or enter password" />
+                        <button type="button" class="credential-generate-btn" id="togglePassword" aria-label="Show password"><i class="fa-solid fa-eye"></i></button>
+                    </div>
+                    <span asp-validation-for="TemporaryPassword" class="field-validation"></span>
+                </div>
+                <div class="form-group credential-generate-group">
+                    <label>Generate Credentials</label>
+                    <button type="button" class="credential-generate-btn credential-generate-all-btn" onclick="generateCredentials()"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate</button>
+                </div>
+                <div class="form-group account-option-group full-width">
+                    <small id="credentialNotice" role="status" aria-live="polite">Generate credentials here, or leave them blank to generate when saving. Credentials are shown after successful creation.</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================
+             FORM ACTIONS
+        ================================= -->
+        <div class="form-actions">
+
+            <a asp-controller="Employee" asp-action="Index" class="btn-cancel">Cancel</a>
+
+
+            <button type="submit"
+                    class="btn-save">
+
+                Add Employee
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+
+<!-- ================================
+     EMPLOYEE PHOTO SCRIPT
+================================= -->
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const employeePhoto =
+            document.getElementById("employeePhoto");
+
+        const employeeImagePreview =
+            document.getElementById("employeeImagePreview");
+
+        const removeEmployeePhoto =
+            document.getElementById("removeEmployeePhoto");
+
+
+        /*
+        =====================================
+        DEFAULT PROFILE IMAGE
+        =====================================
+        */
+
+        const defaultEmployeeImage =
+            employeeImagePreview.src;
+
+
+        /*
+        =====================================
+        IMAGE UPLOAD
+        =====================================
+        */
+
+        employeePhoto.addEventListener("change", function () {
+
+            const file = this.files[0];
+
+
+            if (!file) {
+                return;
+            }
+
+
+            /*
+            =====================================
+            ALLOWED FILE TYPES
+            =====================================
+            */
+
+            const allowedTypes = [
+                "image/jpeg",
+                "image/jpg",
+                "image/png"
+            ];
+
+
+            if (file.type && file.type !== "application/octet-stream" && !allowedTypes.includes(file.type)) {
+
+                alert(
+                    "Please select a JPG, JPEG or PNG image."
+                );
+
+                employeePhoto.value = "";
+
+                return;
+            }
+
+
+            /*
+            =====================================
+            MAXIMUM FILE SIZE
+            5 MB
+            =====================================
+            */
+
+            const maxFileSize =
+                5 * 1024 * 1024;
+
+
+            if (file.size > maxFileSize) {
+
+                alert(
+                    "Image size must be less than 5 MB."
+                );
+
+                employeePhoto.value = "";
+
+                return;
+            }
+
+
+            /*
+            =====================================
+            SHOW IMAGE PREVIEW
+            =====================================
+            */
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload = function (event) {
+
+                employeeImagePreview.src =
+                    event.target.result;
+
+            };
+
+
+            reader.readAsDataURL(file);
+
+        });
+
+
+
+        /*
+        =====================================
+        REMOVE IMAGE
+        =====================================
+        */
+
+        removeEmployeePhoto.addEventListener(
+            "click",
+            function () {
+
+                employeePhoto.value = "";
+
+                employeeImagePreview.src =
+                    defaultEmployeeImage;
+
+            }
+        );
+
+    });
+
+</script>
+
+<script>
+    async function generateCredentials() {
+        const username = document.getElementById('LoginUsername');
+        const password = document.getElementById('TemporaryPassword');
+        const button = document.querySelector('.credential-generate-all-btn');
+        const notice = document.getElementById('credentialNotice');
+        if (username.value.trim() && password.value) {
+            notice.textContent = 'Credentials are ready. You can edit them before saving.';
+            return;
+        }
+        button.disabled = true;
+        notice.textContent = 'Generating secure credentials…';
+        try {
+            const data = new FormData();
+            data.append('firstName', document.getElementById('FirstName').value);
+            data.append('lastName', document.getElementById('LastName').value);
+            data.append('__RequestVerificationToken', document.querySelector('.employee-form input[name="__RequestVerificationToken"]').value);
+            const response = await fetch('@Url.Action("GenerateEmployeeCredentials", "Hr")', {
+                method: 'POST', body: data, credentials: 'same-origin', headers: { 'Accept': 'application/json' }
+            });
+            if (!response.ok) throw new Error('generation failed');
+            const result = await response.json();
+            if (!result.username || !result.password) throw new Error('invalid response');
+            if (!username.value.trim()) username.value = result.username;
+            if (!password.value) password.value = result.password;
+            notice.textContent = 'Credentials generated. Save the employee to activate this login.';
+        } catch {
+            notice.textContent = 'Could not generate credentials. Retry, enter them manually, or leave both blank to generate when saving.';
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const password = document.getElementById('TemporaryPassword');
+        const showing = password.type === 'text';
+        password.type = showing ? 'password' : 'text';
+        this.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+        this.innerHTML = `<i class="fa-solid fa-eye${showing ? '' : '-slash'}"></i>`;
+    });
+
+    document.querySelector('.employee-form').addEventListener('submit', function () {
+        const username = document.getElementById('LoginUsername');
+
+        username.value = username.value.trim();
+    });
+</script>
+
+
+
+<script src="~/js/employee-address.js" asp-append-version="true"></script>
+
+<script>
+(() => {
+    const company = document.getElementById('CompanyCode');
+    const biometric = document.getElementById('PendingBiometricEmployeeId');
+    const code = document.getElementById('EmployeeId');
+    const notice = document.getElementById('employeeIdPreviewNotice');
+    const save = document.querySelector('.employee-form .btn-save');
+    let revision = 0;
+    async function refreshIdentity() {
+        const current = ++revision;
+        code.value = '';
+        notice.textContent = 'Loading employee IDs…';
+        save.disabled = true;
+        const query = new URLSearchParams();
+        if (company.value) query.set('companyCode', company.value);
+        if (biometric.value) query.set('biometricEmployeeId', biometric.value);
+        try {
+            const response = await fetch('@Url.Action("EmployeeIdentityPreview", "Hr")?' + query, { credentials: 'same-origin', cache: 'no-store' });
+            if (current !== revision) return;
+            if (response.status === 400) {
+                const problem = await response.json();
+                if (current !== revision) return;
+                notice.textContent = problem.message || 'This biometric profile is unavailable. Refresh and select another profile.';
+                save.disabled = true;
+                return;
+            }
+            if (!response.ok || response.redirected) throw new Error('Unable to load employee IDs');
+            const result = await response.json();
+            if (current !== revision) return;
+            code.value = result.employeeCode || '';
+            if (result.companyCode) company.value = result.companyCode;
+            notice.textContent = !code.value ? 'Select a company to see the next Employee ID.'
+                : result.isPreview ? 'Next available ID. The final ID is confirmed when saved.' : 'Existing Employee ID.';
+            save.textContent = biometric.value ? 'Complete Employee Profile' : 'Add Employee';
+            save.disabled = false;
+        } catch {
+            if (current !== revision) return;
+            // Preview does not allocate an ID. A temporary preview failure must not
+            // prevent a valid submission; the server validates the link on save.
+            notice.textContent = 'ID preview is unavailable. You can save after selecting a company; the ID and biometric link will be checked when saved.';
+            save.disabled = !company.value;
+        }
+    }
+    company.addEventListener('change', refreshIdentity);
+    refreshIdentity();
+})();
+</script>

@@ -1,0 +1,224 @@
+@model VertexERP.Models.EmployeeFormViewModel
+@{
+    var editing = Model.Id > 0;
+    ViewData["Title"] = editing ? "Edit Employee" : "Add Employee";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+}
+<link href="~/css/AddEmpHrm.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="hrms-page">
+    <div class="page-header"><div class="header-text"><h2>@(editing ? "Edit Employee Profile" : "Add New Employee Profile")</h2><p>Setup personal details, employment information and organizational mapping.</p></div></div>
+    @if (TempData["EmployeeMessage"] is string employeeMessage)
+    {
+        <div class="employee-biometric-notice success" role="status">@employeeMessage</div>
+    }
+    @if (TempData["EmployeeError"] is string employeeError)
+    {
+        <div class="employee-biometric-notice error" role="alert">@employeeError</div>
+    }
+    <div class="form-container-wrapper">
+        @if (!editing)
+        {
+            <div class="form-group">
+                <label>Source Enrollment Number / Emp ID</label>
+                @foreach (var enrollment in Model.SourceEnrollments)
+                {
+                    <input type="text" value="@enrollment" readonly aria-label="Source Enrollment Number / Emp ID" />
+                }
+                <small>@(Model.SourceEnrollments.Count == 0 ? "Not linked to a biometric source." : "Received from the attendance source. This number cannot be edited here; attendance remains linked when company details are updated.")</small>
+            </div>
+        }
+        <form class="employee-onboarding-form" asp-controller="Employee" asp-action="@(editing ? "Edit" : "Create")" asp-route-id="@(editing ? Model.Id : null)" method="post" enctype="multipart/form-data">
+            <input asp-for="Id" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+            <div class="form-main-section" style="margin-bottom:18px;">
+                <div class="section-divider"><span>Employee Photo</span></div>
+                <div class="form-row">
+                    <div class="form-group">
+                        @if (!string.IsNullOrWhiteSpace(Model.PhotoPath))
+                        {
+                            <img id="editPhotoPreview" src="@Model.PhotoPath" alt="Employee photo" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid var(--erp-border, #334155);" />
+                        }
+                        else
+                        {
+                            <div id="editPhotoPlaceholder" style="width:110px;height:110px;border-radius:50%;background:var(--erp-surface-soft, #e5e7eb);border:3px solid var(--erp-border, #334155);"></div>
+                            <img id="editPhotoPreview" src="" alt="Employee photo preview" style="display:none;width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid var(--erp-border, #334155);" />
+                        }
+                    </div>
+                    <div class="form-group"><label asp-for="EmployeePhoto"></label><input asp-for="EmployeePhoto" type="file" accept="image/jpeg,image/png" /><span asp-validation-for="EmployeePhoto" class="field-validation"></span><small>JPG or PNG, maximum 5 MB.</small></div>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-main-section">
+                    <div class="section-divider"><span>Personal Specifications</span></div>
+                    <div class="form-row triple-row">
+                        <div class="form-group"><label asp-for="CompanyCode"></label><select asp-for="CompanyCode"><option value="">Select company</option><option value="VAS">@VertexERP.Models.EmployeeCompany.DisplayName("VAS")</option><option value="VPC">@VertexERP.Models.EmployeeCompany.DisplayName("VPC")</option></select><span asp-validation-for="CompanyCode" class="field-validation"></span><small>Assigning a company keeps the existing Employee ID.</small></div>
+                        <div class="form-group"><label asp-for="EmployeeCode"></label><input asp-for="EmployeeCode" readonly /><span asp-validation-for="EmployeeCode" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="FirstName"></label><input asp-for="FirstName" /><span asp-validation-for="FirstName" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="LastName"></label><input asp-for="LastName" /><span asp-validation-for="LastName" class="field-validation"></span></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label asp-for="Email"></label><input asp-for="Email" /><span asp-validation-for="Email" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="PhoneNumber">Mobile Number</label><input asp-for="PhoneNumber" inputmode="numeric" maxlength="10" pattern="[0-9]{10}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" /><span asp-validation-for="PhoneNumber" class="field-validation"></span></div>
+                        <div class="form-group">
+                            <label asp-for="AadhaarNumber">Aadhaar Number <span>*</span></label>
+                            <input asp-for="AadhaarNumber" type="text" inputmode="numeric" maxlength="12"
+                                   pattern="[0-9]{12}" autocomplete="off" placeholder="Enter 12-digit Aadhaar number" required />
+                            <span asp-validation-for="AadhaarNumber" class="field-validation"></span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label asp-for="DateOfBirthText"></label><input asp-for="DateOfBirthText" type="text" inputmode="numeric" maxlength="10" placeholder="DD/MM/YYYY" pattern="[0-9]{2}/[0-9]{2}/[0-9]{4}" /><span asp-validation-for="DateOfBirthText" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="Gender"></label><select asp-for="Gender"><option value="">Select gender</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label asp-for="MaritalStatus"></label><select asp-for="MaritalStatus"><option value="">Select status</option><option>Single</option><option>Married</option><option>Other</option></select></div>
+                        <div class="form-group"><label asp-for="EmergencyContact"></label><input asp-for="EmergencyContact" /><span asp-validation-for="EmergencyContact" class="field-validation"></span></div>
+                    </div>
+
+                    <div class="section-divider"><span>Present Address</span></div>
+                    <div class="form-group"><label asp-for="Address"></label><input asp-for="Address" /><span asp-validation-for="Address" class="field-validation"></span></div>
+                    <div class="form-row">
+                        <div class="form-group"><label asp-for="City"></label><input asp-for="City" /></div>
+                        <div class="form-group"><label asp-for="State"></label><input asp-for="State" /></div>
+                    </div>
+                    <div class="form-row"><div class="form-group"><label asp-for="PinCode"></label><input asp-for="PinCode" maxlength="6" inputmode="numeric" /><span asp-validation-for="PinCode" class="field-validation"></span></div></div>
+<div class="form-group" style="grid-column:1 / -1"><h3>Permanent Address</h3><label style="display:flex;align-items:center;gap:10px;margin:12px 0"><input asp-for="PermanentAddressSameAsPresent" style="width:18px;height:18px" /> Same as Present Address</label></div>
+<div class="form-group" style="grid-column:1 / -1"><label asp-for="PermanentAddress"></label><textarea asp-for="PermanentAddress" rows="3" maxlength="300"></textarea><span asp-validation-for="PermanentAddress" class="field-validation"></span></div>
+<div class="form-group"><label asp-for="PermanentCity"></label><input asp-for="PermanentCity" maxlength="80" /><span asp-validation-for="PermanentCity" class="field-validation"></span></div>
+<div class="form-group"><label asp-for="PermanentState"></label><input asp-for="PermanentState" maxlength="80" /><span asp-validation-for="PermanentState" class="field-validation"></span></div>
+<div class="form-group"><label asp-for="PermanentPinCode"></label><input asp-for="PermanentPinCode" maxlength="6" /><span asp-validation-for="PermanentPinCode" class="field-validation"></span></div>
+
+                </div>
+
+                <div class="form-side-section">
+                    <div class="config-card">
+                        <h3>Organizational Mapping</h3>
+                <div class="form-group">
+                    <label asp-for="OvertimeEnabled"></label>
+                    <select asp-for="OvertimeEnabled"><option value="false">Inactive</option><option value="true">Active</option></select>
+                    <small>Active: count hours worked beyond the assigned shift duration. Inactive: overtime stays zero. Saved settings also apply when viewing previous attendance.</small>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ShiftStartTime"></label><input asp-for="ShiftStartTime" type="time" asp-format="{0:HH:mm}" required />
+                    <span asp-validation-for="ShiftStartTime" class="field-validation"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ShiftEndTime"></label><input asp-for="ShiftEndTime" type="time" asp-format="{0:HH:mm}" required />
+                    <span asp-validation-for="ShiftEndTime" class="field-validation"></span>
+                    <small>An end time earlier than the start means the shift ends the next day.</small>
+                </div>
+
+                        <div class="form-group"><label asp-for="JoiningDate"></label><input asp-for="JoiningDate" type="date" /><span asp-validation-for="JoiningDate" class="field-validation"></span></div>
+                        <div class="form-group">
+                            <label asp-for="DepartmentId"></label>
+                            <select asp-for="DepartmentId" required>
+                                <option value="">Select department</option>
+                                @foreach (var department in Model.AvailableDepartments)
+                                {
+                                    <option value="@department.Id">@department.DepartmentName</option>
+                                }
+                            </select>
+                            <span asp-validation-for="DepartmentId" class="field-validation"></span>
+                            @if (Model.AvailableDepartments.Count == 0)
+                            {
+                                <small>Add an active department in the Department section first.</small>
+                            }
+                        </div>
+                        <div class="form-group"><label asp-for="Designation"></label><input asp-for="Designation" /><span asp-validation-for="Designation" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="ReportingManagerId"></label><select asp-for="ReportingManagerId"><option value="">No reporting manager</option>@foreach (var manager in Model.Managers){<option value="@manager.Id">@manager.FullName (@manager.EmployeeCode)</option>}</select><span asp-validation-for="ReportingManagerId" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="WorkLocation"></label><input asp-for="WorkLocation" /></div>
+<div class="form-group">
+    <label asp-for="EmployeeCategory"></label>
+    <select asp-for="EmployeeCategory">
+        <option value="">Select employee category</option>
+        @foreach(var category in VertexERP.Models.EmployeeCategories.All){<option value="@category">@category</option>}
+    </select>
+    <span asp-validation-for="EmployeeCategory" class="field-validation"></span>
+</div>
+                        <div class="form-group"><label asp-for="EmploymentType"></label><select asp-for="EmploymentType"><option>Full Time</option><option>Part Time</option><option>Contract</option><option>Intern</option></select></div>
+                        <div class="form-group"><label asp-for="EmployeeStatus"></label><select asp-for="EmployeeStatus"><option>Active</option><option>Probation</option><option>Notice Period</option><option>Inactive</option></select></div>
+                    </div>
+                    <div class="config-card option-card"><h3>Record Status</h3><label class="custom-checkbox"><input asp-for="IsActive" /><span class="checkmark"></span> Active employee</label></div>
+                </div>
+            </div>
+            @if(editing)
+            {
+                <input asp-for="HasSalaryDetails" type="hidden" />
+                <div class="form-main-section" style="margin-top:18px">
+                    <div class="section-divider"><span>Bank &amp; Payroll Details (HR Only)</span></div>
+                    <p style="color:var(--app-muted);margin-bottom:18px">Current verified account: <strong>@(Model.MaskedBankAccountNumber ?? "Not available")</strong>. Leave account-number fields blank to keep the current account unchanged.</p>
+                    <div class="form-row"><div class="form-group"><label asp-for="BankAccountHolderName"></label><input asp-for="BankAccountHolderName"/><span asp-validation-for="BankAccountHolderName" class="field-validation"></span></div><div class="form-group"><label asp-for="BankName"></label><input asp-for="BankName"/><span asp-validation-for="BankName" class="field-validation"></span></div></div>
+                    <div class="form-row"><div class="form-group"><label asp-for="BankAccountNumber"></label><input asp-for="BankAccountNumber" type="text" inputmode="numeric" maxlength="18" pattern="[0-9]{8,18}" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,18)" placeholder="Enter only to add/change account"/><span asp-validation-for="BankAccountNumber" class="field-validation"></span></div><div class="form-group"><label asp-for="ConfirmBankAccountNumber"></label><input asp-for="ConfirmBankAccountNumber" type="text" inputmode="numeric" maxlength="18" pattern="[0-9]{8,18}" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,18)"/><span asp-validation-for="ConfirmBankAccountNumber" class="field-validation"></span></div></div>
+                    <div class="form-row triple-row"><div class="form-group"><label asp-for="BankIfscCode"></label><input asp-for="BankIfscCode"/><span asp-validation-for="BankIfscCode" class="field-validation"></span></div><div class="form-group"><label asp-for="BankBranchName"></label><input asp-for="BankBranchName"/></div><div class="form-group"><label asp-for="BankAccountType"></label><select asp-for="BankAccountType"><option>Savings</option><option>Current</option><option>Salary</option></select></div></div>
+                    <div class="form-row triple-row"><div class="form-group"><label asp-for="PanNumber"></label><input asp-for="PanNumber"/></div><div class="form-group"><label asp-for="UanNumber"></label><input asp-for="UanNumber"/></div><div class="form-group"><label asp-for="EsicNumber"></label><input asp-for="EsicNumber"/></div></div>
+                    <div class="form-row"><div class="form-group"><label asp-for="UpiId"></label><input asp-for="UpiId"/></div></div>
+                </div>
+                <div class="form-main-section" style="margin-top:18px"><div class="section-divider"><span>Salary Details (HR Only)</span></div><div class="form-row triple-row"><div class="form-group"><label asp-for="BasicSalary"></label><input asp-for="BasicSalary" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="HouseRentAllowance"></label><input asp-for="HouseRentAllowance" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="ConveyanceAllowance"></label><input asp-for="ConveyanceAllowance" type="text" inputmode="decimal"/></div></div><div class="form-row triple-row"><div class="form-group"><label asp-for="SpecialAllowance"></label><input asp-for="SpecialAllowance" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="ProvidentFund"></label><input asp-for="ProvidentFund" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="ProfessionalTax"></label><input asp-for="ProfessionalTax" type="text" inputmode="decimal"/></div></div><div class="form-row triple-row"><div class="form-group"><label asp-for="Tds"></label><input asp-for="Tds" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="OtherDeductions"></label><input asp-for="OtherDeductions" type="text" inputmode="decimal"/></div><div class="form-group"><label asp-for="SalaryEffectiveFrom"></label><input asp-for="SalaryEffectiveFrom" type="date"/></div></div><div class="form-row"><div class="form-group"><label asp-for="PfUan"></label><input asp-for="PfUan"/></div></div></div>
+            }
+            @if (editing)
+            {
+                <div class="form-main-section" style="margin-top:18px">
+                    <div class="section-divider"><span>Login Credentials (HR / Admin)</span></div>
+                    <p>@(Model.HasExistingAccount ? "Leave the password blank to keep the current password." : "Enter or generate a username and password to create login access.")</p>
+                    <div class="form-row">
+                        <div class="form-group"><label asp-for="LoginUsername"></label><input asp-for="LoginUsername" autocomplete="off" minlength="3" maxlength="50" pattern="[A-Za-z0-9._-]+" /><span asp-validation-for="LoginUsername" class="field-validation"></span></div>
+                        <div class="form-group"><label asp-for="TemporaryPassword"></label><div class="edit-password-input"><input asp-for="TemporaryPassword" type="password" autocomplete="new-password" minlength="8" maxlength="100" value="" /><button type="button" id="toggleEditPassword" class="edit-password-toggle" aria-label="Show password" title="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path class="password-eye-slash" d="m3 3 18 18" style="display:none"/></svg></button></div><span asp-validation-for="TemporaryPassword" class="field-validation"></span></div>
+                    </div>
+                    @if (!Model.HasExistingAccount)
+                    {
+                        <button type="button" id="generateEditCredentials" class="btn-cancel">Generate credentials</button>
+                    }
+                    <p id="credentialNotice" role="status" aria-live="polite"></p>
+                </div>
+            }
+            <div class="form-actions-footer"><a asp-controller="Employee" asp-action="Index" class="btn-cancel">Cancel</a><button type="submit" class="btn-submit">@(editing ? "Save Changes" : "Register Profile")</button></div>
+        </form>
+    </div>
+</div>
+<script>
+    document.getElementById('toggleEditPassword')?.addEventListener('click', function () {
+        const password = document.getElementById('TemporaryPassword');
+        password.type = password.type === 'password' ? 'text' : 'password';
+        const visible = password.type === 'text';
+        this.querySelector('.password-eye-slash').style.display = visible ? '' : 'none';
+        this.setAttribute('aria-label', visible ? 'Hide password' : 'Show password');
+        this.setAttribute('title', visible ? 'Hide password' : 'Show password');
+        this.setAttribute('aria-pressed', String(visible));
+    });
+    document.getElementById('generateEditCredentials')?.addEventListener('click', async function () {
+        const notice = document.getElementById('credentialNotice');
+        const username = document.getElementById('LoginUsername');
+        const password = document.getElementById('TemporaryPassword');
+        if (username.value.trim() && password.value) {
+            notice.textContent = 'Your existing credentials are kept unchanged. Save Changes to use these credentials.';
+            return;
+        }
+        this.disabled = true;
+        try {
+            const data = new FormData();
+            data.append('firstName', document.getElementById('FirstName').value);
+            data.append('lastName', document.getElementById('LastName').value);
+            data.append('__RequestVerificationToken', this.form.querySelector('[name="__RequestVerificationToken"]').value);
+            const response = await fetch('@Url.Action("GenerateEmployeeCredentials", "Hr")', { method: 'POST', body: data, credentials: 'same-origin' });
+            if (!response.ok) throw new Error();
+            const result = await response.json();
+            if (!username.value.trim()) username.value = result.username;
+            if (!password.value) password.value = result.password;
+            notice.textContent = 'Credentials generated. Use the eye icon to review them, then Save Changes to activate them.';
+        } catch {
+            notice.textContent = 'Could not generate credentials. Please retry or enter them manually.';
+        } finally { this.disabled = false; }
+    });
+    document.getElementById('EmployeePhoto')?.addEventListener('change', function () {
+        const file = this.files?.[0];
+        if (!file) return;
+        const preview = document.getElementById('editPhotoPreview');
+        const placeholder = document.getElementById('editPhotoPlaceholder');
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
+    });
+</script>
+
+<script src="~/js/employee-address.js" asp-append-version="true"></script>

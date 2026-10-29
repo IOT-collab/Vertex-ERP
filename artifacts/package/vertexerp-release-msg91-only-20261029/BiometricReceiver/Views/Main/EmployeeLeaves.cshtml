@@ -1,0 +1,28 @@
+@model VertexERP.Models.EmployeeLeaveViewModel
+@{ ViewData["Title"]="My Leave Balance"; Layout="~/Views/Shared/_LayoutMaster.cshtml"; }
+<link href="~/css/EmployeeSections.css" rel="stylesheet" asp-append-version="true" />
+<style>.manual-category-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:20px 0}.manual-category-cards article{padding:22px}.manual-category-cards h3{margin-top:0}.manual-category-cards dl{display:grid;grid-template-columns:1fr auto;gap:12px}.manual-category-cards dd{margin:0;font-weight:700}.manual-category-cards .available{color:var(--erp-success, #86efac)}.manual-category-cards p{color:var(--erp-text-muted, #94a3b8)}.my-leave-year{display:flex;gap:10px;align-items:center}.my-leave-year input{padding:9px;background:var(--erp-surface, #0f172a);color:var(--erp-text, #fff);border:1px solid var(--erp-border, #475569);border-radius:6px;width:100px}</style>
+<section class="employee-section">
+<header><div><h1>My Leave Balance</h1><p data-no-localize>@Model.Employee.FullName · @Model.Employee.EmployeeCode</p></div><form method="get" asp-action="EmployeeLeaves" class="my-leave-year"><label for="balance-year">Year</label><input id="balance-year" name="year" type="number" min="2000" max="2100" value="@Model.Year" required/><button class="btn btn-primary" type="submit">View</button></form></header>
+<p>Approved leave is included automatically. Pending and rejected requests do not reduce your available balance.</p>
+<div class="manual-category-cards">
+@foreach(var category in new[]{"EL","CL","ML","EW"}){
+    var balance=Model.Balances.FirstOrDefault(x=>x.Category==category);
+    <article class="employee-panel"><h3>@category · @Model.Year</h3>
+    @if(balance == null){<p>Not entered by HR yet.</p>}
+    else if(balance.Revision==0){<p>Entitlement not entered by HR yet.</p><p>Approved: @balance.ApprovedDays.ToString("0.##") days · Pending: @balance.PendingDays.ToString("0.##") days</p>}
+    else{<dl><dt>Carry forward</dt><dd>@balance.OpeningDays.ToString("0.##") days</dd><dt>Current year entitlement</dt><dd>@((balance.TotalDays-balance.OpeningDays).ToString("0.##")) days</dd><dt>Total</dt><dd>@balance.TotalDays.ToString("0.##") days</dd><dt>Approved requests</dt><dd>@balance.ApprovedDays.ToString("0.##") days</dd><dt>Additional HR used</dt><dd>@balance.UsedDays.ToString("0.##") days</dd><dt>Pending</dt><dd>@balance.PendingDays.ToString("0.##") days</dd><dt>Total used</dt><dd>@balance.EffectiveUsedDays.ToString("0.##") days</dd><dt class="available">Available</dt><dd class="available">@balance.AvailableDays.ToString("0.##") days</dd></dl>@if(!string.IsNullOrWhiteSpace(balance.Notes)){<p>@balance.Notes</p>}}
+    </article>
+}
+</div>
+<div class="employee-panel"><h3>Apply Leave</h3><div class="facility-buttons"><button type="button" onclick="openExtraLeave('halfDayForm')">Apply Half Day</button><button type="button" onclick="openExtraLeave('shortLeaveForm')">Apply Short Leave</button></div><partial name="_ExtraFacilitySummary" /><p>You can apply for past dates too. Requests go to your manager, then HR for final approval.</p>
+@if(TempData["LeaveMessage"]!=null){<p class="present">@TempData["LeaveMessage"]</p>}
+@if(TempData["LeaveError"]!=null){<p class="absent">@TempData["LeaveError"]</p>}
+<form asp-action="ApplyLeave" method="post" class="leave-form"><label>Leave Type<select name="leaveType" required><option value="">Select type</option><option>EL</option><option>CL</option><option>ML</option><option>EW</option></select></label><label>From Date<input type="date" name="fromDate" required/></label><label>To Date<input type="date" name="toDate" required/></label><label class="wide">Reason<textarea name="reason" rows="3" required></textarea></label><button class="btn btn-primary" type="submit">Submit Leave Request</button></form>
+<h3>Leave Request History</h3>
+@if(Model.Requests.Count==0){<div class="employee-empty">No leave requests.</div>}
+else{<table class="employee-table"><thead><tr><th>Type</th><th>Dates</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead><tbody>@foreach(var leave in Model.Requests){<tr><td>@leave.LeaveType @(leave.IsHalfDay ? "(half day)" : "")</td><td>@leave.FromDate.ToString("dd MMM yyyy") – @leave.ToDate.ToString("dd MMM yyyy")</td><td>@leave.Reason</td><td><span class="employee-badge @leave.Status.ToLowerInvariant()">@leave.DisplayStatus</span><partial name="_LeaveDecisionDetails" model="leave" /></td><td>@if(leave.Status == "Pending" && !leave.IsHrSubmitted){<div class="request-actions"><a class="btn btn-secondary" asp-controller="MyRequests" asp-action="EditLeave" asp-route-id="@leave.Id"><i class="fa-solid fa-pen" aria-hidden="true"></i> Edit</a><form asp-controller="MyRequests" asp-action="DeleteLeave" method="post" onsubmit="return confirm('Delete this leave request?');"><input type="hidden" name="id" value="@leave.Id"/><button class="btn btn-danger" type="submit"><i class="fa-solid fa-trash" aria-hidden="true"></i> Delete</button></form></div>}else{<small>Contact HR for leave changes.</small>}</td></tr>}</tbody></table>}
+</div></section>
+
+<partial name="_ApplyHalfDay" />
+<partial name="_ApplyShortLeave" />

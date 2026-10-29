@@ -1,0 +1,661 @@
+:root {
+    --erp-bg: #07111f;
+    --erp-surface: #0f172a;
+    --erp-surface-soft: #111c30;
+    --erp-border: #283750;
+    --erp-text: #f1f5f9;
+    --erp-text-muted: #a8b3cf;
+    --erp-primary: #3b82f6;
+    --erp-primary-hover: #60a5fa;
+    --erp-radius: 12px;
+    --erp-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+    --erp-page-width: 1440px;
+    --erp-font: "Segoe UI", Arial, sans-serif;
+}
+
+html {
+    font-size: 16px;
+    background: var(--erp-bg);
+}
+
+body {
+    margin: 0;
+    background: linear-gradient(180deg, var(--erp-bg) 0%, var(--erp-bg) 100%) fixed !important;
+    color: var(--erp-text) !important;
+    font-family: var(--erp-font) !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: var(--erp-font) !important;
+}
+
+.page-content *,
+body > .container * {
+    box-sizing: border-box;
+}
+
+.page-content > * ,
+.page-content [class*="grid"]:not(.calendar-days-grid) > *,
+.page-content [class*="row"] > *,
+.page-content [class*="flex"] > *,
+body > .container [class*="grid"]:not(.calendar-days-grid) > *,
+body > .container [class*="row"] > *,
+body > .container [class*="flex"] > * {
+    min-width: 0;
+}
+
+.page-content,
+body > .container {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    background: linear-gradient(180deg, var(--erp-bg) 0%, var(--erp-bg) 100%) fixed !important;
+}
+
+.page-content {
+    padding: 24px !important;
+    overflow-x: auto !important;
+}
+
+body > .container {
+    padding: 24px !important;
+}
+
+.page-content > :not(link):not(script):not(style):not(dialog):not([class*="modal"]):not([role="dialog"]),
+body > .container > main > :not(link):not(script):not(style):not(dialog):not([class*="modal"]):not([role="dialog"]) {
+    width: 100% !important;
+    max-width: var(--erp-page-width) !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+    box-sizing: border-box !important;
+}
+
+.page-content > .common-back-nav,
+body > .container .common-back-nav {
+    max-width: var(--erp-page-width) !important;
+}
+
+.page-content h1,
+.page-content h2,
+.page-content h3,
+.page-content h4,
+body > .container h1,
+body > .container h2,
+body > .container h3,
+body > .container h4 {
+    margin-top: 0;
+    color: var(--erp-text) !important;
+    font-family: var(--erp-font) !important;
+    font-style: normal !important;
+    letter-spacing: normal !important;
+}
+
+.page-content h1,
+body > .container h1 {
+    font-size: 26px !important;
+    line-height: 1.25 !important;
+    font-weight: 700 !important;
+}
+
+.page-content h2,
+body > .container h2 {
+    font-size: 22px !important;
+    line-height: 1.3 !important;
+    font-weight: 700 !important;
+}
+
+.page-content h3,
+body > .container h3 {
+    font-size: 17px !important;
+    line-height: 1.35 !important;
+    font-weight: 650 !important;
+}
+
+.page-content h4,
+body > .container h4 {
+    font-size: 15px !important;
+    line-height: 1.4 !important;
+    font-weight: 650 !important;
+}
+
+.page-content p,
+.page-content label,
+.page-content td,
+.page-content th,
+body > .container p,
+body > .container label,
+body > .container td,
+body > .container th {
+    font-family: var(--erp-font) !important;
+}
+
+.page-content p,
+body > .container p {
+    color: var(--erp-text-muted) !important;
+    font-size: 14px !important;
+}
+
+/* Only surface components receive a theme. Substring selectors also matched
+   selectable cards, icons and nested headers, masking their own states. */
+:is(.page-content, body > .container) :is(.page-header, .dashboard-header-card, .report-header) {
+    border-color: var(--erp-border) !important;
+    border-radius: var(--erp-radius) !important;
+    background: var(--erp-surface) !important;
+    color: var(--erp-text) !important;
+    box-shadow: var(--erp-shadow) !important;
+}
+
+:is(.page-content, body > .container) :is(.card, .panel, .form-card, .table-card, .filter-panel, .summary-card, .stat-card, .module-card, .setting-card, .report-card, .category-card, .document-card, .vault-card, .employee-panel, .config-card) {
+    border-color: var(--erp-border) !important;
+    border-radius: var(--erp-radius) !important;
+    background-color: var(--erp-surface) !important;
+    color: var(--erp-text) !important;
+    box-sizing: border-box;
+}
+
+.page-content table,
+body > .container table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border-color: var(--erp-border) !important;
+    background: var(--erp-surface) !important;
+    color: var(--erp-text) !important;
+    font-size: 14px !important;
+}
+
+.page-content [class*="table-wrap"],
+.page-content [class*="table-container"],
+.page-content [class*="table-responsive"],
+body > .container [class*="table-wrap"],
+body > .container [class*="table-container"],
+body > .container [class*="table-responsive"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+.page-content [class*="grid"]:not(.calendar-days-grid),
+.page-content [class*="card-row"],
+body > .container [class*="grid"]:not(.calendar-days-grid),
+body > .container [class*="card-row"] {
+    max-width: 100% !important;
+}
+
+.page-content th,
+body > .container th {
+    padding: 12px 14px !important;
+    border-color: var(--erp-border) !important;
+    background: var(--erp-surface-soft) !important;
+    color: var(--erp-text, #cbd5e1) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.03em !important;
+}
+
+.page-content td,
+body > .container td {
+    padding: 12px 14px !important;
+    border-color: var(--erp-border) !important;
+    color: var(--erp-text) !important;
+}
+
+/* Keep headings and row text at the same starting edge across ERP tables.
+   Preserve spanning messages and explicitly right-aligned numeric columns. */
+:is(.page-content, body > .container) table :is(th, td):not([colspan]):not(.text-end):not(.text-right) {
+    text-align: left !important;
+}
+
+.erp-empty-state {
+    padding: 28px 16px !important;
+    color: var(--erp-text-muted) !important;
+    text-align: center !important;
+    font-size: 14px !important;
+}
+
+.page-content input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="submit"], [type="button"], [type="reset"], [type="color"]),
+.page-content select,
+.page-content textarea,
+body > .container input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="submit"], [type="button"], [type="reset"], [type="color"]),
+body > .container select,
+body > .container textarea {
+    min-height: 42px !important;
+    padding: 9px 12px !important;
+    border: 1px solid var(--erp-border) !important;
+    border-radius: 8px !important;
+    background: var(--erp-surface-soft) !important;
+    color: var(--erp-text) !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+}
+
+.page-content textarea,
+body > .container textarea {
+    min-height: 96px !important;
+    resize: vertical;
+}
+
+.page-content option,
+body > .container option,
+.login-shell option {
+    background: var(--erp-surface-soft) !important;
+    color: var(--erp-text) !important;
+}
+
+.page-content label,
+body > .container label,
+.login-shell label {
+    color: var(--erp-text) !important;
+}
+
+.page-content input:focus,
+.page-content select:focus,
+.page-content textarea:focus,
+body > .container input:focus,
+body > .container select:focus,
+body > .container textarea:focus {
+    border-color: var(--erp-primary) !important;
+    outline: 3px solid rgba(37, 99, 235, 0.14) !important;
+    outline-offset: 0 !important;
+}
+
+.page-content input::placeholder,
+.page-content textarea::placeholder,
+body > .container input::placeholder,
+body > .container textarea::placeholder,
+.login-shell input::placeholder,
+.login-shell textarea::placeholder {
+    color: var(--erp-text-muted, #7f8ca8) !important;
+    opacity: 1 !important;
+}
+
+.page-content button,
+.page-content .btn,
+.page-content [class*="btn-"],
+body > .container button,
+body > .container .btn,
+body > .container [class*="btn-"] {
+    border-radius: 8px !important;
+    font-family: var(--erp-font) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+.page-content a,
+body > .container a {
+    font-family: var(--erp-font) !important;
+}
+
+.page-content a:not([class*="btn"]),
+body > .container a:not([class*="btn"]),
+.login-shell a:not([class*="btn"]) {
+    color: #7db2ff;
+}
+
+.page-content img,
+.page-content svg,
+body > .container img,
+body > .container svg {
+    max-width: 100%;
+    height: auto;
+}
+
+.page-content canvas,
+.page-content video,
+.page-content iframe,
+body > .container canvas,
+body > .container video,
+body > .container iframe {
+    max-width: 100% !important;
+}
+
+.page-content :is(.modal-box, .report-modal, .rpt-modal, .exp-modal, dialog),
+body > .container :is(.modal-box, .report-modal, .rpt-modal, .exp-modal, dialog) {
+    max-width: calc(100vw - 32px);
+    max-height: 90dvh !important;
+    overflow-y: auto;
+}
+
+.page-content [class*="modal-body"],
+.page-content [class*="dialog-body"],
+body > .container [class*="modal-body"],
+body > .container [class*="dialog-body"] {
+    max-height: calc(90dvh - 120px) !important;
+    overflow-y: auto !important;
+}
+
+/* Overrides legacy high-specificity light styles on the attendance form. */
+.page-content .attendance-panel-container .page-header,
+.page-content .attendance-panel-container .form-container-wrapper,
+.page-content .attendance-panel-container .config-card,
+.page-content .attendance-panel-container .info-alert-box {
+    border-color: var(--erp-border) !important;
+    background: var(--erp-surface) !important;
+    color: var(--erp-text) !important;
+}
+
+.page-content .attendance-panel-container .page-header h2,
+.page-content .attendance-panel-container .page-header p,
+.page-content .attendance-panel-container .form-group label,
+.page-content .attendance-panel-container .config-card h3,
+.page-content .attendance-panel-container .custom-checkbox,
+.page-content .attendance-panel-container .info-alert-box h4,
+.page-content .attendance-panel-container .info-alert-box p {
+    color: var(--erp-text) !important;
+}
+
+.page-content .attendance-panel-container .form-group input,
+.page-content .attendance-panel-container .form-group select,
+.page-content .attendance-panel-container .form-group textarea,
+.page-content .attendance-panel-container .form-group select option,
+.page-content .attendance-panel-container .btn-cancel,
+.page-content .attendance-panel-container .checkmark {
+    border-color: var(--erp-border) !important;
+    background: var(--erp-surface-soft) !important;
+    color: var(--erp-text) !important;
+}
+
+.login-shell {
+    min-height: 100vh !important;
+    padding: 24px !important;
+    background: linear-gradient(180deg, var(--erp-bg) 0%, var(--erp-bg) 100%) fixed !important;
+    color: var(--erp-text) !important;
+    font-family: var(--erp-font) !important;
+    box-sizing: border-box !important;
+}
+
+.login-shell .login-card,
+.login-shell [class*="login-card"],
+.login-shell [class*="login-panel"] {
+    border: 1px solid var(--erp-border) !important;
+    border-radius: var(--erp-radius) !important;
+    background: var(--erp-surface) !important;
+    color: var(--erp-text) !important;
+    box-shadow: var(--erp-shadow) !important;
+}
+
+.login-shell h1,
+.login-shell h2,
+.login-shell h3 {
+    color: var(--erp-text) !important;
+    font-family: var(--erp-font) !important;
+    font-style: normal !important;
+    letter-spacing: normal !important;
+}
+
+.login-shell p,
+.login-shell label {
+    color: var(--erp-text-muted) !important;
+    font-family: var(--erp-font) !important;
+    font-size: 14px !important;
+}
+
+.login-shell input:not([type="checkbox"]):not([type="radio"]),
+.login-shell select,
+.login-shell textarea {
+    min-height: 42px !important;
+    padding: 9px 12px !important;
+    border: 1px solid var(--erp-border) !important;
+    border-radius: 8px !important;
+    background: var(--erp-surface-soft) !important;
+    color: var(--erp-text) !important;
+    font: 14px/1.4 var(--erp-font) !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 992px) {
+    .page-content,
+    body > .container {
+        padding: 18px !important;
+    }
+
+}
+
+@media (max-width: 768px) {
+    .page-content,
+    body > .container {
+        padding: 16px !important;
+    }
+
+
+    .page-content .page-header,
+    .page-content :is(.dashboard-header, .rpt-header, .hc-header, .exp-header, .hr-header),
+    .page-content .dashboard-header-card,
+    body > .container .page-header,
+    body > .container :is(.dashboard-header, .rpt-header, .hc-header, .exp-header, .hr-header),
+    body > .container .dashboard-header-card {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 14px !important;
+    }
+
+    .page-content [class*="header-actions"],
+    .page-content [class*="form-actions"],
+    .page-content [class*="filter"],
+    body > .container [class*="header-actions"],
+    body > .container [class*="form-actions"],
+    body > .container [class*="filter"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex-wrap: wrap !important;
+    }
+
+    .page-content [class*="search"] input,
+    .page-content [class*="filter"] input:not([type="checkbox"]):not([type="radio"]),
+    .page-content [class*="filter"] select,
+    body > .container [class*="search"] input,
+    body > .container [class*="filter"] input:not([type="checkbox"]):not([type="radio"]),
+    body > .container [class*="filter"] select {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .page-content table,
+    body > .container table {
+        display: block;
+        width: 100% !important;
+        min-width: 0;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .page-content table th,
+    .page-content table td,
+    body > .container table th,
+    body > .container table td {
+        white-space: nowrap;
+    }
+
+    .page-content h1,
+    .page-content h2,
+    .page-content h3,
+    .page-content h4,
+    .page-content p,
+    .page-content button,
+    .page-content a,
+    body > .container h1,
+    body > .container h2,
+    body > .container h3,
+    body > .container h4,
+    body > .container p,
+    body > .container button,
+    body > .container a {
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (max-width: 576px) {
+    body {
+        font-size: 13px !important;
+    }
+
+    .page-content,
+    body > .container {
+        padding: 14px !important;
+    }
+
+    .page-content h1,
+    body > .container h1 {
+        font-size: 22px !important;
+    }
+
+    .page-content h2,
+    body > .container h2 {
+        font-size: 20px !important;
+    }
+
+    .page-content th,
+    .page-content td,
+    body > .container th,
+    body > .container td {
+        padding: 10px !important;
+    }
+
+
+    .page-content .page-header,
+    .page-content :is(.dashboard-header, .rpt-header, .hc-header, .exp-header, .hr-header),
+    body > .container .page-header,
+    body > .container :is(.dashboard-header, .rpt-header, .hc-header, .exp-header, .hr-header) {
+        align-items: stretch !important;
+        gap: 14px !important;
+    }
+
+    .page-content [class*="header-actions"],
+    .page-content [class*="form-actions"],
+    body > .container [class*="header-actions"],
+    body > .container [class*="form-actions"] {
+        width: 100% !important;
+        flex-wrap: wrap !important;
+    }
+
+    .page-content [class*="header-actions"] > *,
+    .page-content [class*="form-actions"] > *,
+    body > .container [class*="header-actions"] > *,
+    body > .container [class*="form-actions"] > * {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .page-content :is(.modal-box, .report-modal, .rpt-modal, .exp-modal, dialog),
+    body > .container :is(.modal-box, .report-modal, .rpt-modal, .exp-modal, dialog) {
+        max-width: calc(100vw - 32px) !important;
+    }
+
+    .login-shell {
+        padding: 14px !important;
+    }
+
+    .login-shell .login-card {
+        width: 100% !important;
+        max-width: 440px !important;
+        padding: 22px 18px !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .page-content,
+    body > .container {
+        padding: 10px !important;
+    }
+
+    .page-content h1,
+    body > .container h1 {
+        font-size: 20px !important;
+    }
+
+    .page-content h2,
+    body > .container h2 {
+        font-size: 18px !important;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .page-content button,
+    .page-content .btn,
+    .page-content [class*="btn-"],
+    body > .container button,
+    body > .container .btn,
+    body > .container [class*="btn-"] {
+        min-height: 44px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .page-content [class*="grid"]:not(.calendar-days-grid),
+    .page-content [class*="card-row"],
+    body > .container [class*="grid"]:not(.calendar-days-grid),
+    body > .container [class*="card-row"] {
+        min-width: 0 !important;
+    }
+}
+
+/* Overlays cover the viewport; only their inner panels have a size limit. */
+:is(.page-content, body > .container) :is(.modal-overlay, .report-modal-overlay, .rpt-modal-overlay, .exp-modal-overlay) {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+:is(.page-content, body > .container) dialog {
+    margin: auto;
+}
+
+/* Native controls must not inherit text-field dimensions. */
+:is(.page-content, body > .container) input:is([type="checkbox"], [type="radio"]) {
+    min-height: 0;
+    flex-shrink: 0;
+    accent-color: var(--erp-primary);
+}
+
+:is(.page-content, body > .container) :is(input, select, textarea) {
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* Keep the login icon, editable text and visibility button in one field. */
+.login-shell .login-form .input-shell input {
+    min-width: 0;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.login-shell .input-icon {
+    flex-shrink: 0;
+}
+
+/* A cell that spans desktop columns must not create implicit mobile columns. */
+@media (max-width: 768px) {
+    :is(.page-content, body > .container) :is(.form-grid, .form-row, .rpt-form-row, .exp-form-row) > * {
+        grid-column: auto !important;
+        min-width: 0;
+    }
+}
+
+:is(.page-content, body > .container) :is(.rpt-modal-close, .exp-modal-close, .report-modal-close, .btn-close-modal) {
+    width: 36px;
+    min-width: 36px;
+    flex: 0 0 36px;
+    padding: 0;
+}
+
+/* Shared attendance holiday status across employee and management pages. */
+.holiday, .holiday-status { color: var(--erp-primary, #93c5fd) !important; background: rgba(59, 130, 246, .12); border-radius: 6px; padding: 3px 8px; }

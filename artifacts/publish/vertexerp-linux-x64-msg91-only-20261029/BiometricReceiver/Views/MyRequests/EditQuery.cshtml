@@ -1,0 +1,14 @@
+@model VertexERP.Models.QueryTicket
+@{ Layout = "_LayoutMaster"; ViewBag.Title = "Edit Query"; ViewData["BackController"] = "Main"; ViewData["BackAction"] = "EmployeeQueries"; }
+<link href="~/css/EmployeeSections.css" rel="stylesheet" asp-append-version="true" />
+<section class="employee-section"><article class="employee-panel">
+    <h1>Edit Query</h1>
+    @if (TempData["QueryError"] is string error) { <p role="alert">@error</p> }
+    <form asp-controller="MyRequests" asp-action="EditQuery" method="post" class="leave-form">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <label>Subject<input name="subject" value="@Model.Subject" maxlength="150" required /></label>
+        <label>Category<select name="category">@foreach (var category in new[] { "General", "Attendance", "Payroll", "Task", "Leave", "Technical" }.Append(Model.Category).Distinct()) { <option value="@category" selected="@(category == Model.Category)">@category</option> }</select></label>
+        <label class="wide">Query Details<textarea name="description" maxlength="1500" rows="4" required>@Model.Description</textarea></label>
+        <div class="request-actions"><button class="btn btn-primary" type="submit">Save Changes</button><a class="btn btn-secondary" asp-controller="Main" asp-action="EmployeeQueries">Cancel</a></div>
+    </form>
+</article></section>

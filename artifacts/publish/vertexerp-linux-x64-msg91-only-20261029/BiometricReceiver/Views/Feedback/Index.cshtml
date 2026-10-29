@@ -1,0 +1,19 @@
+@model VertexERP.Models.FeedbackForm
+@{ Layout = "_LayoutMaster"; ViewBag.Title = "Feedback"; }
+<section class="feedback-page">
+    <header class="feedback-heading"><div><h1>Feedback</h1><p>Share your suggestions, concerns or experience with HR and Admin.</p></div></header>
+    <article class="feedback-card">
+        @if(TempData["FeedbackMessage"] is string message){<div class="feedback-success" role="status"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> @message</div>}
+        <h2>Send Feedback</h2>
+        <p>Your name and submission date will be visible to HR and Admin.</p>
+        <form asp-controller="Feedback" asp-action="Index" method="post" class="feedback-form">
+            <div asp-validation-summary="ModelOnly" role="alert"></div>
+            <label asp-for="Subject">Subject</label><input asp-for="Subject" maxlength="150" required placeholder="What is your feedback about?" />
+            <span asp-validation-for="Subject" class="feedback-error"></span>
+            <label asp-for="Message">Your Feedback</label><textarea asp-for="Message" rows="7" maxlength="2000" required placeholder="Write your feedback here..."></textarea>
+            <span asp-validation-for="Message" class="feedback-error"></span>
+            <small>Maximum 2000 characters.</small>
+            <button type="submit" class="feedback-submit"><i class="fa-regular fa-paper-plane" aria-hidden="true"></i> Submit Feedback</button>
+        </form>
+    </article>
+</section>

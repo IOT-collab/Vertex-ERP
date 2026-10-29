@@ -1,0 +1,8 @@
+VertexERP MSG91-only Linux x64 Release package
+Target framework: .NET 8; RID: linux-x64; framework-dependent
+Main application entry: dotnet "Vertex ERP.dll"
+MSG91 SendingEnabled: keep false during initial deployment; AuthKey comes from Key Vault
+Automatic database migration and development-user seeding: Development-only guard retained
+Attendance behavior: receiver startup code is unchanged from the existing application. The receiver bundle is included by the existing publish target; the ERP does not add Linux DLL auto-start. Preserve the independently managed receiver/port 8082 deployment as-is.
+Configuration: appsettings*.json, remoteattendance.json, .env, private keys, and certificates excluded. Retain VM settings and environment.
+No production database was accessed or changed. No live WhatsApp message was sent.

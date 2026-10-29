@@ -1,0 +1,27 @@
+@{
+    Layout = "_LayoutMaster";
+    ViewBag.Title = "Theme";
+}
+<section class="theme-settings" aria-labelledby="theme-title">
+    <h1 id="theme-title">Theme</h1>
+    <p>Personalize your workspace. Your preference is saved for your account in this browser.</p>
+    <form id="theme-form">
+        <fieldset class="theme-options">
+            <legend>Choose your appearance</legend>
+            <label><input type="radio" name="mode" value="auto" /><strong>Auto</strong><span>Light from 6:00 AM to 6:00 PM; Dark overnight (device time).</span></label>
+            <label><input type="radio" name="mode" value="light" /><strong>Light Mode</strong><span>A bright workspace, all day.</span></label>
+            <label><input type="radio" name="mode" value="dark" /><strong>Dark Mode</strong><span>A dark workspace, all day.</span></label>
+            <label><input type="radio" name="mode" value="custom" /><strong>Custom theme</strong><span>Choose your own colors below.</span></label>
+        </fieldset>
+        <fieldset id="theme-custom" class="theme-colors">
+            <legend>Custom colors</legend>
+            <label>Background <input type="color" name="background" value="#f3f6fb" /></label>
+            <label>Panels &amp; sidebar <input type="color" name="surface" value="#ffffff" /></label>
+            <label>Text <input type="color" name="text" value="#172033" /></label>
+            <label>Accent <input type="color" name="accent" value="#2563eb" /></label>
+        </fieldset>
+        <p>Changes preview immediately. Save to keep them when you return.</p>
+        <div class="theme-actions"><button type="submit">Save theme</button><button type="button" id="theme-reset">Reset to Auto</button></div>
+        <p id="theme-status" role="status" aria-live="polite"></p>
+    </form>
+</section>

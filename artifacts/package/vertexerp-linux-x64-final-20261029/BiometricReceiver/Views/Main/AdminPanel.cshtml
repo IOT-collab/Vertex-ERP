@@ -1,0 +1,80 @@
+@model List<VertexERP.Models.ModuleState>
+@using VertexERP.Services
+@{
+    ViewData["Title"] = "Admin Panel";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    var states = Model.ToDictionary(x => x.Id);
+    var activeCount = ModuleCatalog.All.Count(m => states[m.Id].IsActive);
+}
+<link href="~/css/Admin11.css" rel="stylesheet" asp-append-version="true" />
+<div class="admin-control-page">
+    <header class="dashboard-header">
+        <div class="header-text">
+            <span class="badge-system">Admin controls</span>
+            <h2>ERP Module Control</h2>
+            <p>Activate or deactivate modules for all users. Changes save immediately; existing records are preserved.</p>
+        </div>
+        <div class="header-actions"><a asp-controller="Audit" asp-action="Index" class="btn-secondary">Change history</a></div>
+    </header>
+    @if (TempData["ModuleMessage"] is string message)
+    {
+        <p class="module-notice" role="status">@message</p>
+    }
+    <section class="metrics-grid">
+        <div class="metric-card"><div class="metric-info"><span class="metric-title">Active Modules</span><span class="metric-value">@activeCount</span></div></div>
+        <div class="metric-card"><div class="metric-info"><span class="metric-title">Inactive Modules</span><span class="metric-value">@(ModuleCatalog.All.Length - activeCount)</span></div></div>
+        <div class="metric-card"><div class="metric-info"><span class="metric-title">Total Modules</span><span class="metric-value">@ModuleCatalog.All.Length</span></div></div>
+    </section>
+    <section class="dashboard-toolbar">
+        <div class="search-box"><input id="module-search" type="search" aria-label="Search modules" placeholder="Search modules..." /></div>
+        <a asp-controller="Main" asp-action="UserSettings" class="btn-quick-config">User settings</a>
+    </section>
+    <p>Login, Admin Panel and audit history remain available. Payroll requires HR, Attendance and Leave; deactivate Payroll first before turning these off. Biometric collection continues in the background to avoid losing punches.</p>
+    <main class="admin-modules-grid">
+        @foreach (var module in ModuleCatalog.All)
+        {
+            var state = states[module.Id];
+            <div class="module-card card-blue" data-module-name="@module.Name.ToLowerInvariant()">
+                <div class="card-top">
+                    <span class="status-badge @(state.IsActive ? "badge-active" : "badge-inactive")">@(state.IsActive ? "Active" : "Inactive")</span>
+                    <form asp-controller="ModuleAdmin" asp-action="Toggle" method="post" class="module-toggle-form">
+                        <input type="hidden" name="id" value="@module.Id" />
+                        <input type="hidden" name="revision" value="@state.Revision" />
+                        <input type="hidden" name="isActive" value="@((!state.IsActive).ToString().ToLowerInvariant())" />
+                        <button type="submit" role="switch" aria-checked="@state.IsActive.ToString().ToLowerInvariant()" aria-label="@module.Name" class="module-toggle @(state.IsActive ? "is-active" : "")"><span></span></button>
+                    </form>
+                </div>
+                <div class="module-body">
+                    <h3>@module.Name</h3><p>@module.Description</p>
+                    <div class="module-footer">
+                        @if (state.IsActive)
+                        {
+                            <a asp-controller="@module.Controller" asp-action="@module.Action" class="btn-action">Open module</a>
+                        }
+                        else
+                        {
+                            <span>Access disabled. Saved data retained.</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </main>
+    <p id="module-empty" hidden>No matching modules.</p>
+</div>
+@section Scripts {
+<script>
+    document.getElementById('module-search').addEventListener('input', function () {
+        let visible = 0;
+        document.querySelectorAll('[data-module-name]').forEach(card => {
+            card.hidden = !card.dataset.moduleName.includes(this.value.trim().toLowerCase());
+            if (!card.hidden) visible++;
+        });
+        document.getElementById('module-empty').hidden = visible > 0;
+    });
+    document.querySelectorAll('.module-toggle-form').forEach(form => form.addEventListener('submit', () => {
+        form.querySelector('button').disabled = true;
+    }));
+</script>
+}
+

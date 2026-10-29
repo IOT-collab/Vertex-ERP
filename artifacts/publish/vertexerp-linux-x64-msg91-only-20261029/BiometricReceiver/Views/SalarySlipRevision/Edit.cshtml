@@ -1,0 +1,40 @@
+@model VertexERP.Models.SalarySlipRevisionViewModel
+@{ ViewData["Title"] = "Update Salary Slip"; Layout = "~/Views/Shared/_LayoutMaster.cshtml"; }
+<section style="max-width:950px;margin:24px auto;padding:24px;background:var(--erp-surface, #111c31);color:var(--erp-text, #edf4ff);border-radius:16px">
+    <h1>Update Salary Slip</h1>
+    <a asp-controller="SalarySlipReview" asp-action="Preview" asp-route-id="@Model.Id" target="_blank" rel="noopener">Preview saved slip</a>
+    <p data-no-localize>@Model.EmployeeName · @Model.Month/@Model.Year</p>
+    <p>Correct only the fields that were entered incorrectly. Enter full-month earnings below; salary days automatically prorate earnings using this month�s calendar days. Deductions remain separate amounts. This updates this month's slip only.</p>
+    <form method="post" asp-action="Edit">
+        <input asp-for="Id" type="hidden" /><input asp-for="Version" type="hidden" />
+        <div asp-validation-summary="All" style="color:#ffaaa9"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px">
+        @foreach(var field in VertexERP.Models.SalarySlipRevisionViewModel.Fields)
+        {
+            <label>@(field == "ProfessionalTax" ? "ESIC" : System.Text.RegularExpressions.Regex.Replace(field, "([a-z])([A-Z])", "$1 $2"))
+                <input name="Values[@field]" type="number" step="0.01" min="0" max="@(field == "SalaryDays" ? DateTime.DaysInMonth(Model.Year,Model.Month) : 100000000)" required value="@(Model.Values.GetValueOrDefault(field).ToString(System.Globalization.CultureInfo.InvariantCulture))" style="display:block;width:100%;padding:10px" />
+            </label>
+        }
+        </div>
+        <partial name="_SalaryCalculationSummary" model="(Model.Year, Model.Month)" />
+        <label style="display:block;margin-top:18px">Deduction note<input asp-for="DeductionNote" maxlength="300" style="display:block;width:100%;padding:10px" /></label>
+        <label style="display:block;margin-top:18px">Correction reason (required)<textarea asp-for="Reason" required maxlength="300" style="display:block;width:100%;padding:10px" placeholder="For example: August salary days corrected from 30 to 31"></textarea></label>
+        <button type="submit" formaction="@Url.Action("Edit", new { preview = true })" formtarget="_blank" formnovalidate style="margin:18px 12px 0 0;padding:12px">Preview changes</button>
+        <button type="submit" style="margin:18px 12px 0 0;padding:12px">Save corrected slip</button>
+        <a asp-controller="Hr" asp-action="SalarySlips" asp-route-year="@Model.Year" asp-route-month="@Model.Month">Cancel</a>
+    </form>
+    <h2>Correction history</h2>
+    @if (!Model.History.Any()) { <p>No corrections yet.</p> }
+    @foreach(var entry in Model.History)
+    {
+        using var document = System.Text.Json.JsonDocument.Parse(entry.Detail);
+        var record = document.RootElement;
+        <details style="margin:12px 0"><summary>@entry.OccurredAtUtc.ToString("dd MMM yyyy HH:mm") UTC · @entry.ActorName · @record.GetProperty("Reason").GetString()</summary>
+            <table style="width:100%"><thead><tr><th>Field</th><th>Before</th><th>After</th></tr></thead><tbody>
+            @foreach(var field in VertexERP.Models.SalarySlipRevisionViewModel.Fields)
+            { <tr><td>@(field == "ProfessionalTax" ? "ESIC" : field)</td><td>@record.GetProperty("Before").GetProperty(field)</td><td>@record.GetProperty("After").GetProperty(field)</td></tr> }
+            <tr><td>Deduction note</td><td>@record.GetProperty("PreviousNote")</td><td>@record.GetProperty("Note")</td></tr>
+            </tbody></table>
+        </details>
+    }
+</section>

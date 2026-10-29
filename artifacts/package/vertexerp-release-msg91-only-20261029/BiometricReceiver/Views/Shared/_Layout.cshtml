@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName" data-theme-user="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value">
+<head>
+    <meta charset="utf-8" />
+
+    <!-- Responsive / Mobile Support -->
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - Vertex_ERP</title>
+    <script src="~/js/theme.js" asp-append-version="true"></script>
+    <script src="~/js/locales/hi.js" asp-append-version="true"></script>
+    <script src="~/js/language.js" asp-append-version="true"></script>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Site CSS -->
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <!-- Common Back Button CSS -->
+    <link rel="stylesheet"
+          href="~/css/common-back-button.css"
+          asp-append-version="true" />
+
+    <!-- Common UI CSS -->
+    <link rel="stylesheet"
+          href="~/css/common-ui.css"
+          asp-append-version="true" />
+
+    <!-- Razor / Scoped CSS -->
+    <link rel="stylesheet"
+          href="~/Vertex ERP.styles.css"
+          asp-append-version="true" />
+
+    <!-- ERP Buttons CSS -->
+    <link rel="stylesheet"
+          href="~/css/erp-buttons.css"
+          asp-append-version="true" />
+
+    <!-- Main ERP Layout CSS -->
+    <link rel="stylesheet"
+          href="~/css/Style.css"
+          asp-append-version="true" />
+    <link href="~/css/hr-modules.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/theme.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/ResponsiveEnhancements.css" rel="stylesheet" asp-append-version="true" />
+    <link href="~/css/ResponsiveGuard.css" rel="stylesheet" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="~/css/notification-inbox.css" rel="stylesheet" asp-append-version="true" />
+</head>
+
+<body class="erp-document-shell">
+
+    <!-- Header -->
+    @if (User.IsInRole("HR") || User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Employee") || User.IsInRole("User"))
+    {
+        <header class="ni-document-topbar"><a href="@(User.IsInRole("Employee") || User.IsInRole("User") ? "/Main/EmployeeHome" : User.IsInRole("Manager") ? "/Main/Manager" : "/Main/Dashboard")"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Vertex ERP</a><partial name="_NotificationBell" /></header>
+    }
+
+    <!-- Main Page Content -->
+    <div class="container">
+        <main role="main" class="pb-3">
+
+            <!-- Common Back Button -->
+            <partial name="_BackButton" />
+
+            <!-- Page Content -->
+            @RenderBody()
+
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-top footer text-muted">
+        @*
+        <div class="container">
+            &copy; 2026 - Vertex_ERP -
+            <a asp-area=""
+               asp-controller="Home"
+               asp-action="Privacy">
+                Privacy
+            </a>
+        </div>
+        *@
+    </footer>
+
+    <!-- jQuery -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Site JS -->
+    <script src="~/js/site.js"
+            asp-append-version="true"></script>
+
+    <!-- Input Rules JS -->
+    <script src="~/js/input-rules.js"
+            asp-append-version="true"></script>
+
+    <!-- Page Specific Scripts -->
+    @await RenderSectionAsync("Scripts", required: false)
+
+    @if (User.IsInRole("HR") || User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Employee") || User.IsInRole("User")) { <script src="~/js/notification-inbox.js" asp-append-version="true" defer></script> }
+</body>
+</html>

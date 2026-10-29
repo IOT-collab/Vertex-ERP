@@ -1,4 +1,7 @@
 using System.Security.Claims;
+using Azure;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
@@ -13,6 +16,76 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("App_Data/sms-secrets.json", optional: true, reloadOnChange: false);
 builder.Configuration.AddJsonFile("App_Data/remoteattendance.json", optional: true, reloadOnChange: false);
 builder.Configuration.AddEnvironmentVariables();
+
+// In production, set AZURE_KEY_VAULT_NAME to the vault's DNS name (not a URI).
+// The MSG91 key is fetched via the VM's managed identity. If Key Vault is
+// configured but unavailable, clear any lower-priority AuthKey value first so
+// the process fails closed and cannot fall back to an environment/appsettings key.
+var keyVaultName = builder.Configuration["AZURE_KEY_VAULT_NAME"]?.Trim();
+var keyVaultConfigured = !string.IsNullOrWhiteSpace(keyVaultName);
+var keyVaultSecretLoaded = false;
+var keyVaultStatus = keyVaultConfigured ? "not_loaded" : "vault_name_missing";
+if (!keyVaultConfigured && !builder.Environment.IsDevelopment())
+{
+    // Production/staging require Key Vault; do not accept a lower-priority
+    // MSG91 AuthKey environment value as a fallback if the vault is omitted.
+    builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+    {
+        [Msg91AuthKeySecretMapping.ConfigurationKey] = ""
+    });
+}
+if (keyVaultConfigured)
+{
+    builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+    {
+        [Msg91AuthKeySecretMapping.ConfigurationKey] = ""
+    });
+
+    if (!System.Text.RegularExpressions.Regex.IsMatch(keyVaultName!, "^[a-zA-Z0-9-]{3,24}$"))
+    {
+        keyVaultStatus = "vault_name_invalid";
+    }
+    else
+    {
+        try
+        {
+            var vaultUri = new Uri($"https://{keyVaultName}.vault.azure.net/");
+            var secretClient = new SecretClient(vaultUri, new DefaultAzureCredential());
+            var secretResponse = await secretClient.GetSecretAsync(Msg91AuthKeySecretMapping.SecretName);
+            var authKey = secretResponse.Value.Value;
+            builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                [Msg91AuthKeySecretMapping.ConfigurationKey] = authKey
+            });
+
+            // Evaluate only presence; never emit or otherwise expose the credential.
+            keyVaultSecretLoaded = !string.IsNullOrWhiteSpace(authKey);
+            keyVaultStatus = keyVaultSecretLoaded ? "secret_loaded" : "secret_missing_or_empty";
+        }
+        catch (AuthenticationFailedException)
+        {
+            keyVaultStatus = "authentication_failed";
+        }
+        catch (RequestFailedException exception)
+        {
+            keyVaultStatus = exception.Status switch
+            {
+                401 => "authentication_failed",
+                403 => "authorization_failed",
+                404 => "vault_or_secret_not_found",
+                429 => "throttled",
+                >= 500 => "key_vault_unavailable",
+                _ => "key_vault_request_failed"
+            };
+        }
+        catch (Exception)
+        {
+            // Do not log exception messages: SDK exceptions may contain request
+            // details. Sending remains gated because AuthKey is still empty.
+            keyVaultStatus = "key_vault_load_failed";
+        }
+    }
+}
 
 // ============================================================
 // DOCUMENT TEMPLATES / PDF FONTS
@@ -277,15 +350,23 @@ builder.Services.AddDbContext<ApplicationDbContext>(
 
 var app = builder.Build();
 
+var msg91StartupLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Msg91Startup");
+msg91StartupLogger.LogInformation(
+    "MSG91 Key Vault configured={KeyVaultConfigured}; secretLoaded={SecretLoaded}; status={KeyVaultStatus}.",
+    keyVaultConfigured, keyVaultSecretLoaded, keyVaultStatus);
+var msg91StartupOptions = app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<Msg91WhatsAppOptions>>().Value;
+msg91StartupLogger.LogInformation(
+    "MSG91 sendingReady={SendingReady}; readinessIssues={ReadinessIssues}.",
+    msg91StartupOptions.Ready, string.Join(',', msg91StartupOptions.ReadinessIssues));
+
 // ============================================================
 // DATABASE MIGRATION & SEEDING
 // ============================================================
 
-using (var scope = app.Services.CreateScope())
+if (DatabaseInitializer.ShouldInitializeAtStartup(app.Environment.EnvironmentName))
 {
-    var dbContext =
-        scope.ServiceProvider
-            .GetRequiredService<ApplicationDbContext>();
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
     dbContext.Database.Migrate();
 

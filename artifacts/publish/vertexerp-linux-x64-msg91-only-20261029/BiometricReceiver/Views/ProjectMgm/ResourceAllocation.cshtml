@@ -1,0 +1,120 @@
+@{
+    ViewData["Title"] = "Resource Allocation";
+    Layout = "_Layout";
+}
+<link href="~/css/ResourceAllocation.css" rel="stylesheet" asp-append-version="true" />
+
+
+<div class="allocation-container">
+    <!-- Top Header -->
+    <header class="page-header">
+        <div class="header-title-group">
+            <div class="icon-avatar">
+                <i class="fas fa-users-cog"></i>
+            </div>
+            <div>
+                <h1>Resource Allocation</h1>
+                <p>Manage, assign, and optimize team resources across active projects.</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-outline">
+                <i class="fas fa-filter"></i> <span>Filter</span>
+            </button>
+            <button class="btn btn-primary">
+                <i class="fas fa-user-plus"></i> <span>Allocate Resource</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Top KPI Metrics -->
+    <section class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Total Workforce</span>
+                <span class="value">—</span>
+            </div>
+            <div class="metric-icon icon-blue">
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Allocated Resources</span>
+                <span class="value">—</span>
+            </div>
+            <div class="metric-icon icon-emerald">
+                <i class="fas fa-user-check"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Bench / Available</span>
+                <span class="value">—</span>
+            </div>
+            <div class="metric-icon icon-amber">
+                <i class="fas fa-user-clock"></i>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-info">
+                <span class="label">Avg Utilization</span>
+                <span class="value">—</span>
+            </div>
+            <div class="metric-icon icon-purple">
+                <i class="fas fa-chart-pie"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project & Resource Allocation Section -->
+    <main class="main-content-grid">
+        <!-- Resource Allocation Board -->
+        <div class="glass-card main-board">
+            <div class="card-header flex-between">
+                <div>
+                    <h2>Team Resource Distribution</h2>
+                    <p class="subtitle">Allocated team members per project & workload status</p>
+                </div>
+                <div class="search-bar-sm">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search team member or role..." />
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="allocation-table">
+                        <thead>
+                            <tr>
+                                <th>Resource Member</th>
+                                <th>Role</th>
+                                <th>Assigned Project</th>
+                                <th>Allocation %</th>
+                                <th>Workload</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="6" class="erp-empty-state">No resource allocation data available.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Unassigned / Bench Panel -->
+        <div class="glass-card bench-panel">
+            <div class="card-header">
+                <h2>Available Bench</h2>
+                <p class="subtitle">Resources ready to be assigned</p>
+            </div>
+            <div class="card-body">
+                <div class="bench-list erp-empty-state">No available resources.</div>
+            </div>
+        </div>
+    </main>
+</div>

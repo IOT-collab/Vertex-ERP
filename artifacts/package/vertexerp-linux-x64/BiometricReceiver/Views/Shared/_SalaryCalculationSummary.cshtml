@@ -1,0 +1,9 @@
+@model (int Year, int Month)
+<div class="salary-calculation-summary" data-salary-calculation data-calendar-days="@DateTime.DaysInMonth(Model.Year, Model.Month)" style="margin:18px 0;padding:16px;border:1px solid var(--erp-border);border-radius:10px;display:flex;flex-wrap:wrap;gap:16px">
+    <span>Master earnings: <strong data-salary-total="master">—</strong></span>
+    <span>Actual earnings: <strong data-salary-total="actual">—</strong></span>
+    <span>Total deductions: <strong data-salary-total="deductions">—</strong></span>
+    <span>Net Pay for the month: <strong data-salary-total="net">—</strong></span>
+</div>
+<p>Master is the full-month amount. Actual is calculated using salary days. Net Pay is Actual earnings minus total deductions.</p>
+<script src="~/js/salary-calculation-summary.js" asp-append-version="true"></script>

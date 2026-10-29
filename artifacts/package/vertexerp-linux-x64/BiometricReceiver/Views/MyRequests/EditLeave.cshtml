@@ -1,0 +1,21 @@
+@model VertexERP.Models.LeaveRequest
+@{ Layout = "_LayoutMaster"; ViewBag.Title = "Edit Leave"; ViewData["BackController"] = "Main"; ViewData["BackAction"] = "EmployeeLeaves"; }
+<link href="~/css/EmployeeSections.css" rel="stylesheet" asp-append-version="true" />
+<section class="employee-section"><article class="employee-panel">
+    <h1>Edit Leave</h1><p>Changes will be sent to your manager for approval again. Extra paid facilities do not deduct regular leave.</p>
+    @if (TempData["LeaveError"] is string error) { <p role="alert">@error</p> }
+    <partial name="_ExtraFacilitySummary" />
+    <form asp-controller="MyRequests" asp-action="EditLeave" method="post" class="leave-form" data-facility-form>
+        <input type="hidden" name="id" value="@Model.Id" />
+        <label>Leave / Facility<select name="leaveType" required>@foreach (var category in new[] { "EL", "CL", "ML", "EW", "Half Day", "Short Leave" }) { <option value="@category" selected="@(category == Model.LeaveType)">@category</option> }</select></label>
+        <label>From Date<input type="date" name="fromDate" value="@Model.FromDate.ToString("yyyy-MM-dd")" min="2000-01-01" max="2100-12-31" required /></label>
+        <label>To Date<input type="date" name="toDate" value="@Model.ToDate.ToString("yyyy-MM-dd")" min="2000-01-01" max="2100-12-31" required /></label>
+        <label>Half Day Session<select name="halfDaySession"><option value="First" selected="@(Model.HalfDaySession == "First")">1st Half</option><option value="Second" selected="@(Model.HalfDaySession == "Second")">2nd Half</option></select></label>
+        <label>From Time<input type="time" name="shortLeaveFrom" value="@Model.ShortLeaveFrom?.ToString("HH:mm")"/></label>
+        <label>To Time<input type="time" name="shortLeaveTo" value="@Model.ShortLeaveTo?.ToString("HH:mm")"/></label>
+        <div class="facility-summary" data-facility-quota data-quota-url="@Url.Action("ExtraLeaveQuota", "Main")" aria-live="polite"><small>Quota excludes this pending request while editing.</small><div data-quota-content>Loading monthly quota...</div></div>
+        <p data-facility-error role="alert"></p>
+        <label class="wide">Reason<textarea name="reason" maxlength="500" rows="3" required>@Model.Reason</textarea></label>
+        <div class="request-actions"><button class="btn btn-primary" type="submit">Save Changes</button><a class="btn btn-secondary" asp-controller="Main" asp-action="EmployeeLeaves">Cancel</a></div>
+    </form>
+</article></section>

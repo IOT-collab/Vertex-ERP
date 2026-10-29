@@ -1,0 +1,98 @@
+@model VertexERP.Models.EmployeeDocumentRepositoryViewModel
+@{
+    ViewData["Title"] = "Employee Documents";
+    Layout = "_Layout";
+    var employee = Model.Employee;
+    var types = VertexERP.Models.EmployeeDocumentUploadViewModel.DocumentTypes;
+}
+<link rel="stylesheet" href="~/css/EmpDocuments.css" asp-append-version="true" />
+<div class="emp-docs-container">
+    @if (TempData["DocumentError"] is string error) { <p class="document-action-error" role="alert">@error</p> }
+    @if (TempData["DocumentMessage"] is string message) { <p role="status">@message</p> }
+    <div class="header-section">
+        <div class="header-left">
+            <div class="page-heading">
+                <span class="page-eyebrow">HR DOCUMENT MANAGEMENT</span>
+                <h1 class="page-title">@(employee == null ? "Employee Documents" : employee.FullName)</h1>
+                <p class="page-subtitle">@(employee == null ? "Select an employee to see uploaded and missing documents." : $"{employee.EmployeeCode} · {employee.Department} · {employee.Designation}")</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a asp-action="GenerateDocument" asp-route-employeeId="@employee?.Id" class="btn-primary"><i class="fa-solid fa-file-circle-plus"></i> Generate Document</a>
+            <a asp-action="UploadDocument" asp-route-employeeId="@employee?.Id" class="btn-secondary"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Document</a>
+        </div>
+    </div>
+    @if (employee == null)
+    {
+        <div class="main-panel">
+            <div class="panel-header"><h2 class="panel-title">Employees</h2><span class="repository-count">@Model.Employees.Count Employees</span></div>
+            <div class="controls-bar"><div class="search-box"><i class="fa-solid fa-magnifying-glass search-icon"></i><input id="documentEmployeeSearch" type="search" placeholder="Search employee name, ID or department" aria-label="Search employees" /></div></div>
+            <div class="document-employee-grid">
+                @foreach (var item in Model.Employees)
+                {
+                    <a asp-action="EmpDocuments" asp-route-employeeId="@item.Id" class="document-employee-card" data-employee-search="@($"{item.Name} {item.EmployeeCode} {item.Department}")">
+                        <span class="employee-avatar"><i class="fa-solid fa-user"></i></span>
+                        <span><strong data-no-localize>@item.Name</strong><small data-no-localize>@item.EmployeeCode · @item.Department</small><small>@item.DocumentCount document(s) uploaded</small></span>
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+                }
+            </div>
+            <p id="noDocumentEmployees" hidden>No matching employees found.</p>
+            @if (Model.Employees.Count == 0) { <p>No employees found.</p> }
+        </div>
+    }
+    else
+    {
+        <div class="stats-grid document-summary">
+            <div class="stat-card"><span class="stat-title">Uploaded Files</span><h3 class="stat-value">@Model.Documents.Count</h3></div>
+            <div class="stat-card"><span class="stat-title">Uploaded Types</span><h3 class="stat-value">@Model.UploadedTypeCount</h3></div>
+            <div class="stat-card"><span class="stat-title">Not Uploaded Types</span><h3 class="stat-value">@(types.Count - Model.UploadedTypeCount)</h3></div>
+        </div>
+        <div class="main-panel">
+            <div class="panel-header"><div><h2 class="panel-title">Document Checklist</h2><p class="panel-subtitle">Uploaded and not uploaded status for every document type.</p></div></div>
+            <div class="document-type-grid">
+                @foreach (var type in types)
+                {
+                    var count = Model.Documents.Count(document => document.DocumentType == type);
+                    <div class="document-type-card">
+                        <strong>@type</strong>
+                        <span class="badge @(count > 0 ? "badge-green" : "badge-amber")">@(count > 0 ? $"Uploaded ({count})" : "Not uploaded")</span>
+                        @if (count == 0) { <a asp-action="UploadDocument" asp-route-employeeId="@employee.Id" asp-route-documentType="@type" class="upload-back">Upload</a> }
+                    </div>
+                }
+            </div>
+            <div class="panel-header"><h2 class="panel-title">Uploaded Documents</h2></div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>Document Type</th><th>Document Title</th><th>File Name</th><th>Upload Date</th><th class="text-right">Actions</th></tr></thead>
+                    <tbody>
+                        @foreach (var document in Model.Documents)
+                        {
+                            <tr>
+                                <td>@document.DocumentType</td><td>@document.DocumentName</td><td class="document-file-name">@document.OriginalFileName</td><td>@document.UploadedAtUtc.ToLocalTime().ToString("dd MMM yyyy")</td>
+                                <td><div class="action-buttons document-row-actions">
+                                    <a asp-action="ViewDocument" asp-route-id="@document.Id" asp-route-employeeId="@document.EmployeeId" target="_blank" rel="noopener" class="btn-secondary btn-small"><i class="fa-regular fa-eye"></i> View</a>
+                                    <a asp-action="UpdateDocument" asp-route-id="@document.Id" asp-route-employeeId="@document.EmployeeId" class="btn-secondary btn-small"><i class="fa-solid fa-pen"></i> Update</a>
+                                    <form asp-action="DeleteDocument" asp-route-id="@document.Id" asp-route-employeeId="@document.EmployeeId" method="post" onsubmit="return confirm('Delete this document? This cannot be undone.');"><button type="submit" class="btn-secondary btn-small"><i class="fa-solid fa-trash"></i> Delete</button></form>
+                                </div></td>
+                            </tr>
+                        }
+                        @if (Model.Documents.Count == 0) { <tr><td colspan="5"><div class="empty-state"><h3>No documents uploaded</h3><p>Use Upload beside a missing document type to add a file.</p></div></td></tr> }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+<script>
+(() => {
+    const search = document.getElementById('documentEmployeeSearch');
+    if (!search) return;
+    search.addEventListener('input', () => {
+        const query = search.value.trim().toLowerCase();
+        const cards = [...document.querySelectorAll('[data-employee-search]')];
+        cards.forEach(card => card.hidden = !card.dataset.employeeSearch.toLowerCase().includes(query));
+        document.getElementById('noDocumentEmployees').hidden = cards.some(card => !card.hidden) || !query;
+    });
+})();
+</script>

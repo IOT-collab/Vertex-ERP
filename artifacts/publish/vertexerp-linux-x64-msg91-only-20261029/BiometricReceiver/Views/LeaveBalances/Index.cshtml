@@ -1,0 +1,29 @@
+﻿@model VertexERP.Models.ManualLeavePage
+@using VertexERP.Models
+@using System.Globalization
+@{
+    ViewData["Title"] = "Employee Leave Balances";
+    Layout = "~/Views/Shared/_LayoutMaster.cshtml";
+    ViewData["BackController"] = "Main";
+    ViewData["BackAction"] = "Hrms";
+    var saved = Model.Balances.ToDictionary(x => (x.EmployeeId, x.Category));
+    string N(decimal? value) => value?.ToString("0.##", CultureInfo.InvariantCulture) ?? "";
+}
+<link href="~/css/LeaveBalances.css" rel="stylesheet" asp-append-version="true" />
+<section class="manual-leave-page">
+<header><h1>Employee Leave Balances</h1><p>Calculate year-wise leave earnings and carry forward. Approved requests automatically update Used and Available balances.</p></header>
+@if(TempData["LeaveMessage"] is string message){<p class="manual-notice" role="status">@message</p>}
+<div asp-validation-summary="All" class="manual-error" role="alert"></div>
+<section class="manual-card">
+<div class="manual-list-heading"><h2>All Employees <small>(@Model.Employees.Count)</small></h2><form asp-action="Index" method="get" class="manual-filters"><label>Year<input type="number" name="year" value="@Model.Year" min="2000" max="2100" required/></label><label>Employee<input name="search" value="@Model.Search" placeholder="Name or employee ID"/></label><button type="submit">Search</button><a asp-action="Index" asp-route-year="@Model.Year">Clear</a></form></div>
+<div class="manual-table"><table><thead><tr><th>Employee</th><th>EL</th><th>CL</th><th>ML</th><th>EW</th><th>Action</th></tr></thead><tbody>
+@foreach(var employee in Model.Employees){
+    <tr><td><strong data-no-localize>@employee.FullName</strong><small data-no-localize>@employee.EmployeeCode · @employee.Department</small>@if(!employee.IsActive){<small>Inactive</small>}</td>
+    @foreach(var category in ManualLeavePage.Categories){
+        var balance = saved.GetValueOrDefault((employee.Id, category));
+        <td>@if(balance == null){<span class="manual-unfilled">Not filled</span>}else if(balance.Revision==0){<div>Approved @N(balance.ApprovedDays)</div><div>Pending @N(balance.PendingDays)</div><span class="manual-unfilled">Entitlement not filled</span>}else{@if(Model.CalculatedEmployeeIds.Contains(employee.Id)){<div>Carry forward <strong>@N(balance.OpeningDays)</strong></div>}<div>Used <strong>@N(balance.EffectiveUsedDays)</strong></div><div class="manual-available">Available <strong>@N(balance.AvailableDays)</strong></div>}</td>
+    }
+    <td><a class="calculate-leave-button" asp-action="Calculate" asp-route-employeeId="@employee.Id" asp-route-year="@Model.Year" aria-label="Calculate leave for @employee.FullName for @Model.Year"><i class="fa-solid fa-calculator" aria-hidden="true"></i><span>Calculate Leave</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a></td></tr>
+}
+@if(Model.Employees.Count == 0){<tr><td colspan="6" class="manual-empty">No employees match your search.</td></tr>}
+</tbody></table></div></section></section>
