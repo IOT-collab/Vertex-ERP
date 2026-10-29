@@ -358,6 +358,9 @@ var msg91StartupOptions = app.Services.GetRequiredService<Microsoft.Extensions.O
 msg91StartupLogger.LogInformation(
     "MSG91 sendingReady={SendingReady}; readinessIssues={ReadinessIssues}.",
     msg91StartupOptions.Ready, string.Join(',', msg91StartupOptions.ReadinessIssues));
+msg91StartupLogger.LogInformation(
+    "MSG91 passwordResetOtpReady={OtpReady}; readinessIssues={ReadinessIssues}.",
+    msg91StartupOptions.PasswordResetOtpReady, string.Join(',', msg91StartupOptions.PasswordResetOtpReadinessIssues));
 
 // ============================================================
 // DATABASE MIGRATION & SEEDING

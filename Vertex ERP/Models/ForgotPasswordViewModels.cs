@@ -11,6 +11,7 @@ public sealed class ForgotPasswordViewModel
     public bool MethodsAvailable { get; set; }
     public bool HasSms { get; set; }
     public bool HasEmail { get; set; }
+    public bool HasWhatsApp { get; set; }
     public string? MaskedPhone { get; set; }
     public string? MaskedEmail { get; set; }
     public string? StatusMessage { get; set; }

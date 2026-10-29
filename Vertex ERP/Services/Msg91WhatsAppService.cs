@@ -35,10 +35,12 @@ VertexERP Team
     public string LanguageCode { get; set; } = "en";
     public string Namespace { get; set; } = "cdc730df_d16e_48b9_94b9_a057d00e67a1";
     public string[] ParameterOrder { get; set; } = [];
+    public string PasswordResetOtpTemplateName { get; set; } = "vertex_password_reset_otp";
+    public bool PasswordResetOtpTemplateVerified { get; set; }
 
     // These reason codes are safe for logs and health diagnostics; no credential or
     // employee data is included.
-    public IReadOnlyList<string> ReadinessIssues
+    public IReadOnlyList<string> ProviderReadinessIssues
     {
         get
         {
@@ -52,6 +54,15 @@ VertexERP Team
             if (string.IsNullOrWhiteSpace(Namespace)
                 || !System.Text.RegularExpressions.Regex.IsMatch(Namespace, @"^[0-9a-fA-F]{8}_[0-9a-fA-F]{4}_[0-9a-fA-F]{4}_[0-9a-fA-F]{4}_[0-9a-fA-F]{12}$"))
                 issues.Add("namespace_missing_or_invalid");
+            return issues;
+        }
+    }
+
+    public IReadOnlyList<string> ReadinessIssues
+    {
+        get
+        {
+            var issues = ProviderReadinessIssues.ToList();
             if (!TemplateMappingVerified) issues.Add("template_mapping_unverified");
             if (string.IsNullOrWhiteSpace(ApprovedTemplateText)
                 || !System.Text.RegularExpressions.Regex.Matches(ApprovedTemplateText, @"\{\{\s*(\d+)\s*\}\}")
@@ -64,7 +75,19 @@ VertexERP Team
         }
     }
 
+    public IReadOnlyList<string> PasswordResetOtpReadinessIssues
+    {
+        get
+        {
+            var issues = ProviderReadinessIssues.ToList();
+            if (!PasswordResetOtpTemplateVerified) issues.Add("password_reset_otp_template_unverified");
+            if (PasswordResetOtpTemplateName != "vertex_password_reset_otp") issues.Add("password_reset_otp_template_invalid");
+            return issues;
+        }
+    }
+
     public bool Ready => ReadinessIssues.Count == 0;
+    public bool PasswordResetOtpReady => PasswordResetOtpReadinessIssues.Count == 0;
 
     private static bool IsValidApiUrl(string? value) => Uri.TryCreate(value, UriKind.Absolute, out var uri)
         && uri.Scheme == Uri.UriSchemeHttps
@@ -77,7 +100,11 @@ VertexERP Team
 public sealed record TaskWhatsAppData(string EmployeeName, string Phone, string TaskTitle, string AssignedBy, DateOnly Deadline);
 public sealed record Msg91Result(string Outcome, int? HttpStatus = null, string? ProviderId = null, string? ErrorCode = null,
     TimeSpan? RetryAfter = null, string? SanitizedResponse = null, DateTime? SubmittedAtUtc = null);
-public interface IMsg91WhatsAppService { Task<Msg91Result> SendTaskAsync(TaskWhatsAppData data, CancellationToken cancellationToken); }
+public interface IMsg91WhatsAppService
+{
+    Task<Msg91Result> SendTaskAsync(TaskWhatsAppData data, CancellationToken cancellationToken);
+    Task<Msg91Result> SendPasswordResetOtpAsync(string phone, string otp, string languageCode, CancellationToken cancellationToken);
+}
 
 public sealed class Msg91WhatsAppService(HttpClient client, IOptions<Msg91WhatsAppOptions> options) : IMsg91WhatsAppService
 {
@@ -103,16 +130,48 @@ public sealed class Msg91WhatsAppService(HttpClient client, IOptions<Msg91WhatsA
                 name = config.TemplateName, language = new { code = config.LanguageCode, policy = "deterministic" },
                 @namespace = config.Namespace, to_and_components = new[] { new { to = new[] { phone }, components } } } } };
     }
+    public static object BuildPasswordResetOtpPayload(Msg91WhatsAppOptions config, string phone, string otp, string languageCode)
+    {
+        var components = new Dictionary<string, object>
+        {
+            ["body_1"] = new { type = "text", value = otp },
+            ["button_1"] = new { subtype = "url", type = "text", value = otp }
+        };
+        return new { integrated_number = config.IntegratedNumber, content_type = "template",
+            payload = new { messaging_product = "whatsapp", type = "template", template = new {
+                name = config.PasswordResetOtpTemplateName, language = new { code = languageCode, policy = "deterministic" },
+                @namespace = config.Namespace, to_and_components = new[] { new { to = new[] { phone }, components } } } } };
+    }
     public async Task<Msg91Result> SendTaskAsync(TaskWhatsAppData data, CancellationToken cancellationToken)
     {
         var config = options.Value;
         if (!config.Ready) return new("Disabled", ErrorCode: "configuration_not_verified");
         var phone = NormalizePhone(data.Phone);
         if (phone == null) return new("Failed", ErrorCode: "invalid_employee_phone");
+        return await SubmitAsync(phone, BuildPayload(data, config, phone), cancellationToken);
+    }
+
+    public async Task<Msg91Result> SendPasswordResetOtpAsync(string phone, string otp, string languageCode, CancellationToken cancellationToken)
+    {
+        var config = options.Value;
+        if (!config.PasswordResetOtpReady)
+            return new("Disabled", ErrorCode: "configuration_not_verified");
+        if (!System.Text.RegularExpressions.Regex.IsMatch(otp, @"^[0-9]{6}$"))
+            return new("Failed", ErrorCode: "invalid_otp_format");
+        if (languageCode is not ("en" or "hi")) languageCode = "en";
+        var normalizedPhone = NormalizePhone(phone);
+        if (normalizedPhone == null) return new("Failed", ErrorCode: "invalid_employee_phone");
+        return await SubmitAsync(normalizedPhone,
+            BuildPasswordResetOtpPayload(config, normalizedPhone, otp, languageCode), cancellationToken);
+    }
+
+    private async Task<Msg91Result> SubmitAsync(string phone, object payload, CancellationToken cancellationToken)
+    {
+        var config = options.Value;
         using var request = new HttpRequestMessage(HttpMethod.Post, config.ApiUrl);
         request.Headers.Add("authkey", config.AuthKey);
         request.Headers.Accept.ParseAdd("application/json");
-        request.Content = JsonContent.Create(BuildPayload(data, config, phone));
+        request.Content = JsonContent.Create(payload);
         var submittedAtUtc = DateTime.UtcNow;
         try
         {

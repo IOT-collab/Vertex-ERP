@@ -57,6 +57,9 @@ if (configSearch is not null)
     Check(appSettingsOptions.ApiUrl == Msg91WhatsAppService.Endpoint && appSettingsOptions.IntegratedNumber == "919217614338"
         && appSettingsOptions.TemplateName == "vertex_task_assigned" && appSettingsOptions.LanguageCode == "en"
         && appSettingsOptions.Namespace == "cdc730df_d16e_48b9_94b9_a057d00e67a1", "Committed appsettings bind the confirmed provider settings");
+    Check(appSettingsOptions.PasswordResetOtpTemplateName == "vertex_password_reset_otp"
+        && appSettingsOptions.PasswordResetOtpTemplateVerified && !appSettingsOptions.PasswordResetOtpReady,
+        "Approved password reset template is configured while sending remains disabled");
     Check(appSettingsOptions.ParameterOrder.SequenceEqual(new[] { "EmployeeName", "TaskTitle", "AssignedBy", "TaskDeadline" }), "Configured parameter order binds exactly once");
     Check(string.Join(',', appSettingsOptions.ReadinessIssues.Order()) == "auth_key_missing_or_invalid,sending_disabled",
         "Committed appsettings readiness reports only missing secret and disabled sending");
@@ -87,6 +90,37 @@ var expected = JsonNode("""
 """);
 Check(System.Text.Json.Nodes.JsonNode.DeepEquals(expected, JsonNode(handler.Body!)), "Exact user-provided nested JSON structure; no extra API fields");
 Check(!handler.Body!.Contains(config.AuthKey), "Credentials never enter request JSON");
+config.PasswordResetOtpTemplateVerified = true;
+handler.Status = 200; handler.ResponseBody = "{\"status\":\"success\",\"request_id\":\"otp-test-123\"}";
+result = await sender.SendPasswordResetOtpAsync("+91 98765 43210", "042691", "hi", default);
+Check(result.Outcome == "Accepted" && result.ProviderId == "otp-test-123", "Mocked OTP template request is accepted and provider ID captured");
+var expectedOtp = JsonNode("""
+{
+  "integrated_number":"919217614338", "content_type":"template",
+  "payload": { "messaging_product":"whatsapp", "type":"template", "template": {
+    "name":"vertex_password_reset_otp", "language":{"code":"hi","policy":"deterministic"},
+    "namespace":"cdc730df_d16e_48b9_94b9_a057d00e67a1", "to_and_components":[{
+      "to":["919876543210"], "components":{
+        "body_1":{"type":"text","value":"042691"},
+        "button_1":{"subtype":"url","type":"text","value":"042691"}
+      }
+    }]
+  }}
+}
+""");
+Check(System.Text.Json.Nodes.JsonNode.DeepEquals(expectedOtp, JsonNode(handler.Body!)), "Approved password reset payload maps OTP to body_1 and copy-code button_1");
+Check(!handler.Body!.Contains(config.AuthKey), "OTP JSON never includes AuthKey");
+var callsBeforeOtpGates = handler.Calls;
+var unverifiedOtpConfig = Config();
+var unverifiedOtpSender = new Msg91WhatsAppService(new HttpClient(handler), Options.Create(unverifiedOtpConfig));
+Check((await unverifiedOtpSender.SendPasswordResetOtpAsync(data.Phone, "123456", "en", default)).Outcome == "Disabled" && handler.Calls == callsBeforeOtpGates,
+    "Unverified OTP template blocks outbound requests");
+var disabledOtpConfig = Config(); disabledOtpConfig.SendingEnabled = false; disabledOtpConfig.PasswordResetOtpTemplateVerified = true;
+var disabledOtpSender = new Msg91WhatsAppService(new HttpClient(handler), Options.Create(disabledOtpConfig));
+Check((await disabledOtpSender.SendPasswordResetOtpAsync(data.Phone, "123456", "en", default)).Outcome == "Disabled" && handler.Calls == callsBeforeOtpGates,
+    "SendingEnabled=false blocks password reset OTP HTTP requests");
+Check((await sender.SendPasswordResetOtpAsync(data.Phone, "12345", "en", default)).Outcome == "Failed",
+    "OTP format must be exactly six digits");
 config.ParameterOrder = ["TaskTitle", "EmployeeName", "TaskDeadline", "AssignedBy"];
 var noCallForWrongOrder = handler.Calls;
 Check((await sender.SendTaskAsync(data, default)).Outcome == "Disabled" && handler.Calls == noCallForWrongOrder,

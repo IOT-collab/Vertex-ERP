@@ -175,9 +175,11 @@ namespace VertexERP.Controllers
             var email = user.Employee.Email?.Trim();
             model.HasSms = phone != null;
             model.HasEmail = HasDeliverableEmail(email);
+            var msg91 = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Options.IOptions<Msg91WhatsAppOptions>>().Value;
+            model.HasWhatsApp = phone != null && msg91.PasswordResetOtpReady;
             model.MaskedPhone = phone is null ? null : MaskPhone(phone);
             model.MaskedEmail = model.HasEmail ? MaskEmail(email!) : null;
-            model.MethodsAvailable = model.HasSms || model.HasEmail;
+            model.MethodsAvailable = model.HasSms || model.HasEmail || model.HasWhatsApp;
             if (!model.MethodsAvailable)
             {
                 ModelState.AddModelError(string.Empty, "We couldn't continue with those details. Contact HR for assistance.");
@@ -199,9 +201,9 @@ namespace VertexERP.Controllers
                 return StatusCode(429, new { ok = false, message = "Please wait 60 seconds before requesting another code. The hourly limit is five codes." });
             var now = DateTime.UtcNow;
             var sentRecently = await _dbContext.PasswordResetTokens.AnyAsync(item => item.AppUserId == user.Id &&
-                ((item.VerificationMethod == "Email" && item.AppUser!.Employee != null && !item.AppUser.Employee.Email.EndsWith("@import.vertex") && item.CreatedAtUtc > now.AddMinutes(-1)) || item.SmsSentAtUtc > now.AddMinutes(-1)));
+                ((item.VerificationMethod == "Email" && item.AppUser!.Employee != null && !item.AppUser.Employee.Email.EndsWith("@import.vertex") && item.CreatedAtUtc > now.AddMinutes(-1)) || (item.VerificationMethod == "WhatsApp" && item.CreatedAtUtc > now.AddMinutes(-1)) || item.SmsSentAtUtc > now.AddMinutes(-1)));
             var recentCount = await _dbContext.PasswordResetTokens.CountAsync(item => item.AppUserId == user.Id &&
-                ((item.VerificationMethod == "Email" && item.AppUser!.Employee != null && !item.AppUser.Employee.Email.EndsWith("@import.vertex") && item.CreatedAtUtc > now.AddHours(-1)) || item.SmsSentAtUtc > now.AddHours(-1)));
+                ((item.VerificationMethod == "Email" && item.AppUser!.Employee != null && !item.AppUser.Employee.Email.EndsWith("@import.vertex") && item.CreatedAtUtc > now.AddHours(-1)) || (item.VerificationMethod == "WhatsApp" && item.CreatedAtUtc > now.AddHours(-1)) || item.SmsSentAtUtc > now.AddHours(-1)));
             if (sentRecently || recentCount >= 5)
                 return StatusCode(429, new { ok = false, message = "Please wait 60 seconds before requesting another code. The hourly limit is five codes." });
 
@@ -235,6 +237,66 @@ namespace VertexERP.Controllers
         }
 
         [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
+        public async Task<IActionResult> BeginWhatsAppOtp()
+        {
+            // Keep the response identical for ineligible accounts and provider failures to avoid
+            // turning this public recovery endpoint into an account or delivery-status oracle.
+            const string genericMessage = "If the account is eligible, a WhatsApp verification code has been sent. It expires in 2 minutes.";
+            var user = await GetRecoveryUserAsync();
+            var now = DateTime.UtcNow;
+            if (user?.Employee is null) return Json(new { ok = true, message = genericMessage, expiresInSeconds = 120, resendAfterSeconds = 60 });
+            var config = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Options.IOptions<Msg91WhatsAppOptions>>().Value;
+            var phone = ToIndianE164(user.Employee.PhoneNumber);
+            if (phone is null || !config.PasswordResetOtpReady)
+                return Json(new { ok = true, message = genericMessage, expiresInSeconds = 120, resendAfterSeconds = 60 });
+            if (!AllowRecoveryRequest($"otp:{user.Id}", 5, TimeSpan.FromHours(1)))
+                return StatusCode(429, new { ok = false, message = "Please wait before requesting another verification code." });
+
+            var sentRecently = await _dbContext.PasswordResetTokens.AnyAsync(item => item.AppUserId == user.Id &&
+                ((item.VerificationMethod == "Email" && item.AppUser!.Employee != null && !item.AppUser.Employee.Email.EndsWith("@import.vertex") && item.CreatedAtUtc > now.AddMinutes(-1))
+                    || (item.VerificationMethod == "WhatsApp" && item.CreatedAtUtc > now.AddMinutes(-1)) || item.SmsSentAtUtc > now.AddMinutes(-1)));
+            var recentCount = await _dbContext.PasswordResetTokens.CountAsync(item => item.AppUserId == user.Id &&
+                ((item.VerificationMethod == "Email" && item.AppUser!.Employee != null && !item.AppUser.Employee.Email.EndsWith("@import.vertex") && item.CreatedAtUtc > now.AddHours(-1))
+                    || (item.VerificationMethod == "WhatsApp" && item.CreatedAtUtc > now.AddHours(-1)) || item.SmsSentAtUtc > now.AddHours(-1)));
+            if (sentRecently || recentCount >= 5)
+                return StatusCode(429, new { ok = false, message = "Please wait before requesting another verification code." });
+
+            var otp = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            await _dbContext.PasswordResetTokens.Where(item => item.AppUserId == user.Id && item.UsedAtUtc == null)
+                .ExecuteUpdateAsync(update => update.SetProperty(item => item.UsedAtUtc, now));
+            var token = new PasswordResetToken
+            {
+                AppUserId = user.Id,
+                VerificationMethod = "WhatsApp",
+                OtpHash = PasswordHashService.HashPassword(otp),
+                CreatedAtUtc = now,
+                ExpiresAtUtc = now.AddMinutes(2)
+            };
+            _dbContext.PasswordResetTokens.Add(token);
+            await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            var language = Request.Cookies.TryGetValue("vertex.language." + user.Id, out var selectedLanguage) && selectedLanguage == "hi" ? "hi" : "en";
+            var result = await HttpContext.RequestServices.GetRequiredService<IMsg91WhatsAppService>()
+                .SendPasswordResetOtpAsync(phone, otp, language, HttpContext.RequestAborted);
+            HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILogger<MainController>>()
+                .LogInformation("MSG91 password reset OTP eventId={EventId} outcome={Outcome} httpStatus={HttpStatus} providerId={ProviderId} errorCategory={ErrorCategory} submittedAtUtc={SubmittedAtUtc} response={SanitizedResponse}",
+                    token.Id, result.Outcome, result.HttpStatus, result.ProviderId, result.ErrorCode, result.SubmittedAtUtc, result.SanitizedResponse);
+            if (result.Outcome is "Accepted" or "NeedsReview")
+            {
+                HttpContext.Session.SetInt32("RecoveryChallengeId", token.Id);
+                HttpContext.Session.Remove("PasswordResetGrantTokenId");
+            }
+            else
+            {
+                token.UsedAtUtc = DateTime.UtcNow;
+                await _dbContext.SaveChangesAsync();
+            }
+            return Json(new { ok = true, message = genericMessage, expiresInSeconds = 120, resendAfterSeconds = 60 });
+        }
+
+        [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
         public async Task<IActionResult> VerifyEmailOtp(BeginEmailOtpViewModel model)
         {
             var tokenId = HttpContext.Session.GetInt32("RecoveryChallengeId");
@@ -252,6 +314,37 @@ namespace VertexERP.Controllers
             var verifiedAt = DateTime.UtcNow;
             var markedVerified = await _dbContext.PasswordResetTokens.Where(item => item.Id == token.Id && item.VerifiedAtUtc == null && item.UsedAtUtc == null && item.ExpiresAtUtc > verifiedAt && item.FailedAttempts < 5)
                 .ExecuteUpdateAsync(update => update.SetProperty(item => item.VerifiedAtUtc, verifiedAt));
+            if (markedVerified != 1) return BadRequest(new { ok = false, message = "The code is invalid or has expired." });
+            HttpContext.Session.SetInt32("PasswordResetGrantTokenId", token.Id);
+            HttpContext.Session.Remove("RecoveryChallengeId");
+            HttpContext.Session.Remove("RecoveryUserId");
+            return Json(new { ok = true, redirectUrl = Url.Action(nameof(ResetPassword)) });
+        }
+
+        [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyWhatsAppOtp(BeginEmailOtpViewModel model)
+        {
+            var tokenId = HttpContext.Session.GetInt32("RecoveryChallengeId");
+            var userId = HttpContext.Session.GetInt32("RecoveryUserId");
+            if (!ModelState.IsValid || !tokenId.HasValue || !userId.HasValue)
+                return BadRequest(new { ok = false, message = "The code is invalid or has expired. Request a new code." });
+            var now = DateTime.UtcNow;
+            var token = await _dbContext.PasswordResetTokens.Include(item => item.AppUser)
+                .FirstOrDefaultAsync(item => item.Id == tokenId && item.AppUserId == userId && item.VerificationMethod == "WhatsApp"
+                    && item.UsedAtUtc == null && item.VerifiedAtUtc == null && item.ExpiresAtUtc > now && item.FailedAttempts < 5
+                    && item.AppUser!.IsActive && item.AppUser.Employee!.IsActive);
+            if (token is null) return BadRequest(new { ok = false, message = "The code is invalid or has expired." });
+            if (!PasswordHashService.VerifyPassword(model.Otp, token.OtpHash))
+            {
+                await _dbContext.PasswordResetTokens.Where(item => item.Id == token.Id && item.VerifiedAtUtc == null
+                        && item.UsedAtUtc == null && item.ExpiresAtUtc > now && item.FailedAttempts < 5)
+                    .ExecuteUpdateAsync(update => update.SetProperty(item => item.FailedAttempts, item => item.FailedAttempts + 1));
+                return BadRequest(new { ok = false, message = "The code is invalid or has expired." });
+            }
+            var markedVerified = await _dbContext.PasswordResetTokens.Where(item => item.Id == token.Id && item.AppUserId == userId
+                    && item.VerificationMethod == "WhatsApp" && item.VerifiedAtUtc == null && item.UsedAtUtc == null
+                    && item.ExpiresAtUtc > now && item.FailedAttempts < 5)
+                .ExecuteUpdateAsync(update => update.SetProperty(item => item.VerifiedAtUtc, now));
             if (markedVerified != 1) return BadRequest(new { ok = false, message = "The code is invalid or has expired." });
             HttpContext.Session.SetInt32("PasswordResetGrantTokenId", token.Id);
             HttpContext.Session.Remove("RecoveryChallengeId");
