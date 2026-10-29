@@ -3,7 +3,7 @@ const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const source = fs.readFileSync(path.join(__dirname, '../../Vertex ERP/wwwroot/js/theme.js'), 'utf8');
-function run(hour, saved, user = '17', brokenStorage = false) {
+function run(hour, saved, user = '17', brokenStorage = false, legacySaved = null) {
     const properties = {};
     const root = { dataset: { themeUser: user }, style: { setProperty: (key, value) => properties[key] = value } };
     const events = {};
@@ -12,7 +12,12 @@ function run(hour, saved, user = '17', brokenStorage = false) {
         document: { documentElement: root, addEventListener: () => {}, getElementById: () => null },
         window: { addEventListener: (name, handler) => events[name] = handler },
         Date: class { getHours() { return hour; } },
-        localStorage: { getItem: key => { assert.equal(key, 'vertex.theme.v1.' + user); if (brokenStorage) throw Error(); return saved; } },
+        localStorage: { getItem: key => {
+            if (brokenStorage) throw Error();
+            if (key === 'vertex.theme.v2.' + user) return saved;
+            if (key === 'vertex.theme.v1.' + user) return legacySaved;
+            throw Error('Unexpected theme key: ' + key);
+        } },
         setInterval: handler => tick = handler
     });
     return { root, properties, events, tick, setHour: value => hour = value };
@@ -32,6 +37,24 @@ assert.equal(light.properties['--erp-text-muted'], '#52627a');
 const dark = run(12, '{"mode":"dark"}');
 assert.equal(dark.properties['--erp-text-soft'], '#f1f5f9');
 assert.equal(dark.properties['--erp-glass'], '#0f172a');
+const diwaliDay = run(13, null);
+assert.equal(diwaliDay.root.dataset.themePreset, 'diwali');
+assert.equal(diwaliDay.root.dataset.diwaliTime, 'day');
+assert.equal(diwaliDay.root.dataset.theme, 'light');
+assert.equal(diwaliDay.properties['--erp-bg'], '#fff8eb');
+assert.equal(diwaliDay.properties['--erp-surface'], '#fffdf7');
+assert.equal(diwaliDay.properties['--erp-primary'], '#8e2c1c');
+const diwaliNight = run(21, null);
+assert.equal(diwaliNight.root.dataset.themePreset, 'diwali');
+assert.equal(diwaliNight.root.dataset.diwaliTime, 'night');
+assert.equal(diwaliNight.root.dataset.theme, 'dark');
+assert.equal(diwaliNight.properties['--erp-bg'], '#080e24');
+assert.equal(diwaliNight.properties['--erp-surface'], '#111a38');
+assert.equal(diwaliNight.properties['--erp-primary'], '#f4b942');
+assert.equal(run(13, null, '17', false, '{"mode":"auto"}').root.dataset.themePreset, 'diwali',
+    'Existing Auto preferences migrate to the requested Diwali day/night pair');
+assert.equal(run(13, null, '17', false, '{"mode":"dark"}').root.dataset.theme, 'dark',
+    'Existing explicit appearance choices are preserved during migration');
 assert.equal(run(12, 'invalid-json').root.dataset.theme, 'light');
 assert.equal(run(12, null, '17', true).root.dataset.theme, 'light');
 assert.equal(run(12, null, '').root.dataset.theme, undefined);
@@ -42,9 +65,11 @@ const transition = run(17, null);
 transition.setHour(18);
 transition.tick();
 assert.equal(transition.root.dataset.theme, 'dark');
-transition.events.storage({ key: 'vertex.theme.v1.18', newValue: '{"mode":"light"}' });
+assert.equal(transition.root.dataset.diwaliTime, 'night');
+assert.equal(transition.properties['--erp-bg'], '#080e24');
+transition.events.storage({ key: 'vertex.theme.v2.18', newValue: '{"mode":"light"}' });
 assert.equal(transition.root.dataset.theme, 'dark');
-transition.events.storage({ key: 'vertex.theme.v1.17', newValue: '{"mode":"light"}' });
+transition.events.storage({ key: 'vertex.theme.v2.17', newValue: '{"mode":"light"}' });
 assert.equal(transition.root.dataset.theme, 'light');
 console.log('Theme checks passed: time boundaries, manual modes, custom validation, account isolation, storage failures and live transitions.');
 
@@ -58,4 +83,7 @@ function ratio(a,b) { const x=relativeLuminance(a), y=relativeLuminance(b); retu
 for (const palette of [light,dark]) for(const role of ['text','text-muted','danger','success','warning'])
     assert.ok(ratio(palette.properties['--erp-'+role],palette.properties['--erp-surface'])>=4.5, role+' text must remain readable on the selected surface');
 assert.equal(custom.properties['--erp-danger'], '#ffffff');
+for (const palette of [diwaliDay, diwaliNight]) for (const role of ['text', 'text-muted'])
+    assert.ok(ratio(palette.properties['--erp-' + role], palette.properties['--erp-surface']) >= 4.5,
+        'Diwali ' + palette.root.dataset.diwaliTime + ' ' + role + ' must remain readable on its surface');
 console.log('Palette contrast checks passed for light/dark surfaces, status text and custom palettes.');

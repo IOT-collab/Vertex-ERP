@@ -1,0 +1,150 @@
+/* Seasonal presentation only. Palette changes flow through the existing ERP theme tokens. */
+html[data-theme-preset="diwali"] body {
+    background-image:
+        radial-gradient(ellipse at 2% 0%, color-mix(in srgb, var(--erp-primary) 8%, transparent), transparent 34rem),
+        radial-gradient(ellipse at 98% 100%, color-mix(in srgb, #f5b943 8%, transparent), transparent 32rem);
+}
+
+/* Elegant Marigold daytime palette: warm pages, readable ivory surfaces, maroon navigation. */
+html[data-theme-preset="diwali"][data-diwali-time="day"] :is(.sidebar, .logo) {
+    color: #fff6e5 !important;
+    background: linear-gradient(165deg, #70252a, #4e1821) !important;
+    border-color: #c18a3b !important;
+}
+html[data-theme-preset="diwali"][data-diwali-time="day"] :is(.sidebar a, .sidebar-close-btn, .erp-logo-link) {
+    color: #fff3dc !important;
+}
+html[data-theme-preset="diwali"][data-diwali-time="day"] .sidebar-menu a:is(:hover, :focus-visible) {
+    color: #fff !important;
+    background: #9a3a22 !important;
+}
+html[data-theme-preset="diwali"][data-diwali-time="day"] :is(.topbar, .ni-document-topbar) {
+    color: #48211d !important;
+    background: linear-gradient(100deg, #fffdf7, #fff5df) !important;
+    border-bottom: 1px solid #ead6b5 !important;
+    box-shadow: 0 4px 18px rgba(91, 43, 25, .06) !important;
+}
+html[data-theme-preset="diwali"][data-diwali-time="day"] :is(.topbar-brand, .profile-text, .hamburger-menu-btn, .ni-document-topbar > a:first-child) {
+    color: #54231e !important;
+}
+html[data-theme-preset="diwali"][data-diwali-time="day"] .dashboard.dashboard-studio .header-text {
+    background: linear-gradient(110deg, #faecd0, #fffdf7 72%) !important;
+    border-color: #e5c88f !important;
+}
+html[data-theme-preset="diwali"][data-diwali-time="day"] .dashboard.dashboard-studio .header-text::after {
+    filter: sepia(.55) saturate(.82) hue-rotate(330deg);
+    opacity: .52;
+}
+
+/* Festive Fireworks night palette. Semantic attendance/task status colors remain intact. */
+html[data-theme-preset="diwali"][data-diwali-time="night"] :is(.sidebar, .logo, .topbar, .ni-document-topbar) {
+    background: linear-gradient(130deg, #101a38, #080e24) !important;
+    border-color: #6c5733 !important;
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .dashboard.dashboard-studio .header-text {
+    background: linear-gradient(110deg, #18264a, #111a38 70%) !important;
+    border-color: #695431 !important;
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] :is(.dashboard-card, .table-box, .attendance-box, .alerts-box, .activity-box, .quick-box, .analytics-card) {
+    border-color: color-mix(in srgb, #d4a64d 32%, var(--erp-border)) !important;
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .sidebar-menu a:is(:hover, :focus-visible) {
+    box-shadow: 0 0 18px color-mix(in srgb, #f4b942 25%, transparent);
+}
+
+/* A small animated firework sits in the shared top bar, away from page data and controls. */
+html[data-theme-preset="diwali"][data-diwali-time="night"] .topbar {
+    position: relative;
+    isolation: isolate;
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .ni-document-topbar {
+    position: relative;
+    isolation: isolate;
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .topbar > * {
+    position: relative;
+    z-index: 1;
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .ni-document-topbar > * {
+    position: relative;
+    z-index: 1;
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .topbar::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    width: 42px;
+    height: 42px;
+    top: 50%;
+    left: 67%;
+    transform: translateY(-50%);
+    opacity: .24;
+    background-image:
+        radial-gradient(circle, #ffd986 0 1.5px, transparent 2.5px),
+        repeating-conic-gradient(from 8deg, #e88952 0deg 1.5deg, transparent 2deg 30deg);
+    -webkit-mask-image: radial-gradient(circle, #000 0 17px, transparent 22px);
+    mask-image: radial-gradient(circle, #000 0 17px, transparent 22px);
+    animation: vertex-diwali-firework 5.6s ease-in-out 1.4s infinite;
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .topbar::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    width: 62px;
+    height: 62px;
+    top: 50%;
+    left: 48%;
+    transform: translateY(-50%);
+    opacity: .42;
+    background-image:
+        radial-gradient(circle, #fff2bd 0 2px, transparent 3px),
+        repeating-conic-gradient(from 0deg, #f4b942 0deg 1.5deg, transparent 2deg 22.5deg);
+    -webkit-mask-image: radial-gradient(circle, #000 0 25px, transparent 31px);
+    mask-image: radial-gradient(circle, #000 0 25px, transparent 31px);
+    animation: vertex-diwali-firework 4.8s ease-in-out infinite;
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .ni-document-topbar::before,
+html[data-theme-preset="diwali"][data-diwali-time="night"] .ni-document-topbar::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    right: 22%;
+    top: 50%;
+    width: 50px;
+    height: 50px;
+    transform: translateY(-50%);
+    opacity: .28;
+    background-image:
+        radial-gradient(circle, #fff2bd 0 2px, transparent 3px),
+        repeating-conic-gradient(from 0deg, #f4b942 0deg 1.5deg, transparent 2deg 22.5deg);
+    -webkit-mask-image: radial-gradient(circle, #000 0 20px, transparent 26px);
+    mask-image: radial-gradient(circle, #000 0 20px, transparent 26px);
+    animation: vertex-diwali-firework 4.8s ease-in-out infinite;
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .ni-document-topbar::before {
+    right: 32%;
+    width: 38px;
+    height: 38px;
+    opacity: .18;
+    animation-delay: 1.4s;
+}
+@keyframes vertex-diwali-firework {
+    0%, 100% { opacity: .16; scale: .78; }
+    34% { opacity: .52; scale: 1; }
+    65% { opacity: .24; scale: 1.12; }
+}
+@media (max-width: 700px) {
+    html[data-theme-preset="diwali"][data-diwali-time="night"] .topbar::before,
+    html[data-theme-preset="diwali"][data-diwali-time="night"] .topbar::after,
+    html[data-theme-preset="diwali"][data-diwali-time="night"] .ni-document-topbar::before,
+    html[data-theme-preset="diwali"][data-diwali-time="night"] .ni-document-topbar::after { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    html[data-theme-preset="diwali"][data-diwali-time="night"] .topbar::before { animation: none; opacity: .2; }
+    html[data-theme-preset="diwali"][data-diwali-time="night"] .topbar::after { animation: none; opacity: .28; }
+    html[data-theme-preset="diwali"][data-diwali-time="night"] .ni-document-topbar::before,
+    html[data-theme-preset="diwali"][data-diwali-time="night"] .ni-document-topbar::after { animation: none; }
+}

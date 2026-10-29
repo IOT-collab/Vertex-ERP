@@ -3,9 +3,19 @@
     const root = document.documentElement;
     const user = root.dataset.themeUser;
     if (!user) return;
-    const key = 'vertex.theme.v1.' + user;
-    const defaults = { mode: 'auto', background: '#f3f6fb', surface: '#ffffff', text: '#172033', accent: '#2563eb' };
-    const modes = ['auto', 'light', 'dark', 'custom'];
+    const key = 'vertex.theme.v2.' + user;
+    const previousKey = 'vertex.theme.v1.' + user;
+    const defaults = { mode: 'diwali', background: '#f3f6fb', surface: '#ffffff', text: '#172033', accent: '#2563eb' };
+    const standardDark = { background: '#07111f', surface: '#0f172a', text: '#f1f5f9', accent: '#60a5fa' };
+    const diwaliDay = {
+        background: '#fff8eb', surface: '#fffdf7', surfaceSoft: '#f8ecd7', text: '#48211d',
+        textMuted: '#76564d', accent: '#8e2c1c', border: '#ead6b5'
+    };
+    const diwaliNight = {
+        background: '#080e24', surface: '#111a38', surfaceSoft: '#18264a', text: '#fff5dc',
+        textMuted: '#c7c0d4', accent: '#f4b942', border: '#39436b'
+    };
+    const modes = ['auto', 'light', 'dark', 'diwali', 'custom'];
     const colors = ['background', 'surface', 'text', 'accent'];
     const normalize = value => {
         const result = { ...defaults };
@@ -14,7 +24,19 @@
         return result;
     };
     let preference;
-    try { preference = normalize(JSON.parse(localStorage.getItem(key))); }
+    try {
+        const saved = localStorage.getItem(key);
+        if (saved !== null) preference = normalize(JSON.parse(saved));
+        else {
+            const previous = localStorage.getItem(previousKey);
+            preference = normalize(JSON.parse(previous));
+            // Existing Auto users asked for the seasonal day/night pair; preserve other saved choices.
+            if (previous !== null && preference.mode === 'auto') preference.mode = 'diwali';
+            if (previous !== null) {
+                try { localStorage.setItem(key, JSON.stringify(preference)); } catch { /* Keep using the migrated value for this page. */ }
+            }
+        }
+    }
     catch { preference = { ...defaults }; }
     const luminance = hex => {
         const rgb = hex.match(/[0-9a-f]{2}/ig).map(x => parseInt(x, 16) / 255)
@@ -24,19 +46,26 @@
     const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + .05) / (Math.min(luminance(a), luminance(b)) + .05);
     const apply = () => {
         const hour = new Date().getHours();
-        const mode = preference.mode === 'auto' ? (hour >= 6 && hour < 18 ? 'light' : 'dark') : preference.mode;
-        const palette = mode === 'custom' ? preference : mode === 'light' ? defaults :
-            { background: '#07111f', surface: '#0f172a', text: '#f1f5f9', accent: '#60a5fa' };
+        const daytime = hour >= 6 && hour < 18;
+        const diwaliTime = daytime ? 'day' : 'night';
+        const mode = preference.mode === 'auto' || preference.mode === 'diwali'
+            ? (daytime ? 'light' : 'dark') : preference.mode;
+        const palette = preference.mode === 'custom' ? preference
+            : preference.mode === 'diwali' ? (daytime ? diwaliDay : diwaliNight)
+                : mode === 'light' ? defaults : standardDark;
+        root.dataset.themePreset = preference.mode === 'diwali' ? 'diwali' : 'standard';
+        if (preference.mode === 'diwali') root.dataset.diwaliTime = diwaliTime;
+        else delete root.dataset.diwaliTime;
         const dark = luminance(palette.surface) < .18;
-        const muted = mode === 'custom' ? palette.text : dark ? '#a8b3cf' : '#52627a';
+        const muted = mode === 'custom' ? palette.text : (palette.textMuted || (dark ? '#a8b3cf' : '#52627a'));
         root.dataset.theme = mode;
         root.dataset.themeTone = dark ? 'dark' : 'light';
         root.style.colorScheme = dark ? 'dark' : 'light';
         const values = {
             'bg': palette.background, 'bg-1': palette.background, 'bg-2': palette.background, 'bg-3': palette.background,
-            'surface': palette.surface, 'surface-soft': mode === 'custom' ? palette.surface : dark ? '#162238' : '#f1f5f9',
+            'surface': palette.surface, 'surface-soft': palette.surfaceSoft || (mode === 'custom' ? palette.surface : dark ? '#162238' : '#f1f5f9'),
             'text': palette.text, 'text-soft': palette.text, 'text-muted': muted, 'primary': palette.accent, 'primary-hover': palette.accent,
-            'border': dark ? '#29374e' : '#dce4ef',
+            'border': palette.border || (dark ? '#29374e' : '#dce4ef'),
             'success': mode === 'custom' ? palette.text : dark ? '#86efac' : '#15803d',
             'danger': mode === 'custom' ? palette.text : dark ? '#fda4af' : '#b91c1c',
             'warning': mode === 'custom' ? palette.text : dark ? '#fcd34d' : '#92400e',
@@ -95,7 +124,7 @@
             } catch { status.textContent = 'Browser storage is unavailable. The preview works, but your theme could not be saved.'; }
         });
         document.getElementById('theme-reset').addEventListener('click', () => {
-            preference = { ...defaults };
+            preference = { ...defaults, mode: 'auto' };
             apply();
             fillForm();
             status.textContent = 'Auto preview — select Save theme to keep it.';
