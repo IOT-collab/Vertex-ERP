@@ -18,16 +18,18 @@ namespace Vertex_ERP.Controllers
         private const long MaximumPhotoSize = 5 * 1024 * 1024;
         private readonly ApplicationDbContext _dbContext;
         private readonly IWebHostEnvironment _environment;
+        private readonly EmployeePhotoStorageService? _photoStorage;
         private readonly ILogger<HrController> _logger;
         private readonly BankAccountProtectionService _bankProtection;
         private readonly CompanyLetterPdfService _companyLetterPdf;
 
-        public HrController(ApplicationDbContext dbContext, IWebHostEnvironment environment, ILogger<HrController> logger, BankAccountProtectionService bankProtection)
+        public HrController(ApplicationDbContext dbContext, IWebHostEnvironment environment, ILogger<HrController> logger, BankAccountProtectionService bankProtection, EmployeePhotoStorageService? photoStorage = null)
         {
             _dbContext = dbContext;
             _environment = environment;
             _logger = logger;
             _bankProtection = bankProtection;
+            _photoStorage = photoStorage;
             _companyLetterPdf = new CompanyLetterPdfService(environment.ContentRootPath);
         }
 
@@ -1268,25 +1270,25 @@ namespace Vertex_ERP.Controllers
             }
             catch (DbUpdateConcurrencyException exception)
             {
-                DeletePhotoIfPresent(photoPath);
+                _photoStorage!.Delete(photoPath);
                 _logger.LogWarning(exception, "Biometric profile was completed or changed by another request.");
                 ModelState.AddModelError(string.Empty, "This profile changed while you were saving. Reload and use Edit Profile if it has already been completed.");
             }
             catch (DbUpdateException exception)
             {
-                DeletePhotoIfPresent(photoPath);
+                _photoStorage!.Delete(photoPath);
                 _logger.LogError(exception, "Database error while adding employee {EmployeeCode}.", employeeCode);
                 ModelState.AddModelError(string.Empty, "Unable to add employee. Please try again.");
             }
             catch (IOException exception)
             {
-                DeletePhotoIfPresent(photoPath);
+                _photoStorage!.Delete(photoPath);
                 _logger.LogError(exception, "File error while adding employee {EmployeeCode}.", employeeCode);
                 ModelState.AddModelError(string.Empty, "Unable to save the employee photo. Please try again.");
             }
             catch (Exception exception)
             {
-                DeletePhotoIfPresent(photoPath);
+                _photoStorage!.Delete(photoPath);
                 _logger.LogError(exception, "Unexpected error while adding employee {EmployeeCode}.", employeeCode);
                 ModelState.AddModelError(string.Empty, "Unable to add employee. Please try again.");
             }
@@ -1386,31 +1388,8 @@ namespace Vertex_ERP.Controllers
             return null;
         }
 
-        private async Task<string> SavePhotoAsync(IFormFile photo, string extension)
-        {
-            var fileName = $"{Guid.NewGuid():N}{extension}";
-            var uploadDirectory = Path.Combine(_environment.WebRootPath, "uploads", "employees");
-            Directory.CreateDirectory(uploadDirectory);
-            var physicalPath = Path.Combine(uploadDirectory, fileName);
-            try
-            {
-                await using var target = new FileStream(physicalPath, FileMode.CreateNew);
-                await photo.CopyToAsync(target);
-                return $"/uploads/employees/{fileName}";
-            }
-            catch
-            {
-                if (System.IO.File.Exists(physicalPath)) System.IO.File.Delete(physicalPath);
-                throw;
-            }
-        }
-
-        private void DeletePhotoIfPresent(string? relativePath)
-        {
-            if (string.IsNullOrWhiteSpace(relativePath)) return;
-            var physicalPath = Path.Combine(_environment.WebRootPath, relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-            if (System.IO.File.Exists(physicalPath)) System.IO.File.Delete(physicalPath);
-        }
+        private Task<string> SavePhotoAsync(IFormFile photo, string extension)
+            => _photoStorage!.SaveAsync(photo, extension, HttpContext.RequestAborted);
 
         private static string? Clean(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 

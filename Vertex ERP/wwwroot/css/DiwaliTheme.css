@@ -149,22 +149,228 @@ html[data-theme-preset="diwali"][data-diwali-time="night"] .ni-document-topbar::
     html[data-theme-preset="diwali"][data-diwali-time="night"] .ni-document-topbar::after { animation: none; }
 }
 
+/* Application-wide festive skin: these shared selectors cover Admin, HR, Manager,
+   Employee and the document-style screens that use either shared layout. */
+html[data-theme-preset="diwali"] :is(body.erp-shell .page-content, body.erp-document-shell main) {
+    min-width: 0;
+    background-image:
+        radial-gradient(ellipse at 1% 100%, color-mix(in srgb, #e88b2b 10%, transparent), transparent 25rem),
+        radial-gradient(ellipse at 99% 0%, color-mix(in srgb, #f3bd4b 9%, transparent), transparent 23rem) !important;
+    background-attachment: fixed;
+}
+html[data-theme-preset="diwali"] :is(body.erp-shell .page-content, body.erp-document-shell main) > * {
+    min-width: 0;
+}
+html[data-theme-preset="diwali"] :is(
+    body.erp-shell .page-content .card,
+    body.erp-shell .page-content .panel,
+    body.erp-shell .page-content .form-card,
+    body.erp-shell .page-content .table-card,
+    body.erp-shell .page-content .summary-card,
+    body.erp-shell .page-content .stat-card,
+    body.erp-shell .page-content .employee-panel,
+    body.erp-shell .page-content .profile-field,
+    body.erp-shell .page-content .notification-item,
+    body.erp-shell .page-content .leave-balance,
+    body.erp-shell .page-content .modal-content,
+    body.erp-shell .page-content .dropdown-menu,
+    body.erp-shell .page-content .accordion-item,
+    body.erp-shell .page-content .list-group-item,
+    body.erp-document-shell main .card,
+    body.erp-document-shell main .panel,
+    body.erp-document-shell main .form-card,
+    body.erp-document-shell main .table-card,
+    body.erp-document-shell main .modal-content,
+    body.erp-document-shell main .dropdown-menu,
+    body.erp-document-shell main .accordion-item,
+    body.erp-document-shell main .list-group-item
+) {
+    border-color: color-mix(in srgb, #d6a34c 30%, var(--erp-border)) !important;
+    box-shadow: var(--erp-shadow-soft, 0 6px 22px rgba(65, 35, 24, .08));
+}
+html[data-theme-preset="diwali"] :is(body.erp-shell .page-content, body.erp-document-shell main) :is(
+    table thead th,
+    .table thead th,
+    .list-group-item,
+    .accordion-button,
+    .modal-header,
+    .modal-footer
+) {
+    border-color: var(--erp-border) !important;
+}
+html[data-theme-preset="diwali"][data-diwali-time="day"] :is(
+    body.erp-shell .page-content .card,
+    body.erp-shell .page-content .panel,
+    body.erp-shell .page-content .form-card,
+    body.erp-shell .page-content .table-card,
+    body.erp-shell .page-content .summary-card,
+    body.erp-shell .page-content .stat-card,
+    body.erp-shell .page-content .employee-panel,
+    body.erp-shell .page-content .profile-field,
+    body.erp-shell .page-content .notification-item,
+    body.erp-shell .page-content .leave-balance,
+    body.erp-shell .page-content .modal-content,
+    body.erp-shell .page-content .dropdown-menu,
+    body.erp-shell .page-content .accordion-item,
+    body.erp-shell .page-content .list-group-item,
+    body.erp-document-shell main .card,
+    body.erp-document-shell main .panel,
+    body.erp-document-shell main .form-card,
+    body.erp-document-shell main .table-card,
+    body.erp-document-shell main .modal-content,
+    body.erp-document-shell main .dropdown-menu,
+    body.erp-document-shell main .accordion-item,
+    body.erp-document-shell main .list-group-item
+) {
+    background-color: color-mix(in srgb, var(--erp-surface) 96%, #fff0cf) !important;
+    color: var(--erp-text) !important;
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] :is(
+    body.erp-shell .page-content .card,
+    body.erp-shell .page-content .panel,
+    body.erp-shell .page-content .form-card,
+    body.erp-shell .page-content .table-card,
+    body.erp-shell .page-content .summary-card,
+    body.erp-shell .page-content .stat-card,
+    body.erp-shell .page-content .employee-panel,
+    body.erp-shell .page-content .profile-field,
+    body.erp-shell .page-content .notification-item,
+    body.erp-shell .page-content .leave-balance,
+    body.erp-shell .page-content .modal-content,
+    body.erp-shell .page-content .dropdown-menu,
+    body.erp-shell .page-content .accordion-item,
+    body.erp-shell .page-content .list-group-item,
+    body.erp-document-shell main .card,
+    body.erp-document-shell main .panel,
+    body.erp-document-shell main .form-card,
+    body.erp-document-shell main .table-card,
+    body.erp-document-shell main .modal-content,
+    body.erp-document-shell main .dropdown-menu,
+    body.erp-document-shell main .accordion-item,
+    body.erp-document-shell main .list-group-item
+) {
+    background-color: color-mix(in srgb, var(--erp-surface) 96%, #26345c) !important;
+    color: var(--erp-text) !important;
+}
+html[data-theme-preset="diwali"] :is(body.erp-shell .page-content, body.erp-document-shell main) :is(input, select, textarea, .form-control, .form-select) {
+    border-color: color-mix(in srgb, #d6a34c 35%, var(--erp-border)) !important;
+    border-radius: 8px;
+}
+html[data-theme-preset="diwali"] :is(body.erp-shell .page-content, body.erp-document-shell main) :is(input, select, textarea, .form-control, .form-select):focus {
+    border-color: var(--erp-primary) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--erp-primary) 18%, transparent) !important;
+}
+
+/* Employee dashboard gets the same festive welcome treatment as Admin and HR. */
+html[data-theme-preset="diwali"] .employee-diwali-banner {
+    --diwali-gold: #e8a632;
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(200px, 1fr);
+    align-items: center;
+    gap: 12px;
+    min-height: 190px;
+    margin: 0 0 18px;
+    padding: 20px 24px;
+    overflow: hidden;
+    border: 1px solid #e8ca8c;
+    border-radius: 16px;
+    background: linear-gradient(112deg, #fff0ca 0%, #fffaf0 52%, #f4dfc5 100%);
+    box-shadow: 0 10px 26px rgba(105, 54, 20, .09);
+}
+html[data-theme-preset="diwali"] .employee-diwali-banner::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: 360px;
+    height: 360px;
+    right: 14%;
+    top: -285px;
+    border: 1px solid rgba(188, 125, 43, .3);
+    border-radius: 42%;
+    transform: rotate(28deg);
+    box-shadow: 0 0 0 12px rgba(245, 192, 99, .08), 0 0 0 24px rgba(245, 192, 99, .07);
+}
+html[data-theme-preset="diwali"] .employee-diwali-copy { position: relative; z-index: 2; min-width: 0; }
+html[data-theme-preset="diwali"] .employee-diwali-eyebrow {
+    display: inline-block;
+    margin-bottom: 11px;
+    padding: 5px 9px;
+    border: 1px solid rgba(164, 76, 33, .2);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .52);
+    color: #92331e;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+html[data-theme-preset="diwali"] .employee-diwali-copy > p { margin: 4px 0; color: #714a39; font-size: 12px; }
+html[data-theme-preset="diwali"] .employee-diwali-copy h1 { margin: 3px 0 7px; color: #62271e; font-size: clamp(21px, 2.4vw, 32px); line-height: 1.18; overflow-wrap: anywhere; }
+html[data-theme-preset="diwali"] .employee-diwali-copy h1 strong { color: #9b351d; }
+html[data-theme-preset="diwali"] .employee-diwali-copy blockquote { margin: 11px 0 0; color: #74452e; font-size: 11px; font-style: italic; }
+html[data-theme-preset="diwali"] .employee-diwali-copy blockquote span { display: block; width: 42px; height: 2px; margin-top: 7px; background: #bd4c24; }
+html[data-theme-preset="diwali"] .employee-diwali-art { position: relative; z-index: 1; justify-self: center; align-self: end; width: 100%; height: 175px; max-height: 100%; object-fit: contain; object-position: center bottom; margin-bottom: -12px; filter: drop-shadow(0 8px 11px rgba(113, 48, 24, .18)); animation: employee-diwali-arrive .85s ease-out both; }
+html[data-theme-preset="diwali"] .employee-diwali-vfx { position: absolute; z-index: 2; inset: 0; overflow: hidden; pointer-events: none; }
+html[data-theme-preset="diwali"] .employee-diwali-vfx::before,
+html[data-theme-preset="diwali"] .employee-diwali-vfx::after { content: ""; position: absolute; top: 0; width: 15px; height: 58%; background-image: radial-gradient(ellipse at center, #ffe28a 0 36%, #df842d 44% 68%, transparent 73%), linear-gradient(#c68c37, #c68c37); background-size: 14px 15px, 2px 100%; background-position: center top, center top; background-repeat: repeat-y, no-repeat; }
+html[data-theme-preset="diwali"] .employee-diwali-vfx::before { left: 1%; }
+html[data-theme-preset="diwali"] .employee-diwali-vfx::after { right: 1%; }
+html[data-theme-preset="diwali"] .employee-diwali-burst { position: absolute; width: 54px; height: 54px; border-radius: 50%; background: radial-gradient(circle, #fff5c9 0 2px, transparent 3px), repeating-conic-gradient(#f0ae39 0deg 2deg, transparent 2deg 17deg); -webkit-mask: radial-gradient(circle, transparent 0 9%, #000 15% 60%, transparent 70%); mask: radial-gradient(circle, transparent 0 9%, #000 15% 60%, transparent 70%); animation: employee-diwali-firework 4s ease-in-out infinite; }
+html[data-theme-preset="diwali"] .employee-diwali-burst.burst-one { top: 12%; left: 49%; animation-delay: -1.4s; }
+html[data-theme-preset="diwali"] .employee-diwali-burst.burst-two { top: 8%; right: 5%; width: 42px; height: 42px; animation-delay: -2.7s; }
+html[data-theme-preset="diwali"] .employee-diwali-petal { position: absolute; top: -12px; width: 8px; height: 13px; border-radius: 90% 10% 80% 10%; background: linear-gradient(145deg, #ffdc78, #e58a22); animation: employee-diwali-petal-fall 7s linear infinite; }
+html[data-theme-preset="diwali"] .employee-diwali-petal.petal-one { left: 39%; animation-delay: -2.2s; }
+html[data-theme-preset="diwali"] .employee-diwali-petal.petal-two { left: 69%; animation-delay: -4.4s; }
+html[data-theme-preset="diwali"] .employee-diwali-petal.petal-three { left: 88%; animation-delay: -5.5s; }
+html[data-theme-preset="diwali"] .employee-diwali-flower { position: absolute; bottom: 7%; width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle, #9b461c 0 15%, transparent 18%), radial-gradient(ellipse at 50% 10%, #ffd363 0 22%, transparent 25%), radial-gradient(ellipse at 90% 45%, #f4a42d 0 22%, transparent 25%), radial-gradient(ellipse at 50% 90%, #ffd363 0 22%, transparent 25%), radial-gradient(ellipse at 10% 45%, #f4a42d 0 22%, transparent 25%); }
+html[data-theme-preset="diwali"] .employee-diwali-flower.flower-one { left: 5%; }
+html[data-theme-preset="diwali"] .employee-diwali-flower.flower-two { right: 5%; }
+html[data-theme-preset="diwali"][data-diwali-time="night"] .employee-diwali-banner { border-color: rgba(255, 204, 102, .36); background: radial-gradient(ellipse at 71% 42%, rgba(107, 65, 157, .42), transparent 42%), linear-gradient(112deg, #111a38, #182044 54%, #28204b); box-shadow: 0 12px 30px rgba(7, 12, 34, .3); }
+html[data-theme-preset="diwali"][data-diwali-time="night"] .employee-diwali-eyebrow { border-color: rgba(255, 212, 119, .35); background: rgba(255, 255, 255, .07); color: #ffd975; }
+html[data-theme-preset="diwali"][data-diwali-time="night"] .employee-diwali-copy > p,
+html[data-theme-preset="diwali"][data-diwali-time="night"] .employee-diwali-copy blockquote { color: #ddd3e7; }
+html[data-theme-preset="diwali"][data-diwali-time="night"] .employee-diwali-copy h1,
+html[data-theme-preset="diwali"][data-diwali-time="night"] .employee-diwali-copy h1 strong { color: #fff0c4; }
+html[data-theme-preset="diwali"][data-diwali-time="night"] .employee-diwali-copy blockquote span { background: #f5bd4f; }
+html[data-theme-preset="diwali"][data-diwali-time="night"] .employee-diwali-burst { background: radial-gradient(circle, #fff9d9 0 2px, transparent 3px), repeating-conic-gradient(#ffe29a 0deg 2deg, transparent 2deg 17deg); }
+@keyframes employee-diwali-firework { 0%, 100% { opacity: .15; transform: scale(.55) rotate(0); } 25% { opacity: .78; } 58% { opacity: .28; transform: scale(1.08) rotate(18deg); } }
+@keyframes employee-diwali-petal-fall { 0% { opacity: 0; transform: translateY(-8px) rotate(0); } 15% { opacity: .8; } 82% { opacity: .6; } 100% { opacity: 0; transform: translate(22px, 185px) rotate(260deg); } }
+@keyframes employee-diwali-arrive { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media (max-width: 760px) {
+    html[data-theme-preset="diwali"] .employee-diwali-banner { grid-template-columns: minmax(0, 1fr) 125px; min-height: 180px; padding: 18px; }
+    html[data-theme-preset="diwali"] .employee-diwali-art { height: 135px; }
+    html[data-theme-preset="diwali"] .employee-diwali-burst.burst-one { left: 56%; }
+}
+@media (max-width: 480px) {
+    html[data-theme-preset="diwali"] .employee-diwali-banner { min-height: 205px; grid-template-columns: minmax(0, 1fr); padding: 17px; }
+    html[data-theme-preset="diwali"] .employee-diwali-copy { max-width: 72%; }
+    html[data-theme-preset="diwali"] .employee-diwali-art { position: absolute; right: 0; bottom: 0; width: 43%; height: 125px; margin: 0; opacity: .96; }
+    html[data-theme-preset="diwali"] .employee-diwali-copy h1 { font-size: 21px; }
+    html[data-theme-preset="diwali"] .employee-diwali-burst.burst-one { left: 45%; top: 7%; width: 38px; height: 38px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    html[data-theme-preset="diwali"] .employee-diwali-art { animation: none; }
+    html[data-theme-preset="diwali"] .employee-diwali-burst,
+    html[data-theme-preset="diwali"] .employee-diwali-petal { animation: none; opacity: .45; }
+}
+
 /* Bring the dashboard header artwork and festive frame to Admin as well as Manager. */
 html[data-theme-preset="diwali"][data-diwali-time="day"] .sidebar {
     background-image:
-        radial-gradient(circle at 50% 79%, rgba(255, 220, 130, .24) 0 2px, transparent 3px),
-        repeating-conic-gradient(from 0deg at 50% 79%, rgba(255, 204, 102, .28) 0deg 1deg, transparent 1deg 13deg),
-        radial-gradient(ellipse at 8% 7%, rgba(255, 195, 76, .25), transparent 24px),
-        radial-gradient(ellipse at 92% 7%, rgba(255, 195, 76, .25), transparent 24px),
+        url('/images/diwali/sidebar-ornament.svg'),
         linear-gradient(165deg, #70252a, #4e1821) !important;
+    background-position: center, center !important;
+    background-size: 100% 100%, 100% 100% !important;
+    background-repeat: no-repeat !important;
 }
 html[data-theme-preset="diwali"][data-diwali-time="night"] .sidebar {
     background-image:
-        radial-gradient(circle at 50% 79%, rgba(255, 214, 125, .22) 0 2px, transparent 3px),
-        repeating-conic-gradient(from 0deg at 50% 79%, rgba(255, 203, 104, .25) 0deg 1deg, transparent 1deg 13deg),
-        radial-gradient(ellipse at 10% 80%, rgba(255, 130, 57, .18), transparent 45px),
-        radial-gradient(ellipse at 90% 80%, rgba(255, 130, 57, .18), transparent 45px),
+        url('/images/diwali/sidebar-ornament.svg'),
         linear-gradient(130deg, #101a38, #080e24) !important;
+    background-position: center, center !important;
+    background-size: 100% 100%, 100% 100% !important;
+    background-repeat: no-repeat !important;
 }
 
 html[data-theme-preset="diwali"] .dashboard.dashboard-studio .header-text {
@@ -173,6 +379,18 @@ html[data-theme-preset="diwali"] .dashboard.dashboard-studio .header-text {
     background: linear-gradient(110deg, color-mix(in srgb, var(--erp-primary) 12%, var(--erp-surface)), var(--erp-surface) 72%) !important;
 }
 html[data-theme-preset="diwali"] .dashboard.dashboard-studio .header-text::after { display: none !important; }
+html[data-theme-preset="diwali"] .dashboard.dashboard-studio .header-text > .dashboard-diwali-copy {
+    display: block;
+    position: relative;
+    z-index: 2;
+    max-width: 52%;
+    margin-top: 9px;
+    color: var(--erp-primary);
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: .15px;
+}
+html[data-theme-preset="diwali"] .dashboard-diwali-copy i { margin-right: 5px; color: #d28a1e; }
 html[data-theme-preset="diwali"] .dashboard.dashboard-studio .header-text > :not(.dashboard-diwali-art) {
     position: relative;
     z-index: 2;
@@ -188,13 +406,40 @@ html[data-theme-preset="diwali"] .dashboard-diwali-art {
 html[data-theme-preset="diwali"] .dashboard-diwali-art img {
     position: absolute;
     right: 0;
-    bottom: -22%;
+    bottom: 0;
     width: 100%;
-    height: 155%;
+    height: 100%;
     object-fit: contain;
+    object-position: center bottom;
     filter: drop-shadow(0 7px 12px rgba(114, 55, 25, .2));
     animation: vertex-diwali-arrive .9s ease-out both;
 }
+html[data-theme-preset="diwali"] .dashboard-diwali-garland {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    width: 14px;
+    height: 56%;
+    opacity: .95;
+    background-image: radial-gradient(ellipse at center, #ffdc76 0 35%, #e88924 42% 67%, transparent 72%), linear-gradient(#c58a2a, #c58a2a);
+    background-size: 13px 15px, 2px 100%;
+    background-position: center top, center top;
+    background-repeat: repeat-y, no-repeat;
+}
+html[data-theme-preset="diwali"] .dashboard-diwali-garland-left { left: 1%; }
+html[data-theme-preset="diwali"] .dashboard-diwali-garland-right { right: 1%; }
+html[data-theme-preset="diwali"] .dashboard-diwali-flower {
+    position: absolute;
+    z-index: 3;
+    bottom: 5%;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, #8b3b17 0 14%, transparent 16%), radial-gradient(ellipse at 50% 11%, #ffd369 0 21%, transparent 24%), radial-gradient(ellipse at 89% 39%, #ffb32f 0 21%, transparent 24%), radial-gradient(ellipse at 74% 84%, #ffc14c 0 21%, transparent 24%), radial-gradient(ellipse at 26% 84%, #ffb32f 0 21%, transparent 24%), radial-gradient(ellipse at 11% 39%, #ffd369 0 21%, transparent 24%);
+    filter: drop-shadow(0 2px 3px rgba(85, 42, 12, .22));
+}
+html[data-theme-preset="diwali"] .dashboard-diwali-flower-left { left: 5%; }
+html[data-theme-preset="diwali"] .dashboard-diwali-flower-right { right: 5%; }
 html[data-theme-preset="diwali"] .dashboard-diwali-burst {
     position: absolute;
     width: 54px;
@@ -205,8 +450,8 @@ html[data-theme-preset="diwali"] .dashboard-diwali-burst {
     mask-image: radial-gradient(circle, transparent 0 8%, #000 14% 59%, transparent 68%);
     animation: vertex-diwali-firework 4.8s ease-in-out infinite;
 }
-html[data-theme-preset="diwali"] .dashboard-diwali-burst-one { right: 74%; top: 8%; animation-delay: .8s; }
-html[data-theme-preset="diwali"] .dashboard-diwali-burst-two { right: 4%; top: 3%; width: 42px; height: 42px; animation-delay: 2.4s; }
+html[data-theme-preset="diwali"] .dashboard-diwali-burst-one { right: 74%; top: 8%; animation-delay: -1.7s; }
+html[data-theme-preset="diwali"] .dashboard-diwali-burst-two { right: 4%; top: 3%; width: 42px; height: 42px; animation-delay: -3.2s; }
 html[data-theme-preset="diwali"] .dashboard-diwali-petal {
     position: absolute;
     top: -12px;
@@ -217,9 +462,9 @@ html[data-theme-preset="diwali"] .dashboard-diwali-petal {
     opacity: 0;
     animation: vertex-diwali-petal 7s linear infinite;
 }
-html[data-theme-preset="diwali"] .dashboard-diwali-petal-one { left: 14%; animation-delay: .5s; }
-html[data-theme-preset="diwali"] .dashboard-diwali-petal-two { left: 47%; animation-delay: 2.8s; }
-html[data-theme-preset="diwali"] .dashboard-diwali-petal-three { left: 85%; animation-delay: 4.3s; }
+html[data-theme-preset="diwali"] .dashboard-diwali-petal-one { left: 14%; animation-delay: -2.5s; }
+html[data-theme-preset="diwali"] .dashboard-diwali-petal-two { left: 47%; animation-delay: -4.1s; }
+html[data-theme-preset="diwali"] .dashboard-diwali-petal-three { left: 85%; animation-delay: -5.8s; }
 
 html[data-theme-preset="diwali"][data-diwali-time="night"] .dashboard.dashboard-studio .header-text {
     border-color: rgba(255, 205, 105, .4) !important;
@@ -240,7 +485,8 @@ html[data-theme-preset="diwali"][data-diwali-time="night"] .dashboard-diwali-pet
 @keyframes vertex-diwali-petal { 0% { opacity: 0; transform: translateY(-8px) rotate(0); } 14% { opacity: .8; } 84% { opacity: .6; } 100% { opacity: 0; transform: translate(22px, 130px) rotate(260deg); } }
 @media (max-width: 700px) {
     html[data-theme-preset="diwali"] .dashboard-diwali-art { right: -8%; width: 48%; opacity: .62; }
-    html[data-theme-preset="diwali"] .dashboard-diwali-art img { height: 135%; bottom: -18%; }
+    html[data-theme-preset="diwali"] .dashboard-diwali-art img { height: 100%; bottom: 0; }
+    html[data-theme-preset="diwali"] .dashboard.dashboard-studio .header-text > .dashboard-diwali-copy { max-width: 60%; font-size: 10px; }
 }
 @media (max-width: 480px) {
     html[data-theme-preset="diwali"] .dashboard-diwali-art { right: -18%; width: 52%; opacity: .3; }

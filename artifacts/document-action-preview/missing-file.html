@@ -8,9 +8,9 @@
           content="width=device-width, initial-scale=1.0" />
 
     <title>Update Employee Document - Vertex_ERP</title>
-    <script src="/js/theme.js?v=JsFUoRbzJn9KqZYtXXlz_zgyMbiK4eH1axphmpmIkAA"></script>
-    <script src="/js/locales/hi.js?v=hFJ_RNJGdkgnPk9ITiRnUgQBJlMSXuqSUt6KXt93j_Q"></script>
-    <script src="/js/language.js?v=Isl05HfqnXp40mGSnzRLGCvTWAXm4zkcRwiT43ZML-8"></script>
+    <script src="/js/theme.js?v=zBWuzS3PQK1L0CMPox-lfpHtFAkNa_qNfYhAxA9BPNE"></script>
+    <script src="/js/locales/hi.js?v=zoOYEXXSQS8j8YDGZ2DD4a3tCElk3BnjLkKdjTJz5LY"></script>
+    <script src="/js/language.js?v=2eYXjqQNIWvP4qhGo5_mcgcVyV_14nIIX0pMPrXwvHo"></script>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -34,8 +34,9 @@
     <link rel="stylesheet" href="/css/Style.css?v=fbAK5ytKllCMCjrxL-dKhIFSSm8iPfd0fjHF9eJZZKQ" />
     <link href="/css/hr-modules.css?v=eBF2BBH9XWbB6bStvHdxoVTBuAMjc5II2Tme8JMCKO8" rel="stylesheet" />
     <link href="/css/theme.css?v=UqGZcSDh8Y1acQoWx9eApJDHTxV76rVFCFgSHBN6NFM" rel="stylesheet" />
+    <link href="/css/DiwaliTheme.css?v=jidKAdCryzB2cjX1EwD85xiS7hLqVSUwju_Wi-4DGrI" rel="stylesheet" />
     <link href="/css/ResponsiveEnhancements.css?v=2RztQXGMRnIdoNkyjs46gz9km8jkvuDQEqmubWQAzD4" rel="stylesheet" />
-    <link href="/css/ResponsiveGuard.css?v=WcKT9WrzRXJcg1vDmRbqUUYc2gVwzs87uTYkyZxPsKE" rel="stylesheet" />
+    <link href="/css/ResponsiveGuard.css?v=kwXrT23a33HPbTzE4IgA6PUK32Jw6Awp-4JJI8VSORs" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="/css/notification-inbox.css?v=AuXXfkaAxGiYXPKySVzJsieZf_N5mw0Ofv9Sy4grwzw" rel="stylesheet" />
 </head>
@@ -72,7 +73,7 @@
  <section class="employee-search"><h2><i class="fa-solid fa-user-check"></i> 1. Select employee</h2><div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input id="employeeSearch" type="search" placeholder="Search by employee name, ID, department or designation" autocomplete="off" /></div><div class="employee-results" id="employeeResults"><label class="employee-option" data-search="doc-117 document employee accounts executive"><input type="radio" value="117" checked="checked" data-val="true" data-val-required="The EmployeeId field is required." id="EmployeeId" name="EmployeeId" /><span class="employee-avatar" data-no-localize>D</span><span><strong data-no-localize>Document Employee</strong><small data-no-localize>DOC-117 · Executive · Accounts</small></span></label></div><span class="field-validation-valid" data-valmsg-for="EmployeeId" data-valmsg-replace="true"></span><div id="selectedEmployee" class="selected-employee"></div></section>
  <section class="upload-form"><h2><i class="fa-solid fa-cloud-arrow-up"></i> 2. Document details</h2><div class="upload-grid"><label>Document type<select data-val="true" data-val-length="The field DocumentType must be a string with a maximum length of 80." data-val-length-max="80" data-val-required="The DocumentType field is required." id="DocumentType" name="DocumentType"><option value="">Choose type</option><option selected="selected">Aadhaar Card</option><option>PAN Card</option><option>10th Certificate</option><option>12th Certificate</option><option>Graduation</option><option>Post Graduation</option><option>Employee Photo</option><option>Previous Company Documents</option><option>UAN Passbook</option><option>Other</option></select><span class="field-validation-valid" data-valmsg-for="DocumentType" data-valmsg-replace="true"></span></label><label>Document title<input placeholder="e.g. Aadhaar Card - Front and Back" type="text" data-val="true" data-val-length="The field DocumentName must be a string with a maximum length of 160." data-val-length-max="160" data-val-required="The DocumentName field is required." id="DocumentName" maxlength="160" name="DocumentName" value="Updated Aadhaar" /><span class="field-validation-valid" data-valmsg-for="DocumentName" data-valmsg-replace="true"></span></label><label class="wide">Replacement file (required) <span class="upload-hint">Current file: aadhaar.pdf. Upload a replacement to restore access.</span><input class="file-drop" required="required" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" type="file" id="File" name="File" /><span class="upload-hint">PDF, JPG, PNG, DOC or DOCX · Maximum 3 MB</span><span class="field-validation-valid" data-valmsg-for="File" data-valmsg-replace="true"></span></label><label class="wide">Notes (optional)<textarea rows="3" placeholder="Verification notes, document number reference, etc." data-val="true" data-val-length="The field Notes must be a string with a maximum length of 500." data-val-length-max="500" id="Notes" maxlength="500" name="Notes">
 </textarea><span class="field-validation-valid" data-valmsg-for="Notes" data-valmsg-replace="true"></span></label></div><button type="submit" class="upload-submit"><i class="fa-solid fa-shield-halved"></i> Save Document Changes</button></section>
-<input name="__RequestVerificationToken" type="hidden" value="CfDJ8AAAAAAAAAAAAAAAAAAAAABnZYlJvsnKRxbxEkwd0sHyZZbBY__xySbIZJbx-EEa5Nqi2k88q-YBcXAYB3iX68y6xXb7RFqVcppy0EXVLshmu9woj7omUAWRBbMCWyrXml2WqLpYyOfVyk4WSzUXDU4" /></form></main>
+<input name="__RequestVerificationToken" type="hidden" value="CfDJ8AAAAAAAAAAAAAAAAAAAAACznFDyZ9UqR5MsEzmFX8MSrlGDgl67oWhr26m_l5rg72qUMM42oKAzHOSFm6nyv2i2jHg64wG0qUIuVJnvtUmjAKZlarr8q7hYT0qcTBNKgYmmPvtDGfc5SrsCOjtoDhs" /></form></main>
 <script>
 (() => {
     const fileInput = document.getElementById('File');
@@ -111,7 +112,7 @@
     <script src="/js/site.js?v=hRQyftXiu1lLX2P9Ly9xa4gHJgLeR1uGN5qegUobtGo"></script>
 
     <!-- Input Rules JS -->
-    <script src="/js/input-rules.js?v=JQN9Kjzy5AWiVxFC2yCCbkym3en2Fig1DQEPJ0ejERw"></script>
+    <script src="/js/input-rules.js?v=NFUbJ7ZjVXYwzWLHDpFFFuDZK9uA6ykejikJWaxUynQ"></script>
 
     <!-- Page Specific Scripts -->
     

@@ -17,6 +17,12 @@ function run(hour, saved, user = '17', brokenStorage = false, legacySaved = null
         document: { documentElement: root, addEventListener: () => {}, getElementById: () => null },
         window: { addEventListener: (name, handler) => events[name] = handler },
         Date: class { getHours() { return hour; } },
+        Intl: { DateTimeFormat: class {
+            constructor(_locale, options) {
+                assert.equal(options.timeZone, 'Asia/Kolkata', 'Diwali schedule uses fixed India time');
+            }
+            format() { return String(hour).padStart(2, '0'); }
+        } },
         localStorage: { getItem: key => {
             if (brokenStorage) throw Error();
             if (key === 'vertex.theme.v3.' + user) return saved;
@@ -27,9 +33,11 @@ function run(hour, saved, user = '17', brokenStorage = false, legacySaved = null
     });
     return { root, properties, events, tick, setHour: value => hour = value };
 }
-for (const [hour, expected] of [[0, 'dark'], [5, 'dark'], [6, 'light'], [17, 'light'], [18, 'dark'], [23, 'dark']]) {
+for (const [hour, expected] of [[0, 'dark'], [5, 'dark'], [6, 'light'], [16, 'light'], [17, 'dark'], [18, 'dark'], [23, 'dark']]) {
     assert.equal(run(hour, null).root.dataset.theme, expected);
 }
+assert.equal(run(16, null).root.dataset.diwaliTime, 'day', 'Marigold lasts until 4:59 PM IST');
+assert.equal(run(17, null).root.dataset.diwaliTime, 'night', 'Fireworks begin at 5:00 PM IST');
 assert.equal(run(12, '{"mode":"dark"}').root.dataset.theme, 'dark');
 assert.equal(run(23, '{"mode":"light"}').root.dataset.theme, 'light');
 const light = run(12, '{"mode":"light"}');

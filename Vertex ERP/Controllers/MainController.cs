@@ -23,9 +23,10 @@ namespace VertexERP.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly IShipmentTrackingService _shipmentTrackingService;
         private readonly IPasswordResetSmsService _passwordResetSmsService;
+        private readonly ILogger<MainController>? _logger;
         private static readonly ConcurrentDictionary<string, (DateTime StartedUtc, int Count)> RecoveryRequestWindows = new();
 
-        public MainController(ApplicationDbContext dbContext, IAttendanceProcessingService attendanceProcessingService, BankAccountProtectionService bankProtection, IWebHostEnvironment environment, IShipmentTrackingService shipmentTrackingService, IPasswordResetSmsService passwordResetSmsService)
+        public MainController(ApplicationDbContext dbContext, IAttendanceProcessingService attendanceProcessingService, BankAccountProtectionService bankProtection, IWebHostEnvironment environment, IShipmentTrackingService shipmentTrackingService, IPasswordResetSmsService passwordResetSmsService, ILogger<MainController>? logger = null)
         {
             _dbContext = dbContext;
             _attendanceProcessingService = attendanceProcessingService;
@@ -33,6 +34,7 @@ namespace VertexERP.Controllers
             _environment = environment;
             _shipmentTrackingService = shipmentTrackingService;
             _passwordResetSmsService = passwordResetSmsService;
+            _logger = logger;
         }
 
         [AllowAnonymous]
@@ -1277,6 +1279,15 @@ namespace VertexERP.Controllers
         [Authorize(Roles = "Admin,HR")]
         public async Task<IActionResult> ExportAttendance(string? searchQuery, string? department, DateOnly? filterDate, string? status, string exportPeriod = "day", string? exportMonth = null, CancellationToken cancellationToken = default)
         {
+            var httpContext = ControllerContext?.HttpContext;
+            var traceId = httpContext?.TraceIdentifier ?? "no-http-context";
+            if (httpContext is not null) httpContext.Response.Headers["X-Attendance-Export-Id"] = traceId;
+            _logger?.LogInformation("Attendance export started. TraceId={TraceId}, Period={Period}, Month={Month}", traceId, exportPeriod, exportMonth);
+            httpContext?.Response.OnCompleted(() =>
+            {
+                _logger?.LogInformation("Attendance export response completed. TraceId={TraceId}, StatusCode={StatusCode}, ContentLength={ContentLength}", traceId, httpContext.Response.StatusCode, httpContext.Response.ContentLength);
+                return Task.CompletedTask;
+            });
             var date = filterDate ?? DateOnly.FromDateTime(FieldAttendanceClock.Now);
             var isMonthlyExport = string.Equals(exportPeriod, "month", StringComparison.OrdinalIgnoreCase);
             var dates = new List<DateOnly>();
@@ -1307,7 +1318,11 @@ namespace VertexERP.Controllers
                 Work = TimeSpan.FromTicks(group.Sum(item => item.WorkingHours.Ticks))
             });
             if (isMonthlyExport)
-                return BuildMonthlyAttendanceWorkbook(exportRecords, dates, monthlySummary.ToDictionary(x => x.Key, x => (x.Value.Present, x.Value.Absent, x.Value.Late, x.Value.Work)));
+            {
+                var workbook = BuildMonthlyAttendanceWorkbook(exportRecords, dates, monthlySummary.ToDictionary(x => x.Key, x => (x.Value.Present, x.Value.Absent, x.Value.Late, x.Value.Work)));
+                _logger?.LogInformation("Monthly attendance workbook generated. TraceId={TraceId}, RecordCount={RecordCount}, PayloadBytes={PayloadBytes}", traceId, exportRecords.Count, workbook.FileContents.Length);
+                return workbook;
+            }
             csv.AppendLine("Emp ID,Employee Name,Department,Date,Day,Check In,Check Out,Total Hours,Punch Count,Status,Remark,Late Arrival,Month Present Days,Month Absent Days,Month Late Days,Month Total Hours,Overtime,Site Check In - Time / Location / GPS,Site Check Out - Time / Location / GPS");
             foreach (var item in exportRecords.OrderBy(item => item.EmployeeName).ThenBy(item => item.EmpId).ThenBy(item => item.Date))
             {
@@ -1324,6 +1339,7 @@ namespace VertexERP.Controllers
 
             var bytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true).GetBytes(csv.ToString());
             var periodLabel = dates.Count == 1 ? dates[0].ToString("yyyy-MM-dd") : dates[0].ToString("yyyy-MM");
+            _logger?.LogInformation("Attendance CSV generated. TraceId={TraceId}, RecordCount={RecordCount}, PayloadBytes={PayloadBytes}", traceId, exportRecords.Count, bytes.Length);
             return File(bytes, "text/csv; charset=utf-8", $"Attendance-{periodLabel}.csv");
         }
 

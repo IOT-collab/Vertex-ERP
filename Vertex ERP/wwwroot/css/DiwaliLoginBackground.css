@@ -1,0 +1,23 @@
+/* Festive login backdrop only. The existing sign-in card, form, and company logo stay intact. */
+body.vertex-login-page .login-shell {
+    background:
+        linear-gradient(90deg, rgba(5, 10, 25, .2), rgba(5, 10, 25, .04) 35%, rgba(5, 10, 25, .04) 65%, rgba(5, 10, 25, .2)),
+        url('/images/diwali/login-fireworks-background.png') center center / cover no-repeat fixed !important;
+}
+
+body.vertex-login-page .login-shell::before {
+    background: linear-gradient(180deg, rgba(4, 10, 25, .16), transparent 38%, rgba(4, 10, 25, .12));
+}
+
+body.vertex-login-page .ai-holo-bg {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    body.vertex-login-page .login-shell {
+        min-height: 100svh;
+        padding: 16px;
+        background-attachment: scroll !important;
+        background-position: center center !important;
+    }
+}

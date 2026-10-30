@@ -7,6 +7,12 @@ using VertexERP.Services;
 using VertexERP.Controllers;
 using Vertex_ERP.Controllers;
 
+if (args.Length == 1 && args[0] == "--employee-photo-storage")
+{
+    await EmployeePhotoStorageChecks.Run();
+    return;
+}
+
 if (args.Length == 1 && args[0] == "--site-location-cards")
 {
     await SiteLocationCardChecks.Run();

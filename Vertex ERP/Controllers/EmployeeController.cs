@@ -12,13 +12,15 @@ public class EmployeeController : Controller
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly IWebHostEnvironment _environment;
+    private readonly EmployeePhotoStorageService? _photoStorage;
     private readonly BankAccountProtectionService _bankProtection;
 
-    public EmployeeController(ApplicationDbContext dbContext, IWebHostEnvironment environment, BankAccountProtectionService bankProtection)
+    public EmployeeController(ApplicationDbContext dbContext, IWebHostEnvironment environment, BankAccountProtectionService bankProtection, EmployeePhotoStorageService? photoStorage = null)
     {
         _dbContext = dbContext;
         _environment = environment;
         _bankProtection = bankProtection;
+        _photoStorage = photoStorage;
     }
 
     [HttpGet]
@@ -362,7 +364,7 @@ public class EmployeeController : Controller
 
         if (!TrySave("The employee could not be updated because the data conflicts with an existing record."))
         {
-            DeletePhotoIfPresent(newPhotoPath);
+            _photoStorage!.Delete(newPhotoPath);
             employee.PhotoPath = previousPhotoPath;
             return View("~/Views/Main/AddEmpHrm.cshtml", PopulateManagers(model));
         }
@@ -391,7 +393,7 @@ public class EmployeeController : Controller
             await _dbContext.SaveChangesAsync();
         }
 
-        if (newPhotoPath != null) DeletePhotoIfPresent(previousPhotoPath);
+        if (newPhotoPath != null) _photoStorage!.Delete(previousPhotoPath);
 
         TempData["EmployeeStatusChanged"] = true;
         TempData["EmployeeMessage"] = "Employee updated successfully.";
@@ -493,7 +495,7 @@ public class EmployeeController : Controller
         }
 
         if (!employeeFound) return NotFound();
-        DeletePhotoIfPresent(photoPath);
+        _photoStorage!.Delete(photoPath);
         foreach (var receipt in expenseReceiptPaths)
         {
             var receiptPath = Path.Combine(_environment.ContentRootPath, "App_Data", "ExpenseReceipts", Path.GetFileName(receipt));
@@ -694,13 +696,6 @@ public class EmployeeController : Controller
         return $"Vertex-{number:D2}";
     }
 
-    private void DeletePhotoIfPresent(string? relativePath)
-    {
-        if (string.IsNullOrWhiteSpace(relativePath)) return;
-        var physicalPath = Path.Combine(_environment.WebRootPath, relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-        if (System.IO.File.Exists(physicalPath)) System.IO.File.Delete(physicalPath);
-    }
-
     private async Task<string?> ValidatePhotoAsync(IFormFile? photo)
     {
         if (photo == null) return null;
@@ -721,14 +716,7 @@ public class EmployeeController : Controller
     }
 
     private async Task<string> SavePhotoAsync(IFormFile photo, string extension)
-    {
-        var directory = Path.Combine(_environment.WebRootPath, "uploads", "employees");
-        Directory.CreateDirectory(directory);
-        var fileName = $"{Guid.NewGuid():N}{extension}";
-        await using var target = new FileStream(Path.Combine(directory, fileName), FileMode.CreateNew);
-        await photo.CopyToAsync(target);
-        return $"/uploads/employees/{fileName}";
-    }
+        => await _photoStorage!.SaveAsync(photo, extension, HttpContext.RequestAborted);
 
     private static string? Clean(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

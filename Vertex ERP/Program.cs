@@ -221,6 +221,7 @@ builder.Services
     .SetApplicationName("VertexERP");
 
 builder.Services.AddScoped<BankAccountProtectionService>();
+builder.Services.AddSingleton<EmployeePhotoStorageService>();
 builder.Services.AddScoped<IPasswordResetEmailService, PasswordResetEmailService>();
 builder.Services.AddHttpClient<IFirebaseIdTokenVerifier, FirebaseIdTokenVerifier>(client =>
 {
@@ -416,6 +417,12 @@ if (
 // ============================================================
 
 app.UseStaticFiles();
+var employeePhotoStorage = app.Services.GetRequiredService<EmployeePhotoStorageService>();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = employeePhotoStorage.FileProvider,
+    RequestPath = EmployeePhotoStorageService.RequestPath
+});
 
 // ============================================================
 // ROUTING

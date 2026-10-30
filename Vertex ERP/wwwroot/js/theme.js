@@ -37,11 +37,16 @@
     };
     const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + .05) / (Math.min(luminance(a), luminance(b)) + .05);
     const apply = () => {
-        const hour = new Date().getHours();
-        const daytime = hour >= 6 && hour < 18;
+        // Use India Standard Time so all accounts switch together, regardless of device timezone.
+        const indiaHour = Number(new Intl.DateTimeFormat('en-GB', {
+            timeZone: 'Asia/Kolkata', hour: '2-digit', hourCycle: 'h23'
+        }).format(new Date()));
+        const daytime = indiaHour >= 6 && indiaHour < 17;
+        const standardDaytime = indiaHour >= 6 && indiaHour < 18;
         const diwaliTime = daytime ? 'day' : 'night';
-        const mode = preference.mode === 'auto' || preference.mode === 'diwali'
-            ? (daytime ? 'light' : 'dark') : preference.mode;
+        const mode = preference.mode === 'auto'
+            ? (standardDaytime ? 'light' : 'dark')
+            : preference.mode === 'diwali' ? (daytime ? 'light' : 'dark') : preference.mode;
         const palette = preference.mode === 'custom' ? preference
             : preference.mode === 'diwali' ? (daytime ? diwaliDay : diwaliNight)
                 : mode === 'light' ? defaults : standardDark;
