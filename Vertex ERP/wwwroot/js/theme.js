@@ -3,8 +3,9 @@
     const root = document.documentElement;
     const user = root.dataset.themeUser;
     if (!user) return;
-    const key = 'vertex.theme.v2.' + user;
-    const previousKey = 'vertex.theme.v1.' + user;
+    // v3 starts every existing account on the requested app-wide Diwali theme.
+    // Later, explicit choices saved in v3 continue to be respected.
+    const key = 'vertex.theme.v3.' + user;
     const defaults = { mode: 'diwali', background: '#f3f6fb', surface: '#ffffff', text: '#172033', accent: '#2563eb' };
     const standardDark = { background: '#07111f', surface: '#0f172a', text: '#f1f5f9', accent: '#60a5fa' };
     const diwaliDay = {
@@ -26,16 +27,7 @@
     let preference;
     try {
         const saved = localStorage.getItem(key);
-        if (saved !== null) preference = normalize(JSON.parse(saved));
-        else {
-            const previous = localStorage.getItem(previousKey);
-            preference = normalize(JSON.parse(previous));
-            // Existing Auto users asked for the seasonal day/night pair; preserve other saved choices.
-            if (previous !== null && preference.mode === 'auto') preference.mode = 'diwali';
-            if (previous !== null) {
-                try { localStorage.setItem(key, JSON.stringify(preference)); } catch { /* Keep using the migrated value for this page. */ }
-            }
-        }
+        preference = normalize(JSON.parse(saved));
     }
     catch { preference = { ...defaults }; }
     const luminance = hex => {
@@ -124,10 +116,10 @@
             } catch { status.textContent = 'Browser storage is unavailable. The preview works, but your theme could not be saved.'; }
         });
         document.getElementById('theme-reset').addEventListener('click', () => {
-            preference = { ...defaults, mode: 'auto' };
+            preference = { ...defaults, mode: 'diwali' };
             apply();
             fillForm();
-            status.textContent = 'Auto preview — select Save theme to keep it.';
+            status.textContent = 'Diwali Auto preview — select Save theme to keep it.';
         });
     });
 })();

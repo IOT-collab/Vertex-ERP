@@ -148,3 +148,105 @@ html[data-theme-preset="diwali"][data-diwali-time="night"] .ni-document-topbar::
     html[data-theme-preset="diwali"][data-diwali-time="night"] .ni-document-topbar::before,
     html[data-theme-preset="diwali"][data-diwali-time="night"] .ni-document-topbar::after { animation: none; }
 }
+
+/* Bring the dashboard header artwork and festive frame to Admin as well as Manager. */
+html[data-theme-preset="diwali"][data-diwali-time="day"] .sidebar {
+    background-image:
+        radial-gradient(circle at 50% 79%, rgba(255, 220, 130, .24) 0 2px, transparent 3px),
+        repeating-conic-gradient(from 0deg at 50% 79%, rgba(255, 204, 102, .28) 0deg 1deg, transparent 1deg 13deg),
+        radial-gradient(ellipse at 8% 7%, rgba(255, 195, 76, .25), transparent 24px),
+        radial-gradient(ellipse at 92% 7%, rgba(255, 195, 76, .25), transparent 24px),
+        linear-gradient(165deg, #70252a, #4e1821) !important;
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .sidebar {
+    background-image:
+        radial-gradient(circle at 50% 79%, rgba(255, 214, 125, .22) 0 2px, transparent 3px),
+        repeating-conic-gradient(from 0deg at 50% 79%, rgba(255, 203, 104, .25) 0deg 1deg, transparent 1deg 13deg),
+        radial-gradient(ellipse at 10% 80%, rgba(255, 130, 57, .18), transparent 45px),
+        radial-gradient(ellipse at 90% 80%, rgba(255, 130, 57, .18), transparent 45px),
+        linear-gradient(130deg, #101a38, #080e24) !important;
+}
+
+html[data-theme-preset="diwali"] .dashboard.dashboard-studio .header-text {
+    overflow: hidden !important;
+    border-color: color-mix(in srgb, #d8a34a 62%, var(--erp-border)) !important;
+    background: linear-gradient(110deg, color-mix(in srgb, var(--erp-primary) 12%, var(--erp-surface)), var(--erp-surface) 72%) !important;
+}
+html[data-theme-preset="diwali"] .dashboard.dashboard-studio .header-text::after { display: none !important; }
+html[data-theme-preset="diwali"] .dashboard.dashboard-studio .header-text > :not(.dashboard-diwali-art) {
+    position: relative;
+    z-index: 2;
+}
+html[data-theme-preset="diwali"] .dashboard-diwali-art {
+    position: absolute;
+    z-index: 1;
+    inset: 0 1% 0 auto;
+    width: 45%;
+    height: 100%;
+    pointer-events: none;
+}
+html[data-theme-preset="diwali"] .dashboard-diwali-art img {
+    position: absolute;
+    right: 0;
+    bottom: -22%;
+    width: 100%;
+    height: 155%;
+    object-fit: contain;
+    filter: drop-shadow(0 7px 12px rgba(114, 55, 25, .2));
+    animation: vertex-diwali-arrive .9s ease-out both;
+}
+html[data-theme-preset="diwali"] .dashboard-diwali-burst {
+    position: absolute;
+    width: 54px;
+    height: 54px;
+    opacity: 0;
+    background-image: radial-gradient(circle, #fff4c8 0 2px, transparent 3px), repeating-conic-gradient(#f2ab38 0deg 2deg, transparent 2deg 18deg);
+    -webkit-mask-image: radial-gradient(circle, transparent 0 8%, #000 14% 59%, transparent 68%);
+    mask-image: radial-gradient(circle, transparent 0 8%, #000 14% 59%, transparent 68%);
+    animation: vertex-diwali-firework 4.8s ease-in-out infinite;
+}
+html[data-theme-preset="diwali"] .dashboard-diwali-burst-one { right: 74%; top: 8%; animation-delay: .8s; }
+html[data-theme-preset="diwali"] .dashboard-diwali-burst-two { right: 4%; top: 3%; width: 42px; height: 42px; animation-delay: 2.4s; }
+html[data-theme-preset="diwali"] .dashboard-diwali-petal {
+    position: absolute;
+    top: -12px;
+    width: 8px;
+    height: 13px;
+    border-radius: 90% 10% 80% 10%;
+    background: linear-gradient(145deg, #ffdc78, #e58a22);
+    opacity: 0;
+    animation: vertex-diwali-petal 7s linear infinite;
+}
+html[data-theme-preset="diwali"] .dashboard-diwali-petal-one { left: 14%; animation-delay: .5s; }
+html[data-theme-preset="diwali"] .dashboard-diwali-petal-two { left: 47%; animation-delay: 2.8s; }
+html[data-theme-preset="diwali"] .dashboard-diwali-petal-three { left: 85%; animation-delay: 4.3s; }
+
+html[data-theme-preset="diwali"][data-diwali-time="night"] .dashboard.dashboard-studio .header-text {
+    border-color: rgba(255, 205, 105, .4) !important;
+    background: radial-gradient(ellipse at 77% 45%, rgba(119, 67, 160, .32), transparent 47%), linear-gradient(110deg, #18264a, #111a38 72%) !important;
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .dashboard-diwali-art img {
+    filter: drop-shadow(0 0 18px rgba(255, 194, 86, .28)) drop-shadow(0 8px 12px rgba(0, 0, 0, .3));
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .dashboard-diwali-burst {
+    background-image: radial-gradient(circle, #fff4c8 0 2px, transparent 3px), repeating-conic-gradient(#ffe29a 0deg 2deg, transparent 2deg 18deg);
+    animation-duration: 4s;
+}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .dashboard-diwali-petal {
+    background: linear-gradient(145deg, #ffe6a1, #ff8e74);
+    filter: drop-shadow(0 0 4px rgba(255, 196, 108, .7));
+}
+@keyframes vertex-diwali-arrive { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes vertex-diwali-petal { 0% { opacity: 0; transform: translateY(-8px) rotate(0); } 14% { opacity: .8; } 84% { opacity: .6; } 100% { opacity: 0; transform: translate(22px, 130px) rotate(260deg); } }
+@media (max-width: 700px) {
+    html[data-theme-preset="diwali"] .dashboard-diwali-art { right: -8%; width: 48%; opacity: .62; }
+    html[data-theme-preset="diwali"] .dashboard-diwali-art img { height: 135%; bottom: -18%; }
+}
+@media (max-width: 480px) {
+    html[data-theme-preset="diwali"] .dashboard-diwali-art { right: -18%; width: 52%; opacity: .3; }
+}
+@media (prefers-reduced-motion: reduce) {
+    html[data-theme-preset="diwali"] .dashboard-diwali-art img { animation: none; }
+    html[data-theme-preset="diwali"] .dashboard-diwali-burst,
+    html[data-theme-preset="diwali"] .dashboard-diwali-petal { animation: none; opacity: .12; }
+}

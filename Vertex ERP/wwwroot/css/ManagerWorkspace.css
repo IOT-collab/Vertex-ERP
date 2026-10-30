@@ -54,3 +54,29 @@ html[data-theme] .manager-workspace-shell .sidebar-menu .md-nav-active {color:va
 .md-dashboard[data-period="evening"]{--md-welcome-tint:#7285e9}
 .md-team-table tr:nth-child(-n+2) .md-row-menu .md-menu{top:calc(100% + 5px);bottom:auto}
 .md-global-search{min-width:0}
+
+/* Diwali treatment is limited to the manager welcome banner. */
+.md-diwali-art,.md-diwali-vfx{display:none}
+html[data-theme-preset="diwali"] .md-hero{background:linear-gradient(110deg,#fff4d8 0%,#fff9ed 47%,#f5e3ce 100%);border:1px solid #efd2a1;box-shadow:0 8px 28px rgba(138,75,19,.08)}
+html[data-theme-preset="diwali"] .md-hero-art{display:none}
+html[data-theme-preset="diwali"] .md-diwali-art{display:block;position:relative;z-index:1;width:100%;height:160px;object-fit:contain;align-self:end;margin-bottom:-20px;filter:drop-shadow(0 8px 12px rgba(125,56,18,.17));animation:md-diwali-arrive .9s cubic-bezier(.2,.75,.25,1) both}
+html[data-theme-preset="diwali"] .md-hero>*:not(.md-diwali-vfx){position:relative;z-index:1}
+html[data-theme-preset="diwali"] .md-diwali-vfx{display:block;position:absolute;z-index:2;inset:0;overflow:hidden;pointer-events:none}
+html[data-theme-preset="diwali"] .md-vfx-burst{position:absolute;width:66px;height:66px;opacity:0;background:radial-gradient(circle,#fff8d6 0 2px,transparent 3px),repeating-conic-gradient(from 0deg,#ffc84f 0deg 2deg,transparent 2deg 16deg);-webkit-mask:radial-gradient(circle,transparent 0 9%,#000 13% 59%,transparent 68%);mask:radial-gradient(circle,transparent 0 9%,#000 13% 59%,transparent 68%);animation:md-diwali-burst 4.7s ease-out infinite}
+html[data-theme-preset="diwali"] .md-vfx-burst-one{right:8%;top:5%;animation-delay:.7s}
+html[data-theme-preset="diwali"] .md-vfx-burst-two{right:1%;bottom:2%;width:48px;height:48px;animation-delay:2.8s}
+html[data-theme-preset="diwali"] .md-vfx-petal{position:absolute;top:-14px;width:8px;height:13px;border-radius:90% 10% 80% 10%;background:linear-gradient(145deg,#ffdc78,#e58a22);opacity:0;animation:md-diwali-petal 7s linear infinite}
+html[data-theme-preset="diwali"] .md-vfx-petal-one{left:38%;animation-delay:.2s}html[data-theme-preset="diwali"] .md-vfx-petal-two{left:51%;animation-delay:2.1s}html[data-theme-preset="diwali"] .md-vfx-petal-three{left:68%;animation-delay:4s}html[data-theme-preset="diwali"] .md-vfx-petal-four{left:82%;animation-delay:1.3s}html[data-theme-preset="diwali"] .md-vfx-petal-five{left:92%;animation-delay:5.1s}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .md-hero{background:radial-gradient(ellipse at 73% 50%,rgba(104,68,169,.42),transparent 42%),linear-gradient(110deg,#101632 0%,#17193d 55%,#24204b 100%);border-color:rgba(255,205,105,.36);box-shadow:0 12px 34px rgba(8,12,35,.24)}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .md-greeting,html[data-theme-preset="diwali"][data-diwali-time="night"] .md-quote{color:#fff1cf}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .md-greeting p:last-child{color:#d0cde4}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .md-date{background:rgba(255,250,237,.96);color:#54232a}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .md-vfx-burst{background:radial-gradient(circle,#fff9d6 0 2px,transparent 3px),repeating-conic-gradient(from 0deg,#fff0a8 0deg 2deg,transparent 2deg 16deg);animation-duration:4s}
+html[data-theme-preset="diwali"][data-diwali-time="night"] .md-vfx-petal{background:linear-gradient(145deg,#ffe6a1,#ff8e74);filter:drop-shadow(0 0 4px rgba(255,196,108,.7))}
+@keyframes md-diwali-burst{0%,100%{opacity:0;transform:scale(.18) rotate(0)}12%{opacity:.75}48%{opacity:.18;transform:scale(1) rotate(24deg)}65%{opacity:0;transform:scale(1.12) rotate(35deg)}}
+@keyframes md-diwali-petal{0%{opacity:0;transform:translate3d(0,-8px,0) rotate(0)}12%{opacity:.78}82%{opacity:.62}100%{opacity:0;transform:translate3d(26px,180px,0) rotate(260deg)}}
+@keyframes md-diwali-arrive{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:1100px){html[data-theme-preset="diwali"] .md-diwali-art{height:140px}}
+@media(max-width:720px){html[data-theme-preset="diwali"] .md-diwali-art{height:125px;grid-column:2;grid-row:1/3}html[data-theme-preset="diwali"] .md-vfx-burst{width:42px!important;height:42px!important}}
+@media(max-width:400px){html[data-theme-preset="diwali"] .md-diwali-art{display:none}}
+@media(prefers-reduced-motion:reduce){html[data-theme-preset="diwali"] .md-diwali-art{animation:none}html[data-theme-preset="diwali"] .md-vfx-burst,html[data-theme-preset="diwali"] .md-vfx-petal{animation:none;opacity:.12}}

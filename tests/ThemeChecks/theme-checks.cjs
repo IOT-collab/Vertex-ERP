@@ -3,6 +3,11 @@ const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const source = fs.readFileSync(path.join(__dirname, '../../Vertex ERP/wwwroot/js/theme.js'), 'utf8');
+for (const layout of ['_Layout.cshtml', '_LayoutMaster.cshtml']) {
+    const markup = fs.readFileSync(path.join(__dirname, '../../Vertex ERP/Views/Shared', layout), 'utf8');
+    assert.ok(markup.includes('~/js/theme.js'), layout + ' must initialize the shared theme');
+    assert.ok(markup.includes('~/css/DiwaliTheme.css'), layout + ' must load the shared Diwali styling');
+}
 function run(hour, saved, user = '17', brokenStorage = false, legacySaved = null) {
     const properties = {};
     const root = { dataset: { themeUser: user }, style: { setProperty: (key, value) => properties[key] = value } };
@@ -14,8 +19,8 @@ function run(hour, saved, user = '17', brokenStorage = false, legacySaved = null
         Date: class { getHours() { return hour; } },
         localStorage: { getItem: key => {
             if (brokenStorage) throw Error();
-            if (key === 'vertex.theme.v2.' + user) return saved;
-            if (key === 'vertex.theme.v1.' + user) return legacySaved;
+            if (key === 'vertex.theme.v3.' + user) return saved;
+            if (key === 'vertex.theme.v2.' + user) return legacySaved;
             throw Error('Unexpected theme key: ' + key);
         } },
         setInterval: handler => tick = handler
@@ -52,9 +57,11 @@ assert.equal(diwaliNight.properties['--erp-bg'], '#080e24');
 assert.equal(diwaliNight.properties['--erp-surface'], '#111a38');
 assert.equal(diwaliNight.properties['--erp-primary'], '#f4b942');
 assert.equal(run(13, null, '17', false, '{"mode":"auto"}').root.dataset.themePreset, 'diwali',
-    'Existing Auto preferences migrate to the requested Diwali day/night pair');
-assert.equal(run(13, null, '17', false, '{"mode":"dark"}').root.dataset.theme, 'dark',
-    'Existing explicit appearance choices are preserved during migration');
+    'Existing accounts start with the requested Diwali day/night theme');
+assert.equal(run(13, null, '17', false, '{"mode":"dark"}').root.dataset.themePreset, 'diwali',
+    'Old per-account choices do not block the app-wide Diwali default');
+assert.equal(run(13, '{"mode":"dark"}').root.dataset.theme, 'dark',
+    'A new explicit choice remains respected after the user saves it');
 assert.equal(run(12, 'invalid-json').root.dataset.theme, 'light');
 assert.equal(run(12, null, '17', true).root.dataset.theme, 'light');
 assert.equal(run(12, null, '').root.dataset.theme, undefined);
@@ -67,9 +74,9 @@ transition.tick();
 assert.equal(transition.root.dataset.theme, 'dark');
 assert.equal(transition.root.dataset.diwaliTime, 'night');
 assert.equal(transition.properties['--erp-bg'], '#080e24');
-transition.events.storage({ key: 'vertex.theme.v2.18', newValue: '{"mode":"light"}' });
+transition.events.storage({ key: 'vertex.theme.v3.18', newValue: '{"mode":"light"}' });
 assert.equal(transition.root.dataset.theme, 'dark');
-transition.events.storage({ key: 'vertex.theme.v2.17', newValue: '{"mode":"light"}' });
+transition.events.storage({ key: 'vertex.theme.v3.17', newValue: '{"mode":"light"}' });
 assert.equal(transition.root.dataset.theme, 'light');
 console.log('Theme checks passed: time boundaries, manual modes, custom validation, account isolation, storage failures and live transitions.');
 

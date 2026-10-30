@@ -21,9 +21,11 @@
 <link href="~/css/ManagerWorkspace.css" rel="stylesheet" asp-append-version="true" />
 <section class="md-dashboard" id="managerDashboard" data-period="@(now.Hour<12?"morning":now.Hour<17?"afternoon":"evening")" data-notification-url="@Url.Action("ManagerNotificationUpdates")">
  <section class="md-hero" aria-label="Welcome and today's date">
+  <div class="md-diwali-vfx" aria-hidden="true"><span class="md-vfx-burst md-vfx-burst-one"></span><span class="md-vfx-burst md-vfx-burst-two"></span><span class="md-vfx-petal md-vfx-petal-one"></span><span class="md-vfx-petal md-vfx-petal-two"></span><span class="md-vfx-petal md-vfx-petal-three"></span><span class="md-vfx-petal md-vfx-petal-four"></span><span class="md-vfx-petal md-vfx-petal-five"></span></div>
   <div class="md-greeting"><p id="manager-greeting">@ManagerDashboardPresentation.Greeting(DateTimeOffset.UtcNow),</p><h1><span data-no-localize>@name</span> <span class="md-wave" aria-hidden="true">&#128075;</span></h1><p>Here's an overview of your team, tasks and approvals.</p></div>
   <blockquote class="md-quote">“Great managers build<br/>great people.”<span></span></blockquote>
   <img class="md-hero-art" src="~/images/manager/welcome-illustration.png" asp-append-version="true" alt=""/>
+  <img class="md-diwali-art" src="~/images/diwali/ganesh-lakshmi.webp" asp-append-version="true" alt="Lord Ganesha and Goddess Lakshmi seated on lotus flowers"/>
   <div class="md-date"><span class="md-date-icon"><i class="fa-regular fa-calendar-days" aria-hidden="true"></i></span><div><small>Today's Date</small><strong id="manager-today">@now.ToString("dd MMMM yyyy",CultureInfo.InvariantCulture)</strong><span id="manager-weekday">@now.ToString("dddd",CultureInfo.InvariantCulture)</span></div></div>
  </section>
  <div class="md-metrics">
